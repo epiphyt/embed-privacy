@@ -54,3 +54,6 @@ if ( ! \defined( 'EPI_TWO_CLICK_EMBED_URL' ) ) \define( 'EPI_TWO_CLICK_EMBED_URL
 } );
 
 $two_click_embed = new Two_Click_Embed();
+
+\register_activation_hook( __FILE__, [ $two_click_embed, 'clear_embed_cache' ] );
+\register_deactivation_hook( __FILE__, [ $two_click_embed, 'clear_embed_cache' ] );

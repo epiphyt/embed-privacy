@@ -64,6 +64,32 @@ class Two_Click_Embed {
 	}
 	
 	/**
+	 * Embeds are cached in the postmeta database table and need to be removed
+	 * whenever the plugin will be enabled or disabled.
+	 */
+	public function clear_embed_cache() {
+		global $wpdb;
+		
+		// the query to delete cache
+		$query = "DELETE FROM		" . $wpdb->get_blog_prefix() . "postmeta
+				WHERE				meta_key LIKE '%_oembed_%'";
+		
+		if ( \is_plugin_active_for_network( 'two-click-embed/two-click-embed.php' ) ) {
+			// on networks we need to iterate through every site
+			$sites = \get_sites();
+			
+			foreach ( $sites as $site ) {
+				\switch_to_blog( $site );
+				
+				$wpdb->query( $query );
+			}
+		}
+		else {
+			$wpdb->query( $query );
+		}
+	}
+	
+	/**
 	 * Enqueue our assets for the frontend.
 	 */
 	public function enqueue_assets() {
