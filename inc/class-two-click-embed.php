@@ -107,10 +107,11 @@ class Two_Click_Embed {
 		}
 		
 		// add two click to markup
+		$embed_class = '  embed-' . ( ! empty( $embed_provider ) ? \sanitize_title( $embed_provider ) : 'default' );
 		$height = ( ! empty( $args['height'] ) && $args['height'] <= $args['width'] ? 'height: ' . $args['height'] . 'px;' : 'height: 300px;' );
 		$width = ( ! empty( $args['width'] ) ? 'width: ' . $args['width'] . 'px;' : '' );
-		$markup = '<div class="embed-container">';
-		$markup .= '<div class="embed-overlay" style="' . $height . $width . '">';
+		$markup = '<div class="embed-container' . $embed_class . '">';
+		$markup .= '<div class="embed-overlay" style="' . $height . ' ' . $width . '">';
 		$markup .= '<h3>';
 		
 		if ( ! empty( $embed_provider ) ) {
