@@ -75,24 +75,26 @@ class Two_Click_Embed {
 			}
 		}
 		
-		// add two click only for known embeds
+		// add two click to markup
+		$height = ( ! empty( $args['height'] ) && $args['height'] <= $args['width'] ? 'height: ' . $args['height'] . 'px;' : 'height: 300px;' );
+		$width = ( ! empty( $args['width'] ) ? 'width: ' . $args['width'] . 'px;' : '' );
+		$markup = '<div class="embed-container">';
+		$markup .= '<div class="embed-overlay" style="' . $height . $width . '">';
+		$markup .= '<h3>';
+		
 		if ( ! empty( $embed_provider ) ) {
-			$height = ( ! empty( $args['height'] ) && $args['height'] <= $args['width'] ? 'height: ' . $args['height'] . 'px;' : 'height: 300px;' );
-			$width = ( ! empty( $args['width'] ) ? 'width: ' . $args['width'] . 'px;' : '' );
-			$markup = '<div class="embed-container">';
-			$markup .= '<div class="embed-overlay" style="' . $height . $width . '">';
-			$markup .= '<h3>';
 			/* translators: the embed provider */
 			$markup .= \sprintf( \esc_html__( 'Click here to display content from %s', 'two-click-embed' ), $embed_provider );
-			$markup .= '</h3>';
-			$markup .= '</div>';
-			$markup .= '<div class="embed-content"><!-- ' . $output . ' --></div>';
-			$markup .= '</div>';
-			
-			return $markup;
 		}
 		else {
-			return $output;
+			$markup .= \esc_html__( 'Click here to display content from external service', 'two-click-embed' );
 		}
+		
+		$markup .= '</h3>';
+		$markup .= '</div>';
+		$markup .= '<div class="embed-content"><!-- ' . $output . ' --></div>';
+		$markup .= '</div>';
+		
+		return $markup;
 	}
 }
