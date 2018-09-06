@@ -1,0 +1,36 @@
+/**
+ * Two Click Embed Design file.
+ * 
+ * @author		Epiphyt
+ * @license		GPL2
+ * @package		epiphyt\Two_Click_Embed
+ * @version		0.1
+ */
+.embed-container {
+	margin-bottom: 1.5em;
+}
+
+.embed-overlay {
+	background-color: rgba(0, 0, 0, .9);
+	color: #ddd;
+	cursor: pointer;
+	display: table;
+	transition: background-color .25s ease-in-out, color .25s ease-in-out;
+	
+	> h3 {
+		color: #ddd;
+		display: table-cell;
+		text-align: center;
+		transition: color .25s ease-in-out;
+		vertical-align: middle;
+	}
+	
+	&:hover {
+		background-color: rgba(0, 0, 0, .8);
+		color: #fff;
+		
+		> h3 {
+			color: #fff;
+		}
+	}
+}
