@@ -10,6 +10,9 @@ namespace epiphyt\Two_Click_Embed;
  * @version		0.1
  */
 class Two_Click_Embed {
+	/**
+	 * @var		array The supported media providers
+	 */
 	public $embed_providers = [
 		'instagram' => 'Instagram',
 		'sketchfab' => 'Sketchfab',
