@@ -29,7 +29,6 @@ class Two_Click_Embed {
 		'meetup.com' => 'Meetup',
 		'mixcloud.com' => 'Mixcloud',
 		'photobucket.com' => 'Photobucket',
-		'photobucket.com' => 'Photobucket',
 		'polldaddy.com' => 'Polldaddy.com',
 		'reddit.com' => 'Reddit',
 		'reverbnation.com' => 'ReverbNation',
