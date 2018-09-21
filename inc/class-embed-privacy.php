@@ -1,15 +1,15 @@
 <?php
-namespace epiphyt\Two_Click_Embed;
+namespace epiphyt\Embed_Privacy;
 
 /**
  * Two click embed main class.
  * 
  * @author		Epiphyt
  * @license		GPL2
- * @package		epiphyt\Two_Click_Embed
+ * @package		epiphyt\Embed_Privacy
  * @version		0.1
  */
-class Two_Click_Embed {
+class Embed_Privacy {
 	/**
 	 * @var		array The supported media providers
 	 */
@@ -51,7 +51,7 @@ class Two_Click_Embed {
 	];
 	
 	/**
-	 * Two Click Embed constructor.
+	 * Embed Privacy constructor.
 	 */
 	public function __construct() {
 		// actions
@@ -73,9 +73,9 @@ class Two_Click_Embed {
 		$query = "DELETE FROM		" . $wpdb->get_blog_prefix() . "postmeta
 				WHERE				meta_key LIKE '%_oembed_%'";
 		
-		if ( \is_plugin_active_for_network( 'two-click-embed/two-click-embed.php' ) ) {
+		if ( \is_plugin_active_for_network( 'embed-privacy/embed-privacy.php' ) ) {
 			// on networks we need to iterate through every site
-			$sites = \get_sites();
+			$sites = \get_sites( 99999 );
 			
 			foreach ( $sites as $site ) {
 				\switch_to_blog( $site );
@@ -93,19 +93,19 @@ class Two_Click_Embed {
 	 */
 	public function enqueue_assets() {
 		$suffix = ( \defined( 'DEBUG_MODE' ) && \DEBUG_MODE ? '' : '.min' );
-		$css_file = \EPI_TWO_CLICK_EMBED_BASE . 'assets/style/two-click-embed' . $suffix . '.css';
-		$css_file_url = \EPI_TWO_CLICK_EMBED_URL . 'assets/style/two-click-embed' . $suffix . '.css';
+		$css_file = \EPI_EMBED_PRIVACY_BASE . 'assets/style/embed-privacy' . $suffix . '.css';
+		$css_file_url = \EPI_EMBED_PRIVACY_URL . 'assets/style/embed-privacy' . $suffix . '.css';
 		
-		\wp_enqueue_style( 'two-click-embed', $css_file_url, [], \filemtime( $css_file ) );
+		\wp_enqueue_style( 'embed-privacy', $css_file_url, [], \filemtime( $css_file ) );
 		
-		$js_file = \EPI_TWO_CLICK_EMBED_BASE . 'assets/js/two-click-embed' . $suffix . '.js';
-		$js_file_url = \EPI_TWO_CLICK_EMBED_URL . 'assets/js/two-click-embed' . $suffix . '.js';
+		$js_file = \EPI_EMBED_PRIVACY_BASE . 'assets/js/embed-privacy' . $suffix . '.js';
+		$js_file_url = \EPI_EMBED_PRIVACY_URL . 'assets/js/embed-privacy' . $suffix . '.js';
 		
 		\wp_enqueue_script( 'two-click_embed', $js_file_url, [], \filemtime( $js_file ) );
 	}
 	
 	public function load_textdomain() {
-		\load_plugin_textdomain( 'two-click-embed', false, \EPI_TWO_CLICK_EMBED_BASE . 'languages' );
+		\load_plugin_textdomain( 'embed-privacy', false, \EPI_EMBED_PRIVACY_BASE . 'languages' );
 	}
 	
 	/**
@@ -141,10 +141,10 @@ class Two_Click_Embed {
 		
 		if ( ! empty( $embed_provider ) ) {
 			/* translators: the embed provider */
-			$markup .= \sprintf( \esc_html__( 'Click here to display content from %s', 'two-click-embed' ), $embed_provider );
+			$markup .= \sprintf( \esc_html__( 'Click here to display content from %s', 'embed-privacy' ), $embed_provider );
 		}
 		else {
-			$markup .= \esc_html__( 'Click here to display content from external service', 'two-click-embed' );
+			$markup .= \esc_html__( 'Click here to display content from external service', 'embed-privacy' );
 		}
 		
 		$markup .= '</h3>';

@@ -1,23 +1,23 @@
 <?php
-namespace epiphyt\Two_Click_Embed;
+namespace epiphyt\Embed_Privacy;
 
 /*
-Plugin Name:	Two Click Embed
-Description:	Two Click Embed prevents from loading external embeds directly and lets the user control which one should be loaded.
+Plugin Name:	Embed Privacy
+Description:	Embed Privacy prevents from loading external embeds directly and lets the user control which one should be loaded.
 Version:		0.1
 Author:			Epiphyt
 Author URI:		https://epiph.yt
 License:		GPL2
 License URI:	https://www.gnu.org/licenses/gpl-2.0.html
-Text Domain:	two-click-embed
+Text Domain:	embed-privacy
 Domain Path:	/languages
 
-Two Click Embed is free software: you can redistribute it and/or modify
+Embed Privacy is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 2 of the License, or
 any later version.
 
-Two Click Embed is distributed in the hope that it will be useful,
+Embed Privacy is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU General Public License for more details.
@@ -29,8 +29,8 @@ along with Fury. If not, see https://www.gnu.org/licenses/gpl-2.0.html.
 // exit if ABSPATH is not defined
 \defined( 'ABSPATH' ) || exit;
 
-if ( ! \defined( 'EPI_TWO_CLICK_EMBED_BASE' ) ) \define( 'EPI_TWO_CLICK_EMBED_BASE', \plugin_dir_path( __FILE__ ) );
-if ( ! \defined( 'EPI_TWO_CLICK_EMBED_URL' ) ) \define( 'EPI_TWO_CLICK_EMBED_URL', \plugin_dir_url( __FILE__ ) );
+if ( ! \defined( 'EPI_EMBED_PRIVACY_BASE' ) ) \define( 'EPI_EMBED_PRIVACY_BASE', \plugin_dir_path( __FILE__ ) );
+if ( ! \defined( 'EPI_EMBED_PRIVACY_URL' ) ) \define( 'EPI_EMBED_PRIVACY_URL', \plugin_dir_url( __FILE__ ) );
 
 /**
  * Autoload all necessary classes.
@@ -41,7 +41,7 @@ if ( ! \defined( 'EPI_TWO_CLICK_EMBED_URL' ) ) \define( 'EPI_TWO_CLICK_EMBED_URL
 	$path = \explode( '\\', $class );
 	$filename = \str_replace( '_', '-', \strtolower( \array_pop( $path ) ) );
 	$class = \str_replace(
-		[ 'epiphyt\two_click_embed\\', '\\', '_' ],
+		[ 'epiphyt\embed_privacy\\', '\\', '_' ],
 		[ '', '/', '-' ],
 		\strtolower( $class )
 	);
@@ -53,7 +53,7 @@ if ( ! \defined( 'EPI_TWO_CLICK_EMBED_URL' ) ) \define( 'EPI_TWO_CLICK_EMBED_URL
 	}
 } );
 
-$two_click_embed = new Two_Click_Embed();
+$embed_privacy = new Embed_Privacy();
 
-\register_activation_hook( __FILE__, [ $two_click_embed, 'clear_embed_cache' ] );
-\register_deactivation_hook( __FILE__, [ $two_click_embed, 'clear_embed_cache' ] );
+\register_activation_hook( __FILE__, [ $embed_privacy, 'clear_embed_cache' ] );
+\register_deactivation_hook( __FILE__, [ $embed_privacy, 'clear_embed_cache' ] );

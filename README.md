@@ -1,6 +1,6 @@
-# Two Click Embed
+# Embed Privacy
 
-Two Click Embed prevents from loading external embeds directly and lets the user control which one should be loaded.
+Embed Privacy prevents from loading external embeds directly and lets the user control which one should be loaded.
 
 ## Currently supported embeds
 
