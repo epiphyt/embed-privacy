@@ -1,6 +1,6 @@
 === Embed Privacy ===
 Contributors: epiphyt, kittmedia, krafit
-Tags: oembed, privacy, 
+Tags: oembed, privacy, gutenberg
 Requires at least: 4.7
 Tested up to: 4.9
 Requires PHP: 5.6
@@ -31,6 +31,10 @@ By clicking on the placeholder the respective content will be reloaded.
 = Can Embed Privacy keep external services from tracking me/my visitors? =
 
 Yes. As long as you don't opt-in to load external content, you/your visitors can't be tracked by these services.
+
+= Does Embed Privacy support the Gutenberg editor? =
+
+Sure thing! We enjoy playing with the new WordPress editor and developed Embed Privacy with Gutenberg in mind, the plugin will work no matter the editor you use.
 
 = Which embeds are currently supported? =
 
