@@ -11,6 +11,11 @@ namespace epiphyt\Embed_Privacy;
  */
 class Embed_Privacy {
 	/**
+	 * @var		bool Determine if we use the cache
+	 */
+	private $usecache = false;
+	
+	/**
 	 * @var		array The supported media providers
 	 */
 	public $embed_providers = [
@@ -58,8 +63,17 @@ class Embed_Privacy {
 		\add_action( 'init', [ $this, 'load_textdomain' ] );
 		\add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_assets' ] );
 		
+		$this->usecache = ! \is_admin();
+		
 		// filters
-		\add_filter( 'oembed_result', [ $this, 'replace_embeds' ], 10, 3 );
+		if ( ! $this->usecache ) {
+			// set ttl to 0 in admin
+			\add_filter( 'oembed_ttl', function( $time ) {
+				return 0;
+			}, 10, 1 );
+		}
+		
+		\add_filter( 'embed_oembed_html', [ $this, 'replace_embeds' ], 10, 3 );
 	}
 	
 	/**
@@ -104,6 +118,9 @@ class Embed_Privacy {
 		\wp_enqueue_script( 'two-click_embed', $js_file_url, [], \filemtime( $js_file ) );
 	}
 	
+	/**
+	 * Load the translation files.
+	 */
 	public function load_textdomain() {
 		\load_plugin_textdomain( 'embed-privacy', false, \EPI_EMBED_PRIVACY_BASE . 'languages' );
 	}
@@ -118,7 +135,7 @@ class Embed_Privacy {
 	 */
 	public function replace_embeds( $output, $url, $args ) {
 		// don't do anything in admin
-		if ( \is_admin() ) return $output;
+		if ( ! $this->usecache ) return $output;
 		
 		$embed_provider = '';
 		
