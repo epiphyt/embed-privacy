@@ -11,7 +11,7 @@ Embed Privacy prevents loading of embeded external content and allows your site 
 
 == Description ==
 
-Content embedded from external sites such as YouTube or Twitter is will be loaded immediately when visitors access your site. Embed Privacy addresses this issue and prevents loading of this contents until the visitor decides to allow loading of external content.
+Content embedded from external sites such as YouTube or Twitter is loaded immediately when visitors access your site. Embed Privacy addresses this issue and prevents loading of these contents until the visitor decides to allow loading of external content.
 But Embed Privacy not only protects your visitors privacy, but also makes your site load faster.
 
 All embeds will be replaced by placeholders, ready for you to apply style as you wish. With only a couple of lines of CSS. 
