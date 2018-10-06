@@ -7,7 +7,7 @@ namespace epiphyt\Embed_Privacy;
  * @author		Epiphyt
  * @license		GPL2
  * @package		epiphyt\Embed_Privacy
- * @version		0.1
+ * @version		1.0.0
  */
 class Embed_Privacy {
 	/**
