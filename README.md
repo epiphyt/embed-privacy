@@ -7,7 +7,7 @@ Requires PHP: 5.6
 License: GPL2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Embed Privacy prevents loading of embeded external content and allows your site visitors to opt-in.
+Embed Privacy prevents loading of embedded external content and allows your site visitors to opt-in.
 
 == Description ==
 
@@ -23,7 +23,7 @@ By clicking on the placeholder the respective content will be reloaded.
 
 1. Upload the plugin files to the `/wp-content/plugins/embed-privacy` directory, or install the plugin through the WordPress plugins screen directly.
 1. Activate the plugin through the 'Plugins' screen in WordPress.
-1. Embeded content will automatically be replaced by a placeholder and can be loaded on demand by your visitors. There are no additonal settings.
+1. Embedded content will automatically be replaced by a placeholder and can be loaded on demand by your visitors. There are no additional settings.
 
 
 == Frequently Asked Questions ==
