@@ -47,7 +47,10 @@ We are [Epiphyt](https://epiph.yt/), your friendly neighborhood WordPress plugin
 
 == Changelog ==
 
-= 1.0 =
+= 1.0.1 =
+* Fix support for PHP 5.6
+
+= 1.0.0 =
 * Initial release
 
 == Upgrade Notice ==
