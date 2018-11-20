@@ -2,7 +2,7 @@
 Contributors: epiphyt, kittmedia, krafit
 Tags: oembed, privacy, gutenberg
 Requires at least: 4.7
-Tested up to: 4.9
+Tested up to: 5.0
 Requires PHP: 5.6
 License: GPL2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -46,6 +46,11 @@ We are [Epiphyt](https://epiph.yt/), your friendly neighborhood WordPress plugin
 
 
 == Changelog ==
+
+= 1.0.2 =
+* Improve compatiblity with [Autoptimize](https://wordpress.org/plugins/autoptimize/)
+* Improve compatiblity with [AMP](https://wordpress.org/plugins/amp/)
+* Fix issue with Slideshare causing wrong (generic) placeholders
 
 = 1.0.1 =
 * Fix support for PHP 5.6
