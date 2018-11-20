@@ -112,10 +112,22 @@ class Embed_Privacy {
 		
 		\wp_enqueue_style( 'embed-privacy', $css_file_url, [], \filemtime( $css_file ) );
 		
-		$js_file = \EPI_EMBED_PRIVACY_BASE . 'assets/js/embed-privacy' . $suffix . '.js';
-		$js_file_url = \EPI_EMBED_PRIVACY_URL . 'assets/js/embed-privacy' . $suffix . '.js';
-		
-		\wp_enqueue_script( 'embed-privacy', $js_file_url, [], \filemtime( $js_file ) );
+		if ( ! $this->is_amp() ) {
+			$js_file = \EPI_EMBED_PRIVACY_BASE . 'assets/js/embed-privacy' . $suffix . '.js';
+			$js_file_url = \EPI_EMBED_PRIVACY_URL . 'assets/js/embed-privacy' . $suffix . '.js';
+			
+			\wp_enqueue_script( 'embed-privacy', $js_file_url, [], \filemtime( $js_file ) );
+		}
+	}
+	
+	/**
+	 * Determine whether this is an AMP response.
+	 * Note that this must only be called after the parse_query action.
+	 * 
+	 * @return	bool
+	 */
+	private function is_amp() {
+		return function_exists( 'is_amp_endpoint' ) && is_amp_endpoint();
 	}
 	
 	/**
