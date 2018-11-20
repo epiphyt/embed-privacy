@@ -115,7 +115,7 @@ class Embed_Privacy {
 		$js_file = \EPI_EMBED_PRIVACY_BASE . 'assets/js/embed-privacy' . $suffix . '.js';
 		$js_file_url = \EPI_EMBED_PRIVACY_URL . 'assets/js/embed-privacy' . $suffix . '.js';
 		
-		\wp_enqueue_script( 'two-click_embed', $js_file_url, [], \filemtime( $js_file ) );
+		\wp_enqueue_script( 'embed-privacy', $js_file_url, [], \filemtime( $js_file ) );
 	}
 	
 	/**
