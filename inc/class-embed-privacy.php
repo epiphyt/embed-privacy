@@ -166,7 +166,7 @@ class Embed_Privacy {
 		
 		$markup .= '</h3>';
 		$markup .= '</div>';
-		$markup .= '<div class="embed-content"><!-- ' . $output . ' --></div>';
+		$markup .= '<div class="embed-content"><!--noptimize--><!-- ' . $output . ' --><!--/noptimize--></div>';
 		$markup .= '</div>';
 		
 		return $markup;
