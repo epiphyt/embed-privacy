@@ -39,7 +39,7 @@ class Embed_Privacy {
 		'reverbnation.com' => 'ReverbNation',
 		'scribd.com' => 'Scribd',
 		'sketchfab.com' => 'Sketchfab',
-		'slideshare.com' => 'SlideShare',
+		'slideshare.net' => 'SlideShare',
 		'smugmug.com' => 'SmugMug',
 		'soundcloud.com' => 'SoundCloud',
 		'speakerdeck.com' => 'Speaker Deck',
