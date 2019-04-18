@@ -50,3 +50,24 @@
 	display: table-cell;
 	vertical-align: middle;
 }
+
+// make sure responsive Gutenberg blocks don't have too much space
+.wp-embed-responsive .wp-block-embed {
+	&.wp-embed-aspect-21-9,
+	&.wp-embed-aspect-18-9,
+	&.wp-embed-aspect-16-9,
+	&.wp-embed-aspect-4-3,
+	&.wp-embed-aspect-1-1,
+	&.wp-embed-aspect-9-16,
+	&.wp-embed-aspect-1-2 {
+		.embed-container {
+			bottom: 0;
+			height: 100%;
+			left: 0;
+			position: absolute;
+			right: 0;
+			top: 0;
+			width: 100%;
+		}
+	}
+}
