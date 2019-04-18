@@ -47,7 +47,7 @@ class Embed_Privacy {
 		'ted.com' => 'TED',
 		'tumblr.com' => 'Tumblr',
 		'twitter.com' => 'Twitter',
-		'videopress.com' => 'VideoPres',
+		'videopress.com' => 'VideoPress',
 		'vimeo.com' => 'Vimeo',
 		'wordpress.org/plugins' => 'WordPress.org',
 		'wordpress.tv' => 'WordPress.tv',
