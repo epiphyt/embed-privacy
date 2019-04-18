@@ -174,22 +174,31 @@ class Embed_Privacy {
 		$markup = '<div class="embed-container' . \esc_attr( $embed_class ) . '">';
 		$markup .= '<div class="embed-overlay" style="' . \esc_attr( $width ) . '">';
 		$markup .= '<div class="embed-inner">';
-		$markup .= '<p>';
+		$content = '<p>';
 		
 		if ( ! empty( $embed_provider ) ) {
 			/* translators: the embed provider */
-			$markup .= \sprintf( \esc_html__( 'Click here to display content from %s', 'embed-privacy' ), \esc_html( $embed_provider ) );
+			$content .= \sprintf( \esc_html__( 'Click here to display content from %s', 'embed-privacy' ), \esc_html( $embed_provider ) );
 		}
 		else {
-			$markup .= \esc_html__( 'Click here to display content from external service', 'embed-privacy' );
+			$content .= \esc_html__( 'Click here to display content from external service', 'embed-privacy' );
 		}
 		
-		$markup .= '</p>';
+		$content .= '</p>';
 		
 		$checkbox_id = 'embed-privacy-store-' . $embed_provider_lowercase;
 		/* translators: the embed provider */
-		$markup .= '<p><label for="' . \esc_attr( $checkbox_id ) . '" class="embed-label"><input id="' . \esc_attr( $checkbox_id ) . '" type="checkbox" value="1"> ' . sprintf( \esc_html__( 'Always display content from %s', 'embed-privacy' ), \esc_html( $embed_provider ) ) . '</label></p>';
+		$content .= '<p><label for="' . \esc_attr( $checkbox_id ) . '" class="embed-label"><input id="' . \esc_attr( $checkbox_id ) . '" type="checkbox" value="1"> ' . sprintf( \esc_html__( 'Always display content from %s', 'embed-privacy' ), \esc_html( $embed_provider ) ) . '</label></p>';
 		
+		/**
+		 * Filter the content of the embed overlay.
+		 * 
+		 * @param	string		$content The content
+		 * @param	string		$embed_provider The embed provider of this embed
+		 */
+		$content = \apply_filters( 'embed_privacy_content', $content, $embed_provider );
+		
+		$markup .= $content;
 		$markup .= '</div>';
 		$markup .= '</div>';
 		$markup .= '<div class="embed-content"><!--noptimize--><!-- ' . $output . ' --><!--/noptimize--></div>';
