@@ -166,7 +166,7 @@ class Embed_Privacy {
 		$width = ( ! empty( $args['width'] ) ? 'width: ' . $args['width'] . 'px;' : '' );
 		$markup = '<div class="embed-container' . $embed_class . '">';
 		$markup .= '<div class="embed-overlay" style="' . $height . ' ' . $width . '">';
-		$markup .= '<h3>';
+		$markup .= '<p>';
 		
 		if ( ! empty( $embed_provider ) ) {
 			/* translators: the embed provider */
@@ -176,7 +176,7 @@ class Embed_Privacy {
 			$markup .= \esc_html__( 'Click here to display content from external service', 'embed-privacy' );
 		}
 		
-		$markup .= '</h3>';
+		$markup .= '</p>';
 		$markup .= '</div>';
 		$markup .= '<div class="embed-content"><!--noptimize--><!-- ' . $output . ' --><!--/noptimize--></div>';
 		$markup .= '</div>';
