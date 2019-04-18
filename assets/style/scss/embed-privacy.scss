@@ -15,24 +15,38 @@
 	color: #ddd;
 	cursor: pointer;
 	display: table;
+	height: 100%;
+	min-height: 200px;
 	max-width: 100%;
 	padding: 20px;
 	transition: background-color .25s ease-in-out, color .25s ease-in-out;
 	
-	> p {
+	@media (min-width: 768px) {
+		min-height: 300px;
+	}
+	
+	label,
+	p {
 		color: #ddd;
-		display: table-cell;
+		cursor: pointer;
+		font-weight: 400;
+		margin: 0;
 		text-align: center;
 		transition: color .25s ease-in-out;
-		vertical-align: middle;
 	}
 	
 	&:hover {
 		background-color: rgba(0, 0, 0, .8);
 		color: #fff;
 		
-		> h3 {
+		label,
+		p {
 			color: #fff;
 		}
 	}
+}
+
+.embed-inner {
+	display: table-cell;
+	vertical-align: middle;
 }

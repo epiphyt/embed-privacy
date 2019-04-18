@@ -149,38 +149,65 @@ class Embed_Privacy {
 		// don't do anything in admin
 		if ( ! $this->usecache ) return $output;
 		
+		$cookie = $this->get_cookie();
 		$embed_provider = '';
+		$embed_provider_lowercase = '';
 		
 		// get embed provider name
 		foreach ( $this->embed_providers as $url_part => $name ) {
 			// save name of provider and stop loop
 			if ( \strpos( $url, $url_part ) !== false ) {
 				$embed_provider = $name;
+				$embed_provider_lowercase = \strtolower( $name );
 				break;
 			}
 		}
 		
+		// check if cookie is set
+		if ( isset( $cookie->{$embed_provider_lowercase} ) && $cookie->{$embed_provider_lowercase} === true ) {
+			return $output;
+		}
+		
 		// add two click to markup
 		$embed_class = '  embed-' . ( ! empty( $embed_provider ) ? \sanitize_title( $embed_provider ) : 'default' );
-		$height = 'height: 300px;';
 		$width = ( ! empty( $args['width'] ) ? 'width: ' . $args['width'] . 'px;' : '' );
-		$markup = '<div class="embed-container' . $embed_class . '">';
-		$markup .= '<div class="embed-overlay" style="' . $height . ' ' . $width . '">';
+		$markup = '<div class="embed-container' . \esc_attr( $embed_class ) . '">';
+		$markup .= '<div class="embed-overlay" style="' . \esc_attr( $width ) . '">';
+		$markup .= '<div class="embed-inner">';
 		$markup .= '<p>';
 		
 		if ( ! empty( $embed_provider ) ) {
 			/* translators: the embed provider */
-			$markup .= \sprintf( \esc_html__( 'Click here to display content from %s', 'embed-privacy' ), $embed_provider );
+			$markup .= \sprintf( \esc_html__( 'Click here to display content from %s', 'embed-privacy' ), \esc_html( $embed_provider ) );
 		}
 		else {
 			$markup .= \esc_html__( 'Click here to display content from external service', 'embed-privacy' );
 		}
 		
 		$markup .= '</p>';
+		
+		$checkbox_id = 'embed-privacy-store-' . $embed_provider_lowercase;
+		/* translators: the embed provider */
+		$markup .= '<p><label for="' . \esc_attr( $checkbox_id ) . '" class="embed-label"><input id="' . \esc_attr( $checkbox_id ) . '" type="checkbox" value="1"> ' . sprintf( \esc_html__( 'Always display content from %s', 'embed-privacy' ), \esc_html( $embed_provider ) ) . '</label></p>';
+		
+		$markup .= '</div>';
 		$markup .= '</div>';
 		$markup .= '<div class="embed-content"><!--noptimize--><!-- ' . $output . ' --><!--/noptimize--></div>';
 		$markup .= '</div>';
 		
 		return $markup;
+	}
+	
+	/**
+	 * @return array|mixed|object|string
+	 */
+	private function get_cookie() {
+		if ( empty( $_COOKIE['embed-privacy'] ) ) {
+			return '';
+		}
+		
+		$object = \json_decode( \sanitize_text_field( wp_unslash( $_COOKIE['embed-privacy'] ) ) );
+		
+		return $object;
 	}
 }
