@@ -53,7 +53,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 			var current_target = event.currentTarget;
 			var checkbox_id = current_target.getAttribute( 'for' );
 			var embed_provider = checkbox_id.replace( 'embed-privacy-store-', '' );
-			var cookie = JSON.parse( get_cookie( 'embed-privacy' ) );
+			var cookie = ( get_cookie( 'embed-privacy' ) ? JSON.parse( get_cookie( 'embed-privacy' ) ) : '' );
 			
 			if ( document.getElementById( checkbox_id ).checked ) {
 				// add|update the cookie's value
@@ -106,7 +106,7 @@ function get_cookie( name ) {
  * @param	{String}		name The name of the cookie
  */
 function remove_cookie( name ) {
-	document.cookie = name + '=; Max-Age=-99999999;';
+	document.cookie = name + '=; expires=0; path=/';
 }
 
 /**
