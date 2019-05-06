@@ -17,10 +17,10 @@ document.addEventListener( 'DOMContentLoaded', function() {
 			
 			// hide the embed overlay
 			current_target.style.display = 'none';
-			// remove Autoptimize comments first
-			embed_content.innerHTML = embed_content.innerHTML.replace( '<!--noptimize-->', '' ).replace( '<!--/noptimize-->', '' );
-			// remove the HTML comments from the embed content
-			embed_content.innerHTML = embed_content.innerHTML.replace( /<!--/, '' ).replace( /-->/, '' );
+			// get stored content from JavaScript
+			var embed_object = JSON.parse( window[ '_' + current_target.parentNode.id ] );
+			
+			embed_content.innerHTML = embed_object.embed;
 			
 			// get all script tags inside the embed
 			var script_tags = embed_content.querySelectorAll( 'script' );

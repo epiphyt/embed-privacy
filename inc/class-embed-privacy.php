@@ -170,8 +170,9 @@ class Embed_Privacy {
 		
 		// add two click to markup
 		$embed_class = '  embed-' . ( ! empty( $embed_provider ) ? \sanitize_title( $embed_provider ) : 'default' );
+		$embed_md5 = md5( $output );
 		$width = ( ! empty( $args['width'] ) ? 'width: ' . $args['width'] . 'px;' : '' );
-		$markup = '<div class="embed-container' . \esc_attr( $embed_class ) . '">';
+		$markup = '<div class="embed-container' . \esc_attr( $embed_class ) . '" id="oembed_' . esc_attr( $embed_md5 ) . '">';
 		$markup .= '<div class="embed-overlay" style="' . \esc_attr( $width ) . '">';
 		$markup .= '<div class="embed-inner">';
 		$content = '<p>';
@@ -201,7 +202,7 @@ class Embed_Privacy {
 		$markup .= $content;
 		$markup .= '</div>';
 		$markup .= '</div>';
-		$markup .= '<div class="embed-content"><!--noptimize--><!-- ' . $output . ' --><!--/noptimize--></div>';
+		$markup .= '<div class="embed-content"><script>var _oembed_' . $embed_md5 . ' = \'' . addslashes( wp_json_encode( [ 'embed' => $output ] ) ) . '\';</script></div>';
 		$markup .= '</div>';
 		
 		return $markup;
