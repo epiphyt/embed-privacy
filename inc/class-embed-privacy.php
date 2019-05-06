@@ -19,6 +19,10 @@ class Embed_Privacy {
 	 * @var		array The supported media providers
 	 */
 	public $embed_providers = [
+		'.amazon.' => 'Amazon Kindle',
+		'.amzn.' => 'Amazon Kindle',
+		'a.co' => 'Amazon Kindle',
+		'z.cn' => 'Amazon Kindle',
 		'animoto.com' => 'Animoto',
 		'cloudup.com' => 'Cloudup',
 		'collegehumor.com' => 'CollegeHumor',
