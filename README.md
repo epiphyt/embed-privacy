@@ -38,7 +38,7 @@ Sure thing! We enjoy playing with the new WordPress editor and developed Embed P
 
 = Which embeds are currently supported? =
 
-We currently support all oEmbed providers known to WordPress core. Want to know about them? Here you go: Animoto, Cloudup, CollegeHumor, DailyMotion, Facebook, Flickr, Funny Or Die, Hulu, Imgur, Instagram, Issuu, Kickstarter, Meetup, Mixcloud, Photobucket, Photobucket, Polldaddy.com, Reddit, ReverbNation, Scribd, Sketchfab, SlideShare, SmugMug, SoundCloud, Speaker Deck, Spotify, TED, Tumblr, Twitter, VideoPres, Vimeo, WordPress.org, WordPress.tv, YouTube.
+We currently support all oEmbed providers known to WordPress core. Want to know about them? Here you go: Amazon Kindle (since WordPress 5.2), Animoto, Cloudup, CollegeHumor, DailyMotion, Facebook, Flickr, Funny Or Die, Hulu, Imgur, Instagram, Issuu, Kickstarter, Meetup, Mixcloud, Photobucket, Photobucket, Polldaddy.com, Reddit, ReverbNation, Scribd, Sketchfab, SlideShare, SmugMug, SoundCloud, Speaker Deck, Spotify, TED, Tumblr, Twitter, VideoPres, Vimeo, WordPress.org, WordPress.tv, YouTube.
 
 = Who are you folks? =
 
