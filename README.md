@@ -32,6 +32,10 @@ By clicking on the placeholder the respective content will be reloaded.
 
 Yes. As long as you don't opt-in to load external content, you/your visitors can't be tracked by these services.
 
+= Does Embed Privacy make embedding content privacy-friendly? =
+
+The embedding process itself will be privacy-friendly with Embed Privacy. That means, that no third-party embed provider is able to track users without their explicit consent by clicking on the overlay to allow the embed to be loaded. However, to make sure everything is fine you need to expand your privacy policy for each embed provider you’re using or you want to use, because you need to specify, where data will be sent to and what happens to them.
+
 = Does Embed Privacy support the Gutenberg editor? =
 
 Sure thing! We enjoy playing with the new WordPress editor and developed Embed Privacy with Gutenberg in mind, the plugin will work no matter the editor you use.
