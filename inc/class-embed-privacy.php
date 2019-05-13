@@ -167,6 +167,9 @@ class Embed_Privacy {
 			}
 		}
 		
+		// replace youtube.com to youtube-nocookie.com
+		$output = str_replace( 'youtube.com', 'youtube-nocookie.com', $output );
+		
 		// check if cookie is set
 		if ( isset( $cookie->{$embed_provider_lowercase} ) && $cookie->{$embed_provider_lowercase} === true ) {
 			return $output;
