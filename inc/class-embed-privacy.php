@@ -11,6 +11,11 @@ namespace epiphyt\Embed_Privacy;
  */
 class Embed_Privacy {
 	/**
+	 * @var		string The full path to the main plugin file
+	 */
+	public $plugin_file = '';
+	
+	/**
 	 * @var		bool Determine if we use the cache
 	 */
 	private $usecache = false;
@@ -61,12 +66,16 @@ class Embed_Privacy {
 	
 	/**
 	 * Embed Privacy constructor.
+	 * 
+	 * @param	string		$plugin_file The path of the main plugin file
 	 */
-	public function __construct() {
+	public function __construct( $plugin_file ) {
 		// actions
 		\add_action( 'init', [ $this, 'load_textdomain' ] );
 		\add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_assets' ] );
 		
+		// assign variables
+		$this->plugin_file = $plugin_file;
 		$this->usecache = ! \is_admin();
 		
 		// filters
@@ -162,7 +171,7 @@ class Embed_Privacy {
 			// save name of provider and stop loop
 			if ( \strpos( $url, $url_part ) !== false ) {
 				$embed_provider = $name;
-				$embed_provider_lowercase = \strtolower( $name );
+				$embed_provider_lowercase = str_replace( [ ' ', '.' ], '-', \strtolower( $name ) );
 				break;
 			}
 		}
@@ -182,6 +191,7 @@ class Embed_Privacy {
 		$markup = '<div class="embed-container' . \esc_attr( $embed_class ) . '" id="oembed_' . esc_attr( $embed_md5 ) . '">';
 		$markup .= '<div class="embed-overlay" style="' . \esc_attr( $width ) . '">';
 		$markup .= '<div class="embed-inner">';
+		$markup .= '<div class="embed-logo"></div>';
 		$content = '<p>';
 		
 		if ( ! empty( $embed_provider ) ) {
@@ -211,6 +221,22 @@ class Embed_Privacy {
 		$markup .= '</div>';
 		$markup .= '<div class="embed-content"><script>var _oembed_' . $embed_md5 . ' = \'' . addslashes( wp_json_encode( [ 'embed' => $output ] ) ) . '\';</script></div>';
 		$markup .= '</div>';
+		
+		// display embed provider logo
+		$background_path = plugin_dir_path( $this->plugin_file ) . 'assets/images/embed-' . $embed_provider_lowercase . '.png';
+		$background_url = plugin_dir_url( $this->plugin_file ) . 'assets/images/embed-' . $embed_provider_lowercase . '.png';
+		
+		// display only if file exists
+		if ( file_exists( $background_path ) ) {
+			$version = filemtime( $background_path );
+			$markup .= '
+			<style>
+				.embed-' . $embed_provider_lowercase . ' .embed-logo {
+					background-image: url(' . $background_url . '?v=' . $version . ');
+				}
+			</style>
+			';
+		}
 		
 		return $markup;
 	}

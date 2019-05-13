@@ -11,7 +11,7 @@
 }
 
 .embed-overlay {
-	background-color: rgba(0, 0, 0, .9);
+	background-color: rgba(0, 0, 0, .7);
 	color: #ddd;
 	cursor: pointer;
 	display: table;
@@ -39,6 +39,10 @@
 		background-color: rgba(0, 0, 0, .8);
 		color: #fff;
 		
+		.embed-logo {
+			opacity: 1;
+		}
+		
 		label,
 		p {
 			color: #fff;
@@ -49,6 +53,16 @@
 .embed-inner {
 	display: table-cell;
 	vertical-align: middle;
+}
+
+.embed-logo {
+	background-position: center top;
+	background-repeat: no-repeat;
+	background-size: contain;
+	height: 48px;
+	margin-bottom: 30px;
+	opacity: .8;
+	transition: opacity .25s ease-in-out;
 }
 
 // make sure responsive Gutenberg blocks don't have too much space
