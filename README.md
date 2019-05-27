@@ -51,13 +51,22 @@ We are [Epiphyt](https://epiph.yt/), your friendly neighborhood WordPress plugin
 
 == Changelog ==
 
+= 1.1.0 =
+* Added option to allow all embeds by one provider
+* Added URL rewrite to youtube-nocookie.com
+* Added option to save user selection per embed provider
+* Added provider logo to our placeholder
+* Added option to filter our placeholders markup
+* Improved our placeholder markup to be actually semantic
+* Fixed typos
+
 = 1.0.2 =
-* Improve compatiblity with [Autoptimize](https://wordpress.org/plugins/autoptimize/)
-* Improve compatiblity with [AMP](https://wordpress.org/plugins/amp/)
+* Improved compatiblity with [Autoptimize](https://wordpress.org/plugins/autoptimize/)
+* Improved compatiblity with [AMP](https://wordpress.org/plugins/amp/)
 * Fix issue with Slideshare causing wrong (generic) placeholders
 
 = 1.0.1 =
-* Fix support for PHP 5.6
+* Fixed support for PHP 5.6
 
 = 1.0.0 =
 * Initial release
