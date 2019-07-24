@@ -85,8 +85,16 @@ class Embed_Privacy {
 				return 0;
 			}, 10, 1 );
 		}
-		
-		\add_filter( 'embed_oembed_html', [ $this, 'replace_embeds' ], 10, 3 );
+
+		// filter embeds in text editor
+		add_filter( 'embed_oembed_html', [ $this, 'replace_embeds' ], 10, 3 );
+
+		/**
+		 * filter embeds with the advanced custom fields oembeds field
+		 *
+		 * @see https://www.advancedcustomfields.com/resources/oembed/
+		 */
+		add_filter( 'oembed_result', [ $this, 'replace_embeds' ], 10, 3 );
 	}
 	
 	/**
