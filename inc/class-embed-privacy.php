@@ -1,16 +1,37 @@
 <?php
 namespace epiphyt\Embed_Privacy;
+use function add_action;
+use function add_filter;
 use function addslashes;
+use function apply_filters;
+use function defined;
+use function esc_attr;
+use function esc_html;
+use function esc_html__;
 use function file_exists;
 use function filemtime;
+use function get_sites;
+use function is_admin;
+use function is_plugin_active_for_network;
+use function json_decode;
+use function load_plugin_textdomain;
 use function md5;
 use function plugin_dir_path;
 use function plugin_dir_url;
 use function preg_match_all;
+use function sanitize_text_field;
+use function sanitize_title;
 use function sprintf;
 use function str_replace;
 use function strpos;
+use function strtolower;
+use function switch_to_blog;
+use function wp_enqueue_script;
+use function wp_enqueue_style;
 use function wp_json_encode;
+use const DEBUG_MODE;
+use const EPI_EMBED_PRIVACY_BASE;
+use const EPI_EMBED_PRIVACY_URL;
 
 /**
  * Two click embed main class.
@@ -18,9 +39,12 @@ use function wp_json_encode;
  * @author		Epiphyt
  * @license		GPL2
  * @package		epiphyt\Embed_Privacy
- * @version		1.0.2
+ * @version		1.1.0
  */
 class Embed_Privacy {
+	/**
+	 * @since	1.1.0
+	 */
 	const IFRAME_REGEX = '/<iframe([^>])+>([^<])*<\/iframe>/';
 	
 	/**
@@ -84,17 +108,17 @@ class Embed_Privacy {
 	 */
 	public function __construct( $plugin_file ) {
 		// actions
-		\add_action( 'init', [ $this, 'load_textdomain' ] );
-		\add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_assets' ] );
+		add_action( 'init', [ $this, 'load_textdomain' ] );
+		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_assets' ] );
 		
 		// assign variables
 		$this->plugin_file = $plugin_file;
-		$this->usecache = ! \is_admin();
+		$this->usecache = ! is_admin();
 		
 		// filters
 		if ( ! $this->usecache ) {
 			// set ttl to 0 in admin
-			\add_filter( 'oembed_ttl', function( $time ) {
+			add_filter( 'oembed_ttl', function( $time ) {
 				return 0;
 			}, 10, 1 );
 		}
@@ -115,12 +139,12 @@ class Embed_Privacy {
 		$query = "DELETE FROM		" . $wpdb->get_blog_prefix() . "postmeta
 				WHERE				meta_key LIKE '%_oembed_%'";
 		
-		if ( \is_plugin_active_for_network( 'embed-privacy/embed-privacy.php' ) ) {
+		if ( is_plugin_active_for_network( 'embed-privacy/embed-privacy.php' ) ) {
 			// on networks we need to iterate through every site
-			$sites = \get_sites( 99999 );
+			$sites = get_sites( 99999 );
 			
 			foreach ( $sites as $site ) {
-				\switch_to_blog( $site );
+				switch_to_blog( $site );
 				
 				$wpdb->query( $query );
 			}
@@ -134,17 +158,17 @@ class Embed_Privacy {
 	 * Enqueue our assets for the frontend.
 	 */
 	public function enqueue_assets() {
-		$suffix = ( \defined( 'DEBUG_MODE' ) && \DEBUG_MODE ? '' : '.min' );
-		$css_file = \EPI_EMBED_PRIVACY_BASE . 'assets/style/embed-privacy' . $suffix . '.css';
-		$css_file_url = \EPI_EMBED_PRIVACY_URL . 'assets/style/embed-privacy' . $suffix . '.css';
+		$suffix = ( defined( 'DEBUG_MODE' ) && DEBUG_MODE ? '' : '.min' );
+		$css_file = EPI_EMBED_PRIVACY_BASE . 'assets/style/embed-privacy' . $suffix . '.css';
+		$css_file_url = EPI_EMBED_PRIVACY_URL . 'assets/style/embed-privacy' . $suffix . '.css';
 		
-		\wp_enqueue_style( 'embed-privacy', $css_file_url, [], \filemtime( $css_file ) );
+		wp_enqueue_style( 'embed-privacy', $css_file_url, [], filemtime( $css_file ) );
 		
 		if ( ! $this->is_amp() ) {
-			$js_file = \EPI_EMBED_PRIVACY_BASE . 'assets/js/embed-privacy' . $suffix . '.js';
-			$js_file_url = \EPI_EMBED_PRIVACY_URL . 'assets/js/embed-privacy' . $suffix . '.js';
+			$js_file = EPI_EMBED_PRIVACY_BASE . 'assets/js/embed-privacy' . $suffix . '.js';
+			$js_file_url = EPI_EMBED_PRIVACY_URL . 'assets/js/embed-privacy' . $suffix . '.js';
 			
-			\wp_enqueue_script( 'embed-privacy', $js_file_url, [], \filemtime( $js_file ) );
+			wp_enqueue_script( 'embed-privacy', $js_file_url, [], filemtime( $js_file ) );
 		}
 	}
 	
@@ -162,11 +186,13 @@ class Embed_Privacy {
 	 * Load the translation files.
 	 */
 	public function load_textdomain() {
-		\load_plugin_textdomain( 'embed-privacy', false, \EPI_EMBED_PRIVACY_BASE . 'languages' );
+		load_plugin_textdomain( 'embed-privacy', false, EPI_EMBED_PRIVACY_BASE . 'languages' );
 	}
 	
 	/**
 	 * Replace embeds with a container and hide the embed with an HTML comment.
+	 * 
+	 * @version	1.0.1
 	 * 
 	 * @param	string		$output
 	 * @param	string		$url
@@ -184,9 +210,9 @@ class Embed_Privacy {
 		// get embed provider name
 		foreach ( $this->embed_providers as $url_part => $name ) {
 			// save name of provider and stop loop
-			if ( \strpos( $url, $url_part ) !== false ) {
+			if ( strpos( $url, $url_part ) !== false ) {
 				$embed_provider = $name;
-				$embed_provider_lowercase = str_replace( [ ' ', '.' ], '-', \strtolower( $name ) );
+				$embed_provider_lowercase = str_replace( [ ' ', '.' ], '-', strtolower( $name ) );
 				break;
 			}
 		}
@@ -205,6 +231,8 @@ class Embed_Privacy {
 	
 	/**
 	 * Replace Google Maps iframes.
+	 * 
+	 * @since	1.1.0
 	 * 
 	 * @param	string		$content The post content
 	 * @return	string The post content
@@ -241,13 +269,15 @@ class Embed_Privacy {
 			return '';
 		}
 		
-		$object = \json_decode( \sanitize_text_field( wp_unslash( $_COOKIE['embed-privacy'] ) ) );
+		$object = json_decode( sanitize_text_field( wp_unslash( $_COOKIE['embed-privacy'] ) ) );
 		
 		return $object;
 	}
 	
 	/**
 	 * Output a complete template of the overlay.
+	 * 
+	 * @since	1.1.0
 	 * 
 	 * @param	string		$embed_provider The embed provider
 	 * @param	string		$embed_provider_lowercase The embed provider without spaces and in lowercase
@@ -257,28 +287,28 @@ class Embed_Privacy {
 	 */
 	private function get_output_template( $embed_provider, $embed_provider_lowercase, $output, $args = [] ) {
 		// add two click to markup
-		$embed_class = ' embed-' . ( ! empty( $embed_provider ) ? \sanitize_title( $embed_provider ) : 'default' );
+		$embed_class = ' embed-' . ( ! empty( $embed_provider ) ? sanitize_title( $embed_provider ) : 'default' );
 		$embed_md5 = md5( $output );
 		$width = ( ! empty( $args['width'] ) ? 'width: ' . $args['width'] . 'px;' : '' );
-		$markup = '<div class="embed-container' . \esc_attr( $embed_class ) . '" id="oembed_' . esc_attr( $embed_md5 ) . '">';
-		$markup .= '<div class="embed-overlay" style="' . \esc_attr( $width ) . '">';
+		$markup = '<div class="embed-container' . esc_attr( $embed_class ) . '" id="oembed_' . esc_attr( $embed_md5 ) . '">';
+		$markup .= '<div class="embed-overlay" style="' . esc_attr( $width ) . '">';
 		$markup .= '<div class="embed-inner">';
 		$markup .= '<div class="embed-logo"></div>';
 		$content = '<p>';
 		
 		if ( ! empty( $embed_provider ) ) {
 			/* translators: the embed provider */
-			$content .= \sprintf( \esc_html__( 'Click here to display content from %s', 'embed-privacy' ), \esc_html( $embed_provider ) );
+			$content .= sprintf( esc_html__( 'Click here to display content from %s', 'embed-privacy' ), esc_html( $embed_provider ) );
 		}
 		else {
-			$content .= \esc_html__( 'Click here to display content from external service', 'embed-privacy' );
+			$content .= esc_html__( 'Click here to display content from external service', 'embed-privacy' );
 		}
 		
 		$content .= '</p>';
 		
 		$checkbox_id = 'embed-privacy-store-' . $embed_provider_lowercase;
 		/* translators: the embed provider */
-		$content .= '<p><label for="' . \esc_attr( $checkbox_id ) . '" class="embed-label"><input id="' . \esc_attr( $checkbox_id ) . '" type="checkbox" value="1"> ' . sprintf( \esc_html__( 'Always display content from %s', 'embed-privacy' ), \esc_html( $embed_provider ) ) . '</label></p>';
+		$content .= '<p><label for="' . esc_attr( $checkbox_id ) . '" class="embed-label"><input id="' . esc_attr( $checkbox_id ) . '" type="checkbox" value="1"> ' . sprintf( esc_html__( 'Always display content from %s', 'embed-privacy' ), esc_html( $embed_provider ) ) . '</label></p>';
 		
 		/**
 		 * Filter the content of the embed overlay.
@@ -286,7 +316,7 @@ class Embed_Privacy {
 		 * @param	string		$content The content
 		 * @param	string		$embed_provider The embed provider of this embed
 		 */
-		$content = \apply_filters( 'embed_privacy_content', $content, $embed_provider );
+		$content = apply_filters( 'embed_privacy_content', $content, $embed_provider );
 		
 		$markup .= $content;
 		$markup .= '</div>';

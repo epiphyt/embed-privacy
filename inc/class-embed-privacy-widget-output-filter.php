@@ -10,6 +10,8 @@ use function ob_start;
  * Filter the output of widgets.
  * 
  * @see		https://github.com/philipnewcomer/widget-output-filters
+ * @since	1.1.0
+ * @version	1.0.0
  */
 class Embed_Privacy_Widget_Output_Filter {
 	/**
