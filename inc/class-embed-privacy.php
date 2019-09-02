@@ -1,5 +1,16 @@
 <?php
 namespace epiphyt\Embed_Privacy;
+use function addslashes;
+use function file_exists;
+use function filemtime;
+use function md5;
+use function plugin_dir_path;
+use function plugin_dir_url;
+use function preg_match_all;
+use function sprintf;
+use function str_replace;
+use function strpos;
+use function wp_json_encode;
 
 /**
  * Two click embed main class.
@@ -7,9 +18,11 @@ namespace epiphyt\Embed_Privacy;
  * @author		Epiphyt
  * @license		GPL2
  * @package		epiphyt\Embed_Privacy
- * @version		1.1.0
+ * @version		1.0.2
  */
 class Embed_Privacy {
+	const IFRAME_REGEX = '/<iframe([^>])+>([^<])*<\/iframe>/';
+	
 	/**
 	 * @var		string The full path to the main plugin file
 	 */
@@ -86,7 +99,9 @@ class Embed_Privacy {
 			}, 10, 1 );
 		}
 		
-		\add_filter( 'embed_oembed_html', [ $this, 'replace_embeds' ], 10, 3 );
+		add_filter( 'embed_oembed_html', [ $this, 'replace_embeds' ], 10, 3 );
+		add_filter( 'embed_privacy_widget_output', [ $this, 'replace_google_maps' ] );
+		add_filter( 'the_content', [ $this, 'replace_google_maps' ] );
 	}
 	
 	/**
@@ -185,7 +200,64 @@ class Embed_Privacy {
 		}
 		
 		// add two click to markup
-		$embed_class = '  embed-' . ( ! empty( $embed_provider ) ? \sanitize_title( $embed_provider ) : 'default' );
+		return $this->get_output_template( $embed_provider, $embed_provider_lowercase, $output, $args );
+	}
+	
+	/**
+	 * Replace Google Maps iframes.
+	 * 
+	 * @param	string		$content The post content
+	 * @return	string The post content
+	 */
+	public function replace_google_maps( $content ) {
+		preg_match_all( self::IFRAME_REGEX, $content, $matches );
+		
+		if ( empty( $matches ) || empty( $matches[0] ) ) {
+			return $content;
+		}
+		
+		$embed_provider = 'Google Maps';
+		$embed_provider_lowercase = 'google-maps';
+		
+		foreach ( $matches[0] as $match ) {
+			if ( strpos( $match, 'google.com/maps' ) === false ) {
+				continue;
+			}
+			
+			$overlay_output = $this->get_output_template( $embed_provider, $embed_provider_lowercase, $match );
+			$content = str_replace( $match, $overlay_output, $content );
+		}
+		
+		return $content;
+	}
+	
+	/**
+	 * Get the Embed Privacy cookie.
+	 * 
+	 * @return array|mixed|object|string
+	 */
+	private function get_cookie() {
+		if ( empty( $_COOKIE['embed-privacy'] ) ) {
+			return '';
+		}
+		
+		$object = \json_decode( \sanitize_text_field( wp_unslash( $_COOKIE['embed-privacy'] ) ) );
+		
+		return $object;
+	}
+	
+	/**
+	 * Output a complete template of the overlay.
+	 * 
+	 * @param	string		$embed_provider The embed provider
+	 * @param	string		$embed_provider_lowercase The embed provider without spaces and in lowercase
+	 * @param	string		$output The output before replacing it
+	 * @param	array		$args Additional arguments
+	 * @return	string The overlay template
+	 */
+	private function get_output_template( $embed_provider, $embed_provider_lowercase, $output, $args = [] ) {
+		// add two click to markup
+		$embed_class = ' embed-' . ( ! empty( $embed_provider ) ? \sanitize_title( $embed_provider ) : 'default' );
 		$embed_md5 = md5( $output );
 		$width = ( ! empty( $args['width'] ) ? 'width: ' . $args['width'] . 'px;' : '' );
 		$markup = '<div class="embed-container' . \esc_attr( $embed_class ) . '" id="oembed_' . esc_attr( $embed_md5 ) . '">';
@@ -239,18 +311,5 @@ class Embed_Privacy {
 		}
 		
 		return $markup;
-	}
-	
-	/**
-	 * @return array|mixed|object|string
-	 */
-	private function get_cookie() {
-		if ( empty( $_COOKIE['embed-privacy'] ) ) {
-			return '';
-		}
-		
-		$object = \json_decode( \sanitize_text_field( wp_unslash( $_COOKIE['embed-privacy'] ) ) );
-		
-		return $object;
 	}
 }

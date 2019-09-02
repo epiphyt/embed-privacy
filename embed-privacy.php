@@ -53,6 +53,7 @@ if ( ! \defined( 'EPI_EMBED_PRIVACY_URL' ) ) \define( 'EPI_EMBED_PRIVACY_URL', \
 	}
 } );
 
+Embed_Privacy_Widget_Output_Filter::get_instance();
 $embed_privacy = new Embed_Privacy( __FILE__ );
 
 \register_activation_hook( __FILE__, [ $embed_privacy, 'clear_embed_cache' ] );
