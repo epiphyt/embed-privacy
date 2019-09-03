@@ -6,12 +6,13 @@
  * @package		epiphyt\Embed_Privacy
  * @version		1.1.0
  */
-.embed-container {
+.embed-privacy-container {
 	margin-bottom: 1.5em;
 }
 
-.embed-overlay {
+.embed-privacy-overlay {
 	background-color: rgba(0, 0, 0, .7);
+	box-sizing: border-box;
 	color: #ddd;
 	cursor: pointer;
 	display: table;
@@ -40,7 +41,7 @@
 		background-color: rgba(0, 0, 0, .8);
 		color: #fff;
 		
-		.embed-logo {
+		.embed-privacy-logo {
 			opacity: 1;
 		}
 		
@@ -51,12 +52,12 @@
 	}
 }
 
-.embed-inner {
+.embed-privacy-inner {
 	display: table-cell;
 	vertical-align: middle;
 }
 
-.embed-logo {
+.embed-privacy-logo {
 	background-position: center top;
 	background-repeat: no-repeat;
 	background-size: contain;
@@ -75,7 +76,7 @@
 	&.wp-embed-aspect-1-1,
 	&.wp-embed-aspect-9-16,
 	&.wp-embed-aspect-1-2 {
-		.embed-container {
+		.embed-privacy-container {
 			bottom: 0;
 			height: 100%;
 			left: 0;

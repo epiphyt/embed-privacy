@@ -48,6 +48,11 @@ class Embed_Privacy {
 	const IFRAME_REGEX = '/<iframe([^>])+>([^<])*<\/iframe>/';
 	
 	/**
+	 * @var		\epiphyt\Embed_Privacy\Embed_Privacy
+	 */
+	public static $instance;
+	
+	/**
 	 * @var		string The full path to the main plugin file
 	 */
 	public $plugin_file = '';
@@ -103,10 +108,8 @@ class Embed_Privacy {
 	
 	/**
 	 * Embed Privacy constructor.
-	 * 
-	 * @param	string		$plugin_file The path of the main plugin file
 	 */
-	public function __construct( $plugin_file ) {
+	public function __construct() {
 		// actions
 		add_action( 'init', [ $this, 'load_textdomain' ] );
 		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_assets' ] );
@@ -170,6 +173,21 @@ class Embed_Privacy {
 			
 			wp_enqueue_script( 'embed-privacy', $js_file_url, [], filemtime( $js_file ) );
 		}
+	}
+	
+	/**
+	 * Get a unique instance of the class.
+	 * 
+	 * @since	1.1.0
+	 * 
+	 * @return	\epiphyt\Embed_Privacy\Embed_Privacy The single instance of this class
+	 */
+	public static function get_instance() {
+		if ( self::$instance === null ) {
+			self::$instance = new self();
+		}
+		
+		return self::$instance;
 	}
 	
 	/**
@@ -290,10 +308,10 @@ class Embed_Privacy {
 		$embed_class = ' embed-' . ( ! empty( $embed_provider ) ? sanitize_title( $embed_provider ) : 'default' );
 		$embed_md5 = md5( $output );
 		$width = ( ! empty( $args['width'] ) ? 'width: ' . $args['width'] . 'px;' : '' );
-		$markup = '<div class="embed-container' . esc_attr( $embed_class ) . '" id="oembed_' . esc_attr( $embed_md5 ) . '">';
-		$markup .= '<div class="embed-overlay" style="' . esc_attr( $width ) . '">';
-		$markup .= '<div class="embed-inner">';
-		$markup .= '<div class="embed-logo"></div>';
+		$markup = '<div class="embed-privacy-container' . esc_attr( $embed_class ) . '" id="oembed_' . esc_attr( $embed_md5 ) . '">';
+		$markup .= '<div class="embed-privacy-overlay" style="' . esc_attr( $width ) . '">';
+		$markup .= '<div class="embed-privacy-inner">';
+		$markup .= '<div class="embed-privacy-logo"></div>';
 		$content = '<p>';
 		
 		if ( ! empty( $embed_provider ) ) {
@@ -308,7 +326,7 @@ class Embed_Privacy {
 		
 		$checkbox_id = 'embed-privacy-store-' . $embed_provider_lowercase;
 		/* translators: the embed provider */
-		$content .= '<p><label for="' . esc_attr( $checkbox_id ) . '" class="embed-label"><input id="' . esc_attr( $checkbox_id ) . '" type="checkbox" value="1"> ' . sprintf( esc_html__( 'Always display content from %s', 'embed-privacy' ), esc_html( $embed_provider ) ) . '</label></p>';
+		$content .= '<p><label for="' . esc_attr( $checkbox_id ) . '" class="embed-privacy-label"><input id="' . esc_attr( $checkbox_id ) . '" type="checkbox" value="1"> ' . sprintf( esc_html__( 'Always display content from %s', 'embed-privacy' ), esc_html( $embed_provider ) ) . '</label></p>';
 		
 		/**
 		 * Filter the content of the embed overlay.
@@ -321,7 +339,7 @@ class Embed_Privacy {
 		$markup .= $content;
 		$markup .= '</div>';
 		$markup .= '</div>';
-		$markup .= '<div class="embed-content"><script>var _oembed_' . $embed_md5 . ' = \'' . addslashes( wp_json_encode( [ 'embed' => $output ] ) ) . '\';</script></div>';
+		$markup .= '<div class="embed-privacy-content"><script>var _oembed_' . $embed_md5 . ' = \'' . addslashes( wp_json_encode( [ 'embed' => $output ] ) ) . '\';</script></div>';
 		$markup .= '</div>';
 		
 		// display embed provider logo
@@ -333,7 +351,7 @@ class Embed_Privacy {
 			$version = filemtime( $background_path );
 			$markup .= '
 			<style>
-				.embed-' . $embed_provider_lowercase . ' .embed-logo {
+				.embed-' . $embed_provider_lowercase . ' .embed-privacy-logo {
 					background-image: url(' . $background_url . '?v=' . $version . ');
 				}
 			</style>
@@ -341,5 +359,18 @@ class Embed_Privacy {
 		}
 		
 		return $markup;
+	}
+	
+	/**
+	 * Set the plugin file.
+	 * 
+	 * @since	1.1.0
+	 * 
+	 * @param	string	$file The path to the file
+	 */
+	public function set_plugin_file( $file ) {
+		if ( file_exists( $file ) ) {
+			$this->plugin_file = $file;
+		}
 	}
 }

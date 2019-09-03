@@ -7,8 +7,8 @@
  * @version		1.1.0
  */
 document.addEventListener( 'DOMContentLoaded', function() {
-	var overlays = document.querySelectorAll( '.embed-overlay' );
-	var labels = document.querySelectorAll( '.embed-inner .embed-label' );
+	var overlays = document.querySelectorAll( '.embed-privacy-overlay' );
+	var labels = document.querySelectorAll( '.embed-privacy-inner .embed-privacy-label' );
 	
 	for ( var i = 0; i < overlays.length; i++ ) {
 		overlays[ i ].addEventListener( 'click', function( event ) {

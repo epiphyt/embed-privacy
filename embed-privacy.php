@@ -27,34 +27,48 @@ along with Fury. If not, see https://www.gnu.org/licenses/gpl-2.0.html.
 */
 
 // exit if ABSPATH is not defined
-\defined( 'ABSPATH' ) || exit;
+use function array_pop;
+use function define;
+use function defined;
+use function explode;
+use function file_exists;
+use function plugin_dir_path;
+use function plugin_dir_url;
+use function register_activation_hook;
+use function register_deactivation_hook;
+use function spl_autoload_register;
+use function str_replace;
+use function strtolower;
 
-if ( ! \defined( 'EPI_EMBED_PRIVACY_BASE' ) ) \define( 'EPI_EMBED_PRIVACY_BASE', \plugin_dir_path( __FILE__ ) );
-if ( ! \defined( 'EPI_EMBED_PRIVACY_URL' ) ) \define( 'EPI_EMBED_PRIVACY_URL', \plugin_dir_url( __FILE__ ) );
+defined( 'ABSPATH' ) || exit;
+
+if ( ! defined( 'EPI_EMBED_PRIVACY_BASE' ) ) define( 'EPI_EMBED_PRIVACY_BASE', plugin_dir_path( __FILE__ ) );
+if ( ! defined( 'EPI_EMBED_PRIVACY_URL' ) ) define( 'EPI_EMBED_PRIVACY_URL', plugin_dir_url( __FILE__ ) );
 
 /**
  * Autoload all necessary classes.
  * 
  * @param	string		$class The class name of the autoloaded class
  */
-\spl_autoload_register( function( $class ) {
-	$path = \explode( '\\', $class );
-	$filename = \str_replace( '_', '-', \strtolower( \array_pop( $path ) ) );
-	$class = \str_replace(
+spl_autoload_register( function( $class ) {
+	$path = explode( '\\', $class );
+	$filename = str_replace( '_', '-', strtolower( array_pop( $path ) ) );
+	$class = str_replace(
 		[ 'epiphyt\embed_privacy\\', '\\', '_' ],
 		[ '', '/', '-' ],
-		\strtolower( $class )
+		strtolower( $class )
 	);
-	$class = \str_replace( $filename, 'class-' . $filename, $class );
+	$class = str_replace( $filename, 'class-' . $filename, $class );
 	$maybe_file = __DIR__ . '/inc/' . $class . '.php';
 	
-	if ( \file_exists( $maybe_file ) ) {
+	if ( file_exists( $maybe_file ) ) {
 		require_once( __DIR__ . '/inc/' . $class . '.php' );
 	}
 } );
 
 Embed_Privacy_Widget_Output_Filter::get_instance();
-$embed_privacy = new Embed_Privacy( __FILE__ );
+$embed_privacy = Embed_Privacy::get_instance();
+$embed_privacy->set_plugin_file( __FILE__ );
 
-\register_activation_hook( __FILE__, [ $embed_privacy, 'clear_embed_cache' ] );
-\register_deactivation_hook( __FILE__, [ $embed_privacy, 'clear_embed_cache' ] );
+register_activation_hook( __FILE__, [ $embed_privacy, 'clear_embed_cache' ] );
+register_deactivation_hook( __FILE__, [ $embed_privacy, 'clear_embed_cache' ] );
