@@ -115,7 +115,6 @@ class Embed_Privacy {
 		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_assets' ] );
 		
 		// assign variables
-		$this->plugin_file = $plugin_file;
 		$this->usecache = ! is_admin();
 		
 		// filters
