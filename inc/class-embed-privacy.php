@@ -126,6 +126,7 @@ class Embed_Privacy {
 			}, 10, 1 );
 		}
 		
+		add_filter( 'do_shortcode_tag', [ $this, 'replace_google_maps' ] );
 		add_filter( 'embed_oembed_html', [ $this, 'replace_embeds' ], 10, 3 );
 		add_filter( 'embed_privacy_widget_output', [ $this, 'replace_google_maps' ] );
 		add_filter( 'the_content', [ $this, 'replace_google_maps' ] );
