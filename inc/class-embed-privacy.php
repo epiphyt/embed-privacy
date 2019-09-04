@@ -309,7 +309,7 @@ class Embed_Privacy {
 	 * @param	array		$args Additional arguments
 	 * @return	string The overlay template
 	 */
-	private function get_output_template( $embed_provider, $embed_provider_lowercase, $output, $args = [] ) {
+	public function get_output_template( $embed_provider, $embed_provider_lowercase, $output, $args = [] ) {
 		// add two click to markup
 		$embed_class = ' embed-' . ( ! empty( $embed_provider ) ? sanitize_title( $embed_provider ) : 'default' );
 		$embed_md5 = md5( $output );
