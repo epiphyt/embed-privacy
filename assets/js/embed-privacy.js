@@ -52,7 +52,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 			
 			var current_target = event.currentTarget;
 			var checkbox_id = current_target.getAttribute( 'for' );
-			var embed_provider = checkbox_id.replace( 'embed-privacy-store-', '' );
+			var embed_provider = current_target.getAttribute( 'data-embed-provider' );
 			var cookie = ( get_cookie( 'embed-privacy' ) ? JSON.parse( get_cookie( 'embed-privacy' ) ) : '' );
 			
 			if ( document.getElementById( checkbox_id ).checked ) {

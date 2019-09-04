@@ -221,7 +221,6 @@ class Embed_Privacy {
 		// don't do anything in admin
 		if ( ! $this->usecache ) return $output;
 		
-		$cookie = $this->get_cookie();
 		$embed_provider = '';
 		$embed_provider_lowercase = '';
 		
@@ -239,7 +238,7 @@ class Embed_Privacy {
 		$output = str_replace( 'youtube.com', 'youtube-nocookie.com', $output );
 		
 		// check if cookie is set
-		if ( isset( $cookie->{$embed_provider_lowercase} ) && $cookie->{$embed_provider_lowercase} === true ) {
+		if ( $this->is_always_active_provider( $embed_provider_lowercase ) ) {
 			return $output;
 		}
 		
@@ -264,6 +263,11 @@ class Embed_Privacy {
 		
 		$embed_provider = 'Google Maps';
 		$embed_provider_lowercase = 'google-maps';
+		
+		// check if cookie is set
+		if ( $this->is_always_active_provider( $embed_provider_lowercase ) ) {
+			return $content;
+		}
 		
 		foreach ( $matches[0] as $match ) {
 			if ( strpos( $match, 'google.com/maps' ) === false ) {
@@ -326,7 +330,7 @@ class Embed_Privacy {
 		
 		$checkbox_id = 'embed-privacy-store-' . $embed_provider_lowercase . '-' . $embed_md5;
 		/* translators: the embed provider */
-		$content .= '<p><label for="' . esc_attr( $checkbox_id ) . '" class="embed-privacy-label"><input id="' . esc_attr( $checkbox_id ) . '" type="checkbox" value="1"> ' . sprintf( esc_html__( 'Always display content from %s', 'embed-privacy' ), esc_html( $embed_provider ) ) . '</label></p>';
+		$content .= '<p><label for="' . esc_attr( $checkbox_id ) . '" class="embed-privacy-label" data-embed-provider="' . esc_attr( $embed_provider_lowercase ) . '"><input id="' . esc_attr( $checkbox_id ) . '" type="checkbox" value="1"> ' . sprintf( esc_html__( 'Always display content from %s', 'embed-privacy' ), esc_html( $embed_provider ) ) . '</label></p>';
 		
 		/**
 		 * Filter the content of the embed overlay.
@@ -359,6 +363,22 @@ class Embed_Privacy {
 		}
 		
 		return $markup;
+	}
+	
+	/**
+	 * Check if a provider is always active.
+	 * 
+	 * @param	string		$provider The embed provider in lowercase
+	 * @return	bool True if provider is always active, false otherwise
+	 */
+	public function is_always_active_provider( $provider ) {
+		$cookie = $this->get_cookie();
+		
+		if ( isset( $cookie->{$provider} ) && $cookie->{$provider} === true ) {
+			return true;
+		}
+		
+		return false;
 	}
 	
 	/**
