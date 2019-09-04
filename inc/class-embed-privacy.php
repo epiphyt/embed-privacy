@@ -196,7 +196,7 @@ class Embed_Privacy {
 	 * Determine whether this is an AMP response.
 	 * Note that this must only be called after the parse_query action.
 	 * 
-	 * @return	bool
+	 * @return	bool True if the current page is an AMP page, false otherwise
 	 */
 	private function is_amp() {
 		return function_exists( 'is_amp_endpoint' ) && is_amp_endpoint();
@@ -214,10 +214,10 @@ class Embed_Privacy {
 	 * 
 	 * @version	1.0.1
 	 * 
-	 * @param	string		$output
-	 * @param	string		$url
-	 * @param	array		$args
-	 * @return	string
+	 * @param	string		$output The original output
+	 * @param	string		$url The URL to the embed
+	 * @param	array		$args Additional arguments of the embed
+	 * @return	string The updated embed code
 	 */
 	public function replace_embeds( $output, $url, $args ) {
 		// don't do anything in admin
@@ -286,7 +286,7 @@ class Embed_Privacy {
 	/**
 	 * Get the Embed Privacy cookie.
 	 * 
-	 * @return array|mixed|object|string
+	 * @return array|mixed|object|string The content of the cookie
 	 */
 	private function get_cookie() {
 		if ( empty( $_COOKIE['embed-privacy'] ) ) {
@@ -369,6 +369,8 @@ class Embed_Privacy {
 	
 	/**
 	 * Check if a provider is always active.
+	 * 
+	 * @since	1.1.0
 	 * 
 	 * @param	string		$provider The embed provider in lowercase
 	 * @return	bool True if provider is always active, false otherwise
