@@ -324,7 +324,7 @@ class Embed_Privacy {
 		
 		$content .= '</p>';
 		
-		$checkbox_id = 'embed-privacy-store-' . $embed_provider_lowercase;
+		$checkbox_id = 'embed-privacy-store-' . $embed_provider_lowercase . '-' . $embed_md5;
 		/* translators: the embed provider */
 		$content .= '<p><label for="' . esc_attr( $checkbox_id ) . '" class="embed-privacy-label"><input id="' . esc_attr( $checkbox_id ) . '" type="checkbox" value="1"> ' . sprintf( esc_html__( 'Always display content from %s', 'embed-privacy' ), esc_html( $embed_provider ) ) . '</label></p>';
 		
