@@ -5,6 +5,7 @@ use function add_filter;
 use function addslashes;
 use function apply_filters;
 use function defined;
+use function dirname;
 use function esc_attr;
 use function esc_html;
 use function esc_html__;
@@ -16,6 +17,7 @@ use function is_plugin_active_for_network;
 use function json_decode;
 use function load_plugin_textdomain;
 use function md5;
+use function plugin_basename;
 use function plugin_dir_path;
 use function plugin_dir_url;
 use function preg_match_all;
@@ -204,7 +206,7 @@ class Embed_Privacy {
 	 * Load the translation files.
 	 */
 	public function load_textdomain() {
-		load_plugin_textdomain( 'embed-privacy', false, EPI_EMBED_PRIVACY_BASE . 'languages' );
+		load_plugin_textdomain( 'embed-privacy', false, dirname( plugin_basename( $this->plugin_file ) ) . '/languages' );
 	}
 	
 	/**
