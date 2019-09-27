@@ -312,6 +312,11 @@ class Embed_Privacy {
 	public function get_output_template( $embed_provider, $embed_provider_lowercase, $output, $args = [] ) {
 		// add two click to markup
 		$embed_class = ' embed-' . ( ! empty( $embed_provider ) ? sanitize_title( $embed_provider ) : 'default' );
+		
+		if ( ! empty( $args['align'] ) ) {
+			$embed_class .= ' align' . $args['align'];
+		}
+		
 		$embed_md5 = md5( $output );
 		$width = ( ! empty( $args['width'] ) ? 'width: ' . $args['width'] . 'px;' : '' );
 		$markup = '<div class="embed-privacy-container' . esc_attr( $embed_class ) . '" id="oembed_' . esc_attr( $embed_md5 ) . '">';
