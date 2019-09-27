@@ -75,7 +75,6 @@ class Embed_Privacy_Widget_Output_Filter {
 		
 		$wp_registered_widgets[ $widget_id ]['callback'] = $original_callback;
 		
-		$widget_id_base = $original_callback[0]->id_base;
 		$sidebar_id = $original_callback_params[0]['id'];
 		
 		if ( is_callable( $original_callback ) ) {
@@ -88,11 +87,10 @@ class Embed_Privacy_Widget_Output_Filter {
 			 * Filter the widget's output.
 			 * 
 			 * @param	string	$widget_output The widget's output
-			 * @param	string	$widget_id_base The widget's base ID
 			 * @param	string	$widget_id The widget's full ID
 			 * @param	string	$sidebar_id The current sidebar ID
 			 */
-			echo apply_filters( 'embed_privacy_widget_output', $widget_output, $widget_id_base, $widget_id, $sidebar_id );
+			echo apply_filters( 'embed_privacy_widget_output', $widget_output, $widget_id, $sidebar_id );
 		}
 	}
 }
