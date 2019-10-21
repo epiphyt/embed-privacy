@@ -15,9 +15,42 @@ use function ob_start;
  */
 class Embed_Privacy_Widget_Output_Filter {
 	/**
-	 * Contains the single instance of this class.
-	 * 
-	 * @var		Widget_Output_Filters
+	 * @var		string The alternative option name of this filter
+	 */
+	public $alt_option_name = '';
+	
+	/**
+	 * @var		string The ID of this filter
+	 */
+	public $id = '';
+	
+	/**
+	 * @var		string The ID base of this filter
+	 */
+	public $id_base = 'embed_privacy_widget_output_filter';
+	
+	/**
+	 * @var		string The name of this filter
+	 */
+	public $name = 'Embed Privacy';
+	
+	/**
+	 * @var		string The option name of this filter
+	 */
+	public $option_name = 'widget_embed_privacy_widget_output_filter';
+	
+	/**
+	 * @var		bool The updated value of this filter
+	 */
+	public $updated = false;
+	
+	/**
+	 * @var		array The widget options of this filter
+	 */
+	public $widget_options = [];
+	
+	/**
+	 * @var		Widget_Output_Filters The single instance of this class
 	 */
 	private static $instance = null;
 	
@@ -59,6 +92,7 @@ class Embed_Privacy_Widget_Output_Filter {
 		
 		$wp_registered_widgets[ $current_widget_id ]['original_callback'] = $wp_registered_widgets[ $current_widget_id ]['callback'];
 		$wp_registered_widgets[ $current_widget_id ]['callback'] = [ $this, 'display_widget' ];
+		die( '<pre>' . print_r( $wp_registered_widgets[ $current_widget_id ], true ) );
 		
 		return $sidebar_params;
 	}
@@ -78,7 +112,6 @@ class Embed_Privacy_Widget_Output_Filter {
 		$sidebar_id = $original_callback_params[0]['id'];
 		
 		if ( is_callable( $original_callback ) ) {
-			
 			ob_start();
 			call_user_func_array( $original_callback, $original_callback_params );
 			$widget_output = ob_get_clean();
