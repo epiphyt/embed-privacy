@@ -92,7 +92,6 @@ class Embed_Privacy_Widget_Output_Filter {
 		
 		$wp_registered_widgets[ $current_widget_id ]['original_callback'] = $wp_registered_widgets[ $current_widget_id ]['callback'];
 		$wp_registered_widgets[ $current_widget_id ]['callback'] = [ $this, 'display_widget' ];
-		die( '<pre>' . print_r( $wp_registered_widgets[ $current_widget_id ], true ) );
 		
 		return $sidebar_params;
 	}
