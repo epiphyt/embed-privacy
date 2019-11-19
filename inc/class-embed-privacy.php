@@ -30,6 +30,7 @@ use function strtolower;
 use function switch_to_blog;
 use function wp_enqueue_script;
 use function wp_enqueue_style;
+use function wp_generate_uuid4;
 use function wp_json_encode;
 use const DEBUG_MODE;
 use const EPI_EMBED_PRIVACY_BASE;
@@ -317,7 +318,7 @@ class Embed_Privacy {
 			$embed_class .= ' align' . $args['align'];
 		}
 		
-		$embed_md5 = md5( $output );
+		$embed_md5 = md5( $output . wp_generate_uuid4() );
 		$width = ( ! empty( $args['width'] ) ? 'width: ' . $args['width'] . 'px;' : '' );
 		$markup = '<div class="embed-privacy-container' . esc_attr( $embed_class ) . '" id="oembed_' . esc_attr( $embed_md5 ) . '">';
 		$markup .= '<div class="embed-privacy-overlay" style="' . esc_attr( $width ) . '">';
