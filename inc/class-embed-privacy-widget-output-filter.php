@@ -103,12 +103,12 @@ class Embed_Privacy_Widget_Output_Filter {
 		global $wp_registered_widgets;
 		$original_callback_params = func_get_args();
 		
-		$widget_id = $original_callback_params[0]['widget_id'];
+		$widget_id = isset( $original_callback_params[0]['widget_id'] ) ? $original_callback_params[0]['widget_id'] : null;
 		$original_callback = $wp_registered_widgets[ $widget_id ]['original_callback'];
 		
 		$wp_registered_widgets[ $widget_id ]['callback'] = $original_callback;
 		
-		$sidebar_id = $original_callback_params[0]['id'];
+		$sidebar_id = isset( $original_callback_params[0]['id'] ) ? $original_callback_params[0]['id'] : null;
 		
 		if ( is_callable( $original_callback ) ) {
 			ob_start();
