@@ -10,6 +10,11 @@
 	margin-bottom: 1.5em;
 }
 
+.embed-privacy-content {
+	position: relative;
+	z-index: 10; // explicitly set z-index lower than the one of .embed-privacy-overlay
+}
+
 .embed-privacy-overlay {
 	background-color: rgba(0, 0, 0, .7);
 	box-sizing: border-box;
@@ -20,8 +25,10 @@
 	min-height: 200px;
 	max-width: 100%;
 	padding: 20px;
+	position: relative;
 	transition: background-color .25s ease-in-out, color .25s ease-in-out;
 	width: 100%;
+	z-index: 100;
 	
 	@media (min-width: 768px) {
 		min-height: 300px;
