@@ -2,7 +2,7 @@
 Contributors: epiphyt, kittmedia, krafit
 Tags: oembed, privacy, gutenberg
 Requires at least: 4.7
-Tested up to: 5.2
+Tested up to: 5.4
 Requires PHP: 5.6
 License: GPL2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -42,7 +42,37 @@ Sure thing! We enjoy playing with the new WordPress editor and developed Embed P
 
 = Which embeds are currently supported? =
 
-We currently support all oEmbed providers known to WordPress core. Want to know about them? Here you go: Amazon Kindle (since WordPress 5.2), Animoto, Cloudup, CollegeHumor, DailyMotion, Facebook, Flickr, Funny Or Die, Hulu, Imgur, Instagram, Issuu, Kickstarter, Meetup, Mixcloud, Photobucket, Photobucket, Polldaddy.com, Reddit, ReverbNation, Scribd, Sketchfab, SlideShare, SmugMug, SoundCloud, Speaker Deck, Spotify, TED, Tumblr, Twitter, VideoPres, Vimeo, WordPress.org, WordPress.tv, YouTube.
+We currently support all oEmbed providers known to WordPress core. Want to know about them? Here you go: Amazon Kindle (since WordPress 5.2), Animoto, Cloudup, CollegeHumor, DailyMotion, Facebook, Flickr, Funny Or Die, Hulu, Imgur, Instagram, Issuu, Kickstarter, Meetup, Mixcloud, Photobucket, Photobucket, Polldaddy.com, Reddit, ReverbNation, Scribd, Sketchfab, SlideShare, SmugMug, SoundCloud, Speaker Deck, Spotify, TikTok, TED, Tumblr, Twitter, VideoPres, Vimeo, WordPress.org, WordPress.tv, YouTube.
+
+= Developers: How to use Embed Privacy’s methods for custom content? =
+
+Since version 1.1.0 you can now use our mechanism for content we don’t support in our plugin. You can do it the following way:
+
+```php
+/**
+ * Replace specific content with the Embed Privacy overlay of type 'google-maps'.
+ * 
+ * @param	string		$content The content to replace
+ * @return	string The updated content
+ */
+function prefix_replace_content_with_overlay( $content ) {
+	// check for Embed Privacy
+	if ( ! class_exists( 'epiphyt\Embed_Privacy\Embed_Privacy' ) ) {
+		return $content;
+	}
+	
+	// get Embed Privacy instance
+	$embed_privacy = epiphyt\Embed_Privacy\Embed_Privacy::get_instance();
+	
+	// check if provider is always active; if so, just return the content
+	if ( ! $embed_privacy->is_always_active_provider( 'google-maps' ) ) {
+		// replace the content with the overlay
+		$content = $embed_privacy->get_output_template( 'Google Maps', 'google-maps', $content );
+	}
+	
+	return $content;
+}
+```
 
 = Who are you folks? =
 
@@ -53,11 +83,17 @@ We are [Epiphyt](https://epiph.yt/), your friendly neighborhood WordPress plugin
 
 = 1.1.0 =
 * Added option to allow all embeds by one provider
+* Added provider TikTok, introduced in WordPress 5.4
+* Added support for Google Maps iframes
 * Added URL rewrite to youtube-nocookie.com
 * Added option to save user selection per embed provider
 * Added provider logo to our placeholder
 * Added option to filter our placeholders markup
+* Added support for 'alignwide' and 'alignfull' Gutenberg classes
+* Added support for using our embedding overlay mechanism for external developers
 * Improved our placeholder markup to be actually semantic
+* Changed .embed- classes to .embed-privacy-
+* Fixed some embed providers that use custom z-index, which results in the embedded content being above the overlay
 * Fixed typos
 
 = 1.0.2 =
