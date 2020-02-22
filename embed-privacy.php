@@ -1,5 +1,17 @@
 <?php
 namespace epiphyt\Embed_Privacy;
+use function array_pop;
+use function define;
+use function defined;
+use function explode;
+use function file_exists;
+use function plugin_dir_path;
+use function plugin_dir_url;
+use function register_activation_hook;
+use function register_deactivation_hook;
+use function spl_autoload_register;
+use function str_replace;
+use function strtolower;
 
 /*
 Plugin Name:	Embed Privacy
@@ -27,19 +39,6 @@ along with Fury. If not, see https://www.gnu.org/licenses/gpl-2.0.html.
 */
 
 // exit if ABSPATH is not defined
-use function array_pop;
-use function define;
-use function defined;
-use function explode;
-use function file_exists;
-use function plugin_dir_path;
-use function plugin_dir_url;
-use function register_activation_hook;
-use function register_deactivation_hook;
-use function spl_autoload_register;
-use function str_replace;
-use function strtolower;
-
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'EPI_EMBED_PRIVACY_BASE' ) ) define( 'EPI_EMBED_PRIVACY_BASE', plugin_dir_path( __FILE__ ) );
