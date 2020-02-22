@@ -98,6 +98,7 @@ class Embed_Privacy {
 		'soundcloud.com' => 'SoundCloud',
 		'speakerdeck.com' => 'Speaker Deck',
 		'spotify.com' => 'Spotify',
+		'tiktok.com' => 'TikTok',
 		'ted.com' => 'TED',
 		'tumblr.com' => 'Tumblr',
 		'twitter.com' => 'Twitter',
