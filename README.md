@@ -48,7 +48,7 @@ We currently support all oEmbed providers known to WordPress core. Want to know 
 
 Since version 1.1.0 you can now use our mechanism for content we don’t support in our plugin. You can do it the following way:
 
-```php
+`
 /**
  * Replace specific content with the Embed Privacy overlay of type 'google-maps'.
  * 
@@ -72,7 +72,7 @@ function prefix_replace_content_with_overlay( $content ) {
 	
 	return $content;
 }
-```
+`
 
 = Who are you folks? =
 
