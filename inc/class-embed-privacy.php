@@ -75,7 +75,6 @@ class Embed_Privacy {
 		'z.cn' => 'Amazon Kindle',
 		'animoto.com' => 'Animoto',
 		'cloudup.com' => 'Cloudup',
-		'collegehumor.com' => 'CollegeHumor',
 		'dailymotion.com' => 'DailyMotion',
 		'facebook.com' => 'Facebook',
 		'flickr.com' => 'Flickr',
