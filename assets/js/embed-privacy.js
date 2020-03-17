@@ -20,7 +20,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 			// get stored content from JavaScript
 			var embed_object = JSON.parse( window[ '_' + current_target.parentNode.id ] );
 			
-			embed_content.innerHTML = embed_object.embed;
+			embed_content.innerHTML = htmlentities_decode( embed_object.embed );
 			
 			// get all script tags inside the embed
 			var script_tags = embed_content.querySelectorAll( 'script' );
@@ -96,6 +96,20 @@ function get_cookie( name ) {
 		if ( c.indexOf( nameEQ ) == 0 ) return c.substring( nameEQ.length, c.length );
 	}
 	return null;
+}
+
+/**
+ * Decode a string with HTML entities.
+ * 
+ * @param	{string}		content The content to decode
+ * @return	{string} The decoded content
+ */
+function htmlentities_decode( content ) {
+	var textarea = document.createElement( 'textarea' );
+	
+	textarea.innerHTML = content;
+	
+	return textarea.value;
 }
 
 /**

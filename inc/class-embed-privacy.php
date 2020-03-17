@@ -12,6 +12,7 @@ use function esc_html__;
 use function file_exists;
 use function filemtime;
 use function get_sites;
+use function htmlentities;
 use function is_admin;
 use function is_plugin_active_for_network;
 use function json_decode;
@@ -351,7 +352,7 @@ class Embed_Privacy {
 		$markup .= $content;
 		$markup .= '</div>';
 		$markup .= '</div>';
-		$markup .= '<div class="embed-privacy-content"><script>var _oembed_' . $embed_md5 . ' = \'' . addslashes( wp_json_encode( [ 'embed' => $output ] ) ) . '\';</script></div>';
+		$markup .= '<div class="embed-privacy-content"><script>var _oembed_' . $embed_md5 . ' = \'' . addslashes( wp_json_encode( [ 'embed' => htmlentities( $output ) ] ) ) . '\';</script></div>';
 		$markup .= '</div>';
 		
 		// display embed provider logo
