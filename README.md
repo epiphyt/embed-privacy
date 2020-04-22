@@ -101,8 +101,8 @@ We are [Epiphyt](https://epiph.yt/), your friendly neighborhood WordPress plugin
 * Fixed typos
 
 = 1.0.2 =
-* Improved compatiblity with [Autoptimize](https://wordpress.org/plugins/autoptimize/)
-* Improved compatiblity with [AMP](https://wordpress.org/plugins/amp/)
+* Improved compatibility with [Autoptimize](https://wordpress.org/plugins/autoptimize/)
+* Improved compatibility with [AMP](https://wordpress.org/plugins/amp/)
 * Fix issue with Slideshare causing wrong (generic) placeholders
 
 = 1.0.1 =
