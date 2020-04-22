@@ -43,7 +43,6 @@ use const EPI_EMBED_PRIVACY_URL;
  * @author		Epiphyt
  * @license		GPL2
  * @package		epiphyt\Embed_Privacy
- * @version		1.1.0
  */
 class Embed_Privacy {
 	/**

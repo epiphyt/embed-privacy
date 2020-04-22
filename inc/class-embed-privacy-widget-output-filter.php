@@ -11,7 +11,6 @@ use function ob_start;
  * 
  * @see		https://github.com/philipnewcomer/widget-output-filters
  * @since	1.1.0
- * @version	1.0.0
  */
 class Embed_Privacy_Widget_Output_Filter {
 	/**

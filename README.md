@@ -81,6 +81,10 @@ We are [Epiphyt](https://epiph.yt/), your friendly neighborhood WordPress plugin
 
 == Changelog ==
 
+= 1.1.1 =
+* Removed provider CollegeHumor
+* Fixed a bug with the automatic addition of paragraphs
+
 = 1.1.0 =
 * Added option to allow all embeds by one provider
 * Added provider TikTok, introduced in WordPress 5.4

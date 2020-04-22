@@ -4,7 +4,6 @@
  * @author		Epiphyt
  * @license		GPL2
  * @package		epiphyt\Embed_Privacy
- * @version		1.1.0
  */
 document.addEventListener( 'DOMContentLoaded', function() {
 	var overlays = document.querySelectorAll( '.embed-privacy-overlay' );
