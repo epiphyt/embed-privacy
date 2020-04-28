@@ -312,7 +312,7 @@ class Embed_Privacy {
 	 */
 	public function get_output_template( $embed_provider, $embed_provider_lowercase, $output, $args = [] ) {
 		// add two click to markup
-		$embed_class = ' embed-' . ( ! empty( $embed_provider ) ? sanitize_title( $embed_provider ) : 'default' );
+		$embed_class = ' embed-' . ( ! empty( $embed_provider_lowercase ) ? sanitize_title( $embed_provider_lowercase ) : 'default' );
 		
 		if ( ! empty( $args['align'] ) ) {
 			$embed_class .= ' align' . $args['align'];
