@@ -343,7 +343,7 @@ class Embed_Privacy {
 		$markup = '<div class="embed-privacy-container' . esc_attr( $embed_class ) . '" id="oembed_' . esc_attr( $embed_md5 ) . '">';
 		$markup .= '<div class="embed-privacy-overlay" style="' . esc_attr( $width ) . '">';
 		$markup .= '<div class="embed-privacy-inner">';
-		$markup .= '<div class="embed-privacy-logo"></div>';
+		$markup .= ( file_exists( $background_path ) ? '<div class="embed-privacy-logo"></div>' : '' );
 		$content = '<p>';
 		
 		if ( ! empty( $embed_provider ) ) {
