@@ -241,7 +241,7 @@ class Embed_Privacy {
 		$output = str_replace( 'youtube.com', 'youtube-nocookie.com', $output );
 		
 		// check if cookie is set
-		if ( $this->is_always_active_provider( $embed_provider_lowercase ) ) {
+		if ( $embed_provider_lowercase !== 'default' && $this->is_always_active_provider( $embed_provider_lowercase ) ) {
 			return $output;
 		}
 		
