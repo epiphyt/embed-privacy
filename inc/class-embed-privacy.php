@@ -318,6 +318,26 @@ class Embed_Privacy {
 			$embed_class .= ' align' . $args['align'];
 		}
 		
+		// display embed provider logo
+		$background_path = plugin_dir_path( $this->plugin_file ) . 'assets/images/embed-' . $embed_provider_lowercase . '.png';
+		$background_url = plugin_dir_url( $this->plugin_file ) . 'assets/images/embed-' . $embed_provider_lowercase . '.png';
+		
+		/**
+		 * Filter the path to the background image.
+		 * 
+		 * @param	string	$background_path The default background path
+		 * @param	string	$embed_provider_lowercase The current embed provider in lowercase
+		 */
+		$background_path = apply_filters( "embed_privacy_logo_path_{$embed_provider_lowercase}", $background_path, $embed_provider_lowercase );
+		
+		/**
+		 * Filter the URL to the background image.
+		 * 
+		 * @param	string	$background_url The default background URL
+		 * @param	string	$embed_provider_lowercase The current embed provider in lowercase
+		 */
+		$background_url = apply_filters( "embed_privacy_logo_url_{$embed_provider_lowercase}", $background_url, $embed_provider_lowercase );
+		
 		$embed_md5 = md5( $output . wp_generate_uuid4() );
 		$width = ( ! empty( $args['width'] ) ? 'width: ' . $args['width'] . 'px;' : '' );
 		$markup = '<div class="embed-privacy-container' . esc_attr( $embed_class ) . '" id="oembed_' . esc_attr( $embed_md5 ) . '">';
@@ -337,8 +357,11 @@ class Embed_Privacy {
 		$content .= '</p>';
 		
 		$checkbox_id = 'embed-privacy-store-' . $embed_provider_lowercase . '-' . $embed_md5;
-		/* translators: the embed provider */
-		$content .= '<p><label for="' . esc_attr( $checkbox_id ) . '" class="embed-privacy-label" data-embed-provider="' . esc_attr( $embed_provider_lowercase ) . '"><input id="' . esc_attr( $checkbox_id ) . '" type="checkbox" value="1"> ' . sprintf( esc_html__( 'Always display content from %s', 'embed-privacy' ), esc_html( $embed_provider ) ) . '</label></p>';
+		
+		if ( $embed_provider_lowercase !== 'default' ) {
+			/* translators: the embed provider */
+			$content .= '<p><label for="' . esc_attr( $checkbox_id ) . '" class="embed-privacy-label" data-embed-provider="' . esc_attr( $embed_provider_lowercase ) . '"><input id="' . esc_attr( $checkbox_id ) . '" type="checkbox" value="1"> ' . sprintf( esc_html__( 'Always display content from %s', 'embed-privacy' ), esc_html( $embed_provider ) ) . '</label></p>';
+		}
 		
 		/**
 		 * Filter the content of the embed overlay.
@@ -353,10 +376,6 @@ class Embed_Privacy {
 		$markup .= '</div>';
 		$markup .= '<div class="embed-privacy-content"><script>var _oembed_' . $embed_md5 . ' = \'' . addslashes( wp_json_encode( [ 'embed' => htmlentities( $output ) ] ) ) . '\';</script></div>';
 		$markup .= '</div>';
-		
-		// display embed provider logo
-		$background_path = plugin_dir_path( $this->plugin_file ) . 'assets/images/embed-' . $embed_provider_lowercase . '.png';
-		$background_url = plugin_dir_url( $this->plugin_file ) . 'assets/images/embed-' . $embed_provider_lowercase . '.png';
 		
 		// display only if file exists
 		if ( file_exists( $background_path ) ) {
