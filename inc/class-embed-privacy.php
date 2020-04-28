@@ -48,7 +48,7 @@ class Embed_Privacy {
 	/**
 	 * @since	1.1.0
 	 */
-	const IFRAME_REGEX = '/<iframe([^>])+>([^<])*<\/iframe>/';
+	const IFRAME_REGEX = '/<iframe(.*?)src="([^"]+)"([^>]*)>((?!<\/iframe).)*<\/iframe>/ms';
 	
 	/**
 	 * @var		\epiphyt\Embed_Privacy\Embed_Privacy
