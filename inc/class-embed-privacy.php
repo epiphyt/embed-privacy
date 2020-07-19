@@ -312,10 +312,11 @@ class Embed_Privacy {
 	 */
 	public function get_output_template( $embed_provider, $embed_provider_lowercase, $output, $args = [] ) {
 		// add two click to markup
-		$embed_class = ' embed-' . ( ! empty( $embed_provider_lowercase ) ? sanitize_title( $embed_provider_lowercase ) : 'default' );
+		$embed_class = 'embed-' . ( ! empty( $embed_provider_lowercase ) ? sanitize_title( $embed_provider_lowercase ) : 'default' );
+		$embed_classes = $embed_class;
 		
 		if ( ! empty( $args['align'] ) ) {
-			$embed_class .= ' align' . $args['align'];
+			$embed_classes .= ' align' . $args['align'];
 		}
 		
 		// display embed provider logo
@@ -340,7 +341,7 @@ class Embed_Privacy {
 		
 		$embed_md5 = md5( $output . wp_generate_uuid4() );
 		$width = ( ! empty( $args['width'] ) ? 'width: ' . $args['width'] . 'px;' : '' );
-		$markup = '<div class="embed-privacy-container' . esc_attr( $embed_class ) . '" id="oembed_' . esc_attr( $embed_md5 ) . '">';
+		$markup = '<div class="embed-privacy-container ' . esc_attr( $embed_classes ) . '" id="oembed_' . esc_attr( $embed_md5 ) . '">';
 		$markup .= '<div class="embed-privacy-overlay" style="' . esc_attr( $width ) . '">';
 		$markup .= '<div class="embed-privacy-inner">';
 		$markup .= ( file_exists( $background_path ) ? '<div class="embed-privacy-logo"></div>' : '' );
@@ -382,7 +383,7 @@ class Embed_Privacy {
 			$version = filemtime( $background_path );
 			$markup .= '
 			<style>
-				.embed-' . $embed_provider_lowercase . ' .embed-privacy-logo {
+				.' . $embed_class . ' .embed-privacy-logo {
 					background-image: url(' . $background_url . '?v=' . $version . ');
 				}
 			</style>

@@ -81,6 +81,9 @@ We are [Epiphyt](https://epiph.yt/), your friendly neighborhood WordPress plugin
 
 == Changelog ==
 
+= 1.1.2 =
+* Fixed a possible difference in the used class name of the embed provider in HTML and CSS
+
 = 1.1.1 =
 * Removed provider CollegeHumor
 * Fixed a bug with the automatic addition of paragraphs
