@@ -79,7 +79,6 @@ class Embed_Privacy {
 		'facebook.com' => 'Facebook',
 		'flickr.com' => 'Flickr',
 		'funnyordie.com' => 'Funny Or Die',
-		'hulu.com' => 'Hulu',
 		'imgur.com' => 'Imgur',
 		'instagram.com' => 'Instagram',
 		'issuu.com' => 'Issuu',
