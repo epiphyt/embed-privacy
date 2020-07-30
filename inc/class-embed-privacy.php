@@ -11,6 +11,7 @@ use function esc_html;
 use function esc_html__;
 use function file_exists;
 use function filemtime;
+use function function_exists;
 use function get_sites;
 use function htmlentities;
 use function is_admin;
@@ -33,6 +34,7 @@ use function wp_enqueue_script;
 use function wp_enqueue_style;
 use function wp_generate_uuid4;
 use function wp_json_encode;
+use function wp_unslash;
 use const DEBUG_MODE;
 use const EPI_EMBED_PRIVACY_BASE;
 use const EPI_EMBED_PRIVACY_URL;
@@ -75,6 +77,7 @@ class Embed_Privacy {
 		'z.cn' => 'Amazon Kindle',
 		'animoto.com' => 'Animoto',
 		'cloudup.com' => 'Cloudup',
+		'crowdsignal.com' => 'Crowdsignal',
 		'dailymotion.com' => 'DailyMotion',
 		'facebook.com' => 'Facebook',
 		'flickr.com' => 'Flickr',
@@ -86,7 +89,8 @@ class Embed_Privacy {
 		'meetup.com' => 'Meetup',
 		'mixcloud.com' => 'Mixcloud',
 		'photobucket.com' => 'Photobucket',
-		'polldaddy.com' => 'Polldaddy.com',
+		'poll.fm' => 'Crowdsignal',
+		'polldaddy.com' => 'Crowdsignal',
 		'reddit.com' => 'Reddit',
 		'reverbnation.com' => 'ReverbNation',
 		'scribd.com' => 'Scribd',
@@ -96,6 +100,7 @@ class Embed_Privacy {
 		'soundcloud.com' => 'SoundCloud',
 		'speakerdeck.com' => 'Speaker Deck',
 		'spotify.com' => 'Spotify',
+		'survey.fm' => 'Crowdsignal',
 		'tiktok.com' => 'TikTok',
 		'ted.com' => 'TED',
 		'tumblr.com' => 'Tumblr',
@@ -311,7 +316,8 @@ class Embed_Privacy {
 	 */
 	public function get_output_template( $embed_provider, $embed_provider_lowercase, $output, $args = [] ) {
 		// add two click to markup
-		$embed_class = 'embed-' . ( ! empty( $embed_provider_lowercase ) ? sanitize_title( $embed_provider_lowercase ) : 'default' );
+		$embed_provider_lowercase = sanitize_title( $embed_provider_lowercase );
+		$embed_class = 'embed-' . ( ! empty( $embed_provider_lowercase ) ? $embed_provider_lowercase : 'default' );
 		$embed_classes = $embed_class;
 		
 		if ( ! empty( $args['align'] ) ) {
