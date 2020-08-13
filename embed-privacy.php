@@ -16,7 +16,7 @@ use function strtolower;
 /*
 Plugin Name:	Embed Privacy
 Description:	Embed Privacy prevents from loading external embeds directly and lets the user control which one should be loaded.
-Version:		1.1.2
+Version:		1.1.3
 Author:			Epiphyt
 Author URI:		https://epiph.yt
 License:		GPL2
