@@ -145,8 +145,8 @@ class Embed_Privacy {
 		global $wpdb;
 		
 		// the query to delete cache
-		$query = "DELETE FROM		" . $wpdb->get_blog_prefix() . "postmeta
-				WHERE				meta_key LIKE '%_oembed_%'";
+		$query = "DELETE FROM	$wpdb->postmeta
+				WHERE			meta_key LIKE '%_oembed_%'";
 		
 		if ( is_plugin_active_for_network( 'embed-privacy/embed-privacy.php' ) ) {
 			// on networks we need to iterate through every site
