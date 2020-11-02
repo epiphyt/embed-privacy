@@ -127,13 +127,12 @@ class Embed_Privacy {
 		// filters
 		if ( ! $this->usecache ) {
 			// set ttl to 0 in admin
-			add_filter( 'oembed_ttl', function( $time ) {
-				return 0;
-			}, 10, 1 );
+			add_filter( 'oembed_ttl', '__return_zero' );
 		}
 		
 		add_filter( 'do_shortcode_tag', [ $this, 'replace_google_maps' ] );
 		add_filter( 'embed_oembed_html', [ $this, 'replace_embeds' ], 10, 3 );
+		add_filter( 'et_builder_get_oembed', [ $this, 'replace_embeds_divi' ], 10, 2 );
 		add_filter( 'embed_privacy_widget_output', [ $this, 'replace_google_maps' ] );
 		add_filter( 'the_content', [ $this, 'replace_google_maps' ] );
 	}
@@ -251,6 +250,17 @@ class Embed_Privacy {
 		
 		// add two click to markup
 		return $this->get_output_template( $embed_provider, $embed_provider_lowercase, $output, $args );
+	}
+	
+	/**
+	 * Replace embeds in Divi Builder.
+	 * 
+	 * @param	string		$item_embed The original output
+	 * @param	string		$url The URL of the embed
+	 * @return	string The updated embed code
+	 */
+	public function replace_embeds_divi( $item_embed, $url ) {
+		return $this->replace_embeds( $item_embed, $url, [] );
 	}
 	
 	/**
