@@ -23,6 +23,7 @@ use function plugin_basename;
 use function plugin_dir_path;
 use function plugin_dir_url;
 use function preg_match_all;
+use function register_post_type;
 use function sanitize_text_field;
 use function sanitize_title;
 use function sprintf;
@@ -117,12 +118,20 @@ class Embed_Privacy {
 	 * Embed Privacy constructor.
 	 */
 	public function __construct() {
-		// actions
-		add_action( 'init', [ $this, 'load_textdomain' ] );
-		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_assets' ] );
-		
 		// assign variables
 		$this->usecache = ! is_admin();
+		
+		Fields::get_instance()->init();
+	}
+	
+	/**
+	 * Initialize the class.
+	 */
+	public function init() {
+		// actions
+		add_action( 'init', [ $this, 'load_textdomain' ], 0 );
+		add_action( 'init', [ $this, 'set_post_type' ], 5 );
+		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_assets' ] );
 		
 		// filters
 		if ( ! $this->usecache ) {
@@ -437,5 +446,41 @@ class Embed_Privacy {
 		if ( file_exists( $file ) ) {
 			$this->plugin_file = $file;
 		}
+	}
+	
+	/**
+	 * Register post type.
+	 */
+	public function set_post_type() {
+		register_post_type(
+			'epi_embed',
+			[
+				'label' => __( 'Embeds', 'embed-privacy' ),
+				'description' => __( 'Embeds from Embed Privacy', 'embed-privacy' ),
+				'supports' => [
+					'custom-fields',
+					'editor',
+					'revisions',
+					'thumbnail',
+					'title',
+				],
+				'hierarchical' => false,
+				'public' => true,
+				'menu_icon' => 'dashicons-format-video',
+				'show_in_admin_bar' => false,
+				'show_in_menu' => true,
+				'show_in_nav_menus' => false,
+				'show_in_rest' => false,
+				'show_ui' => true,
+				'can_export' => true,
+				'has_archive' => false,
+				'exclude_from_search' => true,
+				'publicly_queryable' => true,
+				'rewrite' => [
+					'with_front' => false,
+					'pages' => false,
+				],
+			]
+		);
 	}
 }

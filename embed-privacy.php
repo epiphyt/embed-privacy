@@ -16,7 +16,7 @@ use function strtolower;
 /*
 Plugin Name:	Embed Privacy
 Description:	Embed Privacy prevents from loading external embeds directly and lets the user control which one should be loaded.
-Version:		1.1.3
+Version:		1.2.0 Alpha 1
 Author:			Epiphyt
 Author URI:		https://epiph.yt
 License:		GPL2
@@ -67,6 +67,7 @@ spl_autoload_register( function( $class ) {
 
 Embed_Privacy_Widget_Output_Filter::get_instance();
 $embed_privacy = Embed_Privacy::get_instance();
+$embed_privacy->init();
 $embed_privacy->set_plugin_file( __FILE__ );
 
 register_activation_hook( __FILE__, [ $embed_privacy, 'clear_embed_cache' ] );
