@@ -126,6 +126,8 @@ class Embed_Privacy {
 	
 	/**
 	 * Initialize the class.
+	 * 
+	 * @since	1.2.0
 	 */
 	public function init() {
 		// actions
@@ -263,6 +265,8 @@ class Embed_Privacy {
 	
 	/**
 	 * Replace embeds in Divi Builder.
+	 * 
+	 * @since	1.2.0
 	 * 
 	 * @param	string		$item_embed The original output
 	 * @param	string		$url The URL of the embed
@@ -450,6 +454,8 @@ class Embed_Privacy {
 	
 	/**
 	 * Register post type.
+	 * 
+	 * @since	1.2.0
 	 */
 	public function set_post_type() {
 		register_post_type(

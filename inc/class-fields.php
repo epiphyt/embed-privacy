@@ -10,6 +10,8 @@ use function wp_die;
 
 /**
  * Custom fields for Embed Privacy.
+ * 
+ * @since	1.2.0
  *
  * @author	Matthias Kittsteiner
  * @license	GPL2 <https://www.gnu.org/licenses/gpl-2.0.html>
