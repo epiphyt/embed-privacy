@@ -17,16 +17,16 @@ jobs:
           destination: assets/style/style.css
           outputStyle: expanded
       - name: Compile CSS compressed
-          uses: gha-utilities/sass-build@v0.2.5
-          with:
-            source: assets/style/scss/embed-privacy.scss
-            destination: assets/style/embed-privacy.min.css
-            outputStyle: compressed
+        uses: gha-utilities/sass-build@v0.2.5
+        with:
+          source: assets/style/scss/embed-privacy.scss
+          destination: assets/style/embed-privacy.min.css
+          outputStyle: compressed
       # Minify asset JavaScript
       - name: Minify JavaScript
-          uses: nizarmah/auto-minify@v2.0
-          with:
-            directory: assets/js
+        uses: nizarmah/auto-minify@v2.0
+        with:
+          directory: assets/js
     - name: WordPress.org plugin asset/readme update
       uses: 10up/action-wordpress-plugin-asset-update@master
       env:
