@@ -1,0 +1,4 @@
+.distignore
+.git
+.github
+.wordpress-org
