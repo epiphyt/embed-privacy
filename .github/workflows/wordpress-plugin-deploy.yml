@@ -14,8 +14,8 @@ jobs:
     - name: Compile CSS
       uses: gha-utilities/sass-build@v0.2.5
       with:
-        source: assets/style/scss/style.scss
-        destination: assets/style/style.css
+        source: assets/style/scss/embed-privacy.scss
+        destination: assets/style/embed-privacy.css
         outputStyle: expanded
     - name: Compile CSS compressed
       uses: gha-utilities/sass-build@v0.2.5
