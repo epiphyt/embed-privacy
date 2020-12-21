@@ -368,9 +368,8 @@ class Embed_Privacy {
 		$background_url = apply_filters( "embed_privacy_logo_url_{$embed_provider_lowercase}", $background_url, $embed_provider_lowercase );
 		
 		$embed_md5 = md5( $output . wp_generate_uuid4() );
-		$width = ( ! empty( $args['width'] ) ? 'width: ' . $args['width'] . 'px;' : '' );
 		$markup = '<div class="embed-privacy-container ' . esc_attr( $embed_classes ) . '" id="oembed_' . esc_attr( $embed_md5 ) . '">';
-		$markup .= '<div class="embed-privacy-overlay" style="' . esc_attr( $width ) . '">';
+		$markup .= '<div class="embed-privacy-overlay">';
 		$markup .= '<div class="embed-privacy-inner">';
 		$markup .= ( file_exists( $background_path ) ? '<div class="embed-privacy-logo"></div>' : '' );
 		$content = '<p>';
