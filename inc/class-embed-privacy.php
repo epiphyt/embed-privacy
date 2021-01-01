@@ -480,7 +480,7 @@ class Embed_Privacy {
 				'can_export' => true,
 				'has_archive' => false,
 				'exclude_from_search' => true,
-				'publicly_queryable' => true,
+				'publicly_queryable' => false,
 				'rewrite' => [
 					'with_front' => false,
 					'pages' => false,
