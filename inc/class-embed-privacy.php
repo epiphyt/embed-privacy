@@ -120,8 +120,6 @@ class Embed_Privacy {
 	public function __construct() {
 		// assign variables
 		$this->usecache = ! is_admin();
-		
-		Fields::get_instance()->init();
 	}
 	
 	/**
@@ -146,6 +144,8 @@ class Embed_Privacy {
 		add_filter( 'et_builder_get_oembed', [ $this, 'replace_embeds_divi' ], 10, 2 );
 		add_filter( 'embed_privacy_widget_output', [ $this, 'replace_google_maps' ] );
 		add_filter( 'the_content', [ $this, 'replace_google_maps' ] );
+		
+		Fields::get_instance()->init();
 	}
 	
 	/**
