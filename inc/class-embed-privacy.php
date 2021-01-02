@@ -409,7 +409,7 @@ class Embed_Privacy {
 		 * @param	string	$background_path The default background path
 		 * @param	string	$embed_provider_lowercase The current embed provider in lowercase
 		 */
-		$background_path = apply_filters( "embed_privacy_logo_path_{$embed_provider_lowercase}", $background_path, $embed_provider_lowercase );
+		$background_path = apply_filters( "embed_privacy_background_path_{$embed_provider_lowercase}", $background_path, $embed_provider_lowercase );
 		
 		/**
 		 * Filter the URL to the background image.
@@ -417,7 +417,7 @@ class Embed_Privacy {
 		 * @param	string	$background_url The default background URL
 		 * @param	string	$embed_provider_lowercase The current embed provider in lowercase
 		 */
-		$background_url = apply_filters( "embed_privacy_logo_url_{$embed_provider_lowercase}", $background_url, $embed_provider_lowercase );
+		$background_url = apply_filters( "embed_privacy_background_url_{$embed_provider_lowercase}", $background_url, $embed_provider_lowercase );
 		
 		/**
 		 * Filter the path to the logo.
