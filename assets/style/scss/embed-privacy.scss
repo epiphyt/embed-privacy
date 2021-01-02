@@ -6,11 +6,24 @@
  * @package		epiphyt\Embed_Privacy
  */
 .embed-privacy-container {
+	background-size: cover;
 	margin-bottom: 1.5em;
+	
+	a {
+		color: #ddd;
+		
+		&:active,
+		&:focus,
+		&:hover {
+			color: #fff !important;
+		}
+	}
 }
 
 .embed-privacy-content {
+	height: 100%;
 	position: relative;
+	width: 100%;
 	z-index: 10; // explicitly set z-index lower than the one of .embed-privacy-overlay
 }
 
@@ -38,9 +51,13 @@
 		color: #ddd;
 		cursor: pointer;
 		font-weight: 400;
-		margin: 0;
 		text-align: center;
 		transition: color .25s ease-in-out;
+	}
+	
+	label,
+	p:last-child {
+		margin: 0;
 	}
 	
 	&:hover {

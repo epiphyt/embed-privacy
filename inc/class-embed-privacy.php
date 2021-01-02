@@ -1,5 +1,6 @@
 <?php
 namespace epiphyt\Embed_Privacy;
+use function __;
 use function add_action;
 use function add_filter;
 use function addslashes;
@@ -9,10 +10,17 @@ use function dirname;
 use function esc_attr;
 use function esc_html;
 use function esc_html__;
+use function esc_url;
 use function file_exists;
 use function filemtime;
 use function function_exists;
+use function get_attached_file;
+use function get_post;
+use function get_post_meta;
+use function get_post_thumbnail_id;
+use function get_posts;
 use function get_sites;
+use function get_the_post_thumbnail_url;
 use function htmlentities;
 use function is_admin;
 use function is_plugin_active_for_network;
@@ -20,8 +28,7 @@ use function json_decode;
 use function load_plugin_textdomain;
 use function md5;
 use function plugin_basename;
-use function plugin_dir_path;
-use function plugin_dir_url;
+use function preg_match;
 use function preg_match_all;
 use function register_post_type;
 use function sanitize_text_field;
@@ -29,16 +36,19 @@ use function sanitize_title;
 use function sprintf;
 use function str_replace;
 use function strpos;
-use function strtolower;
 use function switch_to_blog;
+use function trim;
 use function wp_enqueue_script;
 use function wp_enqueue_style;
 use function wp_generate_uuid4;
+use function wp_get_attachment_url;
 use function wp_json_encode;
+use function wp_kses;
 use function wp_unslash;
 use const DEBUG_MODE;
 use const EPI_EMBED_PRIVACY_BASE;
 use const EPI_EMBED_PRIVACY_URL;
+use const PHP_EOL;
 
 /**
  * Two click embed main class.
@@ -236,17 +246,32 @@ class Embed_Privacy {
 	 */
 	public function replace_embeds( $output, $url, $args ) {
 		// don't do anything in admin
-		if ( ! $this->usecache ) return $output;
+		if ( ! $this->usecache ) {
+			return $output;
+		}
 		
 		$embed_provider = '';
 		$embed_provider_lowercase = '';
+		$embed_providers = get_posts( [
+			'numberposts' => -1,
+			'post_type' => 'epi_embed',
+		] );
 		
 		// get embed provider name
-		foreach ( $this->embed_providers as $url_part => $name ) {
+		foreach ( $embed_providers as $provider ) {
+			$regex = get_post_meta( $provider->ID, 'embed_privacy_regex_default', true );
+			$regex = '/' . trim( $regex, '/' ) . '/';
+			$regex_gutenberg = get_post_meta( $provider->ID, 'embed_privacy_regex_gutenberg', true );
+			$regex_gutenberg = '/' . trim( $regex_gutenberg, '/' ) . '/';
+			
 			// save name of provider and stop loop
-			if ( strpos( $url, $url_part ) !== false ) {
-				$embed_provider = $name;
-				$embed_provider_lowercase = str_replace( [ ' ', '.' ], '-', strtolower( $name ) );
+			if (
+				$regex !== '//' && preg_match( $regex, $url )
+				|| $regex_gutenberg !== '//' && preg_match( $regex_gutenberg, $url )
+			) {
+				$args['post_id'] = $provider->ID;
+				$embed_provider = $provider->post_title;
+				$embed_provider_lowercase = $provider->post_name;
 				break;
 			}
 		}
@@ -338,18 +363,45 @@ class Embed_Privacy {
 	 * @return	string The overlay template
 	 */
 	public function get_output_template( $embed_provider, $embed_provider_lowercase, $output, $args = [] ) {
-		// add two click to markup
+		if ( ! empty( $args['post_id'] ) ) {
+			$embed_post = get_post( $args['post_id'] );
+		}
+		else {
+			$embed_post = null;
+		}
+		
 		$embed_provider_lowercase = sanitize_title( $embed_provider_lowercase );
 		$embed_class = 'embed-' . ( ! empty( $embed_provider_lowercase ) ? $embed_provider_lowercase : 'default' );
 		$embed_classes = $embed_class;
+		
+		$background_path = '';
+		$background_url = '';
+		$logo_path = '';
+		$logo_url = '';
 		
 		if ( ! empty( $args['align'] ) ) {
 			$embed_classes .= ' align' . $args['align'];
 		}
 		
-		// display embed provider logo
-		$background_path = plugin_dir_path( $this->plugin_file ) . 'assets/images/embed-' . $embed_provider_lowercase . '.png';
-		$background_url = plugin_dir_url( $this->plugin_file ) . 'assets/images/embed-' . $embed_provider_lowercase . '.png';
+		// display embed provider background image and logo
+		if ( $embed_post ) {
+			$background_image_id = get_post_meta( $embed_post->ID, 'embed_privacy_background_image', true );
+		}
+		else {
+			$background_image_id = null;
+		}
+		
+		$thumbnail_id = get_post_thumbnail_id( $embed_post );
+		
+		if ( $background_image_id ) {
+			$background_path = get_attached_file( $background_image_id );
+			$background_url = wp_get_attachment_url( $background_image_id );
+		}
+		
+		if ( $thumbnail_id ) {
+			$logo_path = get_attached_file( $thumbnail_id );
+			$logo_url = get_the_post_thumbnail_url( $args['post_id'] );
+		}
 		
 		/**
 		 * Filter the path to the background image.
@@ -367,19 +419,52 @@ class Embed_Privacy {
 		 */
 		$background_url = apply_filters( "embed_privacy_logo_url_{$embed_provider_lowercase}", $background_url, $embed_provider_lowercase );
 		
+		/**
+		 * Filter the path to the logo.
+		 * 
+		 * @param	string	$logo_path The default background path
+		 * @param	string	$embed_provider_lowercase The current embed provider in lowercase
+		 */
+		$logo_path = apply_filters( "embed_privacy_logo_path_{$embed_provider_lowercase}", $logo_path, $embed_provider_lowercase );
+		
+		/**
+		 * Filter the URL to the logo.
+		 * 
+		 * @param	string	$logo_url The default background URL
+		 * @param	string	$embed_provider_lowercase The current embed provider in lowercase
+		 */
+		$logo_url = apply_filters( "embed_privacy_logo_url_{$embed_provider_lowercase}", $logo_url, $embed_provider_lowercase );
+		
 		$embed_md5 = md5( $output . wp_generate_uuid4() );
 		$markup = '<div class="embed-privacy-container ' . esc_attr( $embed_classes ) . '" id="oembed_' . esc_attr( $embed_md5 ) . '">';
 		$markup .= '<div class="embed-privacy-overlay">';
 		$markup .= '<div class="embed-privacy-inner">';
-		$markup .= ( file_exists( $background_path ) ? '<div class="embed-privacy-logo"></div>' : '' );
+		$markup .= ( file_exists( $logo_path ) ? '<div class="embed-privacy-logo"></div>' : '' );
 		$content = '<p>';
 		
 		if ( ! empty( $embed_provider ) ) {
-			/* translators: the embed provider */
-			$content .= sprintf( esc_html__( 'Click here to display content from %s', 'embed-privacy' ), esc_html( $embed_provider ) );
+			if ( $embed_post ) {
+				$allowed_tags = [
+					'a' => [
+						'href',
+						'target',
+					],
+				];
+				$content .= $embed_post->post_content;
+				$privacy_policy = get_post_meta( $embed_post->ID, 'embed_privacy_privacy_policy_url', true );
+				
+				if ( $privacy_policy ) {
+					/* translators: 1: the embed provider, 2: opening <a> tag to the privacy policy, 3: closing </a> */
+					$content .= '<br>' . sprintf( wp_kses( __( 'Learn more in %1$s’s %2$sprivacy policy%3$s.' ), $allowed_tags ), esc_html( $embed_provider ), '<a href="' . esc_url( $privacy_policy ) . '" target="_blank">', '</a>' );
+				}
+			}
+			else {
+				/* translators: the embed provider */
+				$content .= sprintf( esc_html__( 'Click here to display content from %s', 'embed-privacy' ), esc_html( $embed_provider ) );
+			}
 		}
 		else {
-			$content .= esc_html__( 'Click here to display content from external service', 'embed-privacy' );
+			$content .= esc_html__( 'Click here to display content from external service.', 'embed-privacy' );
 		}
 		
 		$content .= '</p>';
@@ -405,17 +490,25 @@ class Embed_Privacy {
 		$markup .= '<div class="embed-privacy-content"><script>var _oembed_' . $embed_md5 . ' = \'' . addslashes( wp_json_encode( [ 'embed' => htmlentities( $output ) ] ) ) . '\';</script></div>';
 		$markup .= '</div>';
 		
+		$markup .= '<style>' . PHP_EOL;
+		
 		// display only if file exists
 		if ( file_exists( $background_path ) ) {
 			$version = filemtime( $background_path );
-			$markup .= '
-			<style>
-				.' . $embed_class . ' .embed-privacy-logo {
-					background-image: url(' . $background_url . '?v=' . $version . ');
-				}
-			</style>
-			';
+			$markup .= '.' . $embed_class . ' {
+	background-image: url(' . $background_url . '?v=' . $version . ');
+}' . PHP_EOL;
 		}
+		
+		// display only if file exists
+		if ( file_exists( $logo_path ) ) {
+			$version = filemtime( $logo_path );
+			$markup .= '.' . $embed_class . ' .embed-privacy-logo {
+	background-image: url(' . $logo_url . '?v=' . $version . ');
+}' . PHP_EOL;
+		}
+		
+		$markup .= '</style>';
 		
 		return $markup;
 	}

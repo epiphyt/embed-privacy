@@ -4,6 +4,7 @@ use WP_Error;
 use function __;
 use function add_action;
 use function add_meta_box;
+use function addslashes;
 use function apply_filters;
 use function current_user_can;
 use function defined;
@@ -42,8 +43,9 @@ use function wp_upload_bits;
  * 
  * @since	1.2.0
  *
- * @author	Matthias Kittsteiner
- * @license	GPL2 <https://www.gnu.org/licenses/gpl-2.0.html>
+ * @author		Epiphyt
+ * @license		GPL2
+ * @package		epiphyt\Embed_Privacy
  */
 class Fields {
 	/**
@@ -333,7 +335,10 @@ class Fields {
 				$value = $this->sanitize_array( $field );
 			}
 			else {
-				$value = trim( sanitize_text_field( wp_unslash( $field ) ) );
+				$value = sanitize_text_field( wp_unslash( $field ) );
+				// add slashes, so that \/ becomes \\/
+				// otherwise \/ becomes / while storing into the database
+				$value = addslashes( $value );
 			}
 			
 			update_post_meta( $post_id, $key, $value );
