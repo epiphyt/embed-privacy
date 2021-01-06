@@ -26,6 +26,7 @@ use function plugin_dir_url;
 use function remove_meta_box;
 use function sanitize_text_field;
 use function sanitize_title;
+use function strpos;
 use function trim;
 use function update_post_meta;
 use function wp_die;
@@ -126,6 +127,17 @@ class Fields {
 	 */
 	public function get_the_fields_html() {
 		global $post;
+		
+		foreach( $this->fields as $field ) {
+			if ( $field['field_type'] !== 'input' || empty( $field['type'] ) || $field['type'] !== 'hidden' ) {
+				continue;
+			}
+			
+			$field['value'] = (string) get_post_meta( $post->ID, $field['name'], true );
+			?>
+			<input type="hidden" name="<?php echo esc_attr( $field['name'] ); ?>" value="<?php echo esc_attr( $field['value'] ); ?>">
+			<?php
+		}
 		?>
 		<table class="form-table" role="presentation">
 			<tbody>
@@ -231,7 +243,7 @@ class Fields {
 		
 		$current_value = (string) get_post_meta( $post_id, $attributes['name'], $attributes['single'] );
 		
-		if ( ! in_array( $attributes['type'], [ 'checkbox', 'radio' ], true ) ) :
+		if ( ! in_array( $attributes['type'], [ 'checkbox', 'hidden', 'radio' ], true ) ) :
 		?>
 		<tr>
 			<th scope="row">
@@ -317,17 +329,17 @@ class Fields {
 				'name' => 'regex_default',
 				'title' => __( 'Default Regex', 'embed-privacy' ),
 			],
-			'regex_gutenberg' => [
-				'description' => __( 'Regular expression that will be be searched for in the content of Block Editor posts.', 'embed-privacy' ),
-				'field_type' => 'input',
-				'name' => 'regex_gutenberg',
-				'title' => __( 'Block Editor Regex', 'embed-privacy' ),
-			],
 			'is_disabled' => [
 				'field_type' => 'input',
 				'name' => 'is_disabled',
 				'title' => __( 'Disable embed provider', 'embed-privacy' ),
 				'type' => 'checkbox',
+			],
+			'is_system' => [
+				'field_type' => 'input',
+				'name' => 'is_system',
+				'title' => '',
+				'type' => 'hidden',
 			],
 		] );
 	}
@@ -392,11 +404,8 @@ class Fields {
 			if ( is_array( $value ) ) {
 				$value = $this->sanitize_array( $value );
 			}
-			else {
+			else if ( strpos( $field['name'], 'regex' === false ) ) {
 				$value = sanitize_text_field( wp_unslash( $value ) );
-				// add slashes, so that \/ becomes \\/
-				// otherwise \/ becomes / while storing into the database
-				$value = addslashes( $value );
 			}
 			
 			update_post_meta( $post_id, $field['name'], $value );

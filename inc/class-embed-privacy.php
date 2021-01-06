@@ -1,5 +1,6 @@
 <?php
 namespace epiphyt\Embed_Privacy;
+use DOMDocument;
 use function __;
 use function add_action;
 use function add_filter;
@@ -21,11 +22,14 @@ use function get_post_thumbnail_id;
 use function get_posts;
 use function get_sites;
 use function get_the_post_thumbnail_url;
+use function home_url;
 use function htmlentities;
 use function is_admin;
 use function is_plugin_active_for_network;
 use function json_decode;
+use function libxml_use_internal_errors;
 use function load_plugin_textdomain;
+use function mb_convert_encoding;
 use function md5;
 use function plugin_basename;
 use function preg_match;
@@ -35,6 +39,7 @@ use function sanitize_text_field;
 use function sanitize_title;
 use function sprintf;
 use function str_replace;
+use function stripos;
 use function strpos;
 use function switch_to_blog;
 use function trim;
@@ -44,10 +49,13 @@ use function wp_generate_uuid4;
 use function wp_get_attachment_url;
 use function wp_json_encode;
 use function wp_kses;
+use function wp_parse_url;
 use function wp_unslash;
 use const DEBUG_MODE;
 use const EPI_EMBED_PRIVACY_BASE;
 use const EPI_EMBED_PRIVACY_URL;
+use const LIBXML_HTML_NODEFDTD;
+use const LIBXML_HTML_NOIMPLIED;
 use const PHP_EOL;
 
 /**
@@ -59,7 +67,8 @@ use const PHP_EOL;
  */
 class Embed_Privacy {
 	/**
-	 * @since	1.1.0
+	 * @deprecated	1.2.0
+	 * @since		1.1.0
 	 */
 	const IFRAME_REGEX = '/<iframe(.*?)src="([^"]+)"([^>]*)>((?!<\/iframe).)*<\/iframe>/ms';
 	
@@ -76,10 +85,11 @@ class Embed_Privacy {
 	/**
 	 * @var		bool Determine if we use the cache
 	 */
-	private $usecache = false;
+	private $usecache;
 	
 	/**
-	 * @var		array The supported media providers
+	 * @deprecated	1.2.0
+	 * @var			array The supported media providers
 	 */
 	public $embed_providers = [
 		'.amazon.' => 'Amazon Kindle',
@@ -149,11 +159,11 @@ class Embed_Privacy {
 			add_filter( 'oembed_ttl', '__return_zero' );
 		}
 		
-		add_filter( 'do_shortcode_tag', [ $this, 'replace_google_maps' ] );
-		add_filter( 'embed_oembed_html', [ $this, 'replace_embeds' ], 10, 3 );
+		add_filter( 'do_shortcode_tag', [ $this, 'replace_embeds' ] );
+		add_filter( 'embed_oembed_html', [ $this, 'replace_embeds_oembed' ], 10, 3 );
+		add_filter( 'embed_privacy_widget_output', [ $this, 'replace_embeds' ] );
 		add_filter( 'et_builder_get_oembed', [ $this, 'replace_embeds_divi' ], 10, 2 );
-		add_filter( 'embed_privacy_widget_output', [ $this, 'replace_google_maps' ] );
-		add_filter( 'the_content', [ $this, 'replace_google_maps' ] );
+		add_filter( 'the_content', [ $this, 'replace_embeds' ] );
 		
 		Fields::get_instance()->init();
 	}
@@ -237,14 +247,170 @@ class Embed_Privacy {
 	/**
 	 * Replace embeds with a container and hide the embed with an HTML comment.
 	 * 
-	 * @version	1.0.1
+	 * @version	2.0.0
 	 * 
-	 * @param	string		$output The original output
-	 * @param	string		$url The URL to the embed
-	 * @param	array		$args Additional arguments of the embed
+	 * @param	string	$content The original content
+	 * @return	string The updated content
+	 */
+	public function replace_embeds( $content ) {
+		// get all non-system embed providers
+		$embed_providers = get_posts( [
+			'meta_query' => [
+				'relation' => 'OR',
+				[
+					'compare' => 'NOT EXISTS',
+					'key' => 'is_system',
+					'value' => 'yes',
+				],
+				[
+					'compare' => '!=',
+					'key' => 'is_system',
+					'value' => 'yes',
+				],
+			],
+			'numberposts' => -1,
+			'post_type' => 'epi_embed',
+		] );
+		
+		// get embed provider name
+		foreach ( $embed_providers as $provider ) {
+			$regex = trim( get_post_meta( $provider->ID, 'regex_default', true ), '/' );
+			
+			if ( ! empty( $regex ) ) {
+				$regex = '/' . $regex . '/';
+			}
+			
+			// get overlay for this provider
+			if ( ! empty( $regex ) && preg_match( $regex, $content ) ) {
+				$args['regex'] = $regex;
+				$args['post_id'] = $provider->ID;
+				$embed_provider = $provider->post_title;
+				$embed_provider_lowercase = $provider->post_name;
+				$content = $this->get_single_overlay( $content, $embed_provider, $embed_provider_lowercase, $args );
+			}
+		}
+		
+		// get default external content
+		$content = $this->get_single_overlay( $content, '', '', [] );
+		
+		return $content;
+	}
+	
+	/**
+	 * Get a single overlay for all matching embeds.
+	 * 
+	 * @param	string	$content The original content
+	 * @param	string	$embed_provider The embed provider
+	 * @param	string	$embed_provider_lowercase The embed provider without spaces and in lowercase
+	 * @param	array	$args Additional arguments
+	 * @return	string The updated content
+	 */
+	public function get_single_overlay( $content, $embed_provider, $embed_provider_lowercase, $args ) {
+		libxml_use_internal_errors( true );
+		$dom = new DOMDocument();
+		$dom->loadHTML(
+			mb_convert_encoding(
+				$content,
+				'HTML-ENTITIES',
+				'UTF-8'
+			),
+			LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
+		);
+		$template_dom = new DOMDocument();
+		
+		foreach ( [ 'embed', 'iframe', 'object' ] as $tag ) {
+			$replacements = [];
+			
+			foreach ( $dom->getElementsByTagName( $tag ) as $element ) {
+				$is_empty_provider = ( empty( $embed_provider ) );
+				$parsed_url = wp_parse_url( home_url() );
+				
+				// ignore embeds from the same (sub-)domain
+				if ( strpos( $element->getAttribute( 'src' ), $parsed_url['host'] ) !== false ) {
+					continue;
+				}
+				
+				if ( ! empty ( $args['regex'] ) && ! preg_match( $args['regex'], $element->getAttribute( 'src' ) ) ) {
+					continue;
+				}
+				
+				if ( $is_empty_provider ) {
+					$parsed_url = wp_parse_url( $element->getAttribute( 'src' ) );
+					$embed_provider = $parsed_url['host'];
+				}
+				
+				// get overlay template as DOM element
+				$template_dom->loadHTML(
+					mb_convert_encoding(
+						$this->get_output_template( $embed_provider, $embed_provider_lowercase, $dom->saveHTML( $element ), $args ),
+						'HTML-ENTITIES',
+						'UTF-8'
+					),
+					LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
+				);
+				$overlay = null;
+				
+				foreach ( $template_dom->getElementsByTagName( 'div' ) as $div ) {
+					if ( stripos( $div->getAttribute( 'class' ), 'embed-privacy-container' ) !== false ) {
+						$overlay = $div;
+						break;
+					}
+				}
+				
+				// store the elements to replace (see regressive loop down below)
+				$replacements[] = [
+					'element' => $element,
+					'replace' => $dom->importNode( $overlay, true ),
+				];
+				
+				// reset embed provider name
+				if ( $is_empty_provider ) {
+					$embed_provider = '';
+				}
+			}
+			
+			$elements = $dom->getElementsByTagName( $tag );
+			$i = $elements->length - 1;
+			
+			// use regressive loop for replaceChild()
+			// see: https://www.php.net/manual/en/domnode.replacechild.php#50500
+			while ( $i > -1 ) {
+				$element = $elements->item( $i );
+				
+				foreach ( $replacements as $replacement ) {
+					if ( $replacement['element'] === $element ) {
+						$element->parentNode->replaceChild( $replacement['replace'], $replacement['element'] );
+					}
+				}
+				
+				$i--;
+			}
+			
+			$output = '';
+			
+			// remove root node
+			foreach ( $dom->documentElement->childNodes as $child_node ) {
+				$output .= $dom->saveHTML( $child_node );
+			}
+		}
+		
+		libxml_use_internal_errors( false );
+		
+		return $output;
+	}
+	
+	/**
+	 * Replace oembed embeds with a container and hide the embed with an HTML comment.
+	 * 
+	 * @since	1.2.0
+	 * @version	1.0.0
+	 * 
+	 * @param	string	$output The original output
+	 * @param	string	$url The URL to the embed
+	 * @param	array	$args Additional arguments of the embed
 	 * @return	string The updated embed code
 	 */
-	public function replace_embeds( $output, $url, $args ) {
+	public function replace_embeds_oembed( $output, $url, $args ) {
 		// don't do anything in admin
 		if ( ! $this->usecache ) {
 			return $output;
@@ -253,6 +419,8 @@ class Embed_Privacy {
 		$embed_provider = '';
 		$embed_provider_lowercase = '';
 		$embed_providers = get_posts( [
+			'meta_key' => 'is_system',
+			'meta_value' => 'yes',
 			'numberposts' => -1,
 			'post_type' => 'epi_embed',
 		] );
@@ -261,14 +429,9 @@ class Embed_Privacy {
 		foreach ( $embed_providers as $provider ) {
 			$regex = get_post_meta( $provider->ID, 'regex_default', true );
 			$regex = '/' . trim( $regex, '/' ) . '/';
-			$regex_gutenberg = get_post_meta( $provider->ID, 'regex_gutenberg', true );
-			$regex_gutenberg = '/' . trim( $regex_gutenberg, '/' ) . '/';
 			
 			// save name of provider and stop loop
-			if (
-				$regex !== '//' && preg_match( $regex, $url )
-				|| $regex_gutenberg !== '//' && preg_match( $regex_gutenberg, $url )
-			) {
+			if ( $regex !== '//' && preg_match( $regex, $url ) ) {
 				$args['post_id'] = $provider->ID;
 				$embed_provider = $provider->post_title;
 				$embed_provider_lowercase = $provider->post_name;
@@ -277,7 +440,9 @@ class Embed_Privacy {
 		}
 		
 		// replace youtube.com to youtube-nocookie.com
-		$output = str_replace( 'youtube.com', 'youtube-nocookie.com', $output );
+		if ( $embed_provider === 'youtube' ) {
+			$output = str_replace( 'youtube.com', 'youtube-nocookie.com', $output );
+		}
 		
 		// check if cookie is set
 		if ( $embed_provider_lowercase !== 'default' && $this->is_always_active_provider( $embed_provider_lowercase ) ) {
@@ -298,13 +463,14 @@ class Embed_Privacy {
 	 * @return	string The updated embed code
 	 */
 	public function replace_embeds_divi( $item_embed, $url ) {
-		return $this->replace_embeds( $item_embed, $url, [] );
+		return $this->replace_embeds_oembed( $item_embed, $url, [] );
 	}
 	
 	/**
 	 * Replace Google Maps iframes.
 	 * 
-	 * @since	1.1.0
+	 * @deprecated	1.2.0
+	 * @since		1.1.0
 	 * 
 	 * @param	string		$content The post content
 	 * @return	string The post content
@@ -391,12 +557,13 @@ class Embed_Privacy {
 		// display embed provider background image and logo
 		if ( $embed_post ) {
 			$background_image_id = get_post_meta( $embed_post->ID, 'background_image', true );
+			$thumbnail_id = get_post_thumbnail_id( $embed_post );
 		}
 		else {
 			$background_image_id = null;
+			$thumbnail_id = null;
 		}
 		
-		$thumbnail_id = get_post_thumbnail_id( $embed_post );
 		
 		if ( $background_image_id ) {
 			$background_path = get_attached_file( $background_image_id );
@@ -493,7 +660,6 @@ class Embed_Privacy {
 		$markup .= '</div>';
 		$markup .= '</div>';
 		$markup .= '<div class="embed-privacy-content"><script>var _oembed_' . $embed_md5 . ' = \'' . addslashes( wp_json_encode( [ 'embed' => htmlentities( $output ) ] ) ) . '\';</script></div>';
-		$markup .= '</div>';
 		
 		$markup .= '<style>' . PHP_EOL;
 		
@@ -514,6 +680,7 @@ class Embed_Privacy {
 		}
 		
 		$markup .= '</style>';
+		$markup .= '</div>';
 		
 		return $markup;
 	}
