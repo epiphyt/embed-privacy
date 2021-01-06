@@ -183,7 +183,7 @@ class Fields {
 		}
 		
 		$attributes['value'] = (string) get_post_meta( $post_id, $attributes['name'], $attributes['single'] );
-		$attributes['value'] = wp_get_attachment_image( (int) $attributes['value'] );
+		$image = wp_get_attachment_image( (int) $attributes['value'] );
 		?>
 		<tr>
 			<th scope="row">
@@ -197,7 +197,7 @@ class Fields {
 				</div>
 				
 				<div class="embed-privacy-image-container<?php echo ( empty( $attributes['value'] ) ? ' embed-privacy-hidden' : '' ); ?>">
-					<?php echo $attributes['value']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					<?php echo $image; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 					<span class="dashicons dashicons-no embed-privacy-icon embed-privacy-remove-image"></span>
 				</div>
 				
