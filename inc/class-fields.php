@@ -6,8 +6,11 @@ use function add_action;
 use function add_meta_box;
 use function addslashes;
 use function apply_filters;
+use function array_merge;
+use function checked;
 use function current_user_can;
 use function defined;
+use function delete_post_meta;
 use function esc_attr;
 use function esc_html;
 use function esc_html__;
@@ -20,7 +23,6 @@ use function is_array;
 use function is_wp_error;
 use function plugin_dir_path;
 use function plugin_dir_url;
-use function preg_match;
 use function remove_meta_box;
 use function sanitize_text_field;
 use function sanitize_title;
@@ -49,6 +51,11 @@ use function wp_upload_bits;
  */
 class Fields {
 	/**
+	 * @var		array Fields to output
+	 */
+	public $fields = [];
+	
+	/**
 	 * @var		\epiphyt\Embed_Privacy\Fields
 	 */
 	private static $instance;
@@ -67,6 +74,7 @@ class Fields {
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
 		add_action( 'add_meta_boxes', [ $this, 'add_meta_boxes' ] );
 		add_action( 'do_meta_boxes', [ $this, 'remove_default_fields' ] );
+		add_action( 'init', [ $this, 'register_default_fields' ] );
 		add_action( 'save_post', [ $this, 'save_fields' ], 10, 2 );
 	}
 	
@@ -122,10 +130,22 @@ class Fields {
 		<table class="form-table" role="presentation">
 			<tbody>
 				<?php
-				$this->get_the_privacy_policy_url_field( $post->ID );
-				$this->get_the_background_image_field( $post->ID );
-				$this->get_the_default_regex_field( $post->ID );
-				$this->get_the_gutenberg_regex_field( $post->ID );
+				foreach ( $this->fields as $field ) {
+					// set default field type if no one is available
+					if ( empty( $field['field_type'] ) ) {
+						$field['field_type'] = 'input';
+					}
+					
+					switch ( $field['field_type'] ) {
+						case 'image':
+							$this->get_the_image_field_html( $post->ID, $field );
+							break;
+						case 'input':
+						default:
+							$this->get_the_input_field_html( $post->ID, $field );
+							break;
+					}
+				}
 				
 				/**
 				 * Output additional fields.
@@ -144,37 +164,12 @@ class Fields {
 	}
 	
 	/**
-	 * Output the default Regex field.
-	 * 
-	 * @param	int		$post_id The current post ID
-	 */
-	private function get_the_background_image_field( $post_id ) {
-		$this->get_the_image_field( $post_id, [
-			'name' => 'background_image',
-			'title' => __( 'Background Image', 'embed-privacy' ),
-		] );
-	}
-	
-	/**
-	 * Output the default Regex field.
-	 * 
-	 * @param	int		$post_id The current post ID
-	 */
-	private function get_the_default_regex_field( $post_id ) {
-		$this->get_the_single_field_html( $post_id, [
-			'description' => __( 'Regular expression that will be be searched for in the content.', 'embed-privacy' ),
-			'name' => 'regex_default',
-			'title' => __( 'Default Regex', 'embed-privacy' ),
-		] );
-	}
-	
-	/**
 	 * Output an image field.
 	 * 
 	 * @param	int		$post_id The current post ID
 	 * @param	array	$attributes An array with attributes
 	 */
-	public function get_the_image_field( $post_id, array $attributes ) {
+	public function get_the_image_field_html( $post_id, array $attributes ) {
 		$attributes = wp_parse_args( $attributes, [
 			'classes' => '',
 			'description' => '',
@@ -187,7 +182,6 @@ class Fields {
 			return;
 		}
 		
-		$attributes['name'] = 'embed_privacy_' . $attributes['name'];
 		$attributes['value'] = (string) get_post_meta( $post_id, $attributes['name'], $attributes['single'] );
 		$attributes['value'] = wp_get_attachment_image( (int) $attributes['value'] );
 		?>
@@ -216,39 +210,12 @@ class Fields {
 	}
 	
 	/**
-	 * Output the Gutenberg Regex field.
-	 * 
-	 * @param	int		$post_id The current post ID
-	 */
-	private function get_the_gutenberg_regex_field( $post_id ) {
-		$this->get_the_single_field_html( $post_id, [
-			'description' => __( 'Regular expression that will be be searched for in the content of Block Editor posts.', 'embed-privacy' ),
-			'name' => 'regex_gutenberg',
-			'title' => __( 'Block Editor Regex', 'embed-privacy' ),
-		] );
-	}
-	
-	/**
-	 * Output the privacy policy URL field.
-	 * 
-	 * @param	int		$post_id The current post ID
-	 */
-	private function get_the_privacy_policy_url_field( $post_id ) {
-		$this->get_the_single_field_html( $post_id, [
-			'description' => __( 'Link to the privacy policy URL.', 'embed-privacy' ),
-			'name' => 'privacy_policy_url',
-			'title' => __( 'Privacy Policy URL', 'embed-privacy' ),
-			'type' => 'url',
-		] );
-	}
-	
-	/**
 	 * Output a single input field depending on given attributes.
 	 * 
 	 * @param	int		$post_id The current post ID
 	 * @param	array	$attributes An array with attribues
 	 */
-	public function get_the_single_field_html( $post_id, array $attributes ) {
+	public function get_the_input_field_html( $post_id, array $attributes ) {
 		$attributes = wp_parse_args( $attributes, [
 			'classes' => 'regular-text',
 			'description' => '',
@@ -262,21 +229,107 @@ class Fields {
 			return;
 		}
 		
-		$attributes['name'] = 'embed_privacy_' . $attributes['name'];
-		$attributes['value'] = (string) get_post_meta( $post_id, $attributes['name'], $attributes['single'] );
+		$current_value = (string) get_post_meta( $post_id, $attributes['name'], $attributes['single'] );
+		
+		if ( ! in_array( $attributes['type'], [ 'checkbox', 'radio' ], true ) ) :
 		?>
 		<tr>
 			<th scope="row">
 				<label for="<?php echo esc_attr( $attributes['name'] ); ?>"><?php echo esc_html( $attributes['title'] ); ?></label>
 			</th>
 			<td>
-				<input type="<?php echo esc_attr( $attributes['type'] ); ?>" name="<?php echo esc_attr( $attributes['name'] ); ?>" id="<?php echo esc_attr( $attributes['name'] ); ?>" value="<?php echo esc_attr( $attributes['value'] ); ?>" class="<?php echo esc_attr( $attributes['classes'] ); ?>">
+				<input type="<?php echo esc_attr( $attributes['type'] ); ?>" name="<?php echo esc_attr( $attributes['name'] ); ?>" id="<?php echo esc_attr( $attributes['name'] ); ?>" value="<?php echo esc_attr( $current_value ); ?>" class="<?php echo esc_attr( $attributes['classes'] ); ?>">
 				<?php if ( ! empty( $attributes['description'] ) ) : ?>
 				<p><?php echo esc_html( $attributes['description'] ); ?></p>
 				<?php endif; ?>
 			</td>
 		</tr>
 		<?php
+		else :
+		// set default value for checkboxes and radio buttons
+		if ( empty( $attributes['value'] ) ) {
+			$attributes['value'] = 'yes';
+		}
+		?>
+		<tr>
+			<th scope="row"></th>
+			<td>
+				<label for="<?php echo esc_attr( $attributes['name'] ); ?>"><input type="<?php echo esc_attr( $attributes['type'] ); ?>" name="<?php echo esc_attr( $attributes['name'] ); ?>" id="<?php echo esc_attr( $attributes['name'] ); ?>" value="<?php echo esc_attr( $attributes['value'] ); ?>" class="<?php echo esc_attr( $attributes['classes'] ); ?>"<?php checked( $current_value, $attributes['value'] ); ?>> <?php echo esc_html( $attributes['title'] ); ?></label>
+				<?php if ( ! empty( $attributes['description'] ) ) : ?>
+				<p><?php echo esc_html( $attributes['description'] ); ?></p>
+				<?php endif; ?>
+			</td>
+		</tr>
+		<?php
+		endif;
+	}
+	
+	/**
+	 * Register fields.
+	 * 
+	 * @param	array	$fields Fields to register
+	 */
+	public function register( array $fields = [] ) {
+		/**
+		 * Register additional fields.
+		 * Use \epiphyt\Embed_Privacy\Fields::get_instance()->register( $fields )
+		 * if possible (be careful, as this needs a call after textdomain has been loaded).
+		 * 
+		 * @param	array	$fields Additional fields
+		 */
+		$additional_fields = apply_filters( 'embed_privacy_register_fields', [] );
+		
+		if ( ! is_array( $additional_fields ) ) {
+			wp_die( new WP_Error( 'invalid_fields', esc_html__( 'Invalid value for additional Embed Privacy fields provided.', 'embed-privacy' ) ) );
+		}
+		
+		// merge fields
+		$this->fields = array_merge( $this->fields, $fields, $additional_fields );
+		
+		/**
+		 * Filter all registered fields.
+		 * 
+		 * @param	array	$fields Registered fields
+		 */
+		$this->fields = apply_filters( 'embed_privacy_fields', $this->fields );
+	}
+	
+	/**
+	 * Register default fields.
+	 */
+	public function register_default_fields() {
+		$this->register( [
+			'privacy_policy_url' => [
+				'description' => __( 'Link to the embed provider’s privacy policy URL.', 'embed-privacy' ),
+				'field_type' => 'input',
+				'name' => 'privacy_policy_url',
+				'title' => __( 'Privacy Policy URL', 'embed-privacy' ),
+				'type' => 'url',
+			],
+			'background_image' => [
+				'field_type' => 'image',
+				'name' => 'background_image',
+				'title' => __( 'Background Image', 'embed-privacy' ),
+			],
+			'regex_default' => [
+				'description' => __( 'Regular expression that will be be searched for in the content.', 'embed-privacy' ),
+				'field_type' => 'input',
+				'name' => 'regex_default',
+				'title' => __( 'Default Regex', 'embed-privacy' ),
+			],
+			'regex_gutenberg' => [
+				'description' => __( 'Regular expression that will be be searched for in the content of Block Editor posts.', 'embed-privacy' ),
+				'field_type' => 'input',
+				'name' => 'regex_gutenberg',
+				'title' => __( 'Block Editor Regex', 'embed-privacy' ),
+			],
+			'is_disabled' => [
+				'field_type' => 'input',
+				'name' => 'is_disabled',
+				'title' => __( 'Disable embed provider', 'embed-privacy' ),
+				'type' => 'checkbox',
+			],
+		] );
 	}
 	
 	/**
@@ -324,24 +377,29 @@ class Fields {
 			wp_die( new WP_Error( 403, esc_html__( 'You are not allowed to edit an embed.', 'embed-privacy' ) ) );
 		}
 		
-		foreach ( $_POST as $key => $field ) {
-			// ignore POST fields that don't belong to Embed Privacy
-			if ( ! preg_match( '/^embed_privacy_/', $key ) ) {
+		foreach ( $this->fields as $field ) {
+			if ( empty( $_POST[ $field['name'] ] ) ) {
+				if ( in_array( $field['type'], [ 'checkbox', 'radio' ], true ) || $field['field_type'] === 'image' ) {
+					delete_post_meta( $post_id, $field['name'] );
+				}
+				
 				continue;
 			}
 			
+			$value = $_POST[ $field['name'] ];
+			
 			// sanitizing
-			if ( is_array( $field ) ) {
-				$value = $this->sanitize_array( $field );
+			if ( is_array( $value ) ) {
+				$value = $this->sanitize_array( $value );
 			}
 			else {
-				$value = sanitize_text_field( wp_unslash( $field ) );
+				$value = sanitize_text_field( wp_unslash( $value ) );
 				// add slashes, so that \/ becomes \\/
 				// otherwise \/ becomes / while storing into the database
 				$value = addslashes( $value );
 			}
 			
-			update_post_meta( $post_id, $key, $value );
+			update_post_meta( $post_id, $field['name'], $value );
 		}
 		
 		$files = $this->validate_files();
@@ -423,7 +481,7 @@ class Fields {
 		 * 
 		 * @param	array	The default name list
 		 */
-		$valid_files = apply_filters( 'embed_privacy_valid_files', [ 'embed_privacy_background_image' ] );
+		$valid_files = apply_filters( 'embed_privacy_valid_files', [ 'background_image' ] );
 		$validated = [];
 		
 		if ( empty( $_FILES ) ) return $validated;

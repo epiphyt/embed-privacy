@@ -259,9 +259,9 @@ class Embed_Privacy {
 		
 		// get embed provider name
 		foreach ( $embed_providers as $provider ) {
-			$regex = get_post_meta( $provider->ID, 'embed_privacy_regex_default', true );
+			$regex = get_post_meta( $provider->ID, 'regex_default', true );
 			$regex = '/' . trim( $regex, '/' ) . '/';
-			$regex_gutenberg = get_post_meta( $provider->ID, 'embed_privacy_regex_gutenberg', true );
+			$regex_gutenberg = get_post_meta( $provider->ID, 'regex_gutenberg', true );
 			$regex_gutenberg = '/' . trim( $regex_gutenberg, '/' ) . '/';
 			
 			// save name of provider and stop loop
@@ -365,6 +365,11 @@ class Embed_Privacy {
 	public function get_output_template( $embed_provider, $embed_provider_lowercase, $output, $args = [] ) {
 		if ( ! empty( $args['post_id'] ) ) {
 			$embed_post = get_post( $args['post_id'] );
+			
+			// if provider is disabled, to nothing
+			if ( get_post_meta( $embed_post->ID, 'is_disabled', true ) === 'yes' ) {
+				return $output;
+			}
 		}
 		else {
 			$embed_post = null;
@@ -385,7 +390,7 @@ class Embed_Privacy {
 		
 		// display embed provider background image and logo
 		if ( $embed_post ) {
-			$background_image_id = get_post_meta( $embed_post->ID, 'embed_privacy_background_image', true );
+			$background_image_id = get_post_meta( $embed_post->ID, 'background_image', true );
 		}
 		else {
 			$background_image_id = null;
@@ -451,7 +456,7 @@ class Embed_Privacy {
 					],
 				];
 				$content .= $embed_post->post_content;
-				$privacy_policy = get_post_meta( $embed_post->ID, 'embed_privacy_privacy_policy_url', true );
+				$privacy_policy = get_post_meta( $embed_post->ID, 'privacy_policy_url', true );
 				
 				if ( $privacy_policy ) {
 					/* translators: 1: the embed provider, 2: opening <a> tag to the privacy policy, 3: closing </a> */
