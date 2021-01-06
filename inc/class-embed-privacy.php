@@ -166,6 +166,7 @@ class Embed_Privacy {
 		add_filter( 'the_content', [ $this, 'replace_embeds' ] );
 		
 		Fields::get_instance()->init();
+		Migration::get_instance()->init();
 	}
 	
 	/**

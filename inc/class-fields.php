@@ -439,7 +439,7 @@ class Fields {
 	 * @param	array		$file The file to upload
 	 * @return	int The attachment ID
 	 */
-	private function upload_file( array $file ) {
+	public function upload_file( array $file ) {
 		// store file in the uploads folder
 		$upload_file = wp_upload_bits( $file['name'], null, $file['content'] );
 		

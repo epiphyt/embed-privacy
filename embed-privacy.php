@@ -67,8 +67,8 @@ spl_autoload_register( function( $class ) {
 
 Embed_Privacy_Widget_Output_Filter::get_instance();
 $embed_privacy = Embed_Privacy::get_instance();
-$embed_privacy->init();
 $embed_privacy->set_plugin_file( __FILE__ );
+$embed_privacy->init();
 
 register_activation_hook( __FILE__, [ $embed_privacy, 'clear_embed_cache' ] );
 register_deactivation_hook( __FILE__, [ $embed_privacy, 'clear_embed_cache' ] );
