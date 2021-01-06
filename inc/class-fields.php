@@ -4,7 +4,6 @@ use WP_Error;
 use function __;
 use function add_action;
 use function add_meta_box;
-use function addslashes;
 use function apply_filters;
 use function array_merge;
 use function checked;
