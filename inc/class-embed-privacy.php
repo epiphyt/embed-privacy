@@ -337,6 +337,7 @@ class Embed_Privacy {
 				if ( $is_empty_provider ) {
 					$parsed_url = wp_parse_url( $element->getAttribute( 'src' ) );
 					$embed_provider = $parsed_url['host'];
+					$embed_provider_lowercase = sanitize_title( $parsed_url['host'] );
 				}
 				
 				// get overlay template as DOM element
@@ -366,6 +367,7 @@ class Embed_Privacy {
 				// reset embed provider name
 				if ( $is_empty_provider ) {
 					$embed_provider = '';
+					$embed_provider_lowercase = '';
 				}
 			}
 			
@@ -386,12 +388,7 @@ class Embed_Privacy {
 				$i--;
 			}
 			
-			$output = '';
-			
-			// remove root node
-			foreach ( $dom->documentElement->childNodes as $child_node ) {
-				$output .= $dom->saveHTML( $child_node );
-			}
+			$output = $dom->saveHTML( $dom->documentElement );
 		}
 		
 		libxml_use_internal_errors( false );
