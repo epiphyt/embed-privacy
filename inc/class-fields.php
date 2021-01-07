@@ -390,7 +390,7 @@ class Fields {
 		
 		foreach ( $this->fields as $field ) {
 			if ( empty( $_POST[ $field['name'] ] ) ) {
-				if ( in_array( $field['type'], [ 'checkbox', 'radio' ], true ) || $field['field_type'] === 'image' ) {
+				if ( ! empty( $field['type'] ) && in_array( $field['type'], [ 'checkbox', 'radio' ], true ) || $field['field_type'] === 'image' ) {
 					delete_post_meta( $post_id, $field['name'] );
 				}
 				
