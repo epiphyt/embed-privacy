@@ -84,8 +84,11 @@ document.addEventListener( 'DOMContentLoaded', function() {
 	 * @param	{element}	target Target element
 	 */
 	function overlayClick( target ) {
+		var embedContainer = target.parentNode;
 		var embedContent = target.nextElementSibling;
 		
+		embedContainer.classList.remove( 'is-disabled' );
+		embedContainer.classList.add( 'is-enabled' );
 		// hide the embed overlay
 		target.style.display = 'none';
 		// get stored content from JavaScript
