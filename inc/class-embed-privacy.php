@@ -753,7 +753,7 @@ class Embed_Privacy {
 				'public' => true,
 				'menu_icon' => 'dashicons-format-video',
 				'show_in_admin_bar' => false,
-				'show_in_menu' => true,
+				'show_in_menu' => false,
 				'show_in_nav_menus' => false,
 				'show_in_rest' => false,
 				'show_ui' => true,

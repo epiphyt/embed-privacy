@@ -5,9 +5,12 @@ use function add_filter;
 use function add_settings_field;
 use function add_settings_section;
 use function add_submenu_page;
+use function admin_url;
 use function current_user_can;
 use function do_settings_sections;
 use function esc_html__;
+use function esc_html_e;
+use function esc_url;
 use function register_setting;
 use function settings_errors;use function settings_fields;
 use function submit_button;
@@ -92,7 +95,7 @@ class Admin {
 		register_setting( 'embed_privacy', 'embed_privacy_options' );
 		add_settings_section(
 			'embed_privacy_general',
-			__( 'Embed Privacy', 'embed-privacy' ),
+			null,
 			null,
 			'embed_privacy'
 		);
@@ -124,13 +127,16 @@ class Admin {
 		// show error/update messages
 		settings_errors( 'embed_privacy_messages' );
 		?>
-		<form action="options.php" method="post">
-			<?php
-			settings_fields( 'embed_privacy' );
-			do_settings_sections( 'embed_privacy' );
-			submit_button( esc_html__( 'Save Settings', 'embed-privacy' ) );
-			?>
-		</form>
+		<div class="wrap">
+			<h1><?php esc_html_e( 'Embed Privacy', 'embed-privacy' ); ?> <a href="<?php echo esc_url( admin_url() . 'edit.php?post_type=epi_embed' ); ?>" class="page-title-action"><?php esc_html_e( 'Manage embeds', 'embed-privacy' ); ?></a></h1>
+			<form action="options.php" method="post">
+				<?php
+				settings_fields( 'embed_privacy' );
+				do_settings_sections( 'embed_privacy' );
+				submit_button( esc_html__( 'Save Settings', 'embed-privacy' ) );
+				?>
+			</form>
+		</div>
 		<?php
 	}
 	
