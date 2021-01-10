@@ -16,10 +16,13 @@ use function esc_html__;
 use function esc_html_e;
 use function filemtime;
 use function get_current_screen;
+use function get_option;
 use function get_post_meta;
 use function in_array;
 use function is_array;
 use function is_wp_error;
+use function ob_get_clean;
+use function ob_start;
 use function plugin_dir_path;
 use function plugin_dir_url;
 use function remove_meta_box;
@@ -231,6 +234,7 @@ class Fields {
 			'classes' => 'regular-text',
 			'description' => '',
 			'name' => '',
+			'option_type' => 'meta',
 			'single' => true,
 			'title' => '',
 			'type' => 'text',
@@ -240,19 +244,34 @@ class Fields {
 			return;
 		}
 		
-		$current_value = (string) get_post_meta( $post_id, $attributes['name'], $attributes['single'] );
+		if ( $attributes['option_type'] === 'meta' ) {
+			$current_value = (string) get_post_meta( $post_id, $attributes['name'], $attributes['single'] );
+		}
+		else {
+			$current_value = (string) get_option( $attributes['name'] );
+		}
 		
 		if ( ! in_array( $attributes['type'], [ 'checkbox', 'hidden', 'radio' ], true ) ) :
+		ob_start();
+		?>
+		<input type="<?php echo esc_attr( $attributes['type'] ); ?>" name="<?php echo esc_attr( $attributes['name'] ); ?>" id="<?php echo esc_attr( $attributes['name'] ); ?>" value="<?php echo esc_attr( $current_value ); ?>" class="<?php echo esc_attr( $attributes['classes'] ); ?>">
+		<?php if ( ! empty( $attributes['description'] ) ) : ?>
+		<p><?php echo esc_html( $attributes['description'] ); ?></p>
+		<?php
+		endif;
+		$input = ob_get_clean();
+		
+		if ( $attributes['option_type'] === 'option' ) {
+			echo $input;
+			return;
+		}
 		?>
 		<tr>
 			<th scope="row">
 				<label for="<?php echo esc_attr( $attributes['name'] ); ?>"><?php echo esc_html( $attributes['title'] ); ?></label>
 			</th>
 			<td>
-				<input type="<?php echo esc_attr( $attributes['type'] ); ?>" name="<?php echo esc_attr( $attributes['name'] ); ?>" id="<?php echo esc_attr( $attributes['name'] ); ?>" value="<?php echo esc_attr( $current_value ); ?>" class="<?php echo esc_attr( $attributes['classes'] ); ?>">
-				<?php if ( ! empty( $attributes['description'] ) ) : ?>
-				<p><?php echo esc_html( $attributes['description'] ); ?></p>
-				<?php endif; ?>
+				<?php echo $input; ?>
 			</td>
 		</tr>
 		<?php
@@ -261,14 +280,25 @@ class Fields {
 		if ( empty( $attributes['value'] ) ) {
 			$attributes['value'] = 'yes';
 		}
+		
+		ob_start();
+		?>
+		<label for="<?php echo esc_attr( $attributes['name'] ); ?>"><input type="<?php echo esc_attr( $attributes['type'] ); ?>" name="<?php echo esc_attr( $attributes['name'] ); ?>" id="<?php echo esc_attr( $attributes['name'] ); ?>" value="<?php echo esc_attr( $attributes['value'] ); ?>" class="<?php echo esc_attr( $attributes['classes'] ); ?>"<?php checked( $current_value, $attributes['value'] ); ?>> <?php echo esc_html( $attributes['title'] ); ?></label>
+		<?php if ( ! empty( $attributes['description'] ) ) : ?>
+		<p><?php echo esc_html( $attributes['description'] ); ?></p>
+		<?php
+		endif;
+		$input = ob_get_clean();
+		
+		if ( $attributes['option_type'] === 'option' ) {
+			echo $input;
+			return;
+		}
 		?>
 		<tr>
 			<th scope="row"></th>
 			<td>
-				<label for="<?php echo esc_attr( $attributes['name'] ); ?>"><input type="<?php echo esc_attr( $attributes['type'] ); ?>" name="<?php echo esc_attr( $attributes['name'] ); ?>" id="<?php echo esc_attr( $attributes['name'] ); ?>" value="<?php echo esc_attr( $attributes['value'] ); ?>" class="<?php echo esc_attr( $attributes['classes'] ); ?>"<?php checked( $current_value, $attributes['value'] ); ?>> <?php echo esc_html( $attributes['title'] ); ?></label>
-				<?php if ( ! empty( $attributes['description'] ) ) : ?>
-				<p><?php echo esc_html( $attributes['description'] ); ?></p>
-				<?php endif; ?>
+				<?php echo $input; ?>
 			</td>
 		</tr>
 		<?php

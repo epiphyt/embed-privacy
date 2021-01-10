@@ -11,37 +11,12 @@ document.addEventListener( 'DOMContentLoaded', function() {
 	
 	for ( var i = 0; i < overlays.length; i++ ) {
 		overlays[ i ].addEventListener( 'click', function( event ) {
-			var current_target = event.currentTarget;
-			var embed_content = current_target.nextElementSibling;
-			
-			// hide the embed overlay
-			current_target.style.display = 'none';
-			// get stored content from JavaScript
-			var embed_object = JSON.parse( window[ '_' + current_target.parentNode.id ] );
-			
-			embed_content.innerHTML = htmlentities_decode( embed_object.embed );
-			
-			// get all script tags inside the embed
-			var script_tags = embed_content.querySelectorAll( 'script' );
-			
-			// insert every script tag inside the embed as a new script
-			// to execute it
-			for ( var n = 0; n < script_tags.length; n++ ) {
-				var element = document.createElement( 'script' );
-				
-				if ( script_tags[ n ].src ) {
-					// if script tag has a src attribute
-					element.src = script_tags[ n ].src;
-				}
-				else {
-					// if script tag has content
-					element.innerHTML = script_tags[ n ].innerHTML;
-				}
-				
-				// append it to body
-				embed_content.appendChild( element );
-			}
-		} )
+			overlayClick( event.currentTarget );
+		} );
+	}
+	
+	if ( embedPrivacy.javascriptDetection === 'yes' ) {
+		enableAlwaysActiveProviders();
 	}
 	
 	for ( var i = 0; i < labels.length; i++ ) {
@@ -76,6 +51,68 @@ document.addEventListener( 'DOMContentLoaded', function() {
 				}
 			}
 		} );
+	}
+	
+	/**
+	 * Check whether to enable an always active provider by default.
+	 * 
+	 * @since	1.2.0
+	 */
+	function enableAlwaysActiveProviders() {
+		var cookie = ( get_cookie( 'embed-privacy' ) ? JSON.parse( get_cookie( 'embed-privacy' ) ) : '' );
+		
+		if ( cookie === null || ! Object.keys( cookie ).length ) {
+			return;
+		}
+		
+		var providers = Object.keys( cookie );
+		
+		for ( var i = 0; i < overlays.length; i++ ) {
+			var provider = overlays[ i ].parentNode.getAttribute( 'data-embed-provider' );
+			
+			if ( providers.includes( provider ) ) {
+				overlays[ i ].click();
+			}
+		}
+	}
+	
+	/**
+	 * Clicking on an overlay.
+	 * 
+	 * @since	1.2.0
+	 * 
+	 * @param	{element}	target Target element
+	 */
+	function overlayClick( target ) {
+		var embedContent = target.nextElementSibling;
+		
+		// hide the embed overlay
+		target.style.display = 'none';
+		// get stored content from JavaScript
+		var embedObject = JSON.parse( window[ '_' + target.parentNode.id ] );
+		
+		embedContent.innerHTML = htmlentities_decode( embedObject.embed );
+		
+		// get all script tags inside the embed
+		var scriptTags = embedContent.querySelectorAll( 'script' );
+		
+		// insert every script tag inside the embed as a new script
+		// to execute it
+		for ( var n = 0; n < scriptTags.length; n++ ) {
+			var element = document.createElement( 'script' );
+			
+			if ( scriptTags[ n ].src ) {
+				// if script tag has a src attribute
+				element.src = scriptTags[ n ].src;
+			}
+			else {
+				// if script tag has content
+				element.innerHTML = scriptTags[ n ].innerHTML;
+			}
+			
+			// append it to body
+			embedContent.appendChild( element );
+		}
 	}
 } );
 

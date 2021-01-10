@@ -16,6 +16,7 @@ use function file_exists;
 use function filemtime;
 use function function_exists;
 use function get_attached_file;
+use function get_option;
 use function get_post;
 use function get_post_meta;
 use function get_post_thumbnail_id;
@@ -49,6 +50,7 @@ use function wp_generate_uuid4;
 use function wp_get_attachment_url;
 use function wp_json_encode;
 use function wp_kses;
+use function wp_localize_script;
 use function wp_parse_url;
 use function wp_unslash;
 use const DEBUG_MODE;
@@ -165,6 +167,7 @@ class Embed_Privacy {
 		add_filter( 'et_builder_get_oembed', [ $this, 'replace_embeds_divi' ], 10, 2 );
 		add_filter( 'the_content', [ $this, 'replace_embeds' ] );
 		
+		Admin::get_instance()->init();
 		Fields::get_instance()->init();
 		Migration::get_instance()->init();
 	}
@@ -210,6 +213,9 @@ class Embed_Privacy {
 			$js_file_url = EPI_EMBED_PRIVACY_URL . 'assets/js/embed-privacy' . $suffix . '.js';
 			
 			wp_enqueue_script( 'embed-privacy', $js_file_url, [], filemtime( $js_file ) );
+			wp_localize_script( 'embed-privacy', 'embedPrivacy', [
+				'javascriptDetection' => get_option( 'embed_privacy_javascript_detection' ),
+			] );
 		}
 	}
 	
@@ -611,7 +617,7 @@ class Embed_Privacy {
 		$logo_url = apply_filters( "embed_privacy_logo_url_{$embed_provider_lowercase}", $logo_url, $embed_provider_lowercase );
 		
 		$embed_md5 = md5( $output . wp_generate_uuid4() );
-		$markup = '<div class="embed-privacy-container ' . esc_attr( $embed_classes ) . '" id="oembed_' . esc_attr( $embed_md5 ) . '">';
+		$markup = '<div class="embed-privacy-container ' . esc_attr( $embed_classes ) . '" id="oembed_' . esc_attr( $embed_md5 ) . '" data-embed-provider="' . esc_attr( $embed_provider_lowercase ) . '">';
 		$markup .= '<div class="embed-privacy-overlay">';
 		$markup .= '<div class="embed-privacy-inner">';
 		$markup .= ( file_exists( $logo_path ) ? '<div class="embed-privacy-logo"></div>' : '' );
@@ -697,6 +703,12 @@ class Embed_Privacy {
 	 * @return	bool True if provider is always active, false otherwise
 	 */
 	public function is_always_active_provider( $provider ) {
+		$javascript_detection = get_option( 'embed_privacy_javascript_detection' );
+		
+		if ( $javascript_detection ) {
+			return false;
+		}
+		
 		$cookie = $this->get_cookie();
 		
 		if ( isset( $cookie->{$provider} ) && $cookie->{$provider} === true ) {
