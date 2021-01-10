@@ -793,7 +793,7 @@ class Embed_Privacy {
 		$attributes = shortcode_atts( [
 			'headline' => __( 'Embed providers', 'embed-privacy' ),
 			'show_all' => 0,
-			'subline' => __( 'Enable or disable embed providers globally. While an embed provider is enabled, it’s embedded content will displayed directly on every page without asking you anymore.', 'embed-privacy' ),
+			'subline' => __( 'Enable or disable embed providers globally. While an embed provider is enabled, its embedded content will be displayed directly on every page without asking you anymore.', 'embed-privacy' ),
 		], $attributes );
 		$cookie = $this->get_cookie();
 		$enabled_providers = array_keys( (array) $cookie );
