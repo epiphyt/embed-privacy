@@ -254,6 +254,11 @@ class Embed_Privacy {
 	 * @return	string The updated content
 	 */
 	public function replace_embeds( $content ) {
+		// do nothing in admin
+		if ( ! $this->usecache ) {
+			return;
+		}
+		
 		// get all non-system embed providers
 		$embed_providers = get_posts( [
 			'meta_query' => [
@@ -409,7 +414,7 @@ class Embed_Privacy {
 	 * @return	string The updated embed code
 	 */
 	public function replace_embeds_oembed( $output, $url, $args ) {
-		// don't do anything in admin
+		// do nothing in admin
 		if ( ! $this->usecache ) {
 			return $output;
 		}
