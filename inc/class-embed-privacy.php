@@ -4,8 +4,11 @@ use DOMDocument;
 use function __;
 use function add_action;
 use function add_filter;
+use function add_shortcode;
 use function addslashes;
 use function apply_filters;
+use function array_keys;
+use function checked;
 use function defined;
 use function dirname;
 use function esc_attr;
@@ -25,6 +28,7 @@ use function get_sites;
 use function get_the_post_thumbnail_url;
 use function home_url;
 use function htmlentities;
+use function in_array;
 use function is_admin;
 use function is_plugin_active_for_network;
 use function json_decode;
@@ -32,12 +36,14 @@ use function libxml_use_internal_errors;
 use function load_plugin_textdomain;
 use function mb_convert_encoding;
 use function md5;
+use function microtime;
 use function plugin_basename;
 use function preg_match;
 use function preg_match_all;
 use function register_post_type;
 use function sanitize_text_field;
 use function sanitize_title;
+use function shortcode_atts;
 use function sprintf;
 use function str_replace;
 use function stripos;
@@ -167,6 +173,8 @@ class Embed_Privacy {
 		add_filter( 'et_builder_get_oembed', [ $this, 'replace_embeds_divi' ], 10, 2 );
 		add_filter( 'the_content', [ $this, 'replace_embeds' ] );
 		
+		add_shortcode( 'embed_privacy_opt_out', [ $this, 'shortcode_opt_out' ] );
+		
 		Admin::get_instance()->init();
 		Fields::get_instance()->init();
 		Migration::get_instance()->init();
@@ -202,7 +210,7 @@ class Embed_Privacy {
 	 * Enqueue our assets for the frontend.
 	 */
 	public function enqueue_assets() {
-		$suffix = ( defined( 'DEBUG_MODE' ) && DEBUG_MODE ? '' : '.min' );
+		$suffix = ( defined( 'WP_DEBUG' ) && WP_DEBUG ? '' : '.min' );
 		$css_file = EPI_EMBED_PRIVACY_BASE . 'assets/style/embed-privacy' . $suffix . '.css';
 		$css_file_url = EPI_EMBED_PRIVACY_URL . 'assets/style/embed-privacy' . $suffix . '.css';
 		
@@ -377,7 +385,7 @@ class Embed_Privacy {
 		
 		if ( $embed_provider_lowercase !== 'default' ) {
 			/* translators: the embed provider */
-			$content .= '<p><label for="' . esc_attr( $checkbox_id ) . '" class="embed-privacy-label" data-embed-provider="' . esc_attr( $embed_provider_lowercase ) . '"><input id="' . esc_attr( $checkbox_id ) . '" type="checkbox" value="1"> ' . sprintf( esc_html__( 'Always display content from %s', 'embed-privacy' ), esc_html( $embed_provider ) ) . '</label></p>';
+			$content .= '<p><input id="' . esc_attr( $checkbox_id ) . '" type="checkbox" value="1" class="embed-privacy-input" data-embed-provider="' . esc_attr( $embed_provider_lowercase ) . '"><label for="' . esc_attr( $checkbox_id ) . '" class="embed-privacy-label" data-embed-provider="' . esc_attr( $embed_provider_lowercase ) . '">' . sprintf( esc_html__( 'Always display content from %s', 'embed-privacy' ), esc_html( $embed_provider ) ) . '</label></p>';
 		}
 		
 		/**
@@ -427,6 +435,10 @@ class Embed_Privacy {
 	 * @return	string The updated content
 	 */
 	public function get_single_overlay( $content, $embed_provider, $embed_provider_lowercase, $args ) {
+		if ( empty( $content ) ) {
+			return $content;
+		}
+		
 		libxml_use_internal_errors( true );
 		$dom = new DOMDocument();
 		$dom->loadHTML(
@@ -767,5 +779,92 @@ class Embed_Privacy {
 				],
 			]
 		);
+	}
+	
+	/**
+	 * Display an Opt-out shortcode.
+	 * 
+	 * @since	1.2.0
+	 * 
+	 * @param	array	$attributes Shortcode attributes
+	 * @return	string The shortcode output
+	 */
+	public function shortcode_opt_out( $attributes ) {
+		$attributes = shortcode_atts( [
+			'headline' => __( 'Embed providers', 'embed-privacy' ),
+			'show_all' => 0,
+			'subline' => __( 'Enable or disable embed providers globally. While an embed provider is enabled, it’s embedded content will displayed directly on every page without asking you anymore.', 'embed-privacy' ),
+		], $attributes );
+		$cookie = $this->get_cookie();
+		$enabled_providers = array_keys( (array) $cookie );
+		$embed_providers = get_posts( [
+			'numberposts' => -1,
+			'order' => 'ASC',
+			'orderby' => 'post_title',
+			'post_type' => 'epi_embed',
+		] );
+		
+		if ( $attributes['show_all'] ) {
+			$providers = $embed_providers;
+		}
+		else {
+			if ( empty( $cookie ) ) {
+				return;
+			}
+			
+			$providers = [];
+			
+			foreach ( $embed_providers as $embed_provider ) {
+				if ( in_array( $embed_provider->post_name, $enabled_providers, true ) ) {
+					$providers[] = $embed_provider;
+				}
+			}
+		}
+		
+		if ( empty( $providers ) ) {
+			return '';
+		}
+		
+		$headline = '<h3>' . esc_html( $attributes['headline'] ) . '</h3>' . PHP_EOL;
+		
+		/**
+		 * Filter the opt-out headline.
+		 * 
+		 * @param	string	$headline Current headline HTML
+		 * @param	array	$attributes Shortcode attributes
+		 */
+		$headline = apply_filters( 'embed_privacy_opt_out_headline', $headline, $attributes );
+		
+		/**
+		 * Filter the opt-out subline.
+		 * 
+		 * @param	string	$subline Current subline HTML
+		 * @param	array	$attributes Shortcode attributes
+		 */
+		$subline = apply_filters( 'embed_privacy_opt_out_subline', '<p>' . esc_html( $attributes['subline'] ) . '</p>' . PHP_EOL, $attributes );
+		
+		$output = '<div class="embed-privacy-opt-out">' . PHP_EOL . $headline . $subline;
+		$output .= '<p>' . PHP_EOL;
+		
+		foreach ( $providers as $provider ) {
+			if ( $attributes['show_all'] ) {
+				$is_checked = in_array( $provider->post_name, $enabled_providers, true );
+			}
+			else {
+				$is_checked = true;
+			}
+			
+			$microtime = str_replace( '.', '', microtime( true ) );
+			$output .= '<input type="checkbox" id="embed-privacy-provider-' . esc_attr( $provider->post_name ) . '-' . $microtime . '" ' . checked( $is_checked, true, false ) . ' class="embed-privacy-opt-out-input ' . ( $is_checked ? 'is-enabled' : 'is-disabled' ) . '" data-embed-provider="' . esc_attr( $provider->post_name ) . '">';
+			$output .= '<label class="embed-privacy-opt-out-label" for="embed-privacy-provider-' . esc_attr( $provider->post_name ) . '-' . $microtime . '" data-embed-provider="' . esc_attr( $provider->post_name ) . '">';
+			$enable_disable = '<span class="embed-privacy-provider-is-enabled">' . esc_html__( 'Disable', 'embed-privacy' ) . '</span><span class="embed-privacy-provider-is-disabled">' . esc_html__( 'Enable', 'embed-privacy' ) . '</span>';
+			/* translators: 1: Enable/Disable, 2: embed provider title */
+			$output .= wp_kses( sprintf( __( '%1$s %2$s', 'embed-privacy' ), $enable_disable, esc_html( $provider->post_title ) ), [ 'span' => [ 'class' => true ] ] );
+			$output .= '</label><br>' . PHP_EOL;
+		}
+		
+		$output .= '</p>' . PHP_EOL . '</div>' . PHP_EOL;
+		
+		return $output;
 	}
 }

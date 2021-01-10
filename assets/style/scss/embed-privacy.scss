@@ -110,3 +110,15 @@
 		}
 	}
 }
+
+// shortcode
+.is-disabled {
+	+ .embed-privacy-opt-out-label > .embed-privacy-provider-is-enabled {
+		display: none;
+	}
+}
+.is-enabled {
+	+ .embed-privacy-opt-out-label > .embed-privacy-provider-is-disabled {
+		display: none;
+	}
+}

@@ -7,11 +7,14 @@
  */
 document.addEventListener( 'DOMContentLoaded', function() {
 	var overlays = document.querySelectorAll( '.embed-privacy-overlay' );
+	var checkboxes = document.querySelectorAll( '.embed-privacy-inner .embed-privacy-input' );
 	var labels = document.querySelectorAll( '.embed-privacy-inner .embed-privacy-label' );
 	
 	for ( var i = 0; i < overlays.length; i++ ) {
 		overlays[ i ].addEventListener( 'click', function( event ) {
-			overlayClick( event.currentTarget );
+			if ( event.currentTarget.tagName !== 'INPUT' ) {
+				overlayClick( event.currentTarget );
+			}
 		} );
 	}
 	
@@ -19,38 +22,56 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		enableAlwaysActiveProviders();
 	}
 	
+	optOut();
+	
+	for ( var i = 0; i < checkboxes.length; i++ ) {
+		checkboxes[ i ].addEventListener( 'click', function( event ) {
+			// don't trigger the overlays click
+			event.stopPropagation();
+			
+			checkboxActivation( event.currentTarget );
+		} );
+	}
+	
 	for ( var i = 0; i < labels.length; i++ ) {
 		labels[ i ].addEventListener( 'click', function( event ) {
 			// don't trigger the overlays click
 			event.stopPropagation();
-			
-			var current_target = event.currentTarget;
-			var checkbox_id = current_target.getAttribute( 'for' );
-			var embed_provider = current_target.getAttribute( 'data-embed-provider' );
-			var cookie = ( get_cookie( 'embed-privacy' ) ? JSON.parse( get_cookie( 'embed-privacy' ) ) : '' );
-			
-			if ( document.getElementById( checkbox_id ).checked ) {
-				// add|update the cookie's value
-				if ( cookie !== null && Object.keys( cookie ).length !== 0 && cookie.constructor === Object ) {
-					cookie[ embed_provider ] = true;
-					
-					set_cookie( 'embed-privacy', JSON.stringify( cookie ) );
-				}
-				else {
-					set_cookie( 'embed-privacy', '{"' + embed_provider + '":true}', 365 );
-				}
-			}
-			else if ( cookie !== null ) {
-				delete cookie[ embed_provider ];
-				
-				if ( Object.keys( cookie ).length !== 0 ) {
-					set_cookie( 'embed-privacy', JSON.stringify( cookie ), 365 );
-				}
-				else {
-					remove_cookie( 'embed-privacy' );
-				}
-			}
 		} );
+	}
+	
+	/**
+	 * Clicking on a checkbox to always enable/disable an embed provider.
+	 * 
+	 * @since	1.2.0
+	 * 
+	 * @param	{element}	target Target element
+	 */
+	function checkboxActivation( target ) {
+		var embedProvider = target.getAttribute( 'data-embed-provider' );
+		var cookie = ( get_cookie( 'embed-privacy' ) ? JSON.parse( get_cookie( 'embed-privacy' ) ) : '' );
+		
+		if ( target.checked ) {
+			// add|update the cookie's value
+			if ( cookie !== null && Object.keys( cookie ).length !== 0 && cookie.constructor === Object ) {
+				cookie[ embedProvider ] = true;
+				
+				set_cookie( 'embed-privacy', JSON.stringify( cookie ) );
+			}
+			else {
+				set_cookie( 'embed-privacy', '{"' + embedProvider + '":true}', 365 );
+			}
+		}
+		else if ( cookie !== null ) {
+			delete cookie[ embedProvider ];
+			
+			if ( Object.keys( cookie ).length !== 0 ) {
+				set_cookie( 'embed-privacy', JSON.stringify( cookie ), 365 );
+			}
+			else {
+				remove_cookie( 'embed-privacy' );
+			}
+		}
 	}
 	
 	/**
@@ -73,6 +94,38 @@ document.addEventListener( 'DOMContentLoaded', function() {
 			if ( providers.includes( provider ) ) {
 				overlays[ i ].click();
 			}
+		}
+	}
+	
+	/**
+	 * Opting in/out for embed providers.
+	 */
+	function optOut() {
+		var optOutCheckboxes = document.querySelectorAll( '.embed-privacy-opt-out-input' );
+		
+		if ( ! optOutCheckboxes ) {
+			return;
+		}
+		
+		for ( var i = 0; i < optOutCheckboxes.length; i++ ) {
+			optOutCheckboxes[ i ].addEventListener( 'click', function( event ) {
+				var currentTarget = event.currentTarget;
+				
+				if ( ! currentTarget ) {
+					return;
+				}
+				
+				if ( currentTarget.checked ) {
+					currentTarget.classList.add( 'is-enabled' );
+					currentTarget.classList.remove( 'is-disabled' );
+				}
+				else {
+					currentTarget.classList.add( 'is-disabled' );
+					currentTarget.classList.remove( 'is-enabled' );
+				}
+				
+				checkboxActivation( currentTarget );
+			} );
 		}
 	}
 	
