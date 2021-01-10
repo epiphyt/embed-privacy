@@ -220,298 +220,6 @@ class Embed_Privacy {
 	}
 	
 	/**
-	 * Get a unique instance of the class.
-	 * 
-	 * @since	1.1.0
-	 * 
-	 * @return	\epiphyt\Embed_Privacy\Embed_Privacy The single instance of this class
-	 */
-	public static function get_instance() {
-		if ( self::$instance === null ) {
-			self::$instance = new self();
-		}
-		
-		return self::$instance;
-	}
-	
-	/**
-	 * Determine whether this is an AMP response.
-	 * Note that this must only be called after the parse_query action.
-	 * 
-	 * @return	bool True if the current page is an AMP page, false otherwise
-	 */
-	private function is_amp() {
-		return function_exists( 'is_amp_endpoint' ) && is_amp_endpoint();
-	}
-	
-	/**
-	 * Load the translation files.
-	 */
-	public function load_textdomain() {
-		load_plugin_textdomain( 'embed-privacy', false, dirname( plugin_basename( $this->plugin_file ) ) . '/languages' );
-	}
-	
-	/**
-	 * Replace embeds with a container and hide the embed with an HTML comment.
-	 * 
-	 * @version	2.0.0
-	 * 
-	 * @param	string	$content The original content
-	 * @return	string The updated content
-	 */
-	public function replace_embeds( $content ) {
-		// do nothing in admin
-		if ( ! $this->usecache ) {
-			return;
-		}
-		
-		// get all non-system embed providers
-		$embed_providers = get_posts( [
-			'meta_query' => [
-				'relation' => 'OR',
-				[
-					'compare' => 'NOT EXISTS',
-					'key' => 'is_system',
-					'value' => 'yes',
-				],
-				[
-					'compare' => '!=',
-					'key' => 'is_system',
-					'value' => 'yes',
-				],
-			],
-			'numberposts' => -1,
-			'post_type' => 'epi_embed',
-		] );
-		
-		// get embed provider name
-		foreach ( $embed_providers as $provider ) {
-			$regex = trim( get_post_meta( $provider->ID, 'regex_default', true ), '/' );
-			
-			if ( ! empty( $regex ) ) {
-				$regex = '/' . $regex . '/';
-			}
-			
-			// get overlay for this provider
-			if ( ! empty( $regex ) && preg_match( $regex, $content ) ) {
-				$args['regex'] = $regex;
-				$args['post_id'] = $provider->ID;
-				$embed_provider = $provider->post_title;
-				$embed_provider_lowercase = $provider->post_name;
-				$content = $this->get_single_overlay( $content, $embed_provider, $embed_provider_lowercase, $args );
-			}
-		}
-		
-		// get default external content
-		$content = $this->get_single_overlay( $content, '', '', [] );
-		
-		return $content;
-	}
-	
-	/**
-	 * Get a single overlay for all matching embeds.
-	 * 
-	 * @param	string	$content The original content
-	 * @param	string	$embed_provider The embed provider
-	 * @param	string	$embed_provider_lowercase The embed provider without spaces and in lowercase
-	 * @param	array	$args Additional arguments
-	 * @return	string The updated content
-	 */
-	public function get_single_overlay( $content, $embed_provider, $embed_provider_lowercase, $args ) {
-		libxml_use_internal_errors( true );
-		$dom = new DOMDocument();
-		$dom->loadHTML(
-			mb_convert_encoding(
-				$content,
-				'HTML-ENTITIES',
-				'UTF-8'
-			),
-			LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
-		);
-		$template_dom = new DOMDocument();
-		
-		foreach ( [ 'embed', 'iframe', 'object' ] as $tag ) {
-			$replacements = [];
-			
-			foreach ( $dom->getElementsByTagName( $tag ) as $element ) {
-				$is_empty_provider = ( empty( $embed_provider ) );
-				$parsed_url = wp_parse_url( home_url() );
-				
-				// ignore embeds from the same (sub-)domain
-				if ( strpos( $element->getAttribute( 'src' ), $parsed_url['host'] ) !== false ) {
-					continue;
-				}
-				
-				if ( ! empty ( $args['regex'] ) && ! preg_match( $args['regex'], $element->getAttribute( 'src' ) ) ) {
-					continue;
-				}
-				
-				if ( $is_empty_provider ) {
-					$parsed_url = wp_parse_url( $element->getAttribute( 'src' ) );
-					$embed_provider = $parsed_url['host'];
-					$embed_provider_lowercase = sanitize_title( $parsed_url['host'] );
-				}
-				
-				// get overlay template as DOM element
-				$template_dom->loadHTML(
-					mb_convert_encoding(
-						$this->get_output_template( $embed_provider, $embed_provider_lowercase, $dom->saveHTML( $element ), $args ),
-						'HTML-ENTITIES',
-						'UTF-8'
-					),
-					LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
-				);
-				$overlay = null;
-				
-				foreach ( $template_dom->getElementsByTagName( 'div' ) as $div ) {
-					if ( stripos( $div->getAttribute( 'class' ), 'embed-privacy-container' ) !== false ) {
-						$overlay = $div;
-						break;
-					}
-				}
-				
-				// store the elements to replace (see regressive loop down below)
-				$replacements[] = [
-					'element' => $element,
-					'replace' => $dom->importNode( $overlay, true ),
-				];
-				
-				// reset embed provider name
-				if ( $is_empty_provider ) {
-					$embed_provider = '';
-					$embed_provider_lowercase = '';
-				}
-			}
-			
-			$elements = $dom->getElementsByTagName( $tag );
-			$i = $elements->length - 1;
-			
-			// use regressive loop for replaceChild()
-			// see: https://www.php.net/manual/en/domnode.replacechild.php#50500
-			while ( $i > -1 ) {
-				$element = $elements->item( $i );
-				
-				foreach ( $replacements as $replacement ) {
-					if ( $replacement['element'] === $element ) {
-						$element->parentNode->replaceChild( $replacement['replace'], $replacement['element'] );
-					}
-				}
-				
-				$i--;
-			}
-			
-			$output = $dom->saveHTML( $dom->documentElement );
-		}
-		
-		libxml_use_internal_errors( false );
-		
-		return $output;
-	}
-	
-	/**
-	 * Replace oembed embeds with a container and hide the embed with an HTML comment.
-	 * 
-	 * @since	1.2.0
-	 * @version	1.0.0
-	 * 
-	 * @param	string	$output The original output
-	 * @param	string	$url The URL to the embed
-	 * @param	array	$args Additional arguments of the embed
-	 * @return	string The updated embed code
-	 */
-	public function replace_embeds_oembed( $output, $url, $args ) {
-		// do nothing in admin
-		if ( ! $this->usecache ) {
-			return $output;
-		}
-		
-		$embed_provider = '';
-		$embed_provider_lowercase = '';
-		$embed_providers = get_posts( [
-			'meta_key' => 'is_system',
-			'meta_value' => 'yes',
-			'numberposts' => -1,
-			'post_type' => 'epi_embed',
-		] );
-		
-		// get embed provider name
-		foreach ( $embed_providers as $provider ) {
-			$regex = get_post_meta( $provider->ID, 'regex_default', true );
-			$regex = '/' . trim( $regex, '/' ) . '/';
-			
-			// save name of provider and stop loop
-			if ( $regex !== '//' && preg_match( $regex, $url ) ) {
-				$args['post_id'] = $provider->ID;
-				$embed_provider = $provider->post_title;
-				$embed_provider_lowercase = $provider->post_name;
-				break;
-			}
-		}
-		
-		// replace youtube.com to youtube-nocookie.com
-		if ( $embed_provider === 'youtube' ) {
-			$output = str_replace( 'youtube.com', 'youtube-nocookie.com', $output );
-		}
-		
-		// check if cookie is set
-		if ( $embed_provider_lowercase !== 'default' && $this->is_always_active_provider( $embed_provider_lowercase ) ) {
-			return $output;
-		}
-		
-		// add two click to markup
-		return $this->get_output_template( $embed_provider, $embed_provider_lowercase, $output, $args );
-	}
-	
-	/**
-	 * Replace embeds in Divi Builder.
-	 * 
-	 * @since	1.2.0
-	 * 
-	 * @param	string		$item_embed The original output
-	 * @param	string		$url The URL of the embed
-	 * @return	string The updated embed code
-	 */
-	public function replace_embeds_divi( $item_embed, $url ) {
-		return $this->replace_embeds_oembed( $item_embed, $url, [] );
-	}
-	
-	/**
-	 * Replace Google Maps iframes.
-	 * 
-	 * @deprecated	1.2.0
-	 * @since		1.1.0
-	 * 
-	 * @param	string		$content The post content
-	 * @return	string The post content
-	 */
-	public function replace_google_maps( $content ) {
-		preg_match_all( self::IFRAME_REGEX, $content, $matches );
-		
-		if ( empty( $matches ) || empty( $matches[0] ) ) {
-			return $content;
-		}
-		
-		$embed_provider = 'Google Maps';
-		$embed_provider_lowercase = 'google-maps';
-		
-		// check if cookie is set
-		if ( $this->is_always_active_provider( $embed_provider_lowercase ) ) {
-			return $content;
-		}
-		
-		foreach ( $matches[0] as $match ) {
-			if ( strpos( $match, 'google.com/maps' ) === false ) {
-				continue;
-			}
-			
-			$overlay_output = $this->get_output_template( $embed_provider, $embed_provider_lowercase, $match );
-			$content = str_replace( $match, $overlay_output, $content );
-		}
-		
-		return $content;
-	}
-	
-	/**
 	 * Get the Embed Privacy cookie.
 	 * 
 	 * @return array|mixed|object|string The content of the cookie
@@ -524,6 +232,21 @@ class Embed_Privacy {
 		$object = json_decode( sanitize_text_field( wp_unslash( $_COOKIE['embed-privacy'] ) ) );
 		
 		return $object;
+	}
+	
+	/**
+	 * Get a unique instance of the class.
+	 * 
+	 * @since	1.1.0
+	 * 
+	 * @return	\epiphyt\Embed_Privacy\Embed_Privacy The single instance of this class
+	 */
+	public static function get_instance() {
+		if ( self::$instance === null ) {
+			self::$instance = new self();
+		}
+		
+		return self::$instance;
 	}
 	
 	/**
@@ -695,6 +418,116 @@ class Embed_Privacy {
 	}
 	
 	/**
+	 * Get a single overlay for all matching embeds.
+	 * 
+	 * @param	string	$content The original content
+	 * @param	string	$embed_provider The embed provider
+	 * @param	string	$embed_provider_lowercase The embed provider without spaces and in lowercase
+	 * @param	array	$args Additional arguments
+	 * @return	string The updated content
+	 */
+	public function get_single_overlay( $content, $embed_provider, $embed_provider_lowercase, $args ) {
+		libxml_use_internal_errors( true );
+		$dom = new DOMDocument();
+		$dom->loadHTML(
+			mb_convert_encoding(
+				$content,
+				'HTML-ENTITIES',
+				'UTF-8'
+			),
+			LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
+		);
+		$template_dom = new DOMDocument();
+		
+		foreach ( [ 'embed', 'iframe', 'object' ] as $tag ) {
+			$replacements = [];
+			
+			foreach ( $dom->getElementsByTagName( $tag ) as $element ) {
+				$is_empty_provider = ( empty( $embed_provider ) );
+				$parsed_url = wp_parse_url( home_url() );
+				
+				// ignore embeds from the same (sub-)domain
+				if ( strpos( $element->getAttribute( 'src' ), $parsed_url['host'] ) !== false ) {
+					continue;
+				}
+				
+				if ( ! empty ( $args['regex'] ) && ! preg_match( $args['regex'], $element->getAttribute( 'src' ) ) ) {
+					continue;
+				}
+				
+				if ( $is_empty_provider ) {
+					$parsed_url = wp_parse_url( $element->getAttribute( 'src' ) );
+					$embed_provider = $parsed_url['host'];
+					$embed_provider_lowercase = sanitize_title( $parsed_url['host'] );
+				}
+				
+				// get overlay template as DOM element
+				$template_dom->loadHTML(
+					mb_convert_encoding(
+						$this->get_output_template( $embed_provider, $embed_provider_lowercase, $dom->saveHTML( $element ), $args ),
+						'HTML-ENTITIES',
+						'UTF-8'
+					),
+					LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
+				);
+				$overlay = null;
+				
+				foreach ( $template_dom->getElementsByTagName( 'div' ) as $div ) {
+					if ( stripos( $div->getAttribute( 'class' ), 'embed-privacy-container' ) !== false ) {
+						$overlay = $div;
+						break;
+					}
+				}
+				
+				// store the elements to replace (see regressive loop down below)
+				$replacements[] = [
+					'element' => $element,
+					'replace' => $dom->importNode( $overlay, true ),
+				];
+				
+				// reset embed provider name
+				if ( $is_empty_provider ) {
+					$embed_provider = '';
+					$embed_provider_lowercase = '';
+				}
+			}
+			
+			$elements = $dom->getElementsByTagName( $tag );
+			$i = $elements->length - 1;
+			
+			// use regressive loop for replaceChild()
+			// see: https://www.php.net/manual/en/domnode.replacechild.php#50500
+			while ( $i > -1 ) {
+				$element = $elements->item( $i );
+				
+				foreach ( $replacements as $replacement ) {
+					if ( $replacement['element'] === $element ) {
+						$element->parentNode->replaceChild( $replacement['replace'], $replacement['element'] );
+					}
+				}
+				
+				$i--;
+			}
+			
+			$output = $dom->saveHTML( $dom->documentElement );
+		}
+		
+		libxml_use_internal_errors( false );
+		
+		return $output;
+	}
+	
+	/**
+	 * Determine whether this is an AMP response.
+	 * Note that this must only be called after the parse_query action.
+	 * 
+	 * @return	bool True if the current page is an AMP page, false otherwise
+	 */
+	private function is_amp() {
+		return function_exists( 'is_amp_endpoint' ) && is_amp_endpoint();
+	}
+	
+	/**
 	 * Check if a provider is always active.
 	 * 
 	 * @since	1.1.0
@@ -716,6 +549,173 @@ class Embed_Privacy {
 		}
 		
 		return false;
+	}
+	
+	/**
+	 * Load the translation files.
+	 */
+	public function load_textdomain() {
+		load_plugin_textdomain( 'embed-privacy', false, dirname( plugin_basename( $this->plugin_file ) ) . '/languages' );
+	}
+	
+	/**
+	 * Replace embeds with a container and hide the embed with an HTML comment.
+	 * 
+	 * @version	2.0.0
+	 * 
+	 * @param	string	$content The original content
+	 * @return	string The updated content
+	 */
+	public function replace_embeds( $content ) {
+		// do nothing in admin
+		if ( ! $this->usecache ) {
+			return;
+		}
+		
+		// get all non-system embed providers
+		$embed_providers = get_posts( [
+			'meta_query' => [
+				'relation' => 'OR',
+				[
+					'compare' => 'NOT EXISTS',
+					'key' => 'is_system',
+					'value' => 'yes',
+				],
+				[
+					'compare' => '!=',
+					'key' => 'is_system',
+					'value' => 'yes',
+				],
+			],
+			'numberposts' => -1,
+			'post_type' => 'epi_embed',
+		] );
+		
+		// get embed provider name
+		foreach ( $embed_providers as $provider ) {
+			$regex = trim( get_post_meta( $provider->ID, 'regex_default', true ), '/' );
+			
+			if ( ! empty( $regex ) ) {
+				$regex = '/' . $regex . '/';
+			}
+			
+			// get overlay for this provider
+			if ( ! empty( $regex ) && preg_match( $regex, $content ) ) {
+				$args['regex'] = $regex;
+				$args['post_id'] = $provider->ID;
+				$embed_provider = $provider->post_title;
+				$embed_provider_lowercase = $provider->post_name;
+				$content = $this->get_single_overlay( $content, $embed_provider, $embed_provider_lowercase, $args );
+			}
+		}
+		
+		// get default external content
+		$content = $this->get_single_overlay( $content, '', '', [] );
+		
+		return $content;
+	}
+	
+	/**
+	 * Replace oembed embeds with a container and hide the embed with an HTML comment.
+	 * 
+	 * @since	1.2.0
+	 * @version	1.0.0
+	 * 
+	 * @param	string	$output The original output
+	 * @param	string	$url The URL to the embed
+	 * @param	array	$args Additional arguments of the embed
+	 * @return	string The updated embed code
+	 */
+	public function replace_embeds_oembed( $output, $url, $args ) {
+		// do nothing in admin
+		if ( ! $this->usecache ) {
+			return $output;
+		}
+		
+		$embed_provider = '';
+		$embed_provider_lowercase = '';
+		$embed_providers = get_posts( [
+			'meta_key' => 'is_system',
+			'meta_value' => 'yes',
+			'numberposts' => -1,
+			'post_type' => 'epi_embed',
+		] );
+		
+		// get embed provider name
+		foreach ( $embed_providers as $provider ) {
+			$regex = get_post_meta( $provider->ID, 'regex_default', true );
+			$regex = '/' . trim( $regex, '/' ) . '/';
+			
+			// save name of provider and stop loop
+			if ( $regex !== '//' && preg_match( $regex, $url ) ) {
+				$args['post_id'] = $provider->ID;
+				$embed_provider = $provider->post_title;
+				$embed_provider_lowercase = $provider->post_name;
+				break;
+			}
+		}
+		
+		// replace youtube.com to youtube-nocookie.com
+		if ( $embed_provider === 'youtube' ) {
+			$output = str_replace( 'youtube.com', 'youtube-nocookie.com', $output );
+		}
+		
+		// check if cookie is set
+		if ( $embed_provider_lowercase !== 'default' && $this->is_always_active_provider( $embed_provider_lowercase ) ) {
+			return $output;
+		}
+		
+		// add two click to markup
+		return $this->get_output_template( $embed_provider, $embed_provider_lowercase, $output, $args );
+	}
+	
+	/**
+	 * Replace embeds in Divi Builder.
+	 * 
+	 * @since	1.2.0
+	 * 
+	 * @param	string		$item_embed The original output
+	 * @param	string		$url The URL of the embed
+	 * @return	string The updated embed code
+	 */
+	public function replace_embeds_divi( $item_embed, $url ) {
+		return $this->replace_embeds_oembed( $item_embed, $url, [] );
+	}
+	
+	/**
+	 * Replace Google Maps iframes.
+	 * 
+	 * @deprecated	1.2.0
+	 * @since		1.1.0
+	 * 
+	 * @param	string		$content The post content
+	 * @return	string The post content
+	 */
+	public function replace_google_maps( $content ) {
+		preg_match_all( self::IFRAME_REGEX, $content, $matches );
+		
+		if ( empty( $matches ) || empty( $matches[0] ) ) {
+			return $content;
+		}
+		
+		$embed_provider = 'Google Maps';
+		$embed_provider_lowercase = 'google-maps';
+		
+		// check if cookie is set
+		if ( $this->is_always_active_provider( $embed_provider_lowercase ) ) {
+			return $content;
+		}
+		
+		foreach ( $matches[0] as $match ) {
+			if ( strpos( $match, 'google.com/maps' ) === false ) {
+				continue;
+			}
+			
+			$overlay_output = $this->get_output_template( $embed_provider, $embed_provider_lowercase, $match );
+			$content = str_replace( $match, $overlay_output, $content );
+		}
+		
+		return $content;
 	}
 	
 	/**
