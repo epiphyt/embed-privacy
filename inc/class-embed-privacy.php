@@ -450,6 +450,10 @@ class Embed_Privacy {
 			LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
 		);
 		$template_dom = new DOMDocument();
+		$providers = get_posts( [
+			'numberposts' => -1,
+			'post_type' => 'epi_embed',
+		] );
 		
 		foreach ( [ 'embed', 'iframe', 'object' ] as $tag ) {
 			$replacements = [];
@@ -471,6 +475,19 @@ class Embed_Privacy {
 					$parsed_url = wp_parse_url( $element->getAttribute( 'src' ) );
 					$embed_provider = $parsed_url['host'];
 					$embed_provider_lowercase = sanitize_title( $parsed_url['host'] );
+					
+					// check URL for available provider
+					foreach ( $providers as $provider ) {
+						$regex = trim( get_post_meta( $provider->ID, 'regex_default', true ), '/' );
+						
+						if ( ! empty( $regex ) ) {
+							$regex = '/' . $regex . '/';
+						}
+						
+						if ( preg_match( $regex, $element->getAttribute( 'src' ) ) ) {
+							return $content;
+						}
+					}
 				}
 				
 				// get overlay template as DOM element
