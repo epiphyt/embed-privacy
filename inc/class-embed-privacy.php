@@ -598,7 +598,7 @@ class Embed_Privacy {
 	public function replace_embeds( $content ) {
 		// do nothing in admin
 		if ( ! $this->usecache ) {
-			return;
+			return $content;
 		}
 		
 		// get all non-system embed providers
