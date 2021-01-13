@@ -7,8 +7,6 @@ use function explode;
 use function file_exists;
 use function plugin_dir_path;
 use function plugin_dir_url;
-use function register_activation_hook;
-use function register_deactivation_hook;
 use function spl_autoload_register;
 use function str_replace;
 use function strtolower;
@@ -69,6 +67,3 @@ Embed_Privacy_Widget_Output_Filter::get_instance();
 $embed_privacy = Embed_Privacy::get_instance();
 $embed_privacy->set_plugin_file( __FILE__ );
 $embed_privacy->init();
-
-register_activation_hook( __FILE__, [ $embed_privacy, 'clear_embed_cache' ] );
-register_deactivation_hook( __FILE__, [ $embed_privacy, 'clear_embed_cache' ] );

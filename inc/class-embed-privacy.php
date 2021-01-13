@@ -40,6 +40,8 @@ use function microtime;
 use function plugin_basename;
 use function preg_match;
 use function preg_match_all;
+use function register_activation_hook;
+use function register_deactivation_hook;
 use function register_post_type;
 use function sanitize_text_field;
 use function sanitize_title;
@@ -174,6 +176,9 @@ class Embed_Privacy {
 		add_filter( 'the_content', [ $this, 'replace_embeds' ] );
 		
 		add_shortcode( 'embed_privacy_opt_out', [ $this, 'shortcode_opt_out' ] );
+		
+		register_activation_hook( $this->plugin_file, [ $this, 'clear_embed_cache' ] );
+		register_deactivation_hook( $this->plugin_file, [ $this, 'clear_embed_cache' ] );
 		
 		Admin::get_instance()->init();
 		Fields::get_instance()->init();
