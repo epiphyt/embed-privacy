@@ -6,9 +6,10 @@
  * @package		epiphyt\Embed_Privacy
  */
 document.addEventListener( 'DOMContentLoaded', function() {
-	var overlays = document.querySelectorAll( '.embed-privacy-overlay' );
 	var checkboxes = document.querySelectorAll( '.embed-privacy-inner .embed-privacy-input' );
 	var labels = document.querySelectorAll( '.embed-privacy-inner .embed-privacy-label' );
+	var overlays = document.querySelectorAll( '.embed-privacy-overlay' );
+	var overlayLinks = document.querySelectorAll( '.embed-privacy-overlay a' );
 	
 	for ( var i = 0; i < overlays.length; i++ ) {
 		overlays[ i ].addEventListener( 'click', function( event ) {
@@ -23,6 +24,13 @@ document.addEventListener( 'DOMContentLoaded', function() {
 	}
 	
 	optOut();
+	
+	for ( var i = 0; i < overlayLinks.length; i++ ) {
+		overlayLinks[ i ].addEventListener( 'click', function( event ) {
+			// don't trigger the overlays click
+			event.stopPropagation();
+		} );
+	}
 	
 	for ( var i = 0; i < checkboxes.length; i++ ) {
 		checkboxes[ i ].addEventListener( 'click', function( event ) {
