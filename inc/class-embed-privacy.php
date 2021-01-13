@@ -69,9 +69,9 @@ use const PHP_EOL;
 /**
  * Two click embed main class.
  * 
- * @author		Epiphyt
- * @license		GPL2
- * @package		epiphyt\Embed_Privacy
+ * @author	Epiphyt
+ * @license	GPL2
+ * @package	epiphyt\Embed_Privacy
  */
 class Embed_Privacy {
 	/**
@@ -230,7 +230,7 @@ class Embed_Privacy {
 	/**
 	 * Get the Embed Privacy cookie.
 	 * 
-	 * @return array|mixed|object|string The content of the cookie
+	 * @return	mixed The content of the cookie
 	 */
 	private function get_cookie() {
 		if ( empty( $_COOKIE['embed-privacy'] ) ) {
@@ -262,10 +262,10 @@ class Embed_Privacy {
 	 * 
 	 * @since	1.1.0
 	 * 
-	 * @param	string		$embed_provider The embed provider
-	 * @param	string		$embed_provider_lowercase The embed provider without spaces and in lowercase
-	 * @param	string		$output The output before replacing it
-	 * @param	array		$args Additional arguments
+	 * @param	string	$embed_provider The embed provider
+	 * @param	string	$embed_provider_lowercase The embed provider without spaces and in lowercase
+	 * @param	string	$output The output before replacing it
+	 * @param	array	$args Additional arguments
 	 * @return	string The overlay template
 	 */
 	public function get_output_template( $embed_provider, $embed_provider_lowercase, $output, $args = [] ) {
@@ -427,6 +427,8 @@ class Embed_Privacy {
 	
 	/**
 	 * Get a single overlay for all matching embeds.
+	 * 
+	 * @since	1.2.0
 	 * 
 	 * @param	string	$content The original content
 	 * @param	string	$embed_provider The embed provider
@@ -703,8 +705,8 @@ class Embed_Privacy {
 	 * 
 	 * @since	1.2.0
 	 * 
-	 * @param	string		$item_embed The original output
-	 * @param	string		$url The URL of the embed
+	 * @param	string	$item_embed The original output
+	 * @param	string	$url The URL of the embed
 	 * @return	string The updated embed code
 	 */
 	public function replace_embeds_divi( $item_embed, $url ) {
@@ -717,7 +719,7 @@ class Embed_Privacy {
 	 * @deprecated	1.2.0
 	 * @since		1.1.0
 	 * 
-	 * @param	string		$content The post content
+	 * @param	string	$content The post content
 	 * @return	string The post content
 	 */
 	public function replace_google_maps( $content ) {

@@ -30,9 +30,9 @@ use function wp_insert_post;
  * 
  * @since	1.2.0
  *
- * @author		Epiphyt
- * @license		GPL2
- * @package		epiphyt\Embed_Privacy
+ * @author	Epiphyt
+ * @license	GPL2
+ * @package	epiphyt\Embed_Privacy
  */
 class Migration {
 	/**
@@ -63,8 +63,8 @@ class Migration {
 	/**
 	 * Add an embed provider post.
 	 * 
-	 * @param	array				$embed Embed provider information
-	 * @param	\WP_Filesystem_Base	$wp_filesystem WordPress filesystem operation class
+	 * @param	array					$embed Embed provider information
+	 * @param	\WP_Filesystem_Direct	$wp_filesystem WordPress filesystem operation class
 	 */
 	private function add_embed( array $embed, $wp_filesystem ) {
 		$post_id = wp_insert_post( $embed );
@@ -89,8 +89,8 @@ class Migration {
 	
 	/**
 	 * Get a unique instance of the class.
-	 *
-	 * @return	\epiphyt\Embed_Privacy\Migration
+	 * 
+	 * @return	\epiphyt\Embed_Privacy\Migration The single instance of this class
 	 */
 	public static function get_instance() {
 		if ( self::$instance === null ) {
@@ -116,7 +116,7 @@ class Migration {
 	}
 	
 	/**
-	 * Run migrations
+	 * Run migrations.
 	 */
 	public function migrate() {
 		// load textdomain early for migrations

@@ -19,10 +19,10 @@ use function submit_button;
  * Admin related methods for Embed Privacy.
  * 
  * @since	1.2.0
- *
- * @author		Epiphyt
- * @license		GPL2
- * @package		epiphyt\Embed_Privacy
+ * 
+ * @author	Epiphyt
+ * @license	GPL2
+ * @package	epiphyt\Embed_Privacy
  */
 class Admin {
 	/**
@@ -77,8 +77,8 @@ class Admin {
 	
 	/**
 	 * Get a unique instance of the class.
-	 *
-	 * @return	\epiphyt\Embed_Privacy\Admin
+	 * 
+	 * @return	\epiphyt\Embed_Privacy\Admin The single instance of this class
 	 */
 	public static function get_instance() {
 		if ( self::$instance === null ) {

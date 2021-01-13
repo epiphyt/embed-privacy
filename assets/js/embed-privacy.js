@@ -1,9 +1,9 @@
 /**
  * Embed Privacy JavaScript functions.
  * 
- * @author		Epiphyt
- * @license		GPL2
- * @package		epiphyt\Embed_Privacy
+ * @author	Epiphyt
+ * @license	GPL2
+ * @package	epiphyt\Embed_Privacy
  */
 document.addEventListener( 'DOMContentLoaded', function() {
 	var checkboxes = document.querySelectorAll( '.embed-privacy-inner .embed-privacy-input' );
@@ -107,6 +107,8 @@ document.addEventListener( 'DOMContentLoaded', function() {
 	
 	/**
 	 * Opting in/out for embed providers.
+	 * 
+	 * @since	1.2.0
 	 */
 	function optOut() {
 		var optOutCheckboxes = document.querySelectorAll( '.embed-privacy-opt-out-input' );
@@ -181,11 +183,11 @@ document.addEventListener( 'DOMContentLoaded', function() {
 } );
 
 /**
- * Get a cookie
+ * Get a cookie.
  * 
  * @link	https://stackoverflow.com/a/24103596/3461955
  * 
- * @param	{String}		name The name of the cookie
+ * @param	{string}	name The name of the cookie
  */
 function get_cookie( name ) {
 	var nameEQ = name + '=';
@@ -201,7 +203,7 @@ function get_cookie( name ) {
 /**
  * Decode a string with HTML entities.
  * 
- * @param	{string}		content The content to decode
+ * @param	{string}	content The content to decode
  * @return	{string} The decoded content
  */
 function htmlentities_decode( content ) {
@@ -213,24 +215,24 @@ function htmlentities_decode( content ) {
 }
 
 /**
- * Remove a cookie
+ * Remove a cookie.
  * 
  * @link	https://stackoverflow.com/a/24103596/3461955
  * 
- * @param	{String}		name The name of the cookie
+ * @param	{string}	name The name of the cookie
  */
 function remove_cookie( name ) {
 	document.cookie = name + '=; expires=0; path=/';
 }
 
 /**
- * Set a cookie
+ * Set a cookie.
  * 
  * @link	https://stackoverflow.com/a/24103596/3461955
  * 
- * @param	{String}		name The name of the cookie
- * @param	{String}		value The value of the cookie
- * @param	{Number}		days The expiration in days
+ * @param	{string}	name The name of the cookie
+ * @param	{string}	value The value of the cookie
+ * @param	{number}	days The expiration in days
  */
 function set_cookie( name, value, days ) {
 	var expires = '';

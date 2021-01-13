@@ -48,9 +48,9 @@ use function wp_upload_bits;
  * 
  * @since	1.2.0
  *
- * @author		Epiphyt
- * @license		GPL2
- * @package		epiphyt\Embed_Privacy
+ * @author	Epiphyt
+ * @license	GPL2
+ * @package	epiphyt\Embed_Privacy
  */
 class Fields {
 	/**
@@ -90,8 +90,8 @@ class Fields {
 	
 	/**
 	 * Enqueue admin assets.
-	 *
-	 * @param	string		$hook The current hook
+	 * 
+	 * @param	string	$hook The current hook
 	 */
 	public function enqueue_admin_assets( $hook ) {
 		// we need it just on the post page
@@ -113,8 +113,8 @@ class Fields {
 	
 	/**
 	 * Get a unique instance of the class.
-	 *
-	 * @return	\epiphyt\Embed_Privacy\Fields
+	 * 
+	 * @return	\epiphyt\Embed_Privacy\Fields The single instance of this class
 	 */
 	public static function get_instance() {
 		if ( self::$instance === null ) {
@@ -403,7 +403,7 @@ class Fields {
 	
 	/**
 	 * Save the fields as post meta.
-	 *
+	 * 
 	 * @param	int			$post_id The ID of the post
 	 * @param	\WP_Post	$post The post object
 	 */
@@ -464,7 +464,7 @@ class Fields {
 	/**
 	 * Upload a file as attachment.
 	 * 
-	 * @param	array		$file The file to upload
+	 * @param	array	$file The file to upload
 	 * @return	int The attachment ID
 	 */
 	public function upload_file( array $file ) {

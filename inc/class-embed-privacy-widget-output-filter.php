@@ -11,6 +11,10 @@ use function ob_start;
  * 
  * @see		https://github.com/philipnewcomer/widget-output-filters
  * @since	1.1.0
+ * 
+ * @author	Epiphyt
+ * @license	GPL2
+ * @package	epiphyt\Embed_Privacy
  */
 class Embed_Privacy_Widget_Output_Filter {
 	/**
@@ -49,18 +53,18 @@ class Embed_Privacy_Widget_Output_Filter {
 	public $widget_options = [];
 	
 	/**
-	 * @var		Widget_Output_Filters The single instance of this class
+	 * @var		\epiphyt\Embed_Privacy\Embed_Privacy_Widget_Output_Filter
 	 */
-	private static $instance = null;
+	private static $instance;
 	
 	/**
 	 * Return the single instance of this class.
 	 * 
-	 * @return	Widget_Output_Filters The single instance of this class
+	 * @return	\epiphyt\Embed_Privacy\Embed_Privacy_Widget_Output_Filter The single instance of this class
 	 */
 	public static function get_instance() {
 		if ( self::$instance === null ) {
-			self::$instance = new self;
+			self::$instance = new self();
 		}
 		
 		return self::$instance;

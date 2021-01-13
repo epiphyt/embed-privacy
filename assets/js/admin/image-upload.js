@@ -1,9 +1,9 @@
 /**
  * Add support for image uploads.
  * 
- * @author		Epiphyt
- * @license		GPL2
- * @package		epiphyt\Embed_Privacy
+ * @author	Epiphyt
+ * @license	GPL2
+ * @package	epiphyt\Embed_Privacy
  */
 jQuery( document ).ready( function( $ ) {
 	// remove image
