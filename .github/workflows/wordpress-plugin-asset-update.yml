@@ -46,6 +46,5 @@ jobs:
     - name: WordPress.org plugin asset/readme update
       uses: 10up/action-wordpress-plugin-asset-update@master
       env:
-        README_NAME: README.md
         SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
         SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
