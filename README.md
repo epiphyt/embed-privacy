@@ -88,7 +88,7 @@ The shortcode `[embed_privacy_opt_out]` can be used to let users opt-out of embe
 [embed_privacy_opt_out headline="My custom headline"]
 `
 
-`subline` – Add a custom subline (default: Enable or disable embed providers globally. While an embed provider is enabled, its embedded content will be displayed directly on every page without asking you anymore.)
+`subline` – Add a custom subline (default: Enable or disable embed providers globally. While an embed provider is disabled, its embedded content will be displayed directly on every page without asking you anymore.)
 
 `
 [embed_privacy_opt_out subline="My custom subline"]

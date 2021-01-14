@@ -14,6 +14,7 @@ use function dirname;
 use function esc_attr;
 use function esc_html;
 use function esc_html__;
+use function esc_html_x;
 use function esc_url;
 use function file_exists;
 use function filemtime;
@@ -817,7 +818,7 @@ class Embed_Privacy {
 		$attributes = shortcode_atts( [
 			'headline' => __( 'Embed providers', 'embed-privacy' ),
 			'show_all' => 0,
-			'subline' => __( 'Enable or disable embed providers globally. While an embed provider is enabled, its embedded content will be displayed directly on every page without asking you anymore.', 'embed-privacy' ),
+			'subline' => __( 'Enable or disable embed providers globally. While an embed provider is disabled, its embedded content will be displayed directly on every page without asking you anymore.', 'embed-privacy' ),
 		], $attributes );
 		$cookie = $this->get_cookie();
 		$enabled_providers = array_keys( (array) $cookie );
@@ -881,7 +882,7 @@ class Embed_Privacy {
 			$microtime = str_replace( '.', '', microtime( true ) );
 			$output .= '<input type="checkbox" id="embed-privacy-provider-' . esc_attr( $provider->post_name ) . '-' . $microtime . '" ' . checked( $is_checked, true, false ) . ' class="embed-privacy-opt-out-input ' . ( $is_checked ? 'is-enabled' : 'is-disabled' ) . '" data-embed-provider="' . esc_attr( $provider->post_name ) . '">';
 			$output .= '<label class="embed-privacy-opt-out-label" for="embed-privacy-provider-' . esc_attr( $provider->post_name ) . '-' . $microtime . '" data-embed-provider="' . esc_attr( $provider->post_name ) . '">';
-			$enable_disable = '<span class="embed-privacy-provider-is-enabled">' . esc_html__( 'Disable', 'embed-privacy' ) . '</span><span class="embed-privacy-provider-is-disabled">' . esc_html__( 'Enable', 'embed-privacy' ) . '</span>';
+			$enable_disable = '<span class="embed-privacy-provider-is-enabled">' . esc_html_x( 'Disable', 'complete string: Disable <embed name>', 'embed-privacy' ) . '</span><span class="embed-privacy-provider-is-disabled">' . esc_html_x( 'Enable', 'complete string: Disable <embed name>', 'embed-privacy' ) . '</span>';
 			/* translators: 1: Enable/Disable, 2: embed provider title */
 			$output .= wp_kses( sprintf( __( '%1$s %2$s', 'embed-privacy' ), $enable_disable, esc_html( $provider->post_title ) ), [ 'span' => [ 'class' => true ] ] );
 			$output .= '</label><br>' . PHP_EOL;
