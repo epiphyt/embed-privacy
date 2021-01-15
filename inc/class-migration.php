@@ -4,9 +4,14 @@ use function __;
 use function _x;
 use function add_action;
 use function add_post_meta;
+use function array_column;
+use function array_search;
 use function dirname;
 use function file_exists;
 use function get_option;
+use function get_post_meta;
+use function get_post_thumbnail_id;
+use function get_posts;
 use function get_site_option;
 use function get_sites;
 use function is_int;
@@ -22,6 +27,7 @@ use function set_post_thumbnail;
 use function sprintf;
 use function switch_to_blog;
 use function update_option;
+use function update_post_meta;
 use function update_site_option;
 use function WP_Filesystem;
 use function wp_insert_post;
@@ -40,6 +46,11 @@ class Migration {
 	 * @var		\epiphyt\Embed_Privacy\Migration
 	 */
 	private static $instance;
+	
+	/**
+	 * @var		array Default embed providers
+	 */
+	private $providers = [];
 	
 	/**
 	 * Post Type constructor.
@@ -138,11 +149,19 @@ class Migration {
 		// load textdomain early for migrations
 		load_plugin_textdomain( 'embed-privacy', false, dirname( plugin_basename( Embed_Privacy::get_instance()->plugin_file ) ) . '/languages' );
 		
+		$recent_version = '1.2.1';
 		$version = $this->get_option( 'migrate_version', 'initial' );
 		
+		if ( $version !== $recent_version ) {
+			$this->register_default_embed_providers();
+		}
+		
 		switch ( $version ) {
-			case '1.2.0':
+			case $recent_version:
 				// most recent version, do nothing
+				break;
+			case '1.2.0':
+				$this->migrate_1_2_1();
 				break;
 			default:
 				// run all migrations
@@ -153,6 +172,8 @@ class Migration {
 	
 	/**
 	 * Migrations for version 1.2.0.
+	 * 
+	 * - Add default embed providers
 	 */
 	private function migrate_1_2_0() {
 		global $wp_filesystem;
@@ -163,7 +184,89 @@ class Migration {
 			WP_Filesystem();
 		}
 		
-		$embeds = [
+		// add embeds
+		if ( is_multisite() && is_plugin_active_for_network( Embed_Privacy::get_instance()->plugin_file ) ) {
+			$sites = get_sites( [
+				'number' => 10000,
+			] );
+			
+			foreach ( $sites as $site ) {
+				switch_to_blog( $site->blog_id );
+				
+				foreach ( $this->providers as $embed ) {
+					$this->add_embed( $embed, $wp_filesystem );
+				}
+			}
+			
+			restore_current_blog();
+		}
+		else {
+			foreach ( $this->providers as $embed ) {
+				$this->add_embed( $embed, $wp_filesystem );
+			}
+		}
+		
+		$this->update_option( 'migrate_version', '1.2.0' );
+	}
+	
+	/**
+	 * Migrations for version 1.2.1.
+	 * 
+	 * - Add missing meta data
+	 */
+	private function migrate_1_2_1() {
+		global $wp_filesystem;
+		
+		// initialize the WP filesystem if not exists
+		if ( empty( $wp_filesystem ) ) {
+			require_once( ABSPATH . 'wp-admin/includes/file.php' );
+			WP_Filesystem();
+		}
+		
+		$available_providers = get_posts( [
+			'numberposts' => -1,
+			'post_type' => 'epi_embed',
+		] );
+		
+		foreach ( $available_providers as $provider ) {
+			// get according default provider
+			$key = array_search( $provider->post_title, array_column( $this->providers, 'post_title' ) );
+			
+			// if no default provider, continue with next available provider
+			if ( ! $key ) {
+				continue;
+			}
+			
+			// update default meta data, if missing
+			foreach ( [ 'is_system', 'privacy_policy_url', 'regex_default' ] as $meta_key ) {
+				if ( ! get_post_meta( $provider->ID, $meta_key, true ) ) {
+					update_post_meta( $provider->ID, $meta_key, $this->providers[ $key ]['meta_input'][ $meta_key ] );
+				}
+			}
+			
+			// add post thumbnail, if missing
+			if ( ! get_post_thumbnail_id( $provider->ID ) ) {
+				if ( file_exists( plugin_dir_path( Embed_Privacy::get_instance()->plugin_file ) . 'assets/images/embed-' . $provider->post_name . '.png' ) ) {
+					$attachment_id = Fields::get_instance()->upload_file( [
+						'content' => $wp_filesystem->get_contents( plugin_dir_path( Embed_Privacy::get_instance()->plugin_file ) . 'assets/images/embed-' . $provider->post_name . '.png' ),
+						'name' => 'embed-' . $provider->post_name . '.png',
+					] );
+					
+					if ( is_int( $attachment_id ) ) {
+						set_post_thumbnail( $provider->ID, $attachment_id );
+					}
+				}
+			}
+		}
+		
+		$this->update_option( 'migrate_version', '1.2.1' );
+	}
+	
+	/**
+	 * Register default embed providers.
+	 */
+	public function register_default_embed_providers() {
+		$this->providers = [
 			[
 				'meta_input' => [
 					'is_system' => 'yes',
@@ -539,30 +642,6 @@ class Migration {
 				'post_type' => 'epi_embed',
 			],
 		];
-		
-		// add embeds
-		if ( is_multisite() && is_plugin_active_for_network( Embed_Privacy::get_instance()->plugin_file ) ) {
-			$sites = get_sites( [
-				'number' => 10000,
-			] );
-			
-			foreach ( $sites as $site ) {
-				switch_to_blog( $site->blog_id );
-				
-				foreach ( $embeds as $embed ) {
-					$this->add_embed( $embed, $wp_filesystem );
-				}
-			}
-			
-			restore_current_blog();
-		}
-		else {
-			foreach ( $embeds as $embed ) {
-				$this->add_embed( $embed, $wp_filesystem );
-			}
-		}
-		
-		$this->update_option( 'migrate_version', '1.2.0' );
 	}
 	
 	/**
