@@ -3,6 +3,7 @@ namespace epiphyt\Embed_Privacy;
 use function __;
 use function _x;
 use function add_action;
+use function add_post_meta;
 use function dirname;
 use function file_exists;
 use function get_option;
@@ -67,9 +68,24 @@ class Migration {
 	 * @param	\WP_Filesystem_Direct	$wp_filesystem WordPress filesystem operation class
 	 */
 	private function add_embed( array $embed, $wp_filesystem ) {
+		// since meta_input doesn't work on every multisite (I don't know why)
+		// extract meta data and use add_post_meta() afterwards
+		// see: https://github.com/epiphyt/embed-privacy/issues/14
+		if ( ! empty( $embed['meta_input'] ) ) {
+			$meta_data = $embed['meta_input'];
+			unset( $embed['meta_input'] );
+		}
+		
 		$post_id = wp_insert_post( $embed );
 		
 		if ( is_int( $post_id ) ) {
+			// add meta data
+			if ( isset( $meta_data ) ) {
+				foreach ( $meta_data as $meta_key => $meta_value ) {
+					add_post_meta( $post_id, $meta_key, $meta_value );
+				}
+			}
+			
 			// $post->post_name could contain a counter, which we don't want here
 			$post_name = sanitize_title( $embed['post_title'] );
 			
