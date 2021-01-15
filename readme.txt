@@ -85,19 +85,19 @@ Yes! You can use the shortcode `[embed_privacy_opt_out]` to add a list of embed 
 
 The shortcode `[embed_privacy_opt_out]` can be used to let users opt-out of embed providers that have been set to be always active by the user. It can have the following attributes:
 
-`headline` – Add a custom headline (default: Embed providers)
+<code>headline</code> – Add a custom headline (default: Embed providers)
 
 `
 [embed_privacy_opt_out headline="My custom headline"]
 `
 
-`subline` – Add a custom subline (default: Enable or disable embed providers globally. While an embed provider is disabled, its embedded content will be displayed directly on every page without asking you anymore.)
+<code>subline</code> – Add a custom subline (default: Enable or disable embed providers globally. While an embed provider is disabled, its embedded content will be displayed directly on every page without asking you anymore.)
 
 `
 [embed_privacy_opt_out subline="My custom subline"]
 `
 
-`show_all` – Whether to show all available embed providers or just the ones the user opted in (default: false)
+<code>show_all</code> – Whether to show all available embed providers or just the ones the user opted in (default: false)
 
 `
 [embed_privacy_opt_out show_all="1"]
