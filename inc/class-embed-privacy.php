@@ -532,24 +532,29 @@ class Embed_Privacy {
 				}
 			}
 			
-			$elements = $dom->getElementsByTagName( $tag );
-			$i = $elements->length - 1;
-			
-			// use regressive loop for replaceChild()
-			// see: https://www.php.net/manual/en/domnode.replacechild.php#50500
-			while ( $i > -1 ) {
-				$element = $elements->item( $i );
+			if ( ! empty( $replacements ) ) {
+				$elements = $dom->getElementsByTagName( $tag );
+				$i = $elements->length - 1;
 				
-				foreach ( $replacements as $replacement ) {
-					if ( $replacement['element'] === $element ) {
-						$element->parentNode->replaceChild( $replacement['replace'], $replacement['element'] );
+				// use regressive loop for replaceChild()
+				// see: https://www.php.net/manual/en/domnode.replacechild.php#50500
+				while ( $i > -1 ) {
+					$element = $elements->item( $i );
+					
+					foreach ( $replacements as $replacement ) {
+						if ( $replacement['element'] === $element ) {
+							$element->parentNode->replaceChild( $replacement['replace'], $replacement['element'] );
+						}
 					}
+					
+					$i--;
 				}
 				
-				$i--;
+				$output = $dom->saveHTML( $dom->documentElement );
 			}
-			
-			$output = $dom->saveHTML( $dom->documentElement );
+			else {
+				$output = $content;
+			}
 		}
 		
 		libxml_use_internal_errors( false );
