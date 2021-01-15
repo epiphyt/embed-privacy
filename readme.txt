@@ -120,6 +120,11 @@ We are [Epiphyt](https://epiph.yt/), your friendly neighborhood WordPress plugin
 
 == Changelog ==
 
+= 1.2.1 =
+* Fixed a bug where the page markup could be changed unexpectedly
+* Fixed a warning if an embed provider has no regular expressions
+* Improved migrations of embed provider meta data to make sure they have been added to the database
+
 = 1.2.0 =
 * Added support for managing embeds (add/remove/edit/disable)
 * Added support for caching plugins by adding a JavaScript detection for always active embed providers

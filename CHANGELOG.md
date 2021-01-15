@@ -1,5 +1,7 @@
 # Changelog
 
+## 1.2.1
+
 ## 1.2.0
 * Added support for managing embeds (add/remove/edit/disable)
 * Added support for caching plugins by adding a JavaScript detection for always active embed providers
