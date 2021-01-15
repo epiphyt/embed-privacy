@@ -491,6 +491,9 @@ class Embed_Privacy {
 						if ( ! empty( $regex ) ) {
 							$regex = '/' . $regex . '/';
 						}
+						else {
+							continue;
+						}
 						
 						if ( preg_match( $regex, $element->getAttribute( 'src' ) ) ) {
 							return $content;
