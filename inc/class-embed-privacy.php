@@ -243,9 +243,7 @@ class Embed_Privacy {
 			return '';
 		}
 		
-		$object = json_decode( sanitize_text_field( wp_unslash( $_COOKIE['embed-privacy'] ) ) );
-		
-		return $object;
+		return json_decode( sanitize_text_field( wp_unslash( $_COOKIE['embed-privacy'] ) ) );
 	}
 	
 	/**
@@ -851,7 +849,7 @@ class Embed_Privacy {
 		}
 		else {
 			if ( empty( $cookie ) ) {
-				return;
+				return '';
 			}
 			
 			$providers = [];
