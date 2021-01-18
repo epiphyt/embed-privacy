@@ -467,21 +467,28 @@ class Embed_Privacy {
 		foreach ( [ 'embed', 'iframe', 'object' ] as $tag ) {
 			$replacements = [];
 			
+			if ( $tag !== 'object' ) {
+				$attribute = 'src';
+			}
+			else {
+				$attribute = 'data';
+			}
+			
 			foreach ( $dom->getElementsByTagName( $tag ) as $element ) {
 				$is_empty_provider = ( empty( $embed_provider ) );
 				$parsed_url = wp_parse_url( home_url() );
 				
 				// ignore embeds from the same (sub-)domain
-				if ( strpos( $element->getAttribute( 'src' ), $parsed_url['host'] ) !== false ) {
+				if ( strpos( $element->getAttribute( $attribute ), $parsed_url['host'] ) !== false ) {
 					continue;
 				}
 				
-				if ( ! empty ( $args['regex'] ) && ! preg_match( $args['regex'], $element->getAttribute( 'src' ) ) ) {
+				if ( ! empty ( $args['regex'] ) && ! preg_match( $args['regex'], $element->getAttribute( $attribute ) ) ) {
 					continue;
 				}
 				
 				if ( $is_empty_provider ) {
-					$parsed_url = wp_parse_url( $element->getAttribute( 'src' ) );
+					$parsed_url = wp_parse_url( $element->getAttribute( $attribute ) );
 					$embed_provider = $parsed_url['host'];
 					$embed_provider_lowercase = sanitize_title( $parsed_url['host'] );
 					
@@ -496,7 +503,7 @@ class Embed_Privacy {
 							continue;
 						}
 						
-						if ( preg_match( $regex, $element->getAttribute( 'src' ) ) ) {
+						if ( preg_match( $regex, $element->getAttribute( $attribute ) ) ) {
 							return $content;
 						}
 					}
