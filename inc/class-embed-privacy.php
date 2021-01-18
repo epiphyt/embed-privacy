@@ -451,7 +451,8 @@ class Embed_Privacy {
 		$dom = new DOMDocument();
 		$dom->loadHTML(
 			mb_convert_encoding(
-				$content,
+				// adding root element, see https://github.com/epiphyt/embed-privacy/issues/22
+				'<html>' . $content . '</html>',
 				'HTML-ENTITIES',
 				'UTF-8'
 			),
@@ -559,7 +560,8 @@ class Embed_Privacy {
 		
 		libxml_use_internal_errors( false );
 		
-		return $output;
+		// remove root element, see https://github.com/epiphyt/embed-privacy/issues/22
+		return str_replace( [ '<html>', '</html>' ], '', $output );
 	}
 	
 	/**
