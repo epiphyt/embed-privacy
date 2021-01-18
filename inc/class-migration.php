@@ -6,6 +6,8 @@ use function add_action;
 use function add_post_meta;
 use function array_column;
 use function array_search;
+use function delete_option;
+use function delete_site_option;
 use function dirname;
 use function file_exists;
 use function get_option;
@@ -115,6 +117,20 @@ class Migration {
 	}
 	
 	/**
+	 * Delete an option either from the global multisite settings or the regular site.
+	 * 
+	 * @param	string	$option The option name
+	 * @return	bool True if the option was deleted, false otherwise
+	 */
+	private function delete_option( $option ) {
+		if ( is_multisite() && is_plugin_active_for_network( Embed_Privacy::get_instance()->plugin_file ) ) {
+			return delete_site_option( 'embed_privacy_' . $option );
+		}
+		
+		return delete_option( 'embed_privacy_' . $option );
+	}
+	
+	/**
 	 * Get a unique instance of the class.
 	 * 
 	 * @return	\epiphyt\Embed_Privacy\Migration The single instance of this class
@@ -146,6 +162,14 @@ class Migration {
 	 * Run migrations.
 	 */
 	public function migrate() {
+		// check for active migration
+		if ( $this->get_option( 'is_migrating' ) ) {
+			return;
+		}
+		
+		// start the migration
+		$this->update_option( 'is_migrating', true );
+		
 		// load textdomain early for migrations
 		load_plugin_textdomain( 'embed-privacy', false, dirname( plugin_basename( Embed_Privacy::get_instance()->plugin_file ) ) . '/languages' );
 		
@@ -168,6 +192,9 @@ class Migration {
 				$this->migrate_1_2_0();
 				break;
 		}
+		
+		// migration done
+		$this->delete_option( 'is_migrating' );
 	}
 	
 	/**
