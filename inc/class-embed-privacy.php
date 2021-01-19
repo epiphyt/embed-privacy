@@ -371,7 +371,7 @@ class Embed_Privacy {
 				
 				if ( $privacy_policy ) {
 					/* translators: 1: the embed provider, 2: opening <a> tag to the privacy policy, 3: closing </a> */
-					$content .= '<br>' . sprintf( wp_kses( __( 'Learn more in %1$s’s %2$sprivacy policy%3$s.' ), $allowed_tags ), esc_html( $embed_provider ), '<a href="' . esc_url( $privacy_policy ) . '" target="_blank">', '</a>' );
+					$content .= '<br>' . sprintf( wp_kses( __( 'Learn more in %1$s’s %2$sprivacy policy%3$s.', 'embed-privacy' ), $allowed_tags ), esc_html( $embed_provider ), '<a href="' . esc_url( $privacy_policy ) . '" target="_blank">', '</a>' );
 				}
 			}
 			else {
