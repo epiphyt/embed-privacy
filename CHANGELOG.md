@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.2
+* Added a check if a migration is already running
+* Fixed a bug where the page markup could be changed unexpectedly
+* `<object>` elements are now replaced correctly
+* Added a missing textdomain to a string
+* Excluded local embeds (with the same domain)
+* Fixed Amazon Kindle regex being too greedy
+
 ## 1.2.1
 * Fixed a bug where the page markup could be changed unexpectedly
 * Fixed a warning if an embed provider has no regular expressions
