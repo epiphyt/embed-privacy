@@ -68,6 +68,7 @@ use const EPI_EMBED_PRIVACY_URL;
 use const LIBXML_HTML_NODEFDTD;
 use const LIBXML_HTML_NOIMPLIED;
 use const PHP_EOL;
+use const PHP_URL_HOST;
 
 /**
  * Two click embed main class.
@@ -681,6 +682,12 @@ class Embed_Privacy {
 	public function replace_embeds_oembed( $output, $url, $args ) {
 		// do nothing in admin
 		if ( ! $this->usecache ) {
+			return $output;
+		}
+		
+		// check the current domain
+		// see: https://github.com/epiphyt/embed-privacy/issues/24
+		if ( strpos( $url, wp_parse_url( home_url(), PHP_URL_HOST ) ) !== false ) {
 			return $output;
 		}
 		
