@@ -8,6 +8,7 @@ use function add_shortcode;
 use function addslashes;
 use function apply_filters;
 use function array_keys;
+use function array_merge;
 use function checked;
 use function defined;
 use function dirname;
@@ -457,11 +458,15 @@ class Embed_Privacy {
 			),
 			LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
 		);
+		$is_empty_provider = ( empty( $embed_provider ) );
 		$template_dom = new DOMDocument();
-		$providers = get_posts( [
-			'numberposts' => -1,
-			'post_type' => 'epi_embed',
-		] );
+		
+		if ( $is_empty_provider ) {
+			$providers = get_posts( [
+				'numberposts' => -1,
+				'post_type' => 'epi_embed',
+			] );
+		}
 		
 		foreach ( [ 'embed', 'iframe', 'object' ] as $tag ) {
 			$replacements = [];
@@ -474,7 +479,6 @@ class Embed_Privacy {
 			}
 			
 			foreach ( $dom->getElementsByTagName( $tag ) as $element ) {
-				$is_empty_provider = ( empty( $embed_provider ) );
 				$parsed_url = wp_parse_url( home_url() );
 				
 				// ignore embeds from the same (sub-)domain
@@ -557,17 +561,14 @@ class Embed_Privacy {
 					$i--;
 				}
 				
-				$output = $dom->saveHTML( $dom->documentElement );
-			}
-			else {
-				$output = $content;
+				$content = $dom->saveHTML( $dom->documentElement );
 			}
 		}
 		
 		libxml_use_internal_errors( false );
 		
 		// remove root element, see https://github.com/epiphyt/embed-privacy/issues/22
-		return str_replace( [ '<html>', '</html>' ], '', $output );
+		return str_replace( [ '<html>', '</html>' ], '', $content );
 	}
 	
 	/**
@@ -643,6 +644,13 @@ class Embed_Privacy {
 			'numberposts' => -1,
 			'post_type' => 'epi_embed',
 		] );
+		$google_provider = get_posts( [
+			'meta_key' => 'is_system',
+			'meta_value' => 'yes',
+			'name' => 'google-maps',
+			'post_type' => 'epi_embed',
+		] );
+		$embed_providers += $google_provider;
 		
 		// get embed provider name
 		foreach ( $embed_providers as $provider ) {
