@@ -1,5 +1,6 @@
 <?php
 namespace epiphyt\Embed_Privacy;
+use WP_Post;
 use function __;
 use function _x;
 use function add_action;
@@ -23,6 +24,7 @@ use function load_plugin_textdomain;
 use function plugin_basename;
 use function plugin_dir_path;
 use function register_activation_hook;
+use function reset;
 use function restore_current_blog;
 use function sanitize_title;
 use function set_post_thumbnail;
@@ -53,6 +55,12 @@ class Migration {
 	 * @var		array Default embed providers
 	 */
 	private $providers = [];
+	
+	/**
+	 * @var		string Current migration version
+	 * @since	1.2.2
+	 */
+	private $version = '1.2.2';
 	
 	/**
 	 * Post Type constructor.
@@ -173,16 +181,18 @@ class Migration {
 		// load textdomain early for migrations
 		load_plugin_textdomain( 'embed-privacy', false, dirname( plugin_basename( Embed_Privacy::get_instance()->plugin_file ) ) . '/languages' );
 		
-		$recent_version = '1.2.1';
 		$version = $this->get_option( 'migrate_version', 'initial' );
 		
-		if ( $version !== $recent_version ) {
+		if ( $version !== $this->version ) {
 			$this->register_default_embed_providers();
 		}
 		
 		switch ( $version ) {
-			case $recent_version:
+			case $this->version:
 				// most recent version, do nothing
+				break;
+			case '1.2.1':
+				$this->migrate_1_2_2();
 				break;
 			case '1.2.0':
 				$this->migrate_1_2_1();
@@ -194,11 +204,14 @@ class Migration {
 		}
 		
 		// migration done
+		$this->update_option( 'migrate_version', $this->version );
 		$this->delete_option( 'is_migrating' );
 	}
 	
 	/**
 	 * Migrations for version 1.2.0.
+	 * 
+	 * @since	1.2.0
 	 * 
 	 * - Add default embed providers
 	 */
@@ -232,12 +245,12 @@ class Migration {
 				$this->add_embed( $embed, $wp_filesystem );
 			}
 		}
-		
-		$this->update_option( 'migrate_version', '1.2.0' );
 	}
 	
 	/**
 	 * Migrations for version 1.2.1.
+	 * 
+	 * @since	1.2.1
 	 * 
 	 * - Add missing meta data
 	 */
@@ -285,8 +298,32 @@ class Migration {
 				}
 			}
 		}
+	}
+	
+	/**
+	 * Migrations for version 1.2.2.
+	 * 
+	 * @since	1.2.2
+	 * 
+	 * - Update regex for Amazon Kindle
+	 */
+	private function migrate_1_2_2() {
+		$amazon_provider = get_posts( [
+			'meta_key' => 'is_system',
+			'meta_value' => 'yes',
+			'name' => 'amazon-kindle',
+			'post_type' => 'epi_embed',
+		] );
 		
-		$this->update_option( 'migrate_version', '1.2.1' );
+		if ( ! empty( $amazon_provider ) ) {
+			$amazon_provider = reset( $amazon_provider );
+		}
+		
+		if ( ! $amazon_provider instanceof WP_Post ) {
+			return;
+		}
+		
+		update_post_meta( $amazon_provider->ID, 'regex_default', '/\\\.?(ama?zo?n\\\.|a\\\.co\\\/|z\\\.cn\\\/)/' );
 	}
 	
 	/**
@@ -298,7 +335,7 @@ class Migration {
 				'meta_input' => [
 					'is_system' => 'yes',
 					'privacy_policy_url' => __( 'https://www.amazon.com/gp/help/customer/display.html?nodeId=GX7NJQ4ZB8MHFRNJ', 'embed-privacy' ),
-					'regex_default' => '/\\\.?(ama?zo?n\\\.|a\\\.co|z\\\.cn)/',
+					'regex_default' => '/\\\.?(ama?zo?n\\\.|a\\\.co\\\/|z\\\.cn\\\/)/',
 				],
 				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Amazon Kindle', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
