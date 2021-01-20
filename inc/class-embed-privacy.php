@@ -650,7 +650,7 @@ class Embed_Privacy {
 			'name' => 'google-maps',
 			'post_type' => 'epi_embed',
 		] );
-		$embed_providers += $google_provider;
+		$embed_providers = array_merge( $embed_providers, $google_provider );
 		
 		// get embed provider name
 		foreach ( $embed_providers as $provider ) {
