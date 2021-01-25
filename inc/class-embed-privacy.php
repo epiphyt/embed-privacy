@@ -1,6 +1,7 @@
 <?php
 namespace epiphyt\Embed_Privacy;
 use DOMDocument;
+use WP_Post;
 use function __;
 use function add_action;
 use function add_filter;
@@ -32,6 +33,7 @@ use function home_url;
 use function htmlentities;
 use function in_array;
 use function is_admin;
+use function is_numeric;
 use function is_plugin_active_for_network;
 use function json_decode;
 use function libxml_use_internal_errors;
@@ -218,6 +220,10 @@ class Embed_Privacy {
 	 * Enqueue our assets for the frontend.
 	 */
 	public function enqueue_assets() {
+		if ( ! $this->has_embed() ) {
+			return;
+		}
+		
 		$suffix = ( defined( 'WP_DEBUG' ) && WP_DEBUG ? '' : '.min' );
 		$css_file = EPI_EMBED_PRIVACY_BASE . 'assets/style/embed-privacy' . $suffix . '.css';
 		$css_file_url = EPI_EMBED_PRIVACY_URL . 'assets/style/embed-privacy' . $suffix . '.css';
@@ -569,6 +575,47 @@ class Embed_Privacy {
 		
 		// remove root element, see https://github.com/epiphyt/embed-privacy/issues/22
 		return str_replace( [ '<html>', '</html>' ], '', $content );
+	}
+	
+	/**
+	 * Check if a post contains an embed.
+	 * 
+	 * @param	\WP_Post|int|null	$post A post object, post ID or null
+	 * @return	bool True if a post contains an embed, false otherwise
+	 */
+	public function has_embed( $post = null ) {
+		if ( $post === null ) {
+			global $post;
+		}
+		
+		if ( is_numeric( $post ) ) {
+			$post = get_post( $post );
+		}
+		
+		if ( ! $post || ! $post instanceof WP_Post ) {
+			return false;
+		}
+		
+		$embed_providers = get_posts( [
+			'numberposts' => -1,
+			'post_type' => 'epi_embed',
+		] );
+		
+		// check post content
+		foreach ( $embed_providers as $provider ) {
+			$regex = trim( get_post_meta( $provider->ID, 'regex_default', true ), '/' );
+			
+			if ( empty( $regex ) ) {
+				continue;
+			}
+			
+			// get overlay for this provider
+			if ( preg_match( '/' . $regex . '/', $post->post_content ) ) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 	
 	/**
