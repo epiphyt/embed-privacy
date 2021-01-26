@@ -64,6 +64,8 @@ use function wp_json_encode;
 use function wp_kses;
 use function wp_localize_script;
 use function wp_parse_url;
+use function wp_register_script;
+use function wp_register_style;
 use function wp_unslash;
 use const DEBUG_MODE;
 use const EPI_EMBED_PRIVACY_BASE;
@@ -86,6 +88,11 @@ class Embed_Privacy {
 	 * @since		1.1.0
 	 */
 	const IFRAME_REGEX = '/<iframe(.*?)src="([^"]+)"([^>]*)>((?!<\/iframe).)*<\/iframe>/ms';
+	
+	/**
+	 * @var		bool Whether the current request has any embed processed by Embed Privacy
+	 */
+	public $has_embed = false;
 	
 	/**
 	 * @var		\epiphyt\Embed_Privacy\Embed_Privacy
@@ -176,7 +183,7 @@ class Embed_Privacy {
 		
 		add_filter( 'do_shortcode_tag', [ $this, 'replace_embeds' ] );
 		add_filter( 'embed_oembed_html', [ $this, 'replace_embeds_oembed' ], 10, 3 );
-		add_filter( 'embed_privacy_widget_output', [ $this, 'replace_embeds' ] );
+		add_filter( 'embed_privacy_widget_output', [ $this, 'replace_embeds' ], 10, 2 );
 		add_filter( 'et_builder_get_oembed', [ $this, 'replace_embeds_divi' ], 10, 2 );
 		add_filter( 'the_content', [ $this, 'replace_embeds' ] );
 		
@@ -220,24 +227,17 @@ class Embed_Privacy {
 	 * Enqueue our assets for the frontend.
 	 */
 	public function enqueue_assets() {
-		if ( ! $this->has_embed() ) {
-			return;
-		}
-		
 		$suffix = ( defined( 'WP_DEBUG' ) && WP_DEBUG ? '' : '.min' );
 		$css_file = EPI_EMBED_PRIVACY_BASE . 'assets/style/embed-privacy' . $suffix . '.css';
 		$css_file_url = EPI_EMBED_PRIVACY_URL . 'assets/style/embed-privacy' . $suffix . '.css';
 		
-		wp_enqueue_style( 'embed-privacy', $css_file_url, [], filemtime( $css_file ) );
+		wp_register_style( 'embed-privacy', $css_file_url, [], filemtime( $css_file ) );
 		
 		if ( ! $this->is_amp() ) {
 			$js_file = EPI_EMBED_PRIVACY_BASE . 'assets/js/embed-privacy' . $suffix . '.js';
 			$js_file_url = EPI_EMBED_PRIVACY_URL . 'assets/js/embed-privacy' . $suffix . '.js';
 			
-			wp_enqueue_script( 'embed-privacy', $js_file_url, [], filemtime( $js_file ) );
-			wp_localize_script( 'embed-privacy', 'embedPrivacy', [
-				'javascriptDetection' => get_option( 'embed_privacy_javascript_detection' ),
-			] );
+			wp_register_script( 'embed-privacy', $js_file_url, [], filemtime( $js_file ) );
 		}
 	}
 	
@@ -550,6 +550,7 @@ class Embed_Privacy {
 			}
 			
 			if ( ! empty( $replacements ) ) {
+				$this->has_embed = true;
 				$elements = $dom->getElementsByTagName( $tag );
 				$i = $elements->length - 1;
 				
@@ -580,6 +581,8 @@ class Embed_Privacy {
 	/**
 	 * Check if a post contains an embed.
 	 * 
+	 * @since	1.3.0
+	 * 
 	 * @param	\WP_Post|int|null	$post A post object, post ID or null
 	 * @return	bool True if a post contains an embed, false otherwise
 	 */
@@ -606,6 +609,10 @@ class Embed_Privacy {
 		
 		if ( ! $post || ! $post instanceof WP_Post ) {
 			return false;
+		}
+		
+		if ( $this->has_embed ) {
+			return true;
 		}
 		
 		$embed_providers = get_posts( [
@@ -674,15 +681,22 @@ class Embed_Privacy {
 	/**
 	 * Replace embeds with a container and hide the embed with an HTML comment.
 	 * 
-	 * @version	2.0.0
+	 * @since	1.2.0 Changed behaviour of the method
+	 * @since	1.3.0 Added optional parameter $widget_id
 	 * 
 	 * @param	string	$content The original content
+	 * @param	int		$widget_id The widget's ID, if any
 	 * @return	string The updated content
 	 */
-	public function replace_embeds( $content ) {
+	public function replace_embeds( $content, $widget_id = 0 ) {
 		// do nothing in admin
 		if ( ! $this->usecache ) {
 			return $content;
+		}
+		
+		// widgets already contain the embed code
+		if ( ! $this->has_embed && $widget_id && strpos( $content, '<div class="embed-privacy-overlay">' ) !== false ) {
+			$this->has_embed = true;
 		}
 		
 		// get all non-system embed providers
@@ -721,6 +735,7 @@ class Embed_Privacy {
 			
 			// get overlay for this provider
 			if ( ! empty( $regex ) && preg_match( $regex, $content ) ) {
+				$this->has_embed = true;
 				$args['regex'] = $regex;
 				$args['post_id'] = $provider->ID;
 				$embed_provider = $provider->post_title;
@@ -731,6 +746,14 @@ class Embed_Privacy {
 		
 		// get default external content
 		$content = $this->get_single_overlay( $content, '', '', [] );
+		
+		if ( $this->has_embed ) {
+			wp_enqueue_style( 'embed-privacy' );
+			wp_enqueue_script( 'embed-privacy' );
+			wp_localize_script( 'embed-privacy', 'embedPrivacy', [
+				'javascriptDetection' => get_option( 'embed_privacy_javascript_detection' ),
+			] );
+		}
 		
 		return $content;
 	}
@@ -774,6 +797,7 @@ class Embed_Privacy {
 			
 			// save name of provider and stop loop
 			if ( $regex !== '//' && preg_match( $regex, $url ) ) {
+				$this->has_embed = true;
 				$args['post_id'] = $provider->ID;
 				$embed_provider = $provider->post_title;
 				$embed_provider_lowercase = $provider->post_name;
