@@ -592,6 +592,18 @@ class Embed_Privacy {
 			$post = get_post( $post );
 		}
 		
+		/**
+		 * Allow overwriting the return value of has_embed().
+		 * If set to anything other than null, this value will be returned.
+		 * 
+		 * @param	null	$has_embed The default value
+		 */
+		$has_embed = apply_filters( 'embed_privacy_has_embed', null );
+		
+		if ( $has_embed !== null ) {
+			return $has_embed;
+		}
+		
 		if ( ! $post || ! $post instanceof WP_Post ) {
 			return false;
 		}
