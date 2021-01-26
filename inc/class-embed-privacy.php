@@ -90,6 +90,13 @@ class Embed_Privacy {
 	const IFRAME_REGEX = '/<iframe(.*?)src="([^"]+)"([^>]*)>((?!<\/iframe).)*<\/iframe>/ms';
 	
 	/**
+	 * @since	1.3.0
+	 * @var		array An array of embed providers
+	 */
+	public $embeds = [];
+	
+	/**
+	 * @since	1.3.0
 	 * @var		bool Whether the current request has any embed processed by Embed Privacy
 	 */
 	public $has_embed = false;
@@ -252,6 +259,80 @@ class Embed_Privacy {
 		}
 		
 		return json_decode( sanitize_text_field( wp_unslash( $_COOKIE['embed-privacy'] ) ) );
+	}
+	
+	/**
+	 * Get a specific type of embeds.
+	 * 
+	 * @since	1.3.0
+	 * 
+	 * @param	string	$type The embed type
+	 * @return	array A list of embeds
+	 */
+	public function get_embeds( $type = 'all' ) {
+		if ( ! empty( $this->embeds ) && isset( $this->embeds[ $type ] ) ) {
+			return $this->embeds[ $type ];
+		}
+		
+		if ( $type === 'all' && isset( $this->embeds['custom'] ) && isset( $this->embeds['oembed'] ) ) {
+			$this->embeds[ $type ] = array_merge( $this->embeds['custom'], $this->embeds['oembed'] );
+			
+			return $this->embeds[ $type ];
+		} 
+		
+		switch ( $type ) {
+			case 'custom':
+				$custom_providers = (array) get_posts( [
+					'meta_query' => [
+						'relation' => 'OR',
+						[
+							'compare' => 'NOT EXISTS',
+							'key' => 'is_system',
+							'value' => 'yes',
+						],
+						[
+							'compare' => '!=',
+							'key' => 'is_system',
+							'value' => 'yes',
+						],
+					],
+					'numberposts' => -1,
+					'order' => 'ASC',
+					'orderby' => 'post_title',
+					'post_type' => 'epi_embed',
+				] );
+				$google_provider = (array) get_posts( [
+					'meta_key' => 'is_system',
+					'meta_value' => 'yes',
+					'name' => 'google-maps',
+					'post_type' => 'epi_embed',
+				] );
+				$this->embeds['custom'] = array_merge( $custom_providers, $google_provider );
+				
+				return $this->embeds['custom'];
+			case 'oembed':
+				$embed_providers = get_posts( [
+					'meta_key' => 'is_system',
+					'meta_value' => 'yes',
+					'numberposts' => -1,
+					'order' => 'ASC',
+					'orderby' => 'post_title',
+					'post_type' => 'epi_embed',
+				] );
+				$this->embeds['oembed'] = $embed_providers;
+				
+				return $this->embeds['oembed'];
+			case 'all':
+			default:
+				$this->embeds['all'] = (array) get_posts( [
+					'numberposts' => -1,
+					'order' => 'ASC',
+					'orderby' => 'post_title',
+					'post_type' => 'epi_embed',
+				] );
+				
+				return $this->embeds['all'];
+		}
 	}
 	
 	/**
@@ -468,10 +549,7 @@ class Embed_Privacy {
 		$template_dom = new DOMDocument();
 		
 		if ( $is_empty_provider ) {
-			$providers = get_posts( [
-				'numberposts' => -1,
-				'post_type' => 'epi_embed',
-			] );
+			$providers = $this->get_embeds();
 		}
 		
 		foreach ( [ 'embed', 'iframe', 'object' ] as $tag ) {
@@ -615,10 +693,7 @@ class Embed_Privacy {
 			return true;
 		}
 		
-		$embed_providers = get_posts( [
-			'numberposts' => -1,
-			'post_type' => 'epi_embed',
-		] );
+		$embed_providers = $this->get_embeds();
 		
 		// check post content
 		foreach ( $embed_providers as $provider ) {
@@ -700,30 +775,7 @@ class Embed_Privacy {
 		}
 		
 		// get all non-system embed providers
-		$embed_providers = get_posts( [
-			'meta_query' => [
-				'relation' => 'OR',
-				[
-					'compare' => 'NOT EXISTS',
-					'key' => 'is_system',
-					'value' => 'yes',
-				],
-				[
-					'compare' => '!=',
-					'key' => 'is_system',
-					'value' => 'yes',
-				],
-			],
-			'numberposts' => -1,
-			'post_type' => 'epi_embed',
-		] );
-		$google_provider = get_posts( [
-			'meta_key' => 'is_system',
-			'meta_value' => 'yes',
-			'name' => 'google-maps',
-			'post_type' => 'epi_embed',
-		] );
-		$embed_providers = array_merge( $embed_providers, $google_provider );
+		$embed_providers = $this->get_embeds( 'custom' );
 		
 		// get embed provider name
 		foreach ( $embed_providers as $provider ) {
@@ -783,12 +835,7 @@ class Embed_Privacy {
 		
 		$embed_provider = '';
 		$embed_provider_lowercase = '';
-		$embed_providers = get_posts( [
-			'meta_key' => 'is_system',
-			'meta_value' => 'yes',
-			'numberposts' => -1,
-			'post_type' => 'epi_embed',
-		] );
+		$embed_providers = $this->get_embeds( 'oembed' );
 		
 		// get embed provider name
 		foreach ( $embed_providers as $provider ) {
@@ -935,12 +982,7 @@ class Embed_Privacy {
 		], $attributes );
 		$cookie = $this->get_cookie();
 		$enabled_providers = array_keys( (array) $cookie );
-		$embed_providers = get_posts( [
-			'numberposts' => -1,
-			'order' => 'ASC',
-			'orderby' => 'post_title',
-			'post_type' => 'epi_embed',
-		] );
+		$embed_providers = $this->get_embeds();
 		
 		if ( $attributes['show_all'] ) {
 			$providers = $embed_providers;
