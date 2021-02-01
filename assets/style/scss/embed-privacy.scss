@@ -22,9 +22,7 @@
 
 .embed-privacy-content {
 	height: 100%;
-	position: relative;
 	width: 100%;
-	z-index: 10; // explicitly set z-index lower than the one of .embed-privacy-overlay
 }
 
 .embed-privacy-overlay {
