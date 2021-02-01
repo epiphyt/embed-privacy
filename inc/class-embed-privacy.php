@@ -577,6 +577,14 @@ class Embed_Privacy {
 				
 				if ( $is_empty_provider ) {
 					$parsed_url = wp_parse_url( $element->getAttribute( $attribute ) );
+					
+					// embeds with relative paths have no host
+					// and they are local by definition, so do nothing
+					// see https://github.com/epiphyt/embed-privacy/issues/27
+					if ( empty( $parsed_url['host'] ) ) {
+						return $content;
+					}
+					
 					$embed_provider = $parsed_url['host'];
 					$embed_provider_lowercase = sanitize_title( $parsed_url['host'] );
 					
