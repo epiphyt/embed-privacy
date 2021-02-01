@@ -44,6 +44,7 @@ use function microtime;
 use function plugin_basename;
 use function preg_match;
 use function preg_match_all;
+use function preg_replace;
 use function register_activation_hook;
 use function register_deactivation_hook;
 use function register_post_type;
@@ -651,6 +652,13 @@ class Embed_Privacy {
 		}
 		
 		libxml_use_internal_errors( false );
+		
+		// embeds for other elements need to be handled manually
+		// make sure to test before if the regex matches
+		// see: https://github.com/epiphyt/embed-privacy/issues/26
+		if ( empty( $replacements ) && ! empty( $args['regex'] ) && ! $is_empty_provider ) {
+			$content = preg_replace( $args['regex'], $this->get_output_template( $embed_provider, $embed_provider_lowercase, $content, $args ), $content );
+		}
 		
 		// remove root element, see https://github.com/epiphyt/embed-privacy/issues/22
 		return str_replace( [ '<html>', '</html>' ], '', $content );
