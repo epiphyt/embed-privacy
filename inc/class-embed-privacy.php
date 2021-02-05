@@ -42,6 +42,8 @@ use function mb_convert_encoding;
 use function md5;
 use function microtime;
 use function plugin_basename;
+use function plugin_dir_path;
+use function plugin_dir_url;
 use function preg_match;
 use function preg_match_all;
 use function preg_replace;
@@ -406,6 +408,10 @@ class Embed_Privacy {
 		if ( $thumbnail_id ) {
 			$logo_path = get_attached_file( $thumbnail_id );
 			$logo_url = get_the_post_thumbnail_url( $args['post_id'] );
+		}
+		else if ( file_exists( plugin_dir_path( $this->plugin_file ) . 'assets/images/embed-' . $embed_provider_lowercase . '.png' ) ) {
+			$logo_path = plugin_dir_path( $this->plugin_file ) . 'assets/images/embed-' . $embed_provider_lowercase . '.png';
+			$logo_url = plugin_dir_url( $this->plugin_file ) . 'assets/images/embed-' . $embed_provider_lowercase . '.png';
 		}
 		
 		/**
