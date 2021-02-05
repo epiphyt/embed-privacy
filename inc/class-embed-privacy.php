@@ -515,6 +515,14 @@ class Embed_Privacy {
 		$markup .= '</style>';
 		$markup .= '</div>';
 		
+		/**
+		 * Filter the complete markup of the embed.
+		 * 
+		 * @param	string	$markup The markup
+		 * @param	string	$embed_provider The embed provider of this embed
+		 */
+		$markup = apply_filters( 'embed_privacy_markup', $markup, $embed_provider );
+		
 		return $markup;
 	}
 	
