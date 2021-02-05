@@ -55,7 +55,6 @@ use function sprintf;
 use function str_replace;
 use function stripos;
 use function strpos;
-use function switch_to_blog;
 use function trim;
 use function wp_enqueue_script;
 use function wp_enqueue_style;
@@ -212,22 +211,22 @@ class Embed_Privacy {
 	public function clear_embed_cache() {
 		global $wpdb;
 		
-		// the query to delete cache
-		$query = "DELETE FROM	$wpdb->postmeta
-				WHERE			meta_key LIKE '%_oembed_%'";
-		
 		if ( is_plugin_active_for_network( 'embed-privacy/embed-privacy.php' ) ) {
 			// on networks we need to iterate through every site
 			$sites = get_sites( 99999 );
 			
 			foreach ( $sites as $site ) {
-				switch_to_blog( $site );
-				
-				$wpdb->query( $query );
+				$wpdb->query(
+					"DELETE FROM	" . $wpdb->get_blog_prefix( $site->blog_id ) . "postmeta
+					WHERE			meta_key LIKE '%_oembed_%'"
+				 );
 			}
 		}
 		else {
-			$wpdb->query( $query );
+			$wpdb->query(
+				"DELETE FROM	$wpdb->postmeta
+				WHERE			meta_key LIKE '%_oembed_%'"
+			);
 		}
 	}
 	
