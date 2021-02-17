@@ -431,7 +431,7 @@ class Fields {
 			if ( is_array( $value ) ) {
 				$value = $this->sanitize_array( $value );
 			}
-			else if ( strpos( $field['name'], 'regex' === false ) ) {
+			else if ( strpos( $field['name'], 'regex') === false ) {
 				$value = sanitize_text_field( wp_unslash( $value ) );
 			}
 			
