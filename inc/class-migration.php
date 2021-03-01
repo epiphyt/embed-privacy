@@ -26,7 +26,6 @@ use function plugin_dir_path;
 use function register_activation_hook;
 use function reset;
 use function restore_current_blog;
-use function sanitize_title;
 use function set_post_thumbnail;
 use function sprintf;
 use function switch_to_blog;
@@ -85,10 +84,9 @@ class Migration {
 	/**
 	 * Add an embed provider post.
 	 * 
-	 * @param	array					$embed Embed provider information
-	 * @param	\WP_Filesystem_Direct	$wp_filesystem WordPress filesystem operation class
+	 * @param	array	$embed Embed provider information
 	 */
-	private function add_embed( array $embed, $wp_filesystem ) {
+	private function add_embed( array $embed ) {
 		// since meta_input doesn't work on every multisite (I don't know why)
 		// extract meta data and use add_post_meta() afterwards
 		// see: https://github.com/epiphyt/embed-privacy/issues/14
@@ -99,27 +97,10 @@ class Migration {
 		
 		$post_id = wp_insert_post( $embed );
 		
-		if ( is_int( $post_id ) ) {
-			// add meta data
-			if ( isset( $meta_data ) ) {
-				foreach ( $meta_data as $meta_key => $meta_value ) {
-					add_post_meta( $post_id, $meta_key, $meta_value );
-				}
-			}
-			
-			// $post->post_name could contain a counter, which we don't want here
-			$post_name = sanitize_title( $embed['post_title'] );
-			
-			// upload logo
-			if ( file_exists( plugin_dir_path( Embed_Privacy::get_instance()->plugin_file ) . 'assets/images/embed-' . $post_name . '.png' ) ) {
-				$attachment_id = Fields::get_instance()->upload_file( [
-					'content' => $wp_filesystem->get_contents( plugin_dir_path( Embed_Privacy::get_instance()->plugin_file ) . 'assets/images/embed-' . $post_name . '.png' ),
-					'name' => 'embed-' . $post_name . '.png',
-				] );
-				
-				if ( is_int( $attachment_id ) ) {
-					set_post_thumbnail( $post_id, $attachment_id );
-				}
+		// add meta data
+		if ( is_int( $post_id ) && isset( $meta_data ) ) {
+			foreach ( $meta_data as $meta_key => $meta_value ) {
+				add_post_meta( $post_id, $meta_key, $meta_value );
 			}
 		}
 	}
@@ -223,14 +204,6 @@ class Migration {
 	 * - Add default embed providers
 	 */
 	private function migrate_1_2_0() {
-		global $wp_filesystem;
-		
-		// initialize the WP filesystem if not exists
-		if ( empty( $wp_filesystem ) ) {
-			require_once( ABSPATH . 'wp-admin/includes/file.php' );
-			WP_Filesystem();
-		}
-		
 		// add embeds
 		if ( is_multisite() && is_plugin_active_for_network( Embed_Privacy::get_instance()->plugin_file ) ) {
 			$sites = get_sites( [
@@ -241,7 +214,7 @@ class Migration {
 				switch_to_blog( $site->blog_id );
 				
 				foreach ( $this->providers as $embed ) {
-					$this->add_embed( $embed, $wp_filesystem );
+					$this->add_embed( $embed );
 				}
 			}
 			
@@ -249,7 +222,7 @@ class Migration {
 		}
 		else {
 			foreach ( $this->providers as $embed ) {
-				$this->add_embed( $embed, $wp_filesystem );
+				$this->add_embed( $embed );
 			}
 		}
 	}
