@@ -191,10 +191,17 @@ class Migration {
 			case $this->version:
 				// most recent version, do nothing
 				break;
+			case '1.2.2':
+				// TODO: enable migration before release
+				//$this->migrate_1_3_0();
+				break;
 			case '1.2.1':
+				$this->migrate_1_3_0();
 				$this->migrate_1_2_2();
 				break;
 			case '1.2.0':
+				$this->migrate_1_3_0();
+				$this->migrate_1_2_2();
 				$this->migrate_1_2_1();
 				break;
 			default:
@@ -327,6 +334,32 @@ class Migration {
 	}
 	
 	/**
+	 * Migrations for version 1.3.0.
+	 * 
+	 * @since	1.3.0
+	 * 
+	 * - Update regex for Amazon Kindle
+	 */
+	private function migrate_1_3_0() {
+		$provider = get_posts( [
+			'meta_key' => 'is_system',
+			'meta_value' => 'yes',
+			'name' => 'google-maps',
+			'post_type' => 'epi_embed',
+		] );
+		
+		if ( ! empty( $provider ) ) {
+			$provider = reset( $provider );
+		}
+		
+		if ( ! $provider instanceof WP_Post ) {
+			return;
+		}
+		
+		update_post_meta( $provider->ID, 'regex_default', '/google\\\.com\\\/maps\\\/embed/' );
+	}
+	
+	/**
 	 * Register default embed providers.
 	 */
 	public function register_default_embed_providers() {
@@ -423,7 +456,7 @@ class Migration {
 				'meta_input' => [
 					'is_system' => 'yes',
 					'privacy_policy_url' => __( 'https://policies.google.com/privacy?hl=en', 'embed-privacy' ),
-					'regex_default' => '/google\\\.com\\\/maps/',
+					'regex_default' => '/google\\\.com\\\/maps\\\/embed/',
 				],
 				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Google Maps', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
