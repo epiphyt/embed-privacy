@@ -6,8 +6,10 @@ use function _x;
 use function add_action;
 use function add_post_meta;
 use function array_column;
+use function array_merge;
 use function array_search;
 use function delete_option;
+use function delete_post_thumbnail;
 use function delete_site_option;
 use function dirname;
 use function file_exists;
@@ -32,6 +34,7 @@ use function switch_to_blog;
 use function update_option;
 use function update_post_meta;
 use function update_site_option;
+use function wp_delete_attachment;
 use function WP_Filesystem;
 use function wp_insert_post;
 
@@ -314,22 +317,35 @@ class Migration {
 	 * - Update regex for Amazon Kindle
 	 */
 	private function migrate_1_3_0() {
-		$provider = get_posts( [
+		$providers = Embed_Privacy::get_instance()->get_embeds( 'oembed' );
+		$google_provider = (array) get_posts( [
 			'meta_key' => 'is_system',
 			'meta_value' => 'yes',
 			'name' => 'google-maps',
 			'post_type' => 'epi_embed',
 		] );
+		$providers = array_merge( $providers, $google_provider );
 		
-		if ( ! empty( $provider ) ) {
-			$provider = reset( $provider );
+		foreach ( $providers as $provider ) {
+			if ( ! $provider instanceof WP_Post ) {
+				continue;
+			}
+			
+			// delete post thumbnails
+			// see https://github.com/epiphyt/embed-privacy/issues/32
+			$thumbnail_id = get_post_thumbnail_id( $provider->ID );
+			
+			if ( $thumbnail_id ) {
+				delete_post_thumbnail( $provider );
+				wp_delete_attachment( $thumbnail_id, true );
+			}
+			
+			// make regex ungreedy
+			// see https://github.com/epiphyt/embed-privacy/issues/31
+			if ( $provider->post_name === 'google-maps' ) {
+				update_post_meta( $provider->ID, 'regex_default', '/google\\\.com\\\/maps\\\/embed/' );
+			}
 		}
-		
-		if ( ! $provider instanceof WP_Post ) {
-			return;
-		}
-		
-		update_post_meta( $provider->ID, 'regex_default', '/google\\\.com\\\/maps\\\/embed/' );
 	}
 	
 	/**
