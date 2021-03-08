@@ -976,7 +976,7 @@ class Embed_Privacy {
 					'title',
 				],
 				'hierarchical' => false,
-				'public' => true,
+				'public' => false,
 				'menu_icon' => 'dashicons-format-video',
 				'show_in_admin_bar' => false,
 				'show_in_menu' => false,
