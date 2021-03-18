@@ -89,7 +89,7 @@ class Admin {
 			'embed_privacy',
 			'embed_privacy_general',
 			[
-				'description' => __( 'Enable this detection, to check for embed providers via JavaScript on the client-side, rather than on your server. Enabling this option is recommended when using a caching plugin.', 'embed-privacy' ),
+				'description' => __( 'By enabling this option, checks for embed providers are made via JavaScript on the client-side rather than on your server. Enabling this option is recommended when using a caching plugin.', 'embed-privacy' ),
 				'name' => 'embed_privacy_javascript_detection',
 				'option_type' => 'option',
 				'title' => __( 'JavaScript detection for active providers', 'embed-privacy' ),
