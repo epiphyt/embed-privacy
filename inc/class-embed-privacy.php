@@ -65,6 +65,7 @@ use function wp_enqueue_script;
 use function wp_enqueue_style;
 use function wp_generate_uuid4;
 use function wp_get_attachment_url;
+use function wp_get_theme;
 use function wp_json_encode;
 use function wp_kses;
 use function wp_localize_script;
@@ -251,6 +252,15 @@ class Embed_Privacy {
 			$js_file_url = EPI_EMBED_PRIVACY_URL . 'assets/js/embed-privacy' . $suffix . '.js';
 			
 			wp_register_script( 'embed-privacy', $js_file_url, [], filemtime( $js_file ) );
+		}
+		
+		// Astra is too greedy at its CSS selectors
+		// see https://github.com/epiphyt/embed-privacy/issues/33
+		if ( wp_get_theme()->get( 'Name' ) === 'Astra' || wp_get_theme()->get( 'Template' ) === 'Astra' ) {
+			$css_file = EPI_EMBED_PRIVACY_BASE . 'assets/style/astra' . $suffix . '.css';
+			$css_file_url = EPI_EMBED_PRIVACY_URL . 'assets/style/astra' . $suffix . '.css';
+			
+			wp_enqueue_style( 'embed-privacy-astra', $css_file_url, [], filemtime( $css_file ) );
 		}
 	}
 	
