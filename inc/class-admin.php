@@ -48,22 +48,6 @@ class Admin {
 	public function init() {
 		add_action( 'admin_init', [ $this, 'init_settings' ] );
 		add_action( 'admin_menu', [ $this, 'register_menu' ] );
-		
-		add_filter( 'allowed_options', [ $this, 'allow_options' ] );
-	}
-	
-	/**
-	 * Register our options to save.
-	 * 
-	 * @param	array	$allowed_options Current allowed options
-	 * @return	array Updated allowed options
-	 */
-	public function allow_options( array $allowed_options ) {
-		$allowed_options['embed_privacy'] = [
-			'embed_privacy_javascript_detection',
-		];
-		
-		return $allowed_options;
 	}
 	
 	/**
@@ -92,7 +76,6 @@ class Admin {
 	 * Initialize the settings page.
 	 */
 	public function init_settings() {
-		register_setting( 'embed_privacy', 'embed_privacy_options' );
 		add_settings_section(
 			'embed_privacy_general',
 			null,
@@ -113,6 +96,7 @@ class Admin {
 				'type' => 'checkbox',
 			]
 		);
+		register_setting( 'embed_privacy', 'embed_privacy_javascript_detection' );
 	}
 	
 	/**
