@@ -31,9 +31,11 @@ use function get_posts;
 use function get_sites;
 use function get_the_ID;
 use function get_the_post_thumbnail_url;
+use function has_shortcode;
 use function home_url;
 use function htmlentities;
 use function in_array;
+use function is_a;
 use function is_admin;
 use function is_numeric;
 use function is_plugin_active;
@@ -261,6 +263,12 @@ class Embed_Privacy {
 			$css_file_url = EPI_EMBED_PRIVACY_URL . 'assets/style/astra' . $suffix . '.css';
 			
 			wp_enqueue_style( 'embed-privacy-astra', $css_file_url, [], filemtime( $css_file ) );
+		}
+		
+		global $post;
+		
+		if ( is_a( $post, 'WP_Post' ) && has_shortcode( $post->post_content, 'embed_privacy_opt_out' ) ) {
+			$this->print_assets();
 		}
 	}
 	
@@ -820,6 +828,19 @@ class Embed_Privacy {
 	}
 	
 	/**
+	 * Handle printing assets.
+	 * 
+	 * @since	1.3.0
+	 */
+	public function print_assets() {
+		wp_enqueue_script( 'embed-privacy' );
+		wp_enqueue_style( 'embed-privacy' );
+		wp_localize_script( 'embed-privacy', 'embedPrivacy', [
+			'javascriptDetection' => get_option( 'embed_privacy_javascript_detection' ),
+		] );
+	}
+	
+	/**
 	 * Replace embeds with a container and hide the embed with an HTML comment.
 	 * 
 	 * @since	1.2.0 Changed behaviour of the method
@@ -866,11 +887,7 @@ class Embed_Privacy {
 		$content = $this->get_single_overlay( $content, '', '', [] );
 		
 		if ( $this->has_embed ) {
-			wp_enqueue_style( 'embed-privacy' );
-			wp_enqueue_script( 'embed-privacy' );
-			wp_localize_script( 'embed-privacy', 'embedPrivacy', [
-				'javascriptDetection' => get_option( 'embed_privacy_javascript_detection' ),
-			] );
+			$this->print_assets();
 		}
 		
 		return $content;
