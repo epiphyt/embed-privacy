@@ -98,6 +98,21 @@ class Admin {
 		);
 		register_setting( 'embed_privacy', 'embed_privacy_javascript_detection' );
 		add_settings_field(
+			'embed_privacy_local_tweets',
+			__( 'Embeds', 'embed-privacy' ),
+			[ $this, 'get_field' ],
+			'embed_privacy',
+			'embed_privacy_general',
+			[
+				'description' => __( 'By enabling this option, tweets from Twitter are embedded locally as text without any connection to Twitter and no privacy overlay is required.', 'embed-privacy' ),
+				'name' => 'embed_privacy_local_tweets',
+				'option_type' => 'option',
+				'title' => __( 'Local tweets', 'embed-privacy' ),
+				'type' => 'checkbox',
+			]
+		);
+		register_setting( 'embed_privacy', 'embed_privacy_local_tweets' );
+		add_settings_field(
 			'embed_privacy_preserve_data_on_uninstall',
 			__( 'Data handling', 'embed-privacy' ),
 			[ $this, 'get_field' ],

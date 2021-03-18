@@ -1,5 +1,6 @@
 <?php
 namespace epiphyt\Embed_Privacy;
+use DOMXPath;
 use Elementor\Plugin;
 use DOMDocument;
 use WP_Post;
@@ -40,6 +41,7 @@ use function is_admin;
 use function is_numeric;
 use function is_plugin_active;
 use function is_plugin_active_for_network;
+use function is_string;
 use function json_decode;
 use function libxml_use_internal_errors;
 use function load_plugin_textdomain;
@@ -62,7 +64,9 @@ use function sprintf;
 use function str_replace;
 use function stripos;
 use function strpos;
+use function strtotime;
 use function trim;
+use function wp_date;
 use function wp_enqueue_script;
 use function wp_enqueue_style;
 use function wp_generate_uuid4;
@@ -395,6 +399,79 @@ class Embed_Privacy {
 		}
 		
 		return self::$instance;
+	}
+	
+	/**
+	 * Transform a tweet into a local one.
+	 * 
+	 * @since	1.3.0
+	 * 
+	 * @param	string	$html Embed code
+	 * @return	string Local embed
+	 */
+	private function get_local_tweet( $html ) {
+		libxml_use_internal_errors( true );
+		$dom = new DOMDocument();
+		$dom->loadHTML(
+			mb_convert_encoding(
+				'<html>' . $html . '</html>',
+				'HTML-ENTITIES',
+				'UTF-8'
+			),
+			LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
+		);
+		
+		// remove script tag
+		foreach ( $dom->getElementsByTagName( 'script' ) as $script ) {
+			$script->parentNode->removeChild( $script );
+		}
+		
+		$xpath = new DOMXPath( $dom );
+		
+		// get text node, which represents the author name
+		// and give it a span with class
+		foreach ( $xpath->query( '//blockquote/text()' ) as $node ) {
+			$author_node = $dom->createElement( 'span', $node->nodeValue );
+			$author_node->setAttribute( 'class', 'embed-privacy-author-meta' );
+			$node->parentNode->replaceChild( $author_node, $node );
+		}
+		
+		// wrap author name by a meta div
+		foreach ( $dom->getElementsByTagName( 'span' ) as $node ) {
+			if ( $node->getAttribute( 'class' ) !== 'embed-privacy-author-meta' ) {
+				continue;
+			}
+			
+			// create meta div
+			$parent_node = $dom->createElement( 'div' );
+			$parent_node->setAttribute( 'class', 'embed-privacy-tweet-meta' );
+			// append created div to blockquote
+			$node->parentNode->appendChild( $parent_node );
+			// move author meta inside meta div
+			$parent_node->appendChild( $node );
+		}
+		
+		foreach ( $dom->getElementsByTagName( 'a' ) as $link ) {
+			if ( ! preg_match( '/https?:\/\/twitter.com\/([^\/]+)\/status\/(\d+)/', $link->getAttribute( 'href' ) ) ) {
+				continue;
+			}
+			
+			// modify date in link to tweet
+			$l10n_date = wp_date( get_option( 'date_format' ), strtotime( $link->nodeValue ) );
+			
+			if ( is_string( $l10n_date ) ) {
+				$link->nodeValue = $l10n_date;
+			}
+			
+			// move link inside meta div
+			if ( is_a( $parent_node, 'DOMElement' ) ) {
+				$parent_node->appendChild( $link );
+			}
+		}
+		
+		$content = $dom->saveHTML( $dom->documentElement );
+		
+		return str_replace( [ '<html>', '</html>' ], [ '<div class="embed-privacy-local-tweet">', '</div>' ], $content );
 	}
 	
 	/**
@@ -935,9 +1012,13 @@ class Embed_Privacy {
 			}
 		}
 		
-		// replace youtube.com to youtube-nocookie.com
-		if ( $embed_provider === 'youtube' ) {
+		if ( $embed_provider_lowercase === 'youtube' ) {
+			// replace youtube.com to youtube-nocookie.com
 			$output = str_replace( 'youtube.com', 'youtube-nocookie.com', $output );
+		}
+		else if ( $embed_provider_lowercase === 'twitter' && get_option( 'embed_privacy_local_tweets' ) ) {
+			// check for local tweets
+			return $this->get_local_tweet( $output );
 		}
 		
 		// check if cookie is set
