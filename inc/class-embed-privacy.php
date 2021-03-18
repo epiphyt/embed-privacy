@@ -1,5 +1,6 @@
 <?php
 namespace epiphyt\Embed_Privacy;
+use Elementor\Plugin;
 use DOMDocument;
 use WP_Post;
 use function __;
@@ -28,12 +29,14 @@ use function get_post_meta;
 use function get_post_thumbnail_id;
 use function get_posts;
 use function get_sites;
+use function get_the_ID;
 use function get_the_post_thumbnail_url;
 use function home_url;
 use function htmlentities;
 use function in_array;
 use function is_admin;
 use function is_numeric;
+use function is_plugin_active;
 use function is_plugin_active_for_network;
 use function json_decode;
 use function libxml_use_internal_errors;
@@ -182,6 +185,7 @@ class Embed_Privacy {
 		// actions
 		add_action( 'init', [ $this, 'load_textdomain' ], 0 );
 		add_action( 'init', [ $this, 'set_post_type' ], 5 );
+		add_action( 'wp', [ $this, 'get_elementor_filters' ] );
 		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_assets' ] );
 		
 		// filters
@@ -261,6 +265,29 @@ class Embed_Privacy {
 		}
 		
 		return json_decode( sanitize_text_field( wp_unslash( $_COOKIE['embed-privacy'] ) ) );
+	}
+	
+	/**
+	 * Get filters for Elementor.
+	 * 
+	 * @since	1.3.0
+	 */
+	public function get_elementor_filters() {
+		if ( ! function_exists( 'is_plugin_active' ) ) {
+			include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+		}
+		
+		if (
+			! is_plugin_active( 'elementor/elementor.php' )
+			|| ! get_the_ID()
+			|| ! Plugin::$instance->db->is_built_with_elementor( get_the_ID() )
+		) {
+			return;
+		}
+		
+		// doesn't currently run with YouTube
+		// see https://github.com/elementor/elementor/issues/14276
+		add_filter( 'oembed_result', [ $this, 'replace_embeds_oembed' ], 10, 3 );
 	}
 	
 	/**
