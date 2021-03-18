@@ -23,7 +23,6 @@ use function is_multisite;
 use function is_plugin_active_for_network;
 use function load_plugin_textdomain;
 use function plugin_basename;
-use function register_activation_hook;
 use function reset;
 use function restore_current_blog;
 use function sprintf;
@@ -77,8 +76,7 @@ class Migration {
 		// thus, we need to check on every page load in the admin if there are
 		// new migrations
 		add_action( 'admin_init', [ $this, 'migrate' ] );
-		
-		register_activation_hook( Embed_Privacy::get_instance()->plugin_file, [ $this, 'migrate' ] );
+		add_action( 'activated_plugin', [ $this, 'migrate' ], 10, 2 );
 	}
 	
 	/**
@@ -109,10 +107,11 @@ class Migration {
 	 * Delete an option either from the global multisite settings or the regular site.
 	 * 
 	 * @param	string	$option The option name
+	 * @param	bool	$network Whether to force delete a site option or not
 	 * @return	bool True if the option was deleted, false otherwise
 	 */
-	private function delete_option( $option ) {
-		if ( is_multisite() && is_plugin_active_for_network( Embed_Privacy::get_instance()->plugin_file ) ) {
+	private function delete_option( $option, $network = false ) {
+		if ( is_multisite() && ( $network || is_plugin_active_for_network( Embed_Privacy::get_instance()->plugin_file ) ) ) {
 			return delete_site_option( 'embed_privacy_' . $option );
 		}
 		
@@ -137,10 +136,11 @@ class Migration {
 	 * 
 	 * @param	string	$option The option name
 	 * @param	mixed	$default The default value if the option is not set
+	 * @param	bool	$network Whether to force get a site option or not
 	 * @return	mixed Value set for the option
 	 */
-	private function get_option( $option, $default = false ) {
-		if ( is_multisite() && is_plugin_active_for_network( Embed_Privacy::get_instance()->plugin_file ) ) {
+	private function get_option( $option, $default = false, $network = false ) {
+		if ( is_multisite() && ( $network || is_plugin_active_for_network( Embed_Privacy::get_instance()->plugin_file ) ) ) {
 			return get_site_option( 'embed_privacy_' . $option, $default );
 		}
 		
@@ -150,19 +150,27 @@ class Migration {
 	/**
 	 * Run migrations.
 	 */
-	public function migrate() {
+	public function migrate( $plugin = '', $network_wide = false ) {
 		// check for active migration
-		if ( $this->get_option( 'is_migrating' ) ) {
+		if ( $this->get_option( 'is_migrating', false, $network_wide ) ) {
 			return;
 		}
 		
 		// start the migration
-		$this->update_option( 'is_migrating', true );
+		$this->update_option( 'is_migrating', true, $network_wide );
 		
 		// load textdomain early for migrations
 		load_plugin_textdomain( 'embed-privacy', false, dirname( plugin_basename( Embed_Privacy::get_instance()->plugin_file ) ) . '/languages' );
 		
-		$version = $this->get_option( 'migrate_version', 'initial' );
+		$version = $this->get_option( 'migrate_version', 'initial', $network_wide );
+		
+		// on initial activation, both 'admin_init' and 'activated_plugins' hooks get called
+		// ignore the one of 'admin_init' here
+		if ( $version === 'initial' && empty( $plugin ) ) {
+			$this->delete_option( 'is_migrating', $network_wide );
+			
+			return;
+		}
 		
 		if ( $version !== $this->version ) {
 			$this->register_default_embed_providers();
@@ -187,13 +195,13 @@ class Migration {
 				break;
 			default:
 				// run all migrations
-				$this->migrate_1_2_0();
+				$this->migrate_1_2_0( $network_wide );
 				break;
 		}
 		
 		// migration done
-		$this->update_option( 'migrate_version', $this->version );
-		$this->delete_option( 'is_migrating' );
+		$this->update_option( 'migrate_version', $this->version, $network_wide );
+		$this->delete_option( 'is_migrating', $network_wide );
 	}
 	
 	/**
@@ -203,9 +211,9 @@ class Migration {
 	 * 
 	 * - Add default embed providers
 	 */
-	private function migrate_1_2_0() {
+	private function migrate_1_2_0( $network ) {
 		// add embeds
-		if ( is_multisite() && is_plugin_active_for_network( Embed_Privacy::get_instance()->plugin_file ) ) {
+		if ( is_multisite() && ( $network || is_plugin_active_for_network( Embed_Privacy::get_instance()->plugin_file ) ) ) {
 			$sites = get_sites( [
 				'number' => 10000,
 			] );
@@ -718,10 +726,11 @@ class Migration {
 	 * 
 	 * @param	string	$option The option name
 	 * @param	mixed	$value The value to update
+	 * @param	bool	$network Whether to force update a site option or not
 	 * @return	mixed Value set for the option
 	 */
-	private function update_option( $option, $value ) {
-		if ( is_multisite() && is_plugin_active_for_network( Embed_Privacy::get_instance()->plugin_file ) ) {
+	private function update_option( $option, $value, $network = false ) {
+		if ( is_multisite() && ( $network || is_plugin_active_for_network( Embed_Privacy::get_instance()->plugin_file ) ) ) {
 			return update_site_option( 'embed_privacy_' . $option, $value );
 		}
 		
