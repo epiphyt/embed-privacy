@@ -12,7 +12,6 @@ use function delete_option;
 use function delete_post_thumbnail;
 use function delete_site_option;
 use function dirname;
-use function file_exists;
 use function get_option;
 use function get_post_meta;
 use function get_post_thumbnail_id;
@@ -24,11 +23,9 @@ use function is_multisite;
 use function is_plugin_active_for_network;
 use function load_plugin_textdomain;
 use function plugin_basename;
-use function plugin_dir_path;
 use function register_activation_hook;
 use function reset;
 use function restore_current_blog;
-use function set_post_thumbnail;
 use function sprintf;
 use function switch_to_blog;
 use function update_option;
@@ -264,20 +261,6 @@ class Migration {
 			foreach ( [ 'is_system', 'privacy_policy_url', 'regex_default' ] as $meta_key ) {
 				if ( ! get_post_meta( $provider->ID, $meta_key, true ) ) {
 					update_post_meta( $provider->ID, $meta_key, $this->providers[ $key ]['meta_input'][ $meta_key ] );
-				}
-			}
-			
-			// add post thumbnail, if missing
-			if ( ! get_post_thumbnail_id( $provider->ID ) ) {
-				if ( file_exists( plugin_dir_path( Embed_Privacy::get_instance()->plugin_file ) . 'assets/images/embed-' . $provider->post_name . '.png' ) ) {
-					$attachment_id = Fields::get_instance()->upload_file( [
-						'content' => $wp_filesystem->get_contents( plugin_dir_path( Embed_Privacy::get_instance()->plugin_file ) . 'assets/images/embed-' . $provider->post_name . '.png' ),
-						'name' => 'embed-' . $provider->post_name . '.png',
-					] );
-					
-					if ( is_int( $attachment_id ) ) {
-						set_post_thumbnail( $provider->ID, $attachment_id );
-					}
 				}
 			}
 		}
