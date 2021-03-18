@@ -97,6 +97,21 @@ class Admin {
 			]
 		);
 		register_setting( 'embed_privacy', 'embed_privacy_javascript_detection' );
+		add_settings_field(
+			'embed_privacy_preserve_data_on_uninstall',
+			__( 'Data handling', 'embed-privacy' ),
+			[ $this, 'get_field' ],
+			'embed_privacy',
+			'embed_privacy_general',
+			[
+				'description' => __( 'By enabling this option, all plugin data is preserved on uninstall.', 'embed-privacy' ),
+				'name' => 'embed_privacy_preserve_data_on_uninstall',
+				'option_type' => 'option',
+				'title' => __( 'Preserve data on uninstall', 'embed-privacy' ),
+				'type' => 'checkbox',
+			]
+		);
+		register_setting( 'embed_privacy', 'embed_privacy_preserve_data_on_uninstall' );
 	}
 	
 	/**
