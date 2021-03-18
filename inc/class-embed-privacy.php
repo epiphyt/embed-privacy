@@ -222,7 +222,7 @@ class Embed_Privacy {
 		
 		if ( is_plugin_active_for_network( 'embed-privacy/embed-privacy.php' ) ) {
 			// on networks we need to iterate through every site
-			$sites = get_sites( 99999 );
+			$sites = get_sites( [ 'number' => 99999 ] );
 			
 			foreach ( $sites as $site ) {
 				$wpdb->query(
