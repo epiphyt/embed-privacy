@@ -2,7 +2,9 @@ name: Plugin asset/readme update
 on:
   push:
     branches:
-    - master
+      - master
+    tags-ignore:
+      - '*'
 jobs:
   master:
     name: Push to master
