@@ -1,0 +1,15 @@
+.embed-privacy-container {
+	.embed-privacy-overlay {
+		position: relative;
+		
+		* {
+			height: auto;
+			position: static;
+			width: auto;
+		}
+		
+		.embed-privacy-logo {
+			height: 48px;
+		}
+	}
+}

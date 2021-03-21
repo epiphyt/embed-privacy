@@ -48,22 +48,6 @@ class Admin {
 	public function init() {
 		add_action( 'admin_init', [ $this, 'init_settings' ] );
 		add_action( 'admin_menu', [ $this, 'register_menu' ] );
-		
-		add_filter( 'allowed_options', [ $this, 'allow_options' ] );
-	}
-	
-	/**
-	 * Register our options to save.
-	 * 
-	 * @param	array	$allowed_options Current allowed options
-	 * @return	array Updated allowed options
-	 */
-	public function allow_options( array $allowed_options ) {
-		$allowed_options['embed_privacy'] = [
-			'embed_privacy_javascript_detection',
-		];
-		
-		return $allowed_options;
 	}
 	
 	/**
@@ -92,7 +76,6 @@ class Admin {
 	 * Initialize the settings page.
 	 */
 	public function init_settings() {
-		register_setting( 'embed_privacy', 'embed_privacy_options' );
 		add_settings_section(
 			'embed_privacy_general',
 			null,
@@ -106,13 +89,44 @@ class Admin {
 			'embed_privacy',
 			'embed_privacy_general',
 			[
-				'description' => __( 'Enable this detection, to check for embed providers via JavaScript on the client-side, rather than on your server. Enabling this option is recommended when using a caching plugin.', 'embed-privacy' ),
+				'description' => __( 'By enabling this option, checks for embed providers are made via JavaScript on the client-side rather than on your server. Enabling this option is recommended when using a caching plugin.', 'embed-privacy' ),
 				'name' => 'embed_privacy_javascript_detection',
 				'option_type' => 'option',
 				'title' => __( 'JavaScript detection for active providers', 'embed-privacy' ),
 				'type' => 'checkbox',
 			]
 		);
+		register_setting( 'embed_privacy', 'embed_privacy_javascript_detection' );
+		add_settings_field(
+			'embed_privacy_local_tweets',
+			__( 'Embeds', 'embed-privacy' ),
+			[ $this, 'get_field' ],
+			'embed_privacy',
+			'embed_privacy_general',
+			[
+				'description' => __( 'By enabling this option, tweets are embedded locally as text without any connection to Twitter, and no privacy overlay is required.', 'embed-privacy' ),
+				'name' => 'embed_privacy_local_tweets',
+				'option_type' => 'option',
+				'title' => __( 'Local tweets', 'embed-privacy' ),
+				'type' => 'checkbox',
+			]
+		);
+		register_setting( 'embed_privacy', 'embed_privacy_local_tweets' );
+		add_settings_field(
+			'embed_privacy_preserve_data_on_uninstall',
+			__( 'Data handling', 'embed-privacy' ),
+			[ $this, 'get_field' ],
+			'embed_privacy',
+			'embed_privacy_general',
+			[
+				'description' => __( 'By enabling this option, all plugin data is preserved on uninstall.', 'embed-privacy' ),
+				'name' => 'embed_privacy_preserve_data_on_uninstall',
+				'option_type' => 'option',
+				'title' => __( 'Preserve data on uninstall', 'embed-privacy' ),
+				'type' => 'checkbox',
+			]
+		);
+		register_setting( 'embed_privacy', 'embed_privacy_preserve_data_on_uninstall' );
 	}
 	
 	/**

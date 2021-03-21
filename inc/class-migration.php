@@ -6,11 +6,12 @@ use function _x;
 use function add_action;
 use function add_post_meta;
 use function array_column;
+use function array_merge;
 use function array_search;
 use function delete_option;
+use function delete_post_thumbnail;
 use function delete_site_option;
 use function dirname;
-use function file_exists;
 use function get_option;
 use function get_post_meta;
 use function get_post_thumbnail_id;
@@ -22,17 +23,14 @@ use function is_multisite;
 use function is_plugin_active_for_network;
 use function load_plugin_textdomain;
 use function plugin_basename;
-use function plugin_dir_path;
-use function register_activation_hook;
 use function reset;
 use function restore_current_blog;
-use function sanitize_title;
-use function set_post_thumbnail;
 use function sprintf;
 use function switch_to_blog;
 use function update_option;
 use function update_post_meta;
 use function update_site_option;
+use function wp_delete_attachment;
 use function WP_Filesystem;
 use function wp_insert_post;
 
@@ -60,7 +58,7 @@ class Migration {
 	 * @var		string Current migration version
 	 * @since	1.2.2
 	 */
-	private $version = '1.2.2';
+	private $version = '1.3.0';
 	
 	/**
 	 * Post Type constructor.
@@ -78,17 +76,15 @@ class Migration {
 		// thus, we need to check on every page load in the admin if there are
 		// new migrations
 		add_action( 'admin_init', [ $this, 'migrate' ] );
-		
-		register_activation_hook( Embed_Privacy::get_instance()->plugin_file, [ $this, 'migrate' ] );
+		add_action( 'activated_plugin', [ $this, 'migrate' ], 10, 2 );
 	}
 	
 	/**
 	 * Add an embed provider post.
 	 * 
-	 * @param	array					$embed Embed provider information
-	 * @param	\WP_Filesystem_Direct	$wp_filesystem WordPress filesystem operation class
+	 * @param	array	$embed Embed provider information
 	 */
-	private function add_embed( array $embed, $wp_filesystem ) {
+	private function add_embed( array $embed ) {
 		// since meta_input doesn't work on every multisite (I don't know why)
 		// extract meta data and use add_post_meta() afterwards
 		// see: https://github.com/epiphyt/embed-privacy/issues/14
@@ -99,27 +95,10 @@ class Migration {
 		
 		$post_id = wp_insert_post( $embed );
 		
-		if ( is_int( $post_id ) ) {
-			// add meta data
-			if ( isset( $meta_data ) ) {
-				foreach ( $meta_data as $meta_key => $meta_value ) {
-					add_post_meta( $post_id, $meta_key, $meta_value );
-				}
-			}
-			
-			// $post->post_name could contain a counter, which we don't want here
-			$post_name = sanitize_title( $embed['post_title'] );
-			
-			// upload logo
-			if ( file_exists( plugin_dir_path( Embed_Privacy::get_instance()->plugin_file ) . 'assets/images/embed-' . $post_name . '.png' ) ) {
-				$attachment_id = Fields::get_instance()->upload_file( [
-					'content' => $wp_filesystem->get_contents( plugin_dir_path( Embed_Privacy::get_instance()->plugin_file ) . 'assets/images/embed-' . $post_name . '.png' ),
-					'name' => 'embed-' . $post_name . '.png',
-				] );
-				
-				if ( is_int( $attachment_id ) ) {
-					set_post_thumbnail( $post_id, $attachment_id );
-				}
+		// add meta data
+		if ( is_int( $post_id ) && isset( $meta_data ) ) {
+			foreach ( $meta_data as $meta_key => $meta_value ) {
+				add_post_meta( $post_id, $meta_key, $meta_value );
 			}
 		}
 	}
@@ -128,10 +107,11 @@ class Migration {
 	 * Delete an option either from the global multisite settings or the regular site.
 	 * 
 	 * @param	string	$option The option name
+	 * @param	bool	$network Whether to force delete a site option or not
 	 * @return	bool True if the option was deleted, false otherwise
 	 */
-	private function delete_option( $option ) {
-		if ( is_multisite() && is_plugin_active_for_network( Embed_Privacy::get_instance()->plugin_file ) ) {
+	private function delete_option( $option, $network = false ) {
+		if ( is_multisite() && ( $network || is_plugin_active_for_network( Embed_Privacy::get_instance()->plugin_file ) ) ) {
 			return delete_site_option( 'embed_privacy_' . $option );
 		}
 		
@@ -156,10 +136,11 @@ class Migration {
 	 * 
 	 * @param	string	$option The option name
 	 * @param	mixed	$default The default value if the option is not set
+	 * @param	bool	$network Whether to force get a site option or not
 	 * @return	mixed Value set for the option
 	 */
-	private function get_option( $option, $default = false ) {
-		if ( is_multisite() && is_plugin_active_for_network( Embed_Privacy::get_instance()->plugin_file ) ) {
+	private function get_option( $option, $default = false, $network = false ) {
+		if ( is_multisite() && ( $network || is_plugin_active_for_network( Embed_Privacy::get_instance()->plugin_file ) ) ) {
 			return get_site_option( 'embed_privacy_' . $option, $default );
 		}
 		
@@ -169,19 +150,27 @@ class Migration {
 	/**
 	 * Run migrations.
 	 */
-	public function migrate() {
+	public function migrate( $plugin = '', $network_wide = false ) {
 		// check for active migration
-		if ( $this->get_option( 'is_migrating' ) ) {
+		if ( $this->get_option( 'is_migrating', false, $network_wide ) ) {
 			return;
 		}
 		
 		// start the migration
-		$this->update_option( 'is_migrating', true );
+		$this->update_option( 'is_migrating', true, $network_wide );
 		
 		// load textdomain early for migrations
 		load_plugin_textdomain( 'embed-privacy', false, dirname( plugin_basename( Embed_Privacy::get_instance()->plugin_file ) ) . '/languages' );
 		
-		$version = $this->get_option( 'migrate_version', 'initial' );
+		$version = $this->get_option( 'migrate_version', 'initial', $network_wide );
+		
+		// on initial activation, both 'admin_init' and 'activated_plugins' hooks get called
+		// ignore the one of 'admin_init' here
+		if ( $version === 'initial' && empty( $plugin ) ) {
+			$this->delete_option( 'is_migrating', $network_wide );
+			
+			return;
+		}
 		
 		if ( $version !== $this->version ) {
 			$this->register_default_embed_providers();
@@ -191,21 +180,77 @@ class Migration {
 			case $this->version:
 				// most recent version, do nothing
 				break;
+			case '1.2.2':
+				if ( is_multisite() && ( $network_wide || is_plugin_active_for_network( Embed_Privacy::get_instance()->plugin_file ) ) ) {
+					$sites = get_sites( [
+						'number' => 10000,
+					] );
+					
+					foreach ( $sites as $site ) {
+						switch_to_blog( $site->blog_id );
+						
+						$this->migrate_1_3_0();
+						$this->migrate_1_2_2();
+						$this->migrate_1_2_1();
+					}
+					
+					restore_current_blog();
+				}
+				else {
+					$this->migrate_1_3_0();
+				}
+				break;
 			case '1.2.1':
-				$this->migrate_1_2_2();
+				if ( is_multisite() && ( $network_wide || is_plugin_active_for_network( Embed_Privacy::get_instance()->plugin_file ) ) ) {
+					$sites = get_sites( [
+						'number' => 10000,
+					] );
+					
+					foreach ( $sites as $site ) {
+						switch_to_blog( $site->blog_id );
+						
+						$this->migrate_1_3_0();
+						$this->migrate_1_2_2();
+					}
+					
+					restore_current_blog();
+				}
+				else {
+					$this->migrate_1_3_0();
+					$this->migrate_1_2_2();
+				}
 				break;
 			case '1.2.0':
-				$this->migrate_1_2_1();
+				if ( is_multisite() && ( $network_wide || is_plugin_active_for_network( Embed_Privacy::get_instance()->plugin_file ) ) ) {
+					$sites = get_sites( [
+						'number' => 10000,
+					] );
+					
+					foreach ( $sites as $site ) {
+						switch_to_blog( $site->blog_id );
+						
+						$this->migrate_1_3_0();
+						$this->migrate_1_2_2();
+						$this->migrate_1_2_1();
+					}
+					
+					restore_current_blog();
+				}
+				else {
+					$this->migrate_1_3_0();
+					$this->migrate_1_2_2();
+					$this->migrate_1_2_1();
+				}
 				break;
 			default:
 				// run all migrations
-				$this->migrate_1_2_0();
+				$this->migrate_1_2_0( $network_wide );
 				break;
 		}
 		
 		// migration done
-		$this->update_option( 'migrate_version', $this->version );
-		$this->delete_option( 'is_migrating' );
+		$this->update_option( 'migrate_version', $this->version, $network_wide );
+		$this->delete_option( 'is_migrating', $network_wide );
 	}
 	
 	/**
@@ -215,17 +260,9 @@ class Migration {
 	 * 
 	 * - Add default embed providers
 	 */
-	private function migrate_1_2_0() {
-		global $wp_filesystem;
-		
-		// initialize the WP filesystem if not exists
-		if ( empty( $wp_filesystem ) ) {
-			require_once( ABSPATH . 'wp-admin/includes/file.php' );
-			WP_Filesystem();
-		}
-		
+	private function migrate_1_2_0( $network ) {
 		// add embeds
-		if ( is_multisite() && is_plugin_active_for_network( Embed_Privacy::get_instance()->plugin_file ) ) {
+		if ( is_multisite() && ( $network || is_plugin_active_for_network( Embed_Privacy::get_instance()->plugin_file ) ) ) {
 			$sites = get_sites( [
 				'number' => 10000,
 			] );
@@ -234,7 +271,7 @@ class Migration {
 				switch_to_blog( $site->blog_id );
 				
 				foreach ( $this->providers as $embed ) {
-					$this->add_embed( $embed, $wp_filesystem );
+					$this->add_embed( $embed );
 				}
 			}
 			
@@ -242,7 +279,7 @@ class Migration {
 		}
 		else {
 			foreach ( $this->providers as $embed ) {
-				$this->add_embed( $embed, $wp_filesystem );
+				$this->add_embed( $embed );
 			}
 		}
 	}
@@ -273,7 +310,7 @@ class Migration {
 			$key = array_search( $provider->post_title, array_column( $this->providers, 'post_title' ) );
 			
 			// if no default provider, continue with next available provider
-			if ( ! $key ) {
+			if ( $key === false ) {
 				continue;
 			}
 			
@@ -281,20 +318,6 @@ class Migration {
 			foreach ( [ 'is_system', 'privacy_policy_url', 'regex_default' ] as $meta_key ) {
 				if ( ! get_post_meta( $provider->ID, $meta_key, true ) ) {
 					update_post_meta( $provider->ID, $meta_key, $this->providers[ $key ]['meta_input'][ $meta_key ] );
-				}
-			}
-			
-			// add post thumbnail, if missing
-			if ( ! get_post_thumbnail_id( $provider->ID ) ) {
-				if ( file_exists( plugin_dir_path( Embed_Privacy::get_instance()->plugin_file ) . 'assets/images/embed-' . $provider->post_name . '.png' ) ) {
-					$attachment_id = Fields::get_instance()->upload_file( [
-						'content' => $wp_filesystem->get_contents( plugin_dir_path( Embed_Privacy::get_instance()->plugin_file ) . 'assets/images/embed-' . $provider->post_name . '.png' ),
-						'name' => 'embed-' . $provider->post_name . '.png',
-					] );
-					
-					if ( is_int( $attachment_id ) ) {
-						set_post_thumbnail( $provider->ID, $attachment_id );
-					}
 				}
 			}
 		}
@@ -324,6 +347,45 @@ class Migration {
 		}
 		
 		update_post_meta( $amazon_provider->ID, 'regex_default', '/\\\.?(ama?zo?n\\\.|a\\\.co\\\/|z\\\.cn\\\/)/' );
+	}
+	
+	/**
+	 * Migrations for version 1.3.0.
+	 * 
+	 * @since	1.3.0
+	 * 
+	 * - Update regex for Amazon Kindle
+	 */
+	private function migrate_1_3_0() {
+		$providers = Embed_Privacy::get_instance()->get_embeds( 'oembed' );
+		$google_provider = (array) get_posts( [
+			'meta_key' => 'is_system',
+			'meta_value' => 'yes',
+			'name' => 'google-maps',
+			'post_type' => 'epi_embed',
+		] );
+		$providers = array_merge( $providers, $google_provider );
+		
+		foreach ( $providers as $provider ) {
+			if ( ! $provider instanceof WP_Post ) {
+				continue;
+			}
+			
+			// delete post thumbnails
+			// see https://github.com/epiphyt/embed-privacy/issues/32
+			$thumbnail_id = get_post_thumbnail_id( $provider->ID );
+			
+			if ( $thumbnail_id ) {
+				delete_post_thumbnail( $provider );
+				wp_delete_attachment( $thumbnail_id, true );
+			}
+			
+			// make regex ungreedy
+			// see https://github.com/epiphyt/embed-privacy/issues/31
+			if ( $provider->post_name === 'google-maps' ) {
+				update_post_meta( $provider->ID, 'regex_default', '/google\\\.com\\\/maps\\\/embed/' );
+			}
+		}
 	}
 	
 	/**
@@ -423,7 +485,7 @@ class Migration {
 				'meta_input' => [
 					'is_system' => 'yes',
 					'privacy_policy_url' => __( 'https://policies.google.com/privacy?hl=en', 'embed-privacy' ),
-					'regex_default' => '/google\\\.com\\\/maps/',
+					'regex_default' => '/google\\\.com\\\/maps\\\/embed/',
 				],
 				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Google Maps', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
@@ -713,10 +775,11 @@ class Migration {
 	 * 
 	 * @param	string	$option The option name
 	 * @param	mixed	$value The value to update
+	 * @param	bool	$network Whether to force update a site option or not
 	 * @return	mixed Value set for the option
 	 */
-	private function update_option( $option, $value ) {
-		if ( is_multisite() && is_plugin_active_for_network( Embed_Privacy::get_instance()->plugin_file ) ) {
+	private function update_option( $option, $value, $network = false ) {
+		if ( is_multisite() && ( $network || is_plugin_active_for_network( Embed_Privacy::get_instance()->plugin_file ) ) ) {
 			return update_site_option( 'embed_privacy_' . $option, $value );
 		}
 		

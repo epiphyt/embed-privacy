@@ -1,6 +1,9 @@
 <?php
 namespace epiphyt\Embed_Privacy;
+use DOMXPath;
+use Elementor\Plugin;
 use DOMDocument;
+use WP_Post;
 use function __;
 use function add_action;
 use function add_filter;
@@ -27,12 +30,18 @@ use function get_post_meta;
 use function get_post_thumbnail_id;
 use function get_posts;
 use function get_sites;
+use function get_the_ID;
 use function get_the_post_thumbnail_url;
+use function has_shortcode;
 use function home_url;
 use function htmlentities;
 use function in_array;
+use function is_a;
 use function is_admin;
+use function is_numeric;
+use function is_plugin_active;
 use function is_plugin_active_for_network;
+use function is_string;
 use function json_decode;
 use function libxml_use_internal_errors;
 use function load_plugin_textdomain;
@@ -40,8 +49,11 @@ use function mb_convert_encoding;
 use function md5;
 use function microtime;
 use function plugin_basename;
+use function plugin_dir_path;
+use function plugin_dir_url;
 use function preg_match;
 use function preg_match_all;
+use function preg_replace;
 use function register_activation_hook;
 use function register_deactivation_hook;
 use function register_post_type;
@@ -52,16 +64,20 @@ use function sprintf;
 use function str_replace;
 use function stripos;
 use function strpos;
-use function switch_to_blog;
+use function strtotime;
 use function trim;
+use function wp_date;
 use function wp_enqueue_script;
 use function wp_enqueue_style;
 use function wp_generate_uuid4;
 use function wp_get_attachment_url;
+use function wp_get_theme;
 use function wp_json_encode;
 use function wp_kses;
 use function wp_localize_script;
 use function wp_parse_url;
+use function wp_register_script;
+use function wp_register_style;
 use function wp_unslash;
 use const DEBUG_MODE;
 use const EPI_EMBED_PRIVACY_BASE;
@@ -84,6 +100,18 @@ class Embed_Privacy {
 	 * @since		1.1.0
 	 */
 	const IFRAME_REGEX = '/<iframe(.*?)src="([^"]+)"([^>]*)>((?!<\/iframe).)*<\/iframe>/ms';
+	
+	/**
+	 * @since	1.3.0
+	 * @var		array An array of embed providers
+	 */
+	public $embeds = [];
+	
+	/**
+	 * @since	1.3.0
+	 * @var		bool Whether the current request has any embed processed by Embed Privacy
+	 */
+	public $has_embed = false;
 	
 	/**
 	 * @var		\epiphyt\Embed_Privacy\Embed_Privacy
@@ -164,6 +192,7 @@ class Embed_Privacy {
 		// actions
 		add_action( 'init', [ $this, 'load_textdomain' ], 0 );
 		add_action( 'init', [ $this, 'set_post_type' ], 5 );
+		add_action( 'wp', [ $this, 'get_elementor_filters' ] );
 		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_assets' ] );
 		
 		// filters
@@ -174,7 +203,7 @@ class Embed_Privacy {
 		
 		add_filter( 'do_shortcode_tag', [ $this, 'replace_embeds' ] );
 		add_filter( 'embed_oembed_html', [ $this, 'replace_embeds_oembed' ], 10, 3 );
-		add_filter( 'embed_privacy_widget_output', [ $this, 'replace_embeds' ] );
+		add_filter( 'embed_privacy_widget_output', [ $this, 'replace_embeds' ], 10, 2 );
 		add_filter( 'et_builder_get_oembed', [ $this, 'replace_embeds_divi' ], 10, 2 );
 		add_filter( 'the_content', [ $this, 'replace_embeds' ] );
 		
@@ -195,22 +224,22 @@ class Embed_Privacy {
 	public function clear_embed_cache() {
 		global $wpdb;
 		
-		// the query to delete cache
-		$query = "DELETE FROM	$wpdb->postmeta
-				WHERE			meta_key LIKE '%_oembed_%'";
-		
 		if ( is_plugin_active_for_network( 'embed-privacy/embed-privacy.php' ) ) {
 			// on networks we need to iterate through every site
-			$sites = get_sites( 99999 );
+			$sites = get_sites( [ 'number' => 99999 ] );
 			
 			foreach ( $sites as $site ) {
-				switch_to_blog( $site );
-				
-				$wpdb->query( $query );
+				$wpdb->query(
+					"DELETE FROM	" . $wpdb->get_blog_prefix( $site->blog_id ) . "postmeta
+					WHERE			meta_key LIKE '%_oembed_%'"
+				 );
 			}
 		}
 		else {
-			$wpdb->query( $query );
+			$wpdb->query(
+				"DELETE FROM	$wpdb->postmeta
+				WHERE			meta_key LIKE '%_oembed_%'"
+			);
 		}
 	}
 	
@@ -222,16 +251,28 @@ class Embed_Privacy {
 		$css_file = EPI_EMBED_PRIVACY_BASE . 'assets/style/embed-privacy' . $suffix . '.css';
 		$css_file_url = EPI_EMBED_PRIVACY_URL . 'assets/style/embed-privacy' . $suffix . '.css';
 		
-		wp_enqueue_style( 'embed-privacy', $css_file_url, [], filemtime( $css_file ) );
+		wp_register_style( 'embed-privacy', $css_file_url, [], filemtime( $css_file ) );
 		
 		if ( ! $this->is_amp() ) {
 			$js_file = EPI_EMBED_PRIVACY_BASE . 'assets/js/embed-privacy' . $suffix . '.js';
 			$js_file_url = EPI_EMBED_PRIVACY_URL . 'assets/js/embed-privacy' . $suffix . '.js';
 			
-			wp_enqueue_script( 'embed-privacy', $js_file_url, [], filemtime( $js_file ) );
-			wp_localize_script( 'embed-privacy', 'embedPrivacy', [
-				'javascriptDetection' => get_option( 'embed_privacy_javascript_detection' ),
-			] );
+			wp_register_script( 'embed-privacy', $js_file_url, [], filemtime( $js_file ) );
+		}
+		
+		// Astra is too greedy at its CSS selectors
+		// see https://github.com/epiphyt/embed-privacy/issues/33
+		if ( wp_get_theme()->get( 'Name' ) === 'Astra' || wp_get_theme()->get( 'Template' ) === 'Astra' ) {
+			$css_file = EPI_EMBED_PRIVACY_BASE . 'assets/style/astra' . $suffix . '.css';
+			$css_file_url = EPI_EMBED_PRIVACY_URL . 'assets/style/astra' . $suffix . '.css';
+			
+			wp_enqueue_style( 'embed-privacy-astra', $css_file_url, [], filemtime( $css_file ) );
+		}
+		
+		global $post;
+		
+		if ( is_a( $post, 'WP_Post' ) && has_shortcode( $post->post_content, 'embed_privacy_opt_out' ) ) {
+			$this->print_assets();
 		}
 	}
 	
@@ -249,6 +290,103 @@ class Embed_Privacy {
 	}
 	
 	/**
+	 * Get filters for Elementor.
+	 * 
+	 * @since	1.3.0
+	 */
+	public function get_elementor_filters() {
+		if ( ! function_exists( 'is_plugin_active' ) ) {
+			include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+		}
+		
+		if (
+			! is_plugin_active( 'elementor/elementor.php' )
+			|| ! get_the_ID()
+			|| ! Plugin::$instance->db->is_built_with_elementor( get_the_ID() )
+		) {
+			return;
+		}
+		
+		// doesn't currently run with YouTube
+		// see https://github.com/elementor/elementor/issues/14276
+		add_filter( 'oembed_result', [ $this, 'replace_embeds_oembed' ], 10, 3 );
+	}
+	
+	/**
+	 * Get a specific type of embeds.
+	 * 
+	 * @since	1.3.0
+	 * 
+	 * @param	string	$type The embed type
+	 * @return	array A list of embeds
+	 */
+	public function get_embeds( $type = 'all' ) {
+		if ( ! empty( $this->embeds ) && isset( $this->embeds[ $type ] ) ) {
+			return $this->embeds[ $type ];
+		}
+		
+		if ( $type === 'all' && isset( $this->embeds['custom'] ) && isset( $this->embeds['oembed'] ) ) {
+			$this->embeds[ $type ] = array_merge( $this->embeds['custom'], $this->embeds['oembed'] );
+			
+			return $this->embeds[ $type ];
+		} 
+		
+		switch ( $type ) {
+			case 'custom':
+				$custom_providers = (array) get_posts( [
+					'meta_query' => [
+						'relation' => 'OR',
+						[
+							'compare' => 'NOT EXISTS',
+							'key' => 'is_system',
+							'value' => 'yes',
+						],
+						[
+							'compare' => '!=',
+							'key' => 'is_system',
+							'value' => 'yes',
+						],
+					],
+					'numberposts' => -1,
+					'order' => 'ASC',
+					'orderby' => 'post_title',
+					'post_type' => 'epi_embed',
+				] );
+				$google_provider = (array) get_posts( [
+					'meta_key' => 'is_system',
+					'meta_value' => 'yes',
+					'name' => 'google-maps',
+					'post_type' => 'epi_embed',
+				] );
+				$this->embeds['custom'] = array_merge( $custom_providers, $google_provider );
+				
+				return $this->embeds['custom'];
+			case 'oembed':
+				$embed_providers = get_posts( [
+					'meta_key' => 'is_system',
+					'meta_value' => 'yes',
+					'numberposts' => -1,
+					'order' => 'ASC',
+					'orderby' => 'post_title',
+					'post_type' => 'epi_embed',
+				] );
+				$this->embeds['oembed'] = $embed_providers;
+				
+				return $this->embeds['oembed'];
+			case 'all':
+			default:
+				$this->embeds['all'] = (array) get_posts( [
+					'numberposts' => -1,
+					'order' => 'ASC',
+					'orderby' => 'post_title',
+					'post_type' => 'epi_embed',
+				] );
+				
+				return $this->embeds['all'];
+		}
+	}
+	
+	/**
 	 * Get a unique instance of the class.
 	 * 
 	 * @since	1.1.0
@@ -261,6 +399,79 @@ class Embed_Privacy {
 		}
 		
 		return self::$instance;
+	}
+	
+	/**
+	 * Transform a tweet into a local one.
+	 * 
+	 * @since	1.3.0
+	 * 
+	 * @param	string	$html Embed code
+	 * @return	string Local embed
+	 */
+	private function get_local_tweet( $html ) {
+		libxml_use_internal_errors( true );
+		$dom = new DOMDocument();
+		$dom->loadHTML(
+			mb_convert_encoding(
+				'<html>' . $html . '</html>',
+				'HTML-ENTITIES',
+				'UTF-8'
+			),
+			LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
+		);
+		
+		// remove script tag
+		foreach ( $dom->getElementsByTagName( 'script' ) as $script ) {
+			$script->parentNode->removeChild( $script );
+		}
+		
+		$xpath = new DOMXPath( $dom );
+		
+		// get text node, which represents the author name
+		// and give it a span with class
+		foreach ( $xpath->query( '//blockquote/text()' ) as $node ) {
+			$author_node = $dom->createElement( 'span', $node->nodeValue );
+			$author_node->setAttribute( 'class', 'embed-privacy-author-meta' );
+			$node->parentNode->replaceChild( $author_node, $node );
+		}
+		
+		// wrap author name by a meta div
+		foreach ( $dom->getElementsByTagName( 'span' ) as $node ) {
+			if ( $node->getAttribute( 'class' ) !== 'embed-privacy-author-meta' ) {
+				continue;
+			}
+			
+			// create meta div
+			$parent_node = $dom->createElement( 'div' );
+			$parent_node->setAttribute( 'class', 'embed-privacy-tweet-meta' );
+			// append created div to blockquote
+			$node->parentNode->appendChild( $parent_node );
+			// move author meta inside meta div
+			$parent_node->appendChild( $node );
+		}
+		
+		foreach ( $dom->getElementsByTagName( 'a' ) as $link ) {
+			if ( ! preg_match( '/https?:\/\/twitter.com\/([^\/]+)\/status\/(\d+)/', $link->getAttribute( 'href' ) ) ) {
+				continue;
+			}
+			
+			// modify date in link to tweet
+			$l10n_date = wp_date( get_option( 'date_format' ), strtotime( $link->nodeValue ) );
+			
+			if ( is_string( $l10n_date ) ) {
+				$link->nodeValue = $l10n_date;
+			}
+			
+			// move link inside meta div
+			if ( is_a( $parent_node, 'DOMElement' ) ) {
+				$parent_node->appendChild( $link );
+			}
+		}
+		
+		$content = $dom->saveHTML( $dom->documentElement );
+		
+		return str_replace( [ '<html>', '</html>' ], [ '<div class="embed-privacy-local-tweet">', '</div>' ], $content );
 	}
 	
 	/**
@@ -319,6 +530,10 @@ class Embed_Privacy {
 		if ( $thumbnail_id ) {
 			$logo_path = get_attached_file( $thumbnail_id );
 			$logo_url = get_the_post_thumbnail_url( $args['post_id'] );
+		}
+		else if ( file_exists( plugin_dir_path( $this->plugin_file ) . 'assets/images/embed-' . $embed_provider_lowercase . '.png' ) ) {
+			$logo_path = plugin_dir_path( $this->plugin_file ) . 'assets/images/embed-' . $embed_provider_lowercase . '.png';
+			$logo_url = plugin_dir_url( $this->plugin_file ) . 'assets/images/embed-' . $embed_provider_lowercase . '.png';
 		}
 		
 		/**
@@ -382,7 +597,7 @@ class Embed_Privacy {
 			}
 		}
 		else {
-			$content .= esc_html__( 'Click here to display content from external service.', 'embed-privacy' );
+			$content .= esc_html__( 'Click here to display content from an external service.', 'embed-privacy' );
 		}
 		
 		$content .= '</p>';
@@ -428,6 +643,14 @@ class Embed_Privacy {
 		$markup .= '</style>';
 		$markup .= '</div>';
 		
+		/**
+		 * Filter the complete markup of the embed.
+		 * 
+		 * @param	string	$markup The markup
+		 * @param	string	$embed_provider The embed provider of this embed
+		 */
+		$markup = apply_filters( 'embed_privacy_markup', $markup, $embed_provider );
+		
 		return $markup;
 	}
 	
@@ -462,10 +685,7 @@ class Embed_Privacy {
 		$template_dom = new DOMDocument();
 		
 		if ( $is_empty_provider ) {
-			$providers = get_posts( [
-				'numberposts' => -1,
-				'post_type' => 'epi_embed',
-			] );
+			$providers = $this->get_embeds();
 		}
 		
 		foreach ( [ 'embed', 'iframe', 'object' ] as $tag ) {
@@ -492,6 +712,14 @@ class Embed_Privacy {
 				
 				if ( $is_empty_provider ) {
 					$parsed_url = wp_parse_url( $element->getAttribute( $attribute ) );
+					
+					// embeds with relative paths have no host
+					// and they are local by definition, so do nothing
+					// see https://github.com/epiphyt/embed-privacy/issues/27
+					if ( empty( $parsed_url['host'] ) ) {
+						return $content;
+					}
+					
 					$embed_provider = $parsed_url['host'];
 					$embed_provider_lowercase = sanitize_title( $parsed_url['host'] );
 					
@@ -544,6 +772,7 @@ class Embed_Privacy {
 			}
 			
 			if ( ! empty( $replacements ) ) {
+				$this->has_embed = true;
 				$elements = $dom->getElementsByTagName( $tag );
 				$i = $elements->length - 1;
 				
@@ -567,8 +796,71 @@ class Embed_Privacy {
 		
 		libxml_use_internal_errors( false );
 		
+		// embeds for other elements need to be handled manually
+		// make sure to test before if the regex matches
+		// see: https://github.com/epiphyt/embed-privacy/issues/26
+		if ( empty( $replacements ) && ! empty( $args['regex'] ) && ! $is_empty_provider ) {
+			$content = preg_replace( $args['regex'], $this->get_output_template( $embed_provider, $embed_provider_lowercase, $content, $args ), $content );
+		}
+		
 		// remove root element, see https://github.com/epiphyt/embed-privacy/issues/22
 		return str_replace( [ '<html>', '</html>' ], '', $content );
+	}
+	
+	/**
+	 * Check if a post contains an embed.
+	 * 
+	 * @since	1.3.0
+	 * 
+	 * @param	\WP_Post|int|null	$post A post object, post ID or null
+	 * @return	bool True if a post contains an embed, false otherwise
+	 */
+	public function has_embed( $post = null ) {
+		if ( $post === null ) {
+			global $post;
+		}
+		
+		if ( is_numeric( $post ) ) {
+			$post = get_post( $post );
+		}
+		
+		/**
+		 * Allow overwriting the return value of has_embed().
+		 * If set to anything other than null, this value will be returned.
+		 * 
+		 * @param	null	$has_embed The default value
+		 */
+		$has_embed = apply_filters( 'embed_privacy_has_embed', null );
+		
+		if ( $has_embed !== null ) {
+			return $has_embed;
+		}
+		
+		if ( ! $post || ! $post instanceof WP_Post ) {
+			return false;
+		}
+		
+		if ( $this->has_embed ) {
+			return true;
+		}
+		
+		$embed_providers = $this->get_embeds();
+		
+		// check post content
+		foreach ( $embed_providers as $provider ) {
+			$regex = trim( get_post_meta( $provider->ID, 'regex_default', true ), '/' );
+			
+			if ( empty( $regex ) ) {
+				continue;
+			}
+			
+			// get overlay for this provider
+			if ( preg_match( '/' . $regex . '/', $post->post_content ) ) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 	
 	/**
@@ -613,44 +905,41 @@ class Embed_Privacy {
 	}
 	
 	/**
+	 * Handle printing assets.
+	 * 
+	 * @since	1.3.0
+	 */
+	public function print_assets() {
+		wp_enqueue_script( 'embed-privacy' );
+		wp_enqueue_style( 'embed-privacy' );
+		wp_localize_script( 'embed-privacy', 'embedPrivacy', [
+			'javascriptDetection' => get_option( 'embed_privacy_javascript_detection' ),
+		] );
+	}
+	
+	/**
 	 * Replace embeds with a container and hide the embed with an HTML comment.
 	 * 
-	 * @version	2.0.0
+	 * @since	1.2.0 Changed behaviour of the method
+	 * @since	1.3.0 Added optional parameter $widget_id
 	 * 
 	 * @param	string	$content The original content
+	 * @param	int		$widget_id The widget's ID, if any
 	 * @return	string The updated content
 	 */
-	public function replace_embeds( $content ) {
+	public function replace_embeds( $content, $widget_id = 0 ) {
 		// do nothing in admin
 		if ( ! $this->usecache ) {
 			return $content;
 		}
 		
+		// widgets already contain the embed code
+		if ( ! $this->has_embed && $widget_id && strpos( $content, '<div class="embed-privacy-overlay">' ) !== false ) {
+			$this->has_embed = true;
+		}
+		
 		// get all non-system embed providers
-		$embed_providers = get_posts( [
-			'meta_query' => [
-				'relation' => 'OR',
-				[
-					'compare' => 'NOT EXISTS',
-					'key' => 'is_system',
-					'value' => 'yes',
-				],
-				[
-					'compare' => '!=',
-					'key' => 'is_system',
-					'value' => 'yes',
-				],
-			],
-			'numberposts' => -1,
-			'post_type' => 'epi_embed',
-		] );
-		$google_provider = get_posts( [
-			'meta_key' => 'is_system',
-			'meta_value' => 'yes',
-			'name' => 'google-maps',
-			'post_type' => 'epi_embed',
-		] );
-		$embed_providers = array_merge( $embed_providers, $google_provider );
+		$embed_providers = $this->get_embeds( 'custom' );
 		
 		// get embed provider name
 		foreach ( $embed_providers as $provider ) {
@@ -662,6 +951,7 @@ class Embed_Privacy {
 			
 			// get overlay for this provider
 			if ( ! empty( $regex ) && preg_match( $regex, $content ) ) {
+				$this->has_embed = true;
 				$args['regex'] = $regex;
 				$args['post_id'] = $provider->ID;
 				$embed_provider = $provider->post_title;
@@ -672,6 +962,10 @@ class Embed_Privacy {
 		
 		// get default external content
 		$content = $this->get_single_overlay( $content, '', '', [] );
+		
+		if ( $this->has_embed ) {
+			$this->print_assets();
+		}
 		
 		return $content;
 	}
@@ -701,12 +995,7 @@ class Embed_Privacy {
 		
 		$embed_provider = '';
 		$embed_provider_lowercase = '';
-		$embed_providers = get_posts( [
-			'meta_key' => 'is_system',
-			'meta_value' => 'yes',
-			'numberposts' => -1,
-			'post_type' => 'epi_embed',
-		] );
+		$embed_providers = $this->get_embeds( 'oembed' );
 		
 		// get embed provider name
 		foreach ( $embed_providers as $provider ) {
@@ -715,6 +1004,7 @@ class Embed_Privacy {
 			
 			// save name of provider and stop loop
 			if ( $regex !== '//' && preg_match( $regex, $url ) ) {
+				$this->has_embed = true;
 				$args['post_id'] = $provider->ID;
 				$embed_provider = $provider->post_title;
 				$embed_provider_lowercase = $provider->post_name;
@@ -722,9 +1012,13 @@ class Embed_Privacy {
 			}
 		}
 		
-		// replace youtube.com to youtube-nocookie.com
-		if ( $embed_provider === 'youtube' ) {
+		if ( $embed_provider_lowercase === 'youtube' ) {
+			// replace youtube.com to youtube-nocookie.com
 			$output = str_replace( 'youtube.com', 'youtube-nocookie.com', $output );
+		}
+		else if ( $embed_provider_lowercase === 'twitter' && get_option( 'embed_privacy_local_tweets' ) ) {
+			// check for local tweets
+			return $this->get_local_tweet( $output );
 		}
 		
 		// check if cookie is set
@@ -817,7 +1111,7 @@ class Embed_Privacy {
 					'title',
 				],
 				'hierarchical' => false,
-				'public' => true,
+				'public' => false,
 				'menu_icon' => 'dashicons-format-video',
 				'show_in_admin_bar' => false,
 				'show_in_menu' => false,
@@ -848,16 +1142,11 @@ class Embed_Privacy {
 		$attributes = shortcode_atts( [
 			'headline' => __( 'Embed providers', 'embed-privacy' ),
 			'show_all' => 0,
-			'subline' => __( 'Enable or disable embed providers globally. While an embed provider is disabled, its embedded content will be displayed directly on every page without asking you anymore.', 'embed-privacy' ),
+			'subline' => __( 'Enable or disable embed providers globally. By enabling a provider, its embedded content will be displayed directly on every page without asking you anymore.', 'embed-privacy' ),
 		], $attributes );
 		$cookie = $this->get_cookie();
 		$enabled_providers = array_keys( (array) $cookie );
-		$embed_providers = get_posts( [
-			'numberposts' => -1,
-			'order' => 'ASC',
-			'orderby' => 'post_title',
-			'post_type' => 'epi_embed',
-		] );
+		$embed_providers = $this->get_embeds();
 		
 		if ( $attributes['show_all'] ) {
 			$providers = $embed_providers;
