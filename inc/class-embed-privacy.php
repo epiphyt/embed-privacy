@@ -597,7 +597,7 @@ class Embed_Privacy {
 			}
 		}
 		else {
-			$content .= esc_html__( 'Click here to display content from external service.', 'embed-privacy' );
+			$content .= esc_html__( 'Click here to display content from an external service.', 'embed-privacy' );
 		}
 		
 		$content .= '</p>';
