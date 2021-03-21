@@ -58,7 +58,7 @@ class Migration {
 	 * @var		string Current migration version
 	 * @since	1.2.2
 	 */
-	private $version = '1.2.2';
+	private $version = '1.3.0';
 	
 	/**
 	 * Post Type constructor.
@@ -181,17 +181,66 @@ class Migration {
 				// most recent version, do nothing
 				break;
 			case '1.2.2':
-				// TODO: enable migration before release
-				//$this->migrate_1_3_0();
+				if ( is_multisite() && ( $network_wide || is_plugin_active_for_network( Embed_Privacy::get_instance()->plugin_file ) ) ) {
+					$sites = get_sites( [
+						'number' => 10000,
+					] );
+					
+					foreach ( $sites as $site ) {
+						switch_to_blog( $site->blog_id );
+						
+						$this->migrate_1_3_0();
+						$this->migrate_1_2_2();
+						$this->migrate_1_2_1();
+					}
+					
+					restore_current_blog();
+				}
+				else {
+					$this->migrate_1_3_0();
+				}
 				break;
 			case '1.2.1':
-				$this->migrate_1_3_0();
-				$this->migrate_1_2_2();
+				if ( is_multisite() && ( $network_wide || is_plugin_active_for_network( Embed_Privacy::get_instance()->plugin_file ) ) ) {
+					$sites = get_sites( [
+						'number' => 10000,
+					] );
+					
+					foreach ( $sites as $site ) {
+						switch_to_blog( $site->blog_id );
+						
+						$this->migrate_1_3_0();
+						$this->migrate_1_2_2();
+					}
+					
+					restore_current_blog();
+				}
+				else {
+					$this->migrate_1_3_0();
+					$this->migrate_1_2_2();
+				}
 				break;
 			case '1.2.0':
-				$this->migrate_1_3_0();
-				$this->migrate_1_2_2();
-				$this->migrate_1_2_1();
+				if ( is_multisite() && ( $network_wide || is_plugin_active_for_network( Embed_Privacy::get_instance()->plugin_file ) ) ) {
+					$sites = get_sites( [
+						'number' => 10000,
+					] );
+					
+					foreach ( $sites as $site ) {
+						switch_to_blog( $site->blog_id );
+						
+						$this->migrate_1_3_0();
+						$this->migrate_1_2_2();
+						$this->migrate_1_2_1();
+					}
+					
+					restore_current_blog();
+				}
+				else {
+					$this->migrate_1_3_0();
+					$this->migrate_1_2_2();
+					$this->migrate_1_2_1();
+				}
 				break;
 			default:
 				// run all migrations
@@ -261,7 +310,7 @@ class Migration {
 			$key = array_search( $provider->post_title, array_column( $this->providers, 'post_title' ) );
 			
 			// if no default provider, continue with next available provider
-			if ( ! $key ) {
+			if ( $key === false ) {
 				continue;
 			}
 			
