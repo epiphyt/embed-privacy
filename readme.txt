@@ -120,6 +120,21 @@ We are [Epiphyt](https://epiph.yt/), your friendly neighborhood WordPress plugin
 
 == Changelog ==
 
+= 1.3.0 =
+* Added local tweets without overlay
+* Added option to preserve data on uninstall
+* Added compatibility with theme Astra
+* Added filter `embed_privacy_markup` for filtering the whole markup of an embed overlay
+* Added proper support for embeds on the current domain
+* Added support for embeds on other elements than `embed`, `iframe` and `object`
+* Enqueue assets only if needed
+* Removed images from media (which had been added in version 1.2.0) and use fallback images for default embed providers
+* Improved regular expression for Google Maps
+* Improved texts for clarity
+* Fixed visibility of custom post type
+* Fixed network-wide activation
+* Fixed clearing oEmbed cache
+
 = 1.2.2 =
 * Added a check if a migration is already running
 * Fixed a bug where the page markup could be changed unexpectedly
