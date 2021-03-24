@@ -689,6 +689,13 @@ class Embed_Privacy {
 		}
 		$parsed_url = wp_parse_url( home_url() );
 		$domain = $host = $parsed_url['host'];		
+		
+		// Get the main domain of our current host. notice, that WP can run 
+		// on a subdomain itself (e.g. blog.abc.de). If we want to check for 
+		// subdomains (e.g. mydatahub.abc.de), we have to look for subdomains 
+		// of our domain (abc.de), not for subdomains of the WP domain
+		//  (e.g. something.blog.abc.de).
+		
 		if ((!filter_var($host,FILTER_VALIDATE_IP)) && ($host !== 'localhost')) {
 		    // neither IP address or "localhost"
 
