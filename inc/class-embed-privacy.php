@@ -606,7 +606,7 @@ class Embed_Privacy {
 		
 		if ( $embed_provider_lowercase !== 'default' ) {
 			/* translators: the embed provider */
-			$content .= '<p><input id="' . esc_attr( $checkbox_id ) . '" type="checkbox" value="1" class="embed-privacy-input" data-embed-provider="' . esc_attr( $embed_provider_lowercase ) . '"><label for="' . esc_attr( $checkbox_id ) . '" class="embed-privacy-label" data-embed-provider="' . esc_attr( $embed_provider_lowercase ) . '">' . sprintf( esc_html__( 'Always display content from %s', 'embed-privacy' ), esc_html( $embed_provider ) ) . '</label></p>';
+			$content .= '<p class="embed-privacy-input-wrapper"><input id="' . esc_attr( $checkbox_id ) . '" type="checkbox" value="1" class="embed-privacy-input" data-embed-provider="' . esc_attr( $embed_provider_lowercase ) . '"><label for="' . esc_attr( $checkbox_id ) . '" class="embed-privacy-label" data-embed-provider="' . esc_attr( $embed_provider_lowercase ) . '">' . sprintf( esc_html__( 'Always display content from %s', 'embed-privacy' ), esc_html( $embed_provider ) ) . '</label></p>';
 		}
 		
 		/**
