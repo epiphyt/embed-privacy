@@ -687,6 +687,22 @@ class Embed_Privacy {
 		if ( $is_empty_provider ) {
 			$providers = $this->get_embeds();
 		}
+		$parsed_url = wp_parse_url( home_url() );
+		$domain = $host = $parsed_url['host'];		
+		if ((!filter_var($host,FILTER_VALIDATE_IP)) && ($host !== 'localhost')) {
+		    // neither IP address or "localhost"
+
+		    $domain_array = explode(".", str_replace('www.', '', $host));
+		    $count = count($domain_array);
+		    if( $count>=3 && strlen($domain_array[$count-2])==2 ) {
+			// SLD (example.co.uk)
+			$domain = implode('.', array_splice($domain_array, $count-3,3));
+		    } else if( $count>=2 ) {
+			// TLD (example.com)
+			$domain = implode('.', array_splice($domain_array, $count-2,2));
+		    }
+		}
+	
 		
 		foreach ( [ 'embed', 'iframe', 'object' ] as $tag ) {
 			$replacements = [];
@@ -699,12 +715,14 @@ class Embed_Privacy {
 			}
 			
 			foreach ( $dom->getElementsByTagName( $tag ) as $element ) {
-				$parsed_url = wp_parse_url( home_url() );
 				
-				// ignore embeds from the same (sub-)domain
-				if ( strpos( $element->getAttribute( $attribute ), $parsed_url['host'] ) !== false ) {
+				
+				// ignore embeds from the same (sub-)domain - also if we are on a (sub-)domain too.				
+				if ( strpos( $element->getAttribute( $attribute ), $domain ) !== false ) {
 					continue;
 				}
+				
+				// if  $parsed_url['host'] itself is a subdomain
 				
 				if ( ! empty ( $args['regex'] ) && ! preg_match( $args['regex'], $element->getAttribute( $attribute ) ) ) {
 					continue;
