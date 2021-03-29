@@ -414,7 +414,11 @@ class Fields {
 		}
 		
 		// verify capability
-		if ( ! current_user_can( 'edit_posts', $post_id ) ) {
+		if (
+			! current_user_can( 'edit_posts', $post_id )
+			|| ! defined( 'WP_CLI' )
+			|| ! WP_CLI
+		) {
 			wp_die( new WP_Error( 403, esc_html__( 'You are not allowed to edit an embed.', 'embed-privacy' ) ) );
 		}
 		
