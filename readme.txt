@@ -120,6 +120,9 @@ We are [Epiphyt](https://epiph.yt/), your friendly neighborhood WordPress plugin
 
 == Changelog ==
 
+= 1.3.2 =
+* Fixed general activation error
+
 = 1.3.1 =
 * Fixed a fatal error on uninstallation on non-multisite
 * Fixed activating via WP-CLI
