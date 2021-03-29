@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.3.1
+* Fixed a fatal error on uninstallation on non-multisite
+* Fixed activating via WP-CLI
+* Fixed deleting an option on uninstallation
+
 ## 1.3.0
 * Added local tweets without overlay
 * Added option to preserve data on uninstall
