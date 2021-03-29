@@ -42,6 +42,7 @@ use function wp_parse_args;
 use function wp_unslash;
 use function wp_update_attachment_metadata;
 use function wp_upload_bits;
+use const WP_CLI;
 
 /**
  * Custom fields for Embed Privacy.
@@ -415,9 +416,8 @@ class Fields {
 		
 		// verify capability
 		if (
-			! current_user_can( 'edit_posts', $post_id )
-			|| ! defined( 'WP_CLI' )
-			|| ! WP_CLI
+			! defined( 'WP_CLI' ) && ! current_user_can( 'edit_posts', $post_id )
+			|| defined( 'WP_CLI' ) && ! WP_CLI
 		) {
 			wp_die( new WP_Error( 403, esc_html__( 'You are not allowed to edit an embed.', 'embed-privacy' ) ) );
 		}
