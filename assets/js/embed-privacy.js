@@ -24,6 +24,11 @@ document.addEventListener( 'DOMContentLoaded', function() {
 	}
 	
 	optOut();
+	setMinHeight();
+	
+	window.addEventListener( 'resize', function() {
+		setMinHeight();
+	} );
 	
 	for ( var i = 0; i < overlayLinks.length; i++ ) {
 		overlayLinks[ i ].addEventListener( 'click', function( event ) {
@@ -178,6 +183,25 @@ document.addEventListener( 'DOMContentLoaded', function() {
 			
 			// append it to body
 			embedContent.appendChild( element );
+		}
+	}
+	
+	/**
+	 * Calculate min height of the embed wrapper depending of the overlay content.
+	 */
+	function setMinHeight() {
+		for ( var i = 0; i < overlays.length; i++ ) {
+			var wrapper = overlays[ i ].parentNode.parentNode;
+			
+			if ( ! wrapper.classList.contains( 'wp-block-embed__wrapper' ) ) {
+				continue;
+			}
+			
+			wrapper.style.removeProperty( 'height' );
+			
+			if ( wrapper.offsetHeight < overlays[ i ].offsetHeight ) {
+				wrapper.style.height = overlays[ i ].offsetHeight + 'px';
+			}
 		}
 	}
 } );
