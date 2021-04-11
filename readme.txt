@@ -120,6 +120,11 @@ We are [Epiphyt](https://epiph.yt/), your friendly neighborhood WordPress plugin
 
 == Changelog ==
 
+= 1.3.3 =
+* Improved mobile design for responsive embeds
+* Fixed centering for non-responsive embeds
+* Fixed disabled embed content from preventing interactions with the text below the overlay
+
 = 1.3.2 =
 * Fixed general activation error
 
