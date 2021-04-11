@@ -25,6 +25,17 @@
 	height: 100%;
 	width: 100%;
 	
+	// make sure centered elements are centered if body doesn't contain
+	// the class .wp-embed-responsive
+	// see https://github.com/epiphyt/embed-privacy/issues/66
+	.aligncenter & {
+		> * {
+			display: block;
+			margin-left: auto;
+			margin-right: auto;
+		}
+	}
+	
 	.is-enabled & {
 		display: block;
 	}
