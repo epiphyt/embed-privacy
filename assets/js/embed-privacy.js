@@ -164,6 +164,13 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		
 		embedContent.innerHTML = htmlentities_decode( embedObject.embed );
 		
+		// reset wrapper inline CSS set in setMinHeight()
+		var wrapper = embedContainer.parentNode;
+		
+		if ( wrapper.classList.contains( 'wp-block-embed__wrapper' ) ) {
+			wrapper.style.removeProperty( 'height' );
+		}
+		
 		// get all script tags inside the embed
 		var scriptTags = embedContent.querySelectorAll( 'script' );
 		
