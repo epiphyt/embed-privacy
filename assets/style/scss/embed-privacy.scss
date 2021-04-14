@@ -18,6 +18,10 @@
 			color: #fff !important;
 		}
 	}
+	
+	&:last-child {
+		margin-bottom: 0;
+	}
 }
 
 .embed-privacy-content {
