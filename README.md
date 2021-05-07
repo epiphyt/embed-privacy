@@ -68,6 +68,8 @@ function prefix_replace_content_with_overlay( $content ) {
 	if ( ! $embed_privacy->is_always_active_provider( 'google-maps' ) ) {
 		// replace the content with the overlay
 		$content = $embed_privacy->get_output_template( 'Google Maps', 'google-maps', $content );
+		// enqueue assets
+		$embed_privacy->print_assets();
 	}
 	
 	return $content;
