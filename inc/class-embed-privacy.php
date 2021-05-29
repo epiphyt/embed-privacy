@@ -70,7 +70,6 @@ use function stripos;
 use function strlen;
 use function strpos;
 use function strtotime;
-use function substr_count;
 use function trim;
 use function wp_date;
 use function wp_enqueue_script;
@@ -678,6 +677,7 @@ class Embed_Privacy {
 		}
 		
 		libxml_use_internal_errors( true );
+		$all_replacements = [];
 		$dom = new DOMDocument();
 		$dom->loadHTML(
 			mb_convert_encoding(
@@ -795,6 +795,7 @@ class Embed_Privacy {
 			}
 			
 			if ( ! empty( $replacements ) ) {
+				$all_replacements = array_merge( $all_replacements, $replacements );
 				$this->has_embed = true;
 				$elements = $dom->getElementsByTagName( $tag );
 				$i = $elements->length - 1;
@@ -822,7 +823,7 @@ class Embed_Privacy {
 		// embeds for other elements need to be handled manually
 		// make sure to test before if the regex matches
 		// see: https://github.com/epiphyt/embed-privacy/issues/26
-		if ( empty( $replacements ) && ! empty( $args['regex'] ) && ! $is_empty_provider ) {
+		if ( empty( $all_replacements ) && ! empty( $args['regex'] ) && ! $is_empty_provider ) {
 			$content = preg_replace( $args['regex'], $this->get_output_template( $embed_provider, $embed_provider_lowercase, $content, $args ), $content );
 		}
 		
