@@ -993,7 +993,12 @@ class Embed_Privacy {
 		}
 		
 		// get default external content
-		$content = $this->get_single_overlay( $content, '', '', [] );
+		// special case for youtube-nocookie.com as it is part of YouTube provider
+		// and gets rewritten in Divi
+		// see: https://github.com/epiphyt/embed-privacy/issues/69
+		if ( strpos( $content, 'youtube-nocookie.com' ) === false || ! $this->is_always_active_provider( 'youtube' ) ) {
+			$content = $this->get_single_overlay( $content, '', '', [] );
+		}
 		
 		if ( $this->has_embed ) {
 			$this->print_assets();
