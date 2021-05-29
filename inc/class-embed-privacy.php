@@ -60,6 +60,7 @@ use function preg_match_all;
 use function preg_replace;
 use function register_activation_hook;
 use function register_deactivation_hook;
+use function register_post_meta;
 use function register_post_type;
 use function sanitize_text_field;
 use function sanitize_title;
@@ -273,6 +274,13 @@ class Embed_Privacy {
 			$css_file_url = EPI_EMBED_PRIVACY_URL . 'assets/style/astra' . $suffix . '.css';
 			
 			wp_enqueue_style( 'embed-privacy-astra', $css_file_url, [], filemtime( $css_file ) );
+		}
+		
+		if ( wp_get_theme()->get( 'Name' ) === 'Divi' || wp_get_theme()->get( 'Template' ) === 'Divi' ) {
+			$css_file = EPI_EMBED_PRIVACY_BASE . 'assets/style/divi' . $suffix . '.css';
+			$css_file_url = EPI_EMBED_PRIVACY_URL . 'assets/style/divi' . $suffix . '.css';
+			
+			wp_enqueue_style( 'embed-privacy-divi', $css_file_url, [], filemtime( $css_file ) );
 		}
 		
 		global $post;
