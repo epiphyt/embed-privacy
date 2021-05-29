@@ -414,6 +414,11 @@ class Fields {
 			return;
 		}
 		
+		// ignore actions to trash the post
+		if ( ! empty( $_GET['action'] ) && in_array( sanitize_text_field( wp_unslash( $_GET['action'] ) ), [ 'trash', 'untrash' ] ) ) {
+			return;
+		}
+		
 		// verify capability
 		if (
 			! defined( 'WP_CLI' ) && ! current_user_can( 'edit_posts', $post_id )
