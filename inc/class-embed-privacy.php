@@ -12,6 +12,7 @@ use function addslashes;
 use function apply_filters;
 use function array_keys;
 use function array_merge;
+use function array_splice;
 use function checked;
 use function defined;
 use function dirname;
@@ -20,8 +21,10 @@ use function esc_html;
 use function esc_html__;
 use function esc_html_x;
 use function esc_url;
+use function explode;
 use function file_exists;
 use function filemtime;
+use function filter_var;
 use function function_exists;
 use function get_attached_file;
 use function get_option;
@@ -35,6 +38,7 @@ use function get_the_post_thumbnail_url;
 use function has_shortcode;
 use function home_url;
 use function htmlentities;
+use function implode;
 use function in_array;
 use function is_a;
 use function is_admin;
@@ -63,8 +67,10 @@ use function shortcode_atts;
 use function sprintf;
 use function str_replace;
 use function stripos;
+use function strlen;
 use function strpos;
 use function strtotime;
+use function substr_count;
 use function trim;
 use function wp_date;
 use function wp_enqueue_script;
@@ -82,6 +88,7 @@ use function wp_unslash;
 use const DEBUG_MODE;
 use const EPI_EMBED_PRIVACY_BASE;
 use const EPI_EMBED_PRIVACY_URL;
+use const FILTER_VALIDATE_IP;
 use const LIBXML_HTML_NODEFDTD;
 use const LIBXML_HTML_NOIMPLIED;
 use const PHP_EOL;
@@ -688,6 +695,22 @@ class Embed_Privacy {
 			$providers = $this->get_embeds();
 		}
 		
+		// detect domain if WordPress is installed on a sub domain
+		$parsed_url = wp_parse_url( home_url() );
+		$host = $parsed_url['host'];
+		
+		if ( ! filter_var( $host, FILTER_VALIDATE_IP ) ) {
+			$host_array = explode( '.', str_replace( 'www.', '', $host ) );
+			$tld_count = count( $host_array );
+			
+			if ( $tld_count >= 3 && strlen( $host_array[ $tld_count - 2 ] ) === 2 ) {
+				$host = implode( '.', array_splice( $host_array, $tld_count - 3, 3 ) );
+			}
+			else if ( $tld_count >= 2 ) {
+				$host = implode( '.', array_splice( $host_array, $tld_count - 2, $tld_count ) );
+			}
+		}
+		
 		foreach ( [ 'embed', 'iframe', 'object' ] as $tag ) {
 			$replacements = [];
 			
@@ -699,10 +722,8 @@ class Embed_Privacy {
 			}
 			
 			foreach ( $dom->getElementsByTagName( $tag ) as $element ) {
-				$parsed_url = wp_parse_url( home_url() );
-				
 				// ignore embeds from the same (sub-)domain
-				if ( strpos( $element->getAttribute( $attribute ), $parsed_url['host'] ) !== false ) {
+				if ( strpos( $element->getAttribute( $attribute ), $host ) !== false ) {
 					continue;
 				}
 				
