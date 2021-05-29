@@ -759,10 +759,12 @@ class Embed_Privacy {
 				}
 				
 				// store the elements to replace (see regressive loop down below)
-				$replacements[] = [
-					'element' => $element,
-					'replace' => $dom->importNode( $overlay, true ),
-				];
+				if ( is_a( $overlay, 'DOMNode' ) ) {
+					$replacements[] = [
+						'element' => $element,
+						'replace' => $dom->importNode( $overlay, true ),
+					];
+				}
 				
 				// reset embed provider name
 				if ( $is_empty_provider ) {
