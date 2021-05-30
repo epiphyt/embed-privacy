@@ -17,11 +17,35 @@ jobs:
         source: assets/style/scss/embed-privacy.scss
         destination: assets/style/embed-privacy.css
         outputStyle: expanded
+    - name: Compile CSS
+      uses: gha-utilities/sass-build@v0.2.5
+      with:
+        source: assets/style/scss/astra.scss
+        destination: assets/style/astra.css
+        outputStyle: expanded
+    - name: Compile CSS
+      uses: gha-utilities/sass-build@v0.2.5
+      with:
+        source: assets/style/scss/divi.scss
+        destination: assets/style/divi.css
+        outputStyle: expanded
     - name: Compile CSS compressed
       uses: gha-utilities/sass-build@v0.2.5
       with:
         source: assets/style/scss/embed-privacy.scss
         destination: assets/style/embed-privacy.min.css
+        outputStyle: compressed
+    - name: Compile CSS compressed
+      uses: gha-utilities/sass-build@v0.2.5
+      with:
+        source: assets/style/scss/astra.scss
+        destination: assets/style/astra.min.css
+        outputStyle: compressed
+    - name: Compile CSS compressed
+      uses: gha-utilities/sass-build@v0.2.5
+      with:
+        source: assets/style/scss/divi.scss
+        destination: assets/style/divi.min.css
         outputStyle: compressed
     - name: Compile admin CSS
       uses: gha-utilities/sass-build@v0.2.5
