@@ -122,6 +122,14 @@ We are [Epiphyt](https://epiph.yt/), your friendly neighborhood WordPress plugin
 
 == Changelog ==
 
+= 1.3.4 =
+* Fixed deleted meta fields if you put an embed provider in trash and restore it afterwards
+* Fixed Embed Privacy sometimes trying to replace an embed twice
+* Fixed an error that may occur if Embed Privacy tries to replace an embed that doesn't need to be replaced
+* Fixed checking for local domain if WordPress itself is located in a sub-domain
+* Fixed always enable YouTube within Divi
+* Fixed overlay line height in Divi
+
 = 1.3.3 =
 * Improved mobile design for responsive embeds
 * Fixed centering for non-responsive embeds
