@@ -70,6 +70,7 @@ use function str_replace;
 use function stripos;
 use function strlen;
 use function strpos;
+use function strtolower;
 use function strtotime;
 use function trim;
 use function wp_date;
@@ -269,14 +270,14 @@ class Embed_Privacy {
 		
 		// Astra is too greedy at its CSS selectors
 		// see https://github.com/epiphyt/embed-privacy/issues/33
-		if ( wp_get_theme()->get( 'Name' ) === 'Astra' || wp_get_theme()->get( 'Template' ) === 'Astra' ) {
+		if ( strtolower( wp_get_theme()->get( 'Name' ) ) === 'astra' || strtolower( wp_get_theme()->get( 'Template' ) ) === 'astra' ) {
 			$css_file = EPI_EMBED_PRIVACY_BASE . 'assets/style/astra' . $suffix . '.css';
 			$css_file_url = EPI_EMBED_PRIVACY_URL . 'assets/style/astra' . $suffix . '.css';
 			
 			wp_enqueue_style( 'embed-privacy-astra', $css_file_url, [], filemtime( $css_file ) );
 		}
 		
-		if ( wp_get_theme()->get( 'Name' ) === 'Divi' || wp_get_theme()->get( 'Template' ) === 'Divi' ) {
+		if ( strtolower( wp_get_theme()->get( 'Name' ) ) === 'divi' || strtolower( wp_get_theme()->get( 'Template' ) ) === 'divi' ) {
 			$css_file = EPI_EMBED_PRIVACY_BASE . 'assets/style/divi' . $suffix . '.css';
 			$css_file_url = EPI_EMBED_PRIVACY_URL . 'assets/style/divi' . $suffix . '.css';
 			
