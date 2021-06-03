@@ -57,10 +57,10 @@ use function plugin_dir_path;
 use function plugin_dir_url;
 use function preg_match;
 use function preg_match_all;
+use function preg_quote;
 use function preg_replace;
 use function register_activation_hook;
 use function register_deactivation_hook;
-use function register_post_meta;
 use function register_post_type;
 use function sanitize_text_field;
 use function sanitize_title;
@@ -108,6 +108,12 @@ class Embed_Privacy {
 	 * @since		1.1.0
 	 */
 	const IFRAME_REGEX = '/<iframe(.*?)src="([^"]+)"([^>]*)>((?!<\/iframe).)*<\/iframe>/ms';
+	
+	/**
+	 * @since	1.3.5
+	 * @var		array Replacements that already have taken place.
+	 */
+	private $did_replacements = [];
 	
 	/**
 	 * @since	1.3.0
@@ -686,7 +692,6 @@ class Embed_Privacy {
 		}
 		
 		libxml_use_internal_errors( true );
-		$all_replacements = [];
 		$dom = new DOMDocument();
 		$dom->loadHTML(
 			mb_convert_encoding(
@@ -732,7 +737,7 @@ class Embed_Privacy {
 			
 			foreach ( $dom->getElementsByTagName( $tag ) as $element ) {
 				// ignore embeds from the same (sub-)domain
-				if ( strpos( $element->getAttribute( $attribute ), $host ) !== false ) {
+				if ( preg_match( '/https?:\/\/(.*\.)?' . preg_quote( $host ) . '/', $element->getAttribute( $attribute ) ) ) {
 					continue;
 				}
 				
@@ -789,7 +794,7 @@ class Embed_Privacy {
 				}
 				
 				// store the elements to replace (see regressive loop down below)
-				if ( is_a( $overlay, 'DOMNode' ) ) {
+				if ( is_a( $overlay, 'DOMNode' ) || is_a( $overlay, 'DOMElement' ) ) {
 					$replacements[] = [
 						'element' => $element,
 						'replace' => $dom->importNode( $overlay, true ),
@@ -804,7 +809,7 @@ class Embed_Privacy {
 			}
 			
 			if ( ! empty( $replacements ) ) {
-				$all_replacements = array_merge( $all_replacements, $replacements );
+				$this->did_replacements = array_merge( $this->did_replacements, $replacements );
 				$this->has_embed = true;
 				$elements = $dom->getElementsByTagName( $tag );
 				$i = $elements->length - 1;
@@ -832,7 +837,7 @@ class Embed_Privacy {
 		// embeds for other elements need to be handled manually
 		// make sure to test before if the regex matches
 		// see: https://github.com/epiphyt/embed-privacy/issues/26
-		if ( empty( $all_replacements ) && ! empty( $args['regex'] ) && ! $is_empty_provider ) {
+		if ( empty( $this->did_replacements ) && ! empty( $args['regex'] ) && ! $is_empty_provider ) {
 			$content = preg_replace( $args['regex'], $this->get_output_template( $embed_provider, $embed_provider_lowercase, $content, $args ), $content );
 		}
 		
