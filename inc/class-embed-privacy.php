@@ -276,19 +276,15 @@ class Embed_Privacy {
 		
 		// Astra is too greedy at its CSS selectors
 		// see https://github.com/epiphyt/embed-privacy/issues/33
-		if ( strtolower( wp_get_theme()->get( 'Name' ) ) === 'astra' || strtolower( wp_get_theme()->get( 'Template' ) ) === 'astra' ) {
-			$css_file = EPI_EMBED_PRIVACY_BASE . 'assets/style/astra' . $suffix . '.css';
-			$css_file_url = EPI_EMBED_PRIVACY_URL . 'assets/style/astra' . $suffix . '.css';
-			
-			wp_enqueue_style( 'embed-privacy-astra', $css_file_url, [], filemtime( $css_file ) );
-		}
+		$css_file = EPI_EMBED_PRIVACY_BASE . 'assets/style/astra' . $suffix . '.css';
+		$css_file_url = EPI_EMBED_PRIVACY_URL . 'assets/style/astra' . $suffix . '.css';
 		
-		if ( strtolower( wp_get_theme()->get( 'Name' ) ) === 'divi' || strtolower( wp_get_theme()->get( 'Template' ) ) === 'divi' ) {
-			$css_file = EPI_EMBED_PRIVACY_BASE . 'assets/style/divi' . $suffix . '.css';
-			$css_file_url = EPI_EMBED_PRIVACY_URL . 'assets/style/divi' . $suffix . '.css';
-			
-			wp_enqueue_style( 'embed-privacy-divi', $css_file_url, [], filemtime( $css_file ) );
-		}
+		wp_register_style( 'embed-privacy-astra', $css_file_url, [], filemtime( $css_file ) );
+		
+		$css_file = EPI_EMBED_PRIVACY_BASE . 'assets/style/divi' . $suffix . '.css';
+		$css_file_url = EPI_EMBED_PRIVACY_URL . 'assets/style/divi' . $suffix . '.css';
+		
+		wp_register_style( 'embed-privacy-divi', $css_file_url, [], filemtime( $css_file ) );
 		
 		$js_file = EPI_EMBED_PRIVACY_BASE . 'assets/js/elementor-video' . $suffix . '.js';
 		$js_file_url = EPI_EMBED_PRIVACY_URL . 'assets/js/elementor-video' . $suffix . '.js';
@@ -1115,6 +1111,22 @@ class Embed_Privacy {
 	}
 	
 	/**
+	 * Check if the current theme is matching your name.
+	 * 
+	 * @param	string	$name The theme name to test
+	 * @return	bool True if the current theme is matching, false otherwise
+	 */
+	public function is_theme( $name ) {
+		$name = strtolower( $name );
+		
+		if ( strtolower( wp_get_theme()->get( 'Name' ) ) === $name || strtolower( wp_get_theme()->get( 'Template' ) ) === $name ) {
+			return true;
+		}
+		
+		return false;
+	}
+	
+	/**
 	 * Load the translation files.
 	 */
 	public function load_textdomain() {
@@ -1132,6 +1144,14 @@ class Embed_Privacy {
 		wp_localize_script( 'embed-privacy', 'embedPrivacy', [
 			'javascriptDetection' => get_option( 'embed_privacy_javascript_detection' ),
 		] );
+		
+		if ( $this->is_theme( 'Astra' ) ) {
+			wp_enqueue_style( 'embed-privacy-astra' );
+		}
+		
+		if ( $this->is_theme( 'Divi' ) ) {
+			wp_enqueue_style( 'embed-privacy-divi' );
+		}
 		
 		if ( $this->is_elementor() ) {
 			wp_enqueue_script( 'embed-privacy-elementor-video' );
