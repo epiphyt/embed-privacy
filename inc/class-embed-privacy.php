@@ -1113,6 +1113,8 @@ class Embed_Privacy {
 	/**
 	 * Check if the current theme is matching your name.
 	 * 
+	 * @since	1.3.5
+	 * 
 	 * @param	string	$name The theme name to test
 	 * @return	bool True if the current theme is matching, false otherwise
 	 */
