@@ -62,6 +62,7 @@ use function preg_replace;
 use function register_activation_hook;
 use function register_deactivation_hook;
 use function register_post_type;
+use function reset;
 use function sanitize_text_field;
 use function sanitize_title;
 use function shortcode_atts;
@@ -331,6 +332,32 @@ class Embed_Privacy {
 		// doesn't currently run with YouTube
 		// see https://github.com/elementor/elementor/issues/14276
 		add_filter( 'oembed_result', [ $this, 'replace_embeds_oembed' ], 10, 3 );
+	}
+	
+	/**
+	 * Get an embed provider by its name.
+	 * 
+	 * @since	1.3.5
+	 * 
+	 * @param	string	$name The name to search for
+	 * @return	\WP_Post|null The embed or null
+	 */
+	public function get_embed_by_name( $name ) {
+		if ( empty( $name ) ) {
+			return null;
+		}
+		
+		$embeds = get_posts( [
+			'numberposts' => 1,
+			'post_name' => $name,
+			'post_type' => 'epi_embed',
+		] );
+		
+		if ( empty( $embeds ) ) {
+			return null;
+		}
+		
+		return reset( $embeds );
 	}
 	
 	/**
@@ -702,7 +729,7 @@ class Embed_Privacy {
 			),
 			LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
 		);
-		$is_empty_provider = ( empty( $embed_provider ) );
+		$is_empty_provider = empty( $embed_provider );
 		$template_dom = new DOMDocument();
 		
 		if ( $is_empty_provider ) {
@@ -837,8 +864,16 @@ class Embed_Privacy {
 		// embeds for other elements need to be handled manually
 		// make sure to test before if the regex matches
 		// see: https://github.com/epiphyt/embed-privacy/issues/26
-		if ( empty( $this->did_replacements ) && ! empty( $args['regex'] ) && ! $is_empty_provider ) {
-			$content = preg_replace( $args['regex'], $this->get_output_template( $embed_provider, $embed_provider_lowercase, $content, $args ), $content );
+		if (
+			empty( $this->did_replacements )
+			&& ! empty( $args['regex'] )
+			&& ! $is_empty_provider
+		) {
+			$provider = $this->get_embed_by_name( $embed_provider_lowercase );
+			
+			if ( is_a( $provider, 'WP_Post' ) && get_post_meta( $provider->ID, 'is_disabled', true ) !== 'yes' ) {
+				$content = preg_replace( $args['regex'], $this->get_output_template( $embed_provider, $embed_provider_lowercase, $content, $args ), $content );
+			}
 		}
 		
 		// remove root element, see https://github.com/epiphyt/embed-privacy/issues/22
@@ -981,6 +1016,11 @@ class Embed_Privacy {
 		
 		// get embed provider name
 		foreach ( $embed_providers as $provider ) {
+			// make sure to test every provider for its always active state
+			if ( $this->is_always_active_provider( $provider->post_name ) ) {
+				continue;
+			}
+			
 			$regex = trim( get_post_meta( $provider->ID, 'regex_default', true ), '/' );
 			
 			if ( ! empty( $regex ) ) {
@@ -1053,6 +1093,11 @@ class Embed_Privacy {
 				$embed_provider_lowercase = $provider->post_name;
 				break;
 			}
+		}
+		
+		// make sure to only run once
+		if ( strpos( $output, 'data-embed-provider="' . $embed_provider_lowercase . '"' ) !== false ) {
+			return $output;
 		}
 		
 		if ( $embed_provider_lowercase === 'youtube' ) {
