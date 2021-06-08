@@ -207,7 +207,6 @@ class Embed_Privacy {
 		// actions
 		add_action( 'init', [ $this, 'load_textdomain' ], 0 );
 		add_action( 'init', [ $this, 'set_post_type' ], 5 );
-		add_action( 'wp', [ $this, 'get_elementor_filters' ] );
 		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_assets' ] );
 		
 		// filters
@@ -291,6 +290,16 @@ class Embed_Privacy {
 			wp_enqueue_style( 'embed-privacy-divi', $css_file_url, [], filemtime( $css_file ) );
 		}
 		
+		$js_file = EPI_EMBED_PRIVACY_BASE . 'assets/js/elementor-video' . $suffix . '.js';
+		$js_file_url = EPI_EMBED_PRIVACY_URL . 'assets/js/elementor-video' . $suffix . '.js';
+		
+		wp_register_script( 'embed-privacy-elementor-video', $js_file_url, [], filemtime( $js_file ) );
+		
+		$css_file = EPI_EMBED_PRIVACY_BASE . 'assets/style/elementor' . $suffix . '.css';
+		$css_file_url = EPI_EMBED_PRIVACY_URL . 'assets/style/elementor' . $suffix . '.css';
+		
+		wp_register_style( 'embed-privacy-elementor', $css_file_url, [], filemtime( $css_file ) );
+		
 		global $post;
 		
 		if ( is_a( $post, 'WP_Post' ) && has_shortcode( $post->post_content, 'embed_privacy_opt_out' ) ) {
@@ -314,24 +323,102 @@ class Embed_Privacy {
 	/**
 	 * Get filters for Elementor.
 	 * 
-	 * @since	1.3.0
+	 * @since		1.3.0
+	 * @deprecated	1.3.5
 	 */
 	public function get_elementor_filters() {
-		if ( ! function_exists( 'is_plugin_active' ) ) {
-			include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
-		}
-		
-		if (
-			! is_plugin_active( 'elementor/elementor.php' )
-			|| ! get_the_ID()
-			|| ! Plugin::$instance->db->is_built_with_elementor( get_the_ID() )
-		) {
+		if ( ! $this->is_elementor() ) {
 			return;
 		}
 		
 		// doesn't currently run with YouTube
 		// see https://github.com/elementor/elementor/issues/14276
 		add_filter( 'oembed_result', [ $this, 'replace_embeds_oembed' ], 10, 3 );
+	}
+	
+	/**
+	 * Get an overlay for Elementor YouTube videos.
+	 * 
+	 * @since	1.3.5
+	 * 
+	 * @param	string	$content The content
+	 * @return	string The content with an embed overlay (if needed)
+	 */
+	private function get_elementor_youtube_overlay( $content ) {
+		$embed_provider = $this->get_embed_by_name( 'youtube' );
+		$replacements = [];
+		
+		libxml_use_internal_errors( true );
+		$dom = new DOMDocument();
+		$dom->loadHTML(
+			mb_convert_encoding(
+				// adding root element, see https://github.com/epiphyt/embed-privacy/issues/22
+				'<html>' . $content . '</html>',
+				'HTML-ENTITIES',
+				'UTF-8'
+			),
+			LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
+		);
+		$template_dom = new DOMDocument();
+		
+		foreach ( $dom->getElementsByTagName( 'div' ) as $element ) {
+			if ( strpos( $element->getAttribute( 'data-settings' ), 'youtube_url' ) === false ) {
+				continue;
+			}
+			
+			// get overlay template as DOM element
+			$template_dom->loadHTML(
+				mb_convert_encoding(
+					$this->get_output_template( $embed_provider->post_title, $embed_provider->post_name, $dom->saveHTML( $element ), [] ),
+					'HTML-ENTITIES',
+					'UTF-8'
+				),
+				LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
+			);
+			$overlay = null;
+			
+			foreach ( $template_dom->getElementsByTagName( 'div' ) as $div ) {
+				if ( stripos( $div->getAttribute( 'class' ), 'embed-privacy-container' ) !== false ) {
+					$overlay = $div;
+					break;
+				}
+			}
+			
+			// store the elements to replace (see regressive loop down below)
+			if ( is_a( $overlay, 'DOMNode' ) || is_a( $overlay, 'DOMElement' ) ) {
+				$replacements[] = [
+					'element' => $element,
+					'replace' => $dom->importNode( $overlay, true ),
+				];
+			}
+		}
+		
+		if ( ! empty( $replacements ) ) {
+			$this->did_replacements = array_merge( $this->did_replacements, $replacements );
+			$this->has_embed = true;
+			$elements = $dom->getElementsByTagName( 'div' );
+			$i = $elements->length - 1;
+			
+			// use regressive loop for replaceChild()
+			// see: https://www.php.net/manual/en/domnode.replacechild.php#50500
+			while ( $i > -1 ) {
+				$element = $elements->item( $i );
+				
+				foreach ( $replacements as $replacement ) {
+					if ( $replacement['element'] === $element ) {
+						$element->parentNode->replaceChild( $replacement['replace'], $replacement['element'] );
+					}
+				}
+				
+				$i--;
+			}
+			
+			$content = $dom->saveHTML( $dom->documentElement );
+		}
+		
+		libxml_use_internal_errors( false );
+		
+		return $content;
 	}
 	
 	/**
@@ -348,8 +435,8 @@ class Embed_Privacy {
 		}
 		
 		$embeds = get_posts( [
+			'name' => $name,
 			'numberposts' => 1,
-			'post_name' => $name,
 			'post_type' => 'epi_embed',
 		] );
 		
@@ -358,6 +445,40 @@ class Embed_Privacy {
 		}
 		
 		return reset( $embeds );
+	}
+	
+	/**
+	 * Get an embed provider overlay.
+	 * 
+	 * @since	1.3.5
+	 * 
+	 * @param	\WP_Post	$provider An embed provider
+	 * @param	string		$content The content
+	 * @return	string The content with additional overlays of an embed provider
+	 */
+	private function get_embed_overlay( $provider, $content ) {
+		// make sure to test every provider for its always active state
+		if ( $this->is_always_active_provider( $provider->post_name ) ) {
+			return '';
+		}
+		
+		$regex = trim( get_post_meta( $provider->ID, 'regex_default', true ), '/' );
+		
+		if ( ! empty( $regex ) ) {
+			$regex = '/' . $regex . '/';
+		}
+		
+		// get overlay for this provider
+		if ( ! empty( $regex ) && preg_match( $regex, $content ) ) {
+			$this->has_embed = true;
+			$args['regex'] = $regex;
+			$args['post_id'] = $provider->ID;
+			$embed_provider = $provider->post_title;
+			$embed_provider_lowercase = $provider->post_name;
+			$content = $this->get_single_overlay( $content, $embed_provider, $embed_provider_lowercase, $args );
+		}
+		
+		return $content;
 	}
 	
 	/**
@@ -971,6 +1092,29 @@ class Embed_Privacy {
 	}
 	
 	/**
+	 * Check if a post is written in Elementor.
+	 * 
+	 * @since	1.3.5
+	 * 
+	 * @return	bool True if Elementor is used, false otherwise
+	 */
+	public function is_elementor() {
+		if ( ! function_exists( 'is_plugin_active' ) ) {
+			include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+		}
+		
+		if (
+			! is_plugin_active( 'elementor/elementor.php' )
+			|| ! get_the_ID()
+			|| ! Plugin::$instance->db->is_built_with_elementor( get_the_ID() )
+		) {
+			return false;
+		}
+		
+		return true;
+	}
+	
+	/**
 	 * Load the translation files.
 	 */
 	public function load_textdomain() {
@@ -988,6 +1132,11 @@ class Embed_Privacy {
 		wp_localize_script( 'embed-privacy', 'embedPrivacy', [
 			'javascriptDetection' => get_option( 'embed_privacy_javascript_detection' ),
 		] );
+		
+		if ( $this->is_elementor() ) {
+			wp_enqueue_script( 'embed-privacy-elementor-video' );
+			wp_enqueue_style( 'embed-privacy-elementor' );
+		}
 	}
 	
 	/**
@@ -1016,25 +1165,22 @@ class Embed_Privacy {
 		
 		// get embed provider name
 		foreach ( $embed_providers as $provider ) {
-			// make sure to test every provider for its always active state
-			if ( $this->is_always_active_provider( $provider->post_name ) ) {
-				continue;
+			$content = $this->get_embed_overlay( $provider, $content );
+		}
+		
+		// Elementor video providers need special treatment
+		if ( $this->is_elementor() ) {
+			$embed_providers = [
+				$this->get_embed_by_name( 'dailymotion' ),
+				$this->get_embed_by_name( 'vimeo' ),
+			];
+			
+			foreach ( $embed_providers as $provider ) {
+				$content = $this->get_embed_overlay( $provider, $content );
 			}
 			
-			$regex = trim( get_post_meta( $provider->ID, 'regex_default', true ), '/' );
-			
-			if ( ! empty( $regex ) ) {
-				$regex = '/' . $regex . '/';
-			}
-			
-			// get overlay for this provider
-			if ( ! empty( $regex ) && preg_match( $regex, $content ) ) {
-				$this->has_embed = true;
-				$args['regex'] = $regex;
-				$args['post_id'] = $provider->ID;
-				$embed_provider = $provider->post_title;
-				$embed_provider_lowercase = $provider->post_name;
-				$content = $this->get_single_overlay( $content, $embed_provider, $embed_provider_lowercase, $args );
+			if ( strpos( $content, 'youtube.com\/watch' ) !== false ) {
+				$content = $this->get_elementor_youtube_overlay( $content );
 			}
 		}
 		
