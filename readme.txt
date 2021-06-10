@@ -122,6 +122,12 @@ We are [Epiphyt](https://epiph.yt/), your friendly neighborhood WordPress plugin
 
 == Changelog ==
 
+= 1.3.5 =
+* Fixed functionality in Elementor
+* Fixed custom embed provider output
+* Fixed replacing content in shortcodes multiple times
+* Fixed checking for theme/template
+
 = 1.3.4 =
 * Fixed deleted meta fields if you put an embed provider in trash and restore it afterwards
 * Fixed Embed Privacy sometimes trying to replace an embed twice
