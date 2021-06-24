@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.6
+* Fixed enabling multiple YouTube videos in Elementor
+* Fixed displaying content if the page contains an always active provider
+
 ## 1.3.5
 * Fixed functionality in Elementor
 * Fixed custom embed provider output
