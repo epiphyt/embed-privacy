@@ -455,7 +455,7 @@ class Embed_Privacy {
 	private function get_embed_overlay( $provider, $content ) {
 		// make sure to test every provider for its always active state
 		if ( $this->is_always_active_provider( $provider->post_name ) ) {
-			return '';
+			return $content;
 		}
 		
 		$regex = trim( get_post_meta( $provider->ID, 'regex_default', true ), '/' );
