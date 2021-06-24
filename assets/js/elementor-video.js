@@ -66,8 +66,6 @@ document.addEventListener( 'DOMContentLoaded', function() {
 				// replace the video element with the iframe
 				embedVideo.parentNode.replaceChild( iframe, embedVideo );
 			}
-			
-			observer.disconnect();
 		} );
 		
 		observeEmbeds.observe( document, {
