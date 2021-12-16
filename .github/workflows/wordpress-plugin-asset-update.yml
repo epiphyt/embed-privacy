@@ -11,76 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    # Compile CSS
-    - name: Compile CSS
-      uses: gha-utilities/sass-build@v0.2.5
-      with:
-        source: assets/style/scss/embed-privacy.scss
-        destination: assets/style/embed-privacy.css
-        outputStyle: expanded
-    - name: Compile CSS
-      uses: gha-utilities/sass-build@v0.2.5
-      with:
-        source: assets/style/scss/astra.scss
-        destination: assets/style/astra.css
-        outputStyle: expanded
-    - name: Compile CSS
-      uses: gha-utilities/sass-build@v0.2.5
-      with:
-        source: assets/style/scss/divi.scss
-        destination: assets/style/divi.css
-        outputStyle: expanded
-    - name: Compile CSS
-      uses: gha-utilities/sass-build@v0.2.5
-      with:
-        source: assets/style/scss/elementor.scss
-        destination: assets/style/elementor.css
-        outputStyle: expanded
-    - name: Compile CSS compressed
-      uses: gha-utilities/sass-build@v0.2.5
-      with:
-        source: assets/style/scss/embed-privacy.scss
-        destination: assets/style/embed-privacy.min.css
-        outputStyle: compressed
-    - name: Compile admin CSS
-      uses: gha-utilities/sass-build@v0.2.5
-      with:
-        source: assets/style/scss/embed-privacy-admin.scss
-        destination: assets/style/embed-privacy-admin.css
-        outputStyle: expanded
-    - name: Compile admin CSS compressed
-      uses: gha-utilities/sass-build@v0.2.5
-      with:
-        source: assets/style/scss/embed-privacy-admin.scss
-        destination: assets/style/embed-privacy-admin.min.css
-        outputStyle: compressed
-    - name: Compile CSS compressed
-      uses: gha-utilities/sass-build@v0.2.5
-      with:
-        source: assets/style/scss/astra.scss
-        destination: assets/style/astra.min.css
-        outputStyle: compressed
-    - name: Compile CSS compressed
-      uses: gha-utilities/sass-build@v0.2.5
-      with:
-        source: assets/style/scss/divi.scss
-        destination: assets/style/divi.min.css
-        outputStyle: compressed
-    - name: Compile CSS compressed
-      uses: gha-utilities/sass-build@v0.2.5
-      with:
-        source: assets/style/scss/elementor.scss
-        destination: assets/style/elementor.min.css
-        outputStyle: compressed
-    # Minify asset JavaScript
-    - name: Minify JavaScript
-      uses: nizarmah/auto-minify@v2.0
-      with:
-        directory: assets/js
-    - name: Minify admin JavaScript
-      uses: nizarmah/auto-minify@v2.0
-      with:
-        directory: assets/js/admin
+    # Run npm build
+    - uses: bahmutov/npm-install@v1
+    - name: npm build
+      run: npm run build
     - name: WordPress.org plugin asset/readme update
       uses: 10up/action-wordpress-plugin-asset-update@master
       env:

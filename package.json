@@ -1,0 +1,17 @@
+{
+	"name": "embed-privacy",
+	"description": "Embed Privacy prevents from loading external embeds directly and lets the user control which one should be loaded.",
+	"scripts": {
+		"start": "wp-scripts start",
+		"build": "wp-scripts build"
+	},
+	"author": "RegioHelden",
+	"license": "GPL-2.0",
+	"devDependencies": {
+		"@wordpress/scripts": "^19.2.2",
+		"extract-loader": "^5.1.0",
+		"file-loader": "^6.2.0",
+		"ignore-emit-webpack-plugin": "^2.0.6",
+		"mini-css-extract-plugin": "^2.4.5"
+	}
+}
