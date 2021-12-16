@@ -362,10 +362,17 @@ class Embed_Privacy {
 				continue;
 			}
 			
+			$settings = json_decode( $element->getAttribute( 'data-settings' ) );
+			$args = [];
+			
+			if ( ! empty( $settings->youtube_url ) ) {
+				$args['embed_url'] = $settings->youtube_url;
+			}
+			
 			// get overlay template as DOM element
 			$template_dom->loadHTML(
 				mb_convert_encoding(
-					$this->get_output_template( $embed_provider->post_title, $embed_provider->post_name, $dom->saveHTML( $element ), [] ),
+					$this->get_output_template( $embed_provider->post_title, $embed_provider->post_name, $dom->saveHTML( $element ), $args ),
 					'HTML-ENTITIES',
 					'UTF-8'
 				),
@@ -639,6 +646,33 @@ class Embed_Privacy {
 		return str_replace( [ '<html>', '</html>' ], [ '<cite class="embed-privacy-local-tweet">', '</cite>' ], $content );
 	}
 	
+	private function get_oembed_title( $content ) {
+		libxml_use_internal_errors( true );
+		$dom = new DOMDocument();
+		$dom->loadHTML(
+			mb_convert_encoding(
+				// adding root element, see https://github.com/epiphyt/embed-privacy/issues/22
+				'<html>' . $content . '</html>',
+				'HTML-ENTITIES',
+				'UTF-8'
+			),
+			LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
+		);
+		libxml_use_internal_errors( false );
+		
+		foreach ( [ 'embed', 'iframe', 'object' ] as $tag ) {
+			foreach ( $dom->getElementsByTagName( $tag ) as $element ) {
+				$title = $element->getAttribute( 'title' );
+				
+				if ( $title ) {
+					return $title;
+				}
+			}
+		}
+		
+		return '';
+	}
+	
 	/**
 	 * Output a complete template of the overlay.
 	 * 
@@ -784,6 +818,26 @@ class Embed_Privacy {
 		
 		$markup .= $content;
 		$markup .= '</div>';
+		
+		if ( ! empty( $args['embed_url'] ) ) {
+			$footer_content = '<div class="embed-privacy-footer"><span class="embed-privacy-url"><a href="' . esc_url( $args['embed_url'] ) . '">';
+			$footer_content .= sprintf(
+				/* translators: content name or 'content' */
+				esc_html__( 'Open %s directly', 'impressum' ),
+				! empty( $args['embed_title'] ) ? $args['embed_title'] : __( 'content', 'impressum' )
+			);
+			$footer_content .= '</a></span></div>';
+			
+			/**
+			 * Filter the overlay footer.
+			 * 
+			 * @param	string	$footer_content The footer content
+			 */
+			$footer_content = apply_filters( 'embed_privacy_overlay_footer', $footer_content );
+			
+			$markup .= $footer_content;
+		}
+		
 		$markup .= '</div>';
 		$markup .= '<div class="embed-privacy-content"><script>var _oembed_' . $embed_md5 . ' = \'' . addslashes( wp_json_encode( [ 'embed' => htmlentities( $output ) ] ) ) . '\';</script></div>';
 		
@@ -918,6 +972,10 @@ class Embed_Privacy {
 						}
 					}
 				}
+				
+				/* translators: embed title */
+				$args['embed_title'] = sprintf( __( '"%s"', 'impressum' ), $element->getAttribute( 'title' ) );
+				$args['embed_url'] = $element->getAttribute( $attribute );
 				
 				// get overlay template as DOM element
 				$template_dom->loadHTML(
@@ -1286,6 +1344,11 @@ class Embed_Privacy {
 		if ( $embed_provider_lowercase !== 'default' && $this->is_always_active_provider( $embed_provider_lowercase ) ) {
 			return $output;
 		}
+		
+		$embed_title = $this->get_oembed_title( $output );
+		/* translators: embed title */
+		$args['embed_title'] = $embed_title ? sprintf( __( '"%s"', 'impressum' ), $embed_title ) : '';
+		$args['embed_url'] = $url;
 		
 		// add two click to markup
 		return $this->get_output_template( $embed_provider, $embed_provider_lowercase, $output, $args );
