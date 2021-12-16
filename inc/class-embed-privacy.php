@@ -1235,8 +1235,8 @@ class Embed_Privacy {
 			return $content;
 		}
 		
-		// widgets already contain the embed code
-		if ( ! $this->has_embed && $widget_id && strpos( $content, '<div class="embed-privacy-overlay">' ) !== false ) {
+		// check content for already available embeds
+		if ( ! $this->has_embed && strpos( $content, '<div class="embed-privacy-overlay">' ) !== false ) {
 			$this->has_embed = true;
 		}
 		
