@@ -636,7 +636,7 @@ class Embed_Privacy {
 		
 		$content = $dom->saveHTML( $dom->documentElement );
 		
-		return str_replace( [ '<html>', '</html>' ], [ '<div class="embed-privacy-local-tweet">', '</div>' ], $content );
+		return str_replace( [ '<html>', '</html>' ], [ '<cite class="embed-privacy-local-tweet">', '</cite>' ], $content );
 	}
 	
 	/**
