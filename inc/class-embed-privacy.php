@@ -498,7 +498,7 @@ class Embed_Privacy {
 		
 		switch ( $type ) {
 			case 'custom':
-				$custom_providers = (array) get_posts( [
+				$custom_providers = get_posts( [
 					'meta_query' => [
 						'relation' => 'OR',
 						[
@@ -517,7 +517,7 @@ class Embed_Privacy {
 					'orderby' => 'post_title',
 					'post_type' => 'epi_embed',
 				] );
-				$google_provider = (array) get_posts( [
+				$google_provider = get_posts( [
 					'meta_key' => 'is_system',
 					'meta_value' => 'yes',
 					'name' => 'google-maps',
@@ -540,7 +540,7 @@ class Embed_Privacy {
 				return $this->embeds['oembed'];
 			case 'all':
 			default:
-				$this->embeds['all'] = (array) get_posts( [
+				$this->embeds['all'] = get_posts( [
 					'numberposts' => -1,
 					'order' => 'ASC',
 					'orderby' => 'post_title',
@@ -629,7 +629,7 @@ class Embed_Privacy {
 			}
 			
 			// move link inside meta div
-			if ( is_a( $parent_node, 'DOMElement' ) ) {
+			if ( isset( $parent_node ) && is_a( $parent_node, 'DOMElement' ) ) {
 				$parent_node->appendChild( $link );
 			}
 		}
@@ -707,7 +707,7 @@ class Embed_Privacy {
 		 * @param	string	$background_path The default background path
 		 * @param	string	$embed_provider_lowercase The current embed provider in lowercase
 		 */
-		$background_path = apply_filters( "embed_privacy_background_path_{$embed_provider_lowercase}", $background_path, $embed_provider_lowercase );
+		$background_path = apply_filters( "embed_privacy_background_path_$embed_provider_lowercase", $background_path, $embed_provider_lowercase );
 		
 		/**
 		 * Filter the URL to the background image.
@@ -715,7 +715,7 @@ class Embed_Privacy {
 		 * @param	string	$background_url The default background URL
 		 * @param	string	$embed_provider_lowercase The current embed provider in lowercase
 		 */
-		$background_url = apply_filters( "embed_privacy_background_url_{$embed_provider_lowercase}", $background_url, $embed_provider_lowercase );
+		$background_url = apply_filters( "embed_privacy_background_url_$embed_provider_lowercase", $background_url, $embed_provider_lowercase );
 		
 		/**
 		 * Filter the path to the logo.
@@ -723,7 +723,7 @@ class Embed_Privacy {
 		 * @param	string	$logo_path The default background path
 		 * @param	string	$embed_provider_lowercase The current embed provider in lowercase
 		 */
-		$logo_path = apply_filters( "embed_privacy_logo_path_{$embed_provider_lowercase}", $logo_path, $embed_provider_lowercase );
+		$logo_path = apply_filters( "embed_privacy_logo_path_$embed_provider_lowercase", $logo_path, $embed_provider_lowercase );
 		
 		/**
 		 * Filter the URL to the logo.
@@ -731,7 +731,7 @@ class Embed_Privacy {
 		 * @param	string	$logo_url The default background URL
 		 * @param	string	$embed_provider_lowercase The current embed provider in lowercase
 		 */
-		$logo_url = apply_filters( "embed_privacy_logo_url_{$embed_provider_lowercase}", $logo_url, $embed_provider_lowercase );
+		$logo_url = apply_filters( "embed_privacy_logo_url_$embed_provider_lowercase", $logo_url, $embed_provider_lowercase );
 		
 		$embed_md5 = md5( $output . wp_generate_uuid4() );
 		$markup = '<div class="embed-privacy-container is-disabled ' . esc_attr( $embed_classes ) . '" id="oembed_' . esc_attr( $embed_md5 ) . '" data-embed-provider="' . esc_attr( $embed_provider_lowercase ) . '">';
@@ -1026,7 +1026,7 @@ class Embed_Privacy {
 			return $has_embed;
 		}
 		
-		if ( ! $post || ! $post instanceof WP_Post ) {
+		if ( ! $post instanceof WP_Post ) {
 			return false;
 		}
 		
@@ -1102,7 +1102,7 @@ class Embed_Privacy {
 		if (
 			! is_plugin_active( 'elementor/elementor.php' )
 			|| ! get_the_ID()
-			|| ! Plugin::$instance->db->is_built_with_elementor( get_the_ID() )
+			|| ! Plugin::$instance->documents->get( get_the_ID() )->is_built_with_elementor()
 		) {
 			return false;
 		}
