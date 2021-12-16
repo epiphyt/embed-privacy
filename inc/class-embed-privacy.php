@@ -217,7 +217,7 @@ class Embed_Privacy {
 		
 		add_filter( 'do_shortcode_tag', [ $this, 'replace_embeds' ] );
 		add_filter( 'embed_oembed_html', [ $this, 'replace_embeds_oembed' ], 10, 3 );
-		add_filter( 'embed_privacy_widget_output', [ $this, 'replace_embeds' ], 10, 2 );
+		add_filter( 'embed_privacy_widget_output', [ $this, 'replace_embeds' ] );
 		add_filter( 'et_builder_get_oembed', [ $this, 'replace_embeds_divi' ], 10, 2 );
 		add_filter( 'the_content', [ $this, 'replace_embeds' ] );
 		
@@ -1226,10 +1226,9 @@ class Embed_Privacy {
 	 * @since	1.3.0 Added optional parameter $widget_id
 	 * 
 	 * @param	string	$content The original content
-	 * @param	int		$widget_id The widget's ID, if any
 	 * @return	string The updated content
 	 */
-	public function replace_embeds( $content, $widget_id = 0 ) {
+	public function replace_embeds( $content ) {
 		// do nothing in admin
 		if ( ! $this->usecache ) {
 			return $content;
