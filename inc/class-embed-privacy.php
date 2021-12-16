@@ -1263,6 +1263,11 @@ class Embed_Privacy {
 			}
 		}
 		
+		// see https://github.com/epiphyt/embed-privacy/issues/89
+		if ( empty( $embed_provider ) ) {
+			$embed_provider = wp_parse_url( $url )['host'];
+		}
+		
 		// make sure to only run once
 		if ( strpos( $output, 'data-embed-provider="' . $embed_provider_lowercase . '"' ) !== false ) {
 			return $output;
