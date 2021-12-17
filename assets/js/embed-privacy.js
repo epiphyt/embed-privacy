@@ -79,6 +79,8 @@ document.addEventListener( 'DOMContentLoaded', function() {
 			else {
 				set_cookie( 'embed-privacy', '{"' + embedProvider + '":true}', 365 );
 			}
+			
+			enableAlwaysActiveProviders();
 		}
 		else if ( cookie !== null ) {
 			delete cookie[ embedProvider ];
