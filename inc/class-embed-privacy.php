@@ -769,7 +769,7 @@ class Embed_Privacy {
 		
 		$embed_md5 = md5( $output . wp_generate_uuid4() );
 		$markup = '<div class="embed-privacy-container is-disabled ' . esc_attr( $embed_classes ) . '" id="oembed_' . esc_attr( $embed_md5 ) . '" data-embed-provider="' . esc_attr( $embed_provider_lowercase ) . '">';
-		$markup .= '<div class="embed-privacy-overlay">';
+		$markup .= '<div class="embed-privacy-overlay" role="button" tabindex="0">';
 		$markup .= '<div class="embed-privacy-inner">';
 		$markup .= ( file_exists( $logo_path ) ? '<div class="embed-privacy-logo"></div>' : '' );
 		$content = '<p>';

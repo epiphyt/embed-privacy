@@ -17,6 +17,11 @@ document.addEventListener( 'DOMContentLoaded', function() {
 				overlayClick( event.currentTarget );
 			}
 		} );
+		overlays[ i ].addEventListener( 'keypress', function( event ) {
+			if ( event.key === 'Enter' ) {
+				overlayClick( event.currentTarget );
+			}
+		} );
 	}
 	
 	if ( embedPrivacy.javascriptDetection === 'yes' ) {
