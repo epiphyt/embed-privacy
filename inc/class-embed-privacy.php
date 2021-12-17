@@ -1202,6 +1202,7 @@ class Embed_Privacy {
 		wp_enqueue_script( 'embed-privacy' );
 		wp_enqueue_style( 'embed-privacy' );
 		wp_localize_script( 'embed-privacy', 'embedPrivacy', [
+			'alwaysActiveProviders' => array_keys( (array) $this->get_cookie() ),
 			'javascriptDetection' => get_option( 'embed_privacy_javascript_detection' ),
 		] );
 		
@@ -1514,7 +1515,10 @@ class Embed_Privacy {
 		$output .= '<p>' . PHP_EOL;
 		
 		foreach ( $providers as $provider ) {
-			if ( $attributes['show_all'] ) {
+			if ( get_option( 'embed_privacy_javascript_detection' ) === 'yes' ) {
+				$is_checked = false;
+			}
+			else if ( $attributes['show_all'] ) {
 				$is_checked = in_array( $provider->post_name, $enabled_providers, true );
 			}
 			else {
