@@ -1,7 +1,6 @@
 <?php
 namespace epiphyt\Embed_Privacy;
 use function __;
-use function add_filter;
 use function add_settings_field;
 use function add_settings_section;
 use function add_submenu_page;
@@ -12,7 +11,8 @@ use function esc_html__;
 use function esc_html_e;
 use function esc_url;
 use function register_setting;
-use function settings_errors;use function settings_fields;
+use function settings_errors;
+use function settings_fields;
 use function submit_button;
 
 /**
