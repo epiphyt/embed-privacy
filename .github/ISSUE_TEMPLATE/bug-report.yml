@@ -5,8 +5,8 @@ body:
     attributes:
       label: Bug/Problem
       description: Please add a description of the bug/problem occuring in Embed Privacy.
-      validations:
-        required: true
+    validations:
+      required: true
   
   - type: textarea
     attributes:
@@ -16,22 +16,22 @@ body:
         1. Go to '…'
         2. Click on '…'
         3. Scroll down to '…'
-      validation:
-        required: true
+    validations:
+      required: true
   
   - type: input
     attributes:
       label: Version
       description: Please provide the version of Embed Privacy you’re using.
-      validations:
-        required: true
+    validations:
+      required: true
   
   - type: input
     attributes:
       label: Link
       description: Please provide a link to the exact page the problem occurs.
-      validations:
-        required: false
+    validations:
+      required: false
 
   - type: textarea
     attributes:
@@ -46,10 +46,11 @@ body:
       required: false
   
   - type: checkboxes
-    id: terms
     attributes:
       label: Code of Conduct
       description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/epiphyt/embed-privacy/blob/main/CONTRIBUTING.md)
       options:
         - label: I agree to follow this project's Code of Conduct
           required: true
+    validations:
+      required: true

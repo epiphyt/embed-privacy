@@ -5,22 +5,22 @@ body:
     attributes:
       label: What feature are you requesting?
       description: Please describe what feature you want to have in Embed Privacy in an upcoming version.
-      validations:
-        required: true
+    validations:
+      required: true
   
   - type: textarea
     attributes:
       label: Why is this feature necessary?
       description: Please provide information why your requested feature improves Embed Privacy.
-      validations:
-        required: true
+    validations:
+      required: true
   
   - type: textarea
     attributes:
       label: Are you expecing side-effects?
       description: When adding your feature, can you see any side-effects that may occur during/after the implementation?
-      validations:
-        required: false
+    validations:
+      required: false
   
   - type: checkboxes
     id: terms
@@ -30,3 +30,5 @@ body:
       options:
         - label: I agree to follow this project's Code of Conduct
           required: true
+    validations:
+      required: false
