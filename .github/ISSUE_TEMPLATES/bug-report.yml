@@ -1,0 +1,55 @@
+name: Bug report
+description: Report a bug or provide information about problems you have with Embed Privacy
+body:
+  - type: textarea
+    attributes:
+      label: Bug/Problem
+      description: Please add a description of the bug/problem occuring in Embed Privacy.
+      validations:
+        required: true
+  
+  - type: textarea
+    attributes:
+      label: Steps to reproduce
+      description: Please provide a step-by-step description how to reproduce your bug/problem.
+      placeholder: |
+        1. Go to '…'
+        2. Click on '…'
+        3. Scroll down to '…'
+      validation:
+        required: true
+  
+  - type: input
+    attributes:
+      label: Version
+      description: Please provide the version of Embed Privacy you’re using.
+      validations:
+        required: true
+  
+  - type: input
+    attributes:
+      label: Link
+      description: Please provide a link to the exact page the problem occurs.
+      validations:
+        required: false
+
+  - type: textarea
+    attributes:
+      label: Environment info
+      description: |
+        Please list what Embed Privacy version you are using.
+      placeholder: |
+        - WordPress version, Embed Privacy version, and active Theme you are using.
+        - Browser(s) are you seeing the problem on.
+        - Device you are using and operating system (e.g. "Desktop with Windows 10", "iPhone with iOS 14", etc.).
+    validations:
+      required: false
+  
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/epiphyt/embed-privacy/blob/main/CONTRIBUTING.md)
+      options:
+        - label: I agree to follow this project's Code of Conduct
+          required: true
