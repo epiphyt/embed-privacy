@@ -1,6 +1,8 @@
 <?php
 namespace epiphyt\Embed_Privacy;
 use function __;
+use function add_action;
+use function add_filter;
 use function add_settings_field;
 use function add_settings_section;
 use function add_submenu_page;
@@ -10,7 +12,10 @@ use function do_settings_sections;
 use function esc_html__;
 use function esc_html_e;
 use function esc_url;
+use function get_post;
+use function get_post_meta;
 use function register_setting;
+use function reset;
 use function settings_errors;
 use function settings_fields;
 use function submit_button;
@@ -48,6 +53,39 @@ class Admin {
 	public function init() {
 		add_action( 'admin_init', [ $this, 'init_settings' ] );
 		add_action( 'admin_menu', [ $this, 'register_menu' ] );
+		
+		add_filter( 'map_meta_cap', [ $this, 'disallow_deleting_system_embeds' ], 10, 4 );
+	}
+	
+	/**
+	 * Disallow deletion of system embeds.
+	 * 
+	 * @since	1.4.0
+	 * 
+	 * @param	array	$caps The current capabilities
+	 * @param	string	$cap The capability to check
+	 * @param	int		$user_id The user ID
+	 * @param	array	$args Additional arguments
+	 * @return	array The updated capabilities
+	 */
+	function disallow_deleting_system_embeds( array $caps, $cap, $user_id, array $args ) {
+		if ( $cap !== 'delete_post' ) {
+			return $caps;
+		}
+		
+		$post_id = reset( $args );
+		
+		if ( $post_id ) {
+			$post = get_post( $post_id );
+			
+			if ( $post->post_type === 'epi_embed' && get_post_meta( $post->ID, 'is_system', true ) === 'yes' ) {
+				$caps[] = 'do_not_allow';
+				
+				return $caps;
+			}
+		}
+		
+		return $caps;
 	}
 	
 	/**
