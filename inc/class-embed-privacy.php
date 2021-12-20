@@ -870,6 +870,8 @@ class Embed_Privacy {
 		 */
 		$markup = apply_filters( 'embed_privacy_markup', $markup, $embed_provider );
 		
+		$this->has_embed = true;
+		
 		return $markup;
 	}
 	
@@ -1269,7 +1271,12 @@ class Embed_Privacy {
 		// and gets rewritten in Divi
 		// see: https://github.com/epiphyt/embed-privacy/issues/69
 		if ( strpos( $content, 'youtube-nocookie.com' ) === false || ! $this->is_always_active_provider( 'youtube' ) ) {
-			$content = $this->get_single_overlay( $content, '', '', [] );
+			$new_content = $this->get_single_overlay( $content, '', '', [] );
+			
+			if ( $new_content !== $content ) {
+				$this->has_embed = true;
+				$content = $new_content;
+			}
 		}
 		
 		if ( $this->has_embed ) {
