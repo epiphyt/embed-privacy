@@ -122,6 +122,19 @@ We are [Epiphyt](https://epiph.yt/), your friendly neighborhood WordPress plugin
 
 == Changelog ==
 
+= 1.4.0 =
+* Added support for Wolfram Cloud
+* Improved migrations to fix duplicate providers or performance problems in multisite installations
+* Embeds can now be enabled via keyboard
+* Added a link to the original content on the bottom right overlay corner
+* Added support for caching the opt-out shortcode
+* Clicking on the "always enable content of X" enables all embeds of this provider on the current page immediately
+* Improved markup of local tweets
+* Added additional class to checkbox paragraph, thanks to @florianbrinkmann
+* System providers cannot be deleted anymore
+* Fixed oEmbed provider name if the provider is unknown
+* Fix enqueuing assets for unknown embed providers
+
 = 1.3.6 =
 * Fixed enabling multiple YouTube videos in Elementor
 * Fixed displaying content if the page contains an always active provider
