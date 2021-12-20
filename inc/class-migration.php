@@ -11,7 +11,6 @@ use function array_merge;
 use function array_search;
 use function delete_option;
 use function delete_post_thumbnail;
-use function delete_site_option;
 use function dirname;
 use function esc_html__;
 use function get_option;
@@ -308,7 +307,8 @@ class Migration {
 	 * 
 	 * @since	1.3.0
 	 * 
-	 * - Update regex for Amazon Kindle
+	 * - Delete post thumbnails
+	 * - Update regex for Google Maps
 	 */
 	private function migrate_1_3_0() {
 		$providers = Embed_Privacy::get_instance()->get_embeds( 'oembed' );
@@ -348,7 +348,7 @@ class Migration {
 	 * @since	1.4.0
 	 * 
 	 * - Replace duplicate embed providers
-	 * - Add missing default embed providers
+	 * - Add missing default embed providers (this also adds new Wolfram Cloud)
 	 */
 	private function migrate_1_4_0() {
 		$providers = Embed_Privacy::get_instance()->get_embeds();
@@ -739,6 +739,17 @@ class Migration {
 				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Vimeo', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
 				'post_title' => _x( 'Vimeo', 'embed provider', 'embed-privacy' ),
+				'post_type' => 'epi_embed',
+			],
+			[
+				'meta_input' => [
+					'is_system' => 'yes',
+					'privacy_policy_url' => __( 'https://www.wolfram.com/legal/privacy/wolfram/', 'embed-privacy' ),
+					'regex_default' => '/wolframcloud\\\.com/',
+				],
+				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Wolfram Cloud', 'embed provider', 'embed-privacy' ) ),
+				'post_status' => 'publish',
+				'post_title' => _x( 'Wolfram Cloud', 'embed provider', 'embed-privacy' ),
 				'post_type' => 'epi_embed',
 			],
 			[
