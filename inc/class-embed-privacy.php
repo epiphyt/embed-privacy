@@ -646,6 +646,14 @@ class Embed_Privacy {
 		return str_replace( [ '<html>', '</html>' ], [ '<cite class="embed-privacy-local-tweet">', '</cite>' ], $content );
 	}
 	
+	/**
+	 * Get en oEmbed title by its title attribute.
+	 * 
+	 * @since	1.4.0
+	 * 
+	 * @param	string	$content The content to get the title of
+	 * @return	string The title or an empty string
+	 */
 	private function get_oembed_title( $content ) {
 		libxml_use_internal_errors( true );
 		$dom = new DOMDocument();
@@ -824,7 +832,7 @@ class Embed_Privacy {
 			$footer_content .= sprintf(
 				/* translators: content name or 'content' */
 				esc_html__( 'Open %s directly', 'impressum' ),
-				! empty( $args['embed_title'] ) ? $args['embed_title'] : __( 'content', 'impressum' )
+				! empty( $args['embed_title'] ) && $args['embed_title'] !== '""' ? $args['embed_title'] : __( 'content', 'impressum' )
 			);
 			$footer_content .= '</a></span></div>';
 			
@@ -1354,7 +1362,7 @@ class Embed_Privacy {
 		
 		$embed_title = $this->get_oembed_title( $output );
 		/* translators: embed title */
-		$args['embed_title'] = $embed_title ? sprintf( __( '"%s"', 'impressum' ), $embed_title ) : '';
+		$args['embed_title'] = ! empty( $embed_title ) ? sprintf( __( '"%s"', 'impressum' ), $embed_title ) : '';
 		$args['embed_url'] = $url;
 		
 		// add two click to markup
