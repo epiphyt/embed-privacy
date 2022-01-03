@@ -111,6 +111,12 @@ class Embed_Privacy {
 	const IFRAME_REGEX = '/<iframe(.*?)src="([^"]+)"([^>]*)>((?!<\/iframe).)*<\/iframe>/ms';
 	
 	/**
+	 * @since	1.4.0
+	 * @var		mixed The cookie content or any error message from json_decode()
+	 */
+	private $cookie;
+	
+	/**
 	 * @since	1.3.5
 	 * @var		array Replacements that already have taken place.
 	 */
@@ -807,7 +813,7 @@ class Embed_Privacy {
 			$content .= esc_html__( 'Click here to display content from an external service.', 'embed-privacy' );
 		}
 		
-		$content .= '</p>';
+		$content .= '</p>' . PHP_EOL;
 		
 		$checkbox_id = 'embed-privacy-store-' . $embed_provider_lowercase . '-' . $embed_md5;
 		
@@ -1250,7 +1256,8 @@ class Embed_Privacy {
 			$this->has_embed = true;
 		}
 		
-		$embed_providers = $this->get_embeds();
+		// get all non-system embed providers
+		$embed_providers = $this->get_embeds( 'custom' );
 		
 		// get embed provider name
 		foreach ( $embed_providers as $provider ) {
