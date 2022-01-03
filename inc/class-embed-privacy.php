@@ -19,6 +19,7 @@ use function dirname;
 use function esc_attr;
 use function esc_html;
 use function esc_html__;
+use function esc_html_e;
 use function esc_html_x;
 use function esc_url;
 use function explode;
@@ -52,6 +53,7 @@ use function load_plugin_textdomain;
 use function mb_convert_encoding;
 use function md5;
 use function microtime;
+use function ob_get_clean;use function ob_start;
 use function plugin_basename;
 use function plugin_dir_path;
 use function plugin_dir_url;
@@ -59,6 +61,7 @@ use function preg_match;
 use function preg_match_all;
 use function preg_quote;
 use function preg_replace;
+use function printf;
 use function register_activation_hook;
 use function register_deactivation_hook;
 use function register_post_type;
@@ -789,45 +792,58 @@ class Embed_Privacy {
 		$logo_url = apply_filters( "embed_privacy_logo_url_$embed_provider_lowercase", $logo_url, $embed_provider_lowercase );
 		
 		$embed_md5 = md5( $output . wp_generate_uuid4() );
-		$markup = '<div class="embed-privacy-container is-disabled ' . esc_attr( $embed_classes ) . '" id="oembed_' . esc_attr( $embed_md5 ) . '" data-embed-provider="' . esc_attr( $embed_provider_lowercase ) . '">';
-		$markup .= '<div class="embed-privacy-overlay" role="button" tabindex="0">';
-		$markup .= '<div class="embed-privacy-inner">';
-		$markup .= ( file_exists( $logo_path ) ? '<div class="embed-privacy-logo"></div>' : '' );
-		$content = '<p>';
 		
-		if ( ! empty( $embed_provider ) ) {
-			if ( $embed_post ) {
-				$allowed_tags = [
-					'a' => [
-						'href',
-						'target',
-					],
-				];
-				$content .= $embed_post->post_content;
-				$privacy_policy = get_post_meta( $embed_post->ID, 'privacy_policy_url', true );
-				
-				if ( $privacy_policy ) {
-					/* translators: 1: the embed provider, 2: opening <a> tag to the privacy policy, 3: closing </a> */
-					$content .= '<br>' . sprintf( wp_kses( __( 'Learn more in %1$s’s %2$sprivacy policy%3$s.', 'embed-privacy' ), $allowed_tags ), esc_html( $embed_provider ), '<a href="' . esc_url( $privacy_policy ) . '" target="_blank">', '</a>' );
+		ob_start();
+		?>
+		<p>
+		<?php
+			if ( ! empty( $embed_provider ) ) {
+				if ( $embed_post ) {
+					$allowed_tags = [
+						'a' => [
+							'href',
+							'target',
+						],
+					];
+					echo $embed_post->post_content . PHP_EOL;
+					$privacy_policy = get_post_meta( $embed_post->ID, 'privacy_policy_url', true );
+					
+					if ( $privacy_policy ) {
+						?>
+						<br>
+						<?php
+						/* translators: 1: the embed provider, 2: opening <a> tag to the privacy policy, 3: closing </a> */
+						printf( wp_kses( __( 'Learn more in %1$s’s %2$sprivacy policy%3$s.', 'embed-privacy' ), $allowed_tags ), esc_html( $embed_provider ), '<a href="' . esc_url( $privacy_policy ) . '" target="_blank">', '</a>' );
+					}
+				}
+				else {
+					/* translators: the embed provider */
+					printf( esc_html__( 'Click here to display content from %s', 'embed-privacy' ), esc_html( $embed_provider ) );
 				}
 			}
 			else {
-				/* translators: the embed provider */
-				$content .= sprintf( esc_html__( 'Click here to display content from %s', 'embed-privacy' ), esc_html( $embed_provider ) );
+				esc_html_e( 'Click here to display content from an external service.', 'embed-privacy' );
 			}
-		}
-		else {
-			$content .= esc_html__( 'Click here to display content from an external service.', 'embed-privacy' );
-		}
-		
-		$content .= '</p>' . PHP_EOL;
-		
+		?>
+		</p>
+		<?php
 		$checkbox_id = 'embed-privacy-store-' . $embed_provider_lowercase . '-' . $embed_md5;
 		
 		if ( $embed_provider_lowercase !== 'default' ) {
-			/* translators: the embed provider */
-			$content .= '<p class="embed-privacy-input-wrapper"><input id="' . esc_attr( $checkbox_id ) . '" type="checkbox" value="1" class="embed-privacy-input" data-embed-provider="' . esc_attr( $embed_provider_lowercase ) . '"><label for="' . esc_attr( $checkbox_id ) . '" class="embed-privacy-label" data-embed-provider="' . esc_attr( $embed_provider_lowercase ) . '">' . sprintf( esc_html__( 'Always display content from %s', 'embed-privacy' ), esc_html( $embed_provider ) ) . '</label></p>';
+			?>
+			<p class="embed-privacy-input-wrapper">
+				<input id="<?php echo esc_attr( $checkbox_id ); ?>" type="checkbox" value="1" class="embed-privacy-input" data-embed-provider="<?php echo esc_attr( $embed_provider_lowercase ); ?>">
+				<label for="<?php echo esc_attr( $checkbox_id ); ?>" class="embed-privacy-label" data-embed-provider="<?php echo esc_attr( $embed_provider_lowercase ); ?>">
+					<?php
+					/* translators: the embed provider */
+					printf( esc_html__( 'Always display content from %s', 'embed-privacy' ), esc_html( $embed_provider ) );
+					?>
+				</label>
+			</p>
+			<?php
 		}
+		
+		$content = ob_get_clean();
 		
 		/**
 		 * Filter the content of the embed overlay.
@@ -837,17 +853,18 @@ class Embed_Privacy {
 		 */
 		$content = apply_filters( 'embed_privacy_content', $content, $embed_provider );
 		
-		$markup .= $content;
-		$markup .= '</div>';
+		ob_start();
+		
+		$footer_content = '';
 		
 		if ( ! empty( $args['embed_url'] ) ) {
-			$footer_content = '<div class="embed-privacy-footer"><span class="embed-privacy-url"><a href="' . esc_url( $args['embed_url'] ) . '">';
+			$footer_content = '<div class="embed-privacy-footer"><span class="embed-privacy-url"><a href="' . esc_url( $args['embed_url'] ). '">';
 			$footer_content .= sprintf(
 				/* translators: content name or 'content' */
 				esc_html__( 'Open %s directly', 'impressum' ),
 				! empty( $args['embed_title'] ) && $args['embed_title'] !== '""' ? $args['embed_title'] : __( 'content', 'impressum' )
 			);
-			$footer_content .= '</a></span></div>';
+			$footer_content .= '</a></span></div>' . PHP_EOL;
 			
 			/**
 			 * Filter the overlay footer.
@@ -855,33 +872,49 @@ class Embed_Privacy {
 			 * @param	string	$footer_content The footer content
 			 */
 			$footer_content = apply_filters( 'embed_privacy_overlay_footer', $footer_content );
+		}
+		
+		?>
+		<div class="embed-privacy-container is-disabled <?php echo esc_attr( $embed_classes ); ?>" id="oembed_<?php echo esc_attr( $embed_md5 ); ?>" data-embed-provider="<?php echo esc_attr( $embed_provider_lowercase ); ?>">
+			<div class="embed-privacy-overlay" role="button" tabindex="0">
+				<div class="embed-privacy-inner">
+					<?php
+					echo ( file_exists( $logo_path ) ? '<div class="embed-privacy-logo"></div>' . PHP_EOL : '' );
+					echo $content . PHP_EOL;
+					?>
+				</div>
+				
+				<?php echo $footer_content; ?>
+			</div>
 			
-			$markup .= $footer_content;
-		}
-		
-		$markup .= '</div>';
-		$markup .= '<div class="embed-privacy-content"><script>var _oembed_' . $embed_md5 . ' = \'' . addslashes( wp_json_encode( [ 'embed' => htmlentities( $output ) ] ) ) . '\';</script></div>';
-		
-		$markup .= '<style>' . PHP_EOL;
-		
-		// display only if file exists
-		if ( file_exists( $background_path ) ) {
-			$version = filemtime( $background_path );
-			$markup .= '.' . $embed_class . ' {
-	background-image: url(' . $background_url . '?v=' . $version . ');
-}' . PHP_EOL;
-		}
-		
-		// display only if file exists
-		if ( file_exists( $logo_path ) ) {
-			$version = filemtime( $logo_path );
-			$markup .= '.' . $embed_class . ' .embed-privacy-logo {
-	background-image: url(' . $logo_url . '?v=' . $version . ');
-}' . PHP_EOL;
-		}
-		
-		$markup .= '</style>';
-		$markup .= '</div>';
+			<div class="embed-privacy-content">
+				<script>var _oembed_<?php echo $embed_md5; ?> = '<?php echo addslashes( wp_json_encode( [ 'embed' => htmlentities( $output ) ] ) ); ?>';</script>
+			</div>
+			
+			<style>
+				<?php
+				// display only if file exists
+				if ( file_exists( $background_path ) ) :
+				$version = filemtime( $background_path );
+				?>
+				.<?php echo $embed_class; ?> {
+					background-image: url(<?php echo $background_url; ?>?v=<?php echo $version; ?>);
+				}
+				<?php
+				endif;
+				
+				// display only if file exists
+				if ( file_exists( $logo_path ) ) :
+				$version = filemtime( $logo_path );
+				?>
+				.<?php echo $embed_class; ?> .embed-privacy-logo {
+					background-image: url(<?php echo $logo_url; ?>?v=<?php echo $version; ?>);
+				}
+				<?php endif; ?>
+			</style>
+		</div>
+		<?php
+		$markup = ob_get_clean();
 		
 		/**
 		 * Filter the complete markup of the embed.
