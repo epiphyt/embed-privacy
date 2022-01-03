@@ -62,7 +62,6 @@ use function preg_replace;
 use function register_activation_hook;
 use function register_deactivation_hook;
 use function register_post_type;
-use function reset;
 use function sanitize_text_field;
 use function sanitize_title;
 use function shortcode_atts;
@@ -319,7 +318,13 @@ class Embed_Privacy {
 			return '';
 		}
 		
-		return json_decode( sanitize_text_field( wp_unslash( $_COOKIE['embed-privacy'] ) ) );
+		if ( ! empty( $this->cookie ) ) {
+			return $this->cookie;
+		}
+		
+		$this->cookie = json_decode( sanitize_text_field( wp_unslash( $_COOKIE['embed-privacy'] ) ) );
+		
+		return $this->cookie;
 	}
 	
 	/**
@@ -443,17 +448,19 @@ class Embed_Privacy {
 			return null;
 		}
 		
-		$embeds = get_posts( [
-			'name' => $name,
-			'numberposts' => 1,
-			'post_type' => 'epi_embed',
-		] );
+		$embed_providers = $this->get_embeds();
+		$embed = null;
 		
-		if ( empty( $embeds ) ) {
-			return null;
+		foreach ( $embed_providers as $embed_provider ) {
+			if ( $embed_provider->post_name !== $name ) {
+				continue;
+			}
+			
+			$embed = $embed_provider;
+			break;
 		}
 		
-		return reset( $embeds );
+		return $embed;
 	}
 	
 	/**
@@ -1062,7 +1069,11 @@ class Embed_Privacy {
 		) {
 			$provider = $this->get_embed_by_name( $embed_provider_lowercase );
 			
-			if ( is_a( $provider, 'WP_Post' ) && get_post_meta( $provider->ID, 'is_disabled', true ) !== 'yes' ) {
+			if (
+				$provider instanceof WP_Post
+				&& get_post_meta( $provider->ID, 'is_disabled', true ) !== 'yes'
+				&& preg_match( $args['regex'], $content )
+			) {
 				$content = preg_replace( $args['regex'], $this->get_output_template( $embed_provider, $embed_provider_lowercase, $content, $args ), $content );
 			}
 		}
