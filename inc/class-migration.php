@@ -579,6 +579,17 @@ class Migration {
 			[
 				'meta_input' => [
 					'is_system' => 'yes',
+					'privacy_policy_url' => __( 'https://policy.pinterest.com/en/privacy-policy', 'embed-privacy' ),
+					'regex_default' => '/pinterest\\\./',
+				],
+				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Pinterest', 'embed provider', 'embed-privacy' ) ),
+				'post_status' => 'publish',
+				'post_title' => _x( 'Pinterest', 'embed provider', 'embed-privacy' ),
+				'post_type' => 'epi_embed',
+			],
+			[
+				'meta_input' => [
+					'is_system' => 'yes',
 					'privacy_policy_url' => __( 'https://www.reddit.com/help/privacypolicy', 'embed-privacy' ),
 					'regex_default' => '/reddit\\\.com/',
 				],

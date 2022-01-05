@@ -123,7 +123,7 @@ We are [Epiphyt](https://epiph.yt/), your friendly neighborhood WordPress plugin
 == Changelog ==
 
 = 1.4.0 =
-* Added support for Wolfram Cloud
+* Added support for Pinterest and Wolfram Cloud
 * Improved migrations to fix duplicate providers or performance problems in multisite installations
 * Embeds can now be enabled via keyboard
 * Added a link to the original content on the bottom right overlay corner
