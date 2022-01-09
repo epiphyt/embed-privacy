@@ -146,6 +146,7 @@ class Migration {
 			_doing_it_wrong(
 				__METHOD__,
 				sprintf(
+					/* translators: parameter */
 					esc_html__( 'The function does not support the parameter "%s" anymore.', 'embed-privacy' ),
 					'$plugin'
 				),
@@ -157,6 +158,7 @@ class Migration {
 			_doing_it_wrong(
 				__METHOD__,
 				sprintf(
+					/* translators: parameter */
 					esc_html__( 'The function does not support the parameter "%s" anymore.', 'embed-privacy' ),
 					'$network_wide'
 				),
@@ -260,7 +262,7 @@ class Migration {
 		
 		foreach ( $available_providers as $provider ) {
 			// get according default provider
-			$key = array_search( $provider->post_title, array_column( $this->providers, 'post_title' ) );
+			$key = array_search( $provider->post_title, array_column( $this->providers, 'post_title' ), true );
 			
 			// if no default provider, continue with next available provider
 			if ( $key === false ) {
@@ -406,6 +408,7 @@ class Migration {
 					'privacy_policy_url' => __( 'https://www.amazon.com/gp/help/customer/display.html?nodeId=GX7NJQ4ZB8MHFRNJ', 'embed-privacy' ),
 					'regex_default' => '/\\\.?(ama?zo?n\\\.|a\\\.co\\\/|z\\\.cn\\\/)/',
 				],
+				/* translators: embed provider */
 				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Amazon Kindle', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
 				'post_title' => _x( 'Amazon Kindle', 'embed provider', 'embed-privacy' ),
@@ -417,6 +420,7 @@ class Migration {
 					'privacy_policy_url' => __( 'https://animoto.com/legal/privacy_policy', 'embed-privacy' ),
 					'regex_default' => '/animoto\\\.com/',
 				],
+				/* translators: embed provider */
 				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Animoto', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
 				'post_title' => _x( 'Animoto', 'embed provider', 'embed-privacy' ),
@@ -428,6 +432,7 @@ class Migration {
 					'privacy_policy_url' => __( 'https://automattic.com/privacy/', 'embed-privacy' ),
 					'regex_default' => '/cloudup\\\.com/',
 				],
+				/* translators: embed provider */
 				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Cloudup', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
 				'post_title' => _x( 'Cloudup', 'embed provider', 'embed-privacy' ),
@@ -439,6 +444,7 @@ class Migration {
 					'privacy_policy_url' => __( 'https://automattic.com/privacy/', 'embed-privacy' ),
 					'regex_default' => '/((poll(\\\.fm|daddy\\\.com))|croudsignal\\\.com|survey\\\.fm)/',
 				],
+				/* translators: embed provider */
 				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Crowdsignal', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
 				'post_title' => _x( 'Crowdsignal', 'embed provider', 'embed-privacy' ),
@@ -450,6 +456,7 @@ class Migration {
 					'privacy_policy_url' => __( 'https://www.dailymotion.com/legal/privacy?localization=en', 'embed-privacy' ),
 					'regex_default' => '/dailymotion\\\.com/',
 				],
+				/* translators: embed provider */
 				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'DailyMotion', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
 				'post_title' => _x( 'DailyMotion', 'embed provider', 'embed-privacy' ),
@@ -461,6 +468,7 @@ class Migration {
 					'privacy_policy_url' => __( 'https://www.facebook.com/privacy/explanation', 'embed-privacy' ),
 					'regex_default' => '/facebook\\\.com/',
 				],
+				/* translators: embed provider */
 				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Facebook', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
 				'post_title' => _x( 'Facebook', 'embed provider', 'embed-privacy' ),
@@ -472,6 +480,7 @@ class Migration {
 					'privacy_policy_url' => __( 'https://www.flickr.com/help/privacy', 'embed-privacy' ),
 					'regex_default' => '/flickr\\\.com/',
 				],
+				/* translators: embed provider */
 				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Flickr', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
 				'post_title' => _x( 'Flickr', 'embed provider', 'embed-privacy' ),
@@ -483,6 +492,7 @@ class Migration {
 					'privacy_policy_url' => __( 'https://www.funnyordie.com/legal/privacy-notice', 'embed-privacy' ),
 					'regex_default' => '/funnyordie\\\.com/',
 				],
+				/* translators: embed provider */
 				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Funny Or Die', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
 				'post_title' => _x( 'Funny Or Die', 'embed provider', 'embed-privacy' ),
@@ -494,6 +504,7 @@ class Migration {
 					'privacy_policy_url' => __( 'https://policies.google.com/privacy?hl=en', 'embed-privacy' ),
 					'regex_default' => '/google\\\.com\\\/maps\\\/embed/',
 				],
+				/* translators: embed provider */
 				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Google Maps', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
 				'post_title' => _x( 'Google Maps', 'embed provider', 'embed-privacy' ),
@@ -505,6 +516,7 @@ class Migration {
 					'privacy_policy_url' => __( 'https://imgur.com/privacy', 'embed-privacy' ),
 					'regex_default' => '/imgur\\\.com/',
 				],
+				/* translators: embed provider */
 				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Imgur', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
 				'post_title' => _x( 'Imgur', 'embed provider', 'embed-privacy' ),
@@ -516,6 +528,7 @@ class Migration {
 					'privacy_policy_url' => __( 'https://www.instagram.com/legal/privacy/', 'embed-privacy' ),
 					'regex_default' => '/instagram\\\.com/',
 				],
+				/* translators: embed provider */
 				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Instagram', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
 				'post_title' => _x( 'Instagram', 'embed provider', 'embed-privacy' ),
@@ -527,6 +540,7 @@ class Migration {
 					'privacy_policy_url' => __( 'https://issuu.com/legal/privacy', 'embed-privacy' ),
 					'regex_default' => '/issuu\\\.com/',
 				],
+				/* translators: embed provider */
 				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Issuu', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
 				'post_title' => _x( 'Issuu', 'embed provider', 'embed-privacy' ),
@@ -538,6 +552,7 @@ class Migration {
 					'privacy_policy_url' => __( 'https://www.kickstarter.com/privacy', 'embed-privacy' ),
 					'regex_default' => '/kickstarter\\\.com/',
 				],
+				/* translators: embed provider */
 				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Kickstarter', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
 				'post_title' => _x( 'Kickstarter', 'embed provider', 'embed-privacy' ),
@@ -549,6 +564,7 @@ class Migration {
 					'privacy_policy_url' => __( 'https://www.meetup.com/privacy/', 'embed-privacy' ),
 					'regex_default' => '/meetup\\\.com/',
 				],
+				/* translators: embed provider */
 				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Meetup', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
 				'post_title' => _x( 'Meetup', 'embed provider', 'embed-privacy' ),
@@ -560,6 +576,7 @@ class Migration {
 					'privacy_policy_url' => __( 'https://www.mixcloud.com/privacy/', 'embed-privacy' ),
 					'regex_default' => '/mixcloud\\\.com/',
 				],
+				/* translators: embed provider */
 				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Mixcloud', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
 				'post_title' => _x( 'Mixcloud', 'embed provider', 'embed-privacy' ),
@@ -571,6 +588,7 @@ class Migration {
 					'privacy_policy_url' => __( 'https://app.photobucket.com/privacy', 'embed-privacy' ),
 					'regex_default' => '/photobucket\\\.com/',
 				],
+				/* translators: embed provider */
 				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Photobucket', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
 				'post_title' => _x( 'Photobucket', 'embed provider', 'embed-privacy' ),
@@ -582,6 +600,7 @@ class Migration {
 					'privacy_policy_url' => __( 'https://policy.pinterest.com/en/privacy-policy', 'embed-privacy' ),
 					'regex_default' => '/pinterest\\\./',
 				],
+				/* translators: embed provider */
 				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Pinterest', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
 				'post_title' => _x( 'Pinterest', 'embed provider', 'embed-privacy' ),
@@ -593,6 +612,7 @@ class Migration {
 					'privacy_policy_url' => __( 'https://www.reddit.com/help/privacypolicy', 'embed-privacy' ),
 					'regex_default' => '/reddit\\\.com/',
 				],
+				/* translators: embed provider */
 				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Reddit', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
 				'post_title' => _x( 'Reddit', 'embed provider', 'embed-privacy' ),
@@ -604,6 +624,7 @@ class Migration {
 					'privacy_policy_url' => __( 'https://www.reverbnation.com/privacy', 'embed-privacy' ),
 					'regex_default' => '/reverbnation\\\.com/',
 				],
+				/* translators: embed provider */
 				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'ReverbNation', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
 				'post_title' => _x( 'ReverbNation', 'embed provider', 'embed-privacy' ),
@@ -615,6 +636,7 @@ class Migration {
 					'privacy_policy_url' => __( 'https://scribd.com/privacy', 'embed-privacy' ),
 					'regex_default' => '/scribd\\\.com/',
 				],
+				/* translators: embed provider */
 				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Scribd', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
 				'post_title' => _x( 'Scribd', 'embed provider', 'embed-privacy' ),
@@ -626,6 +648,7 @@ class Migration {
 					'privacy_policy_url' => __( 'https://sketchfab.com/privacy', 'embed-privacy' ),
 					'regex_default' => '/sketchfab\\\.com/',
 				],
+				/* translators: embed provider */
 				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Sketchfab', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
 				'post_title' => _x( 'Sketchfab', 'embed provider', 'embed-privacy' ),
@@ -637,6 +660,7 @@ class Migration {
 					'privacy_policy_url' => __( 'https://www.slideshare.net/privacy', 'embed-privacy' ),
 					'regex_default' => '/slideshare\\\.net/',
 				],
+				/* translators: embed provider */
 				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'SlideShare', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
 				'post_title' => _x( 'SlideShare', 'embed provider', 'embed-privacy' ),
@@ -648,6 +672,7 @@ class Migration {
 					'privacy_policy_url' => __( 'https://www.smugmug.com/about/privacy', 'embed-privacy' ),
 					'regex_default' => '/smugmug\\\.com/',
 				],
+				/* translators: embed provider */
 				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'SmugMug', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
 				'post_title' => _x( 'SmugMug', 'embed provider', 'embed-privacy' ),
@@ -659,6 +684,7 @@ class Migration {
 					'privacy_policy_url' => __( 'https://soundcloud.com/pages/privacy', 'embed-privacy' ),
 					'regex_default' => '/soundcloud\\\.com/',
 				],
+				/* translators: embed provider */
 				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'SoundCloud', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
 				'post_title' => _x( 'SoundCloud', 'embed provider', 'embed-privacy' ),
@@ -670,6 +696,7 @@ class Migration {
 					'privacy_policy_url' => __( 'https://speakerdeck.com/privacy', 'embed-privacy' ),
 					'regex_default' => '/speakerdeck\\\.com/',
 				],
+				/* translators: embed provider */
 				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Speaker Deck', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
 				'post_title' => _x( 'Speaker Deck', 'embed provider', 'embed-privacy' ),
@@ -681,6 +708,7 @@ class Migration {
 					'privacy_policy_url' => __( 'https://www.spotify.com/privacy/', 'embed-privacy' ),
 					'regex_default' => '/spotify\\\.com/',
 				],
+				/* translators: embed provider */
 				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Spotify', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
 				'post_title' => _x( 'Spotify', 'embed provider', 'embed-privacy' ),
@@ -692,6 +720,7 @@ class Migration {
 					'privacy_policy_url' => __( 'https://www.tiktok.com/legal/privacy-policy?lang=en-US', 'embed-privacy' ),
 					'regex_default' => '/tiktok\\\.com/',
 				],
+				/* translators: embed provider */
 				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'TikTok', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
 				'post_title' => _x( 'TikTok', 'embed provider', 'embed-privacy' ),
@@ -703,6 +732,7 @@ class Migration {
 					'privacy_policy_url' => __( 'https://www.ted.com/about/our-organization/our-policies-terms/privacy-policy', 'embed-privacy' ),
 					'regex_default' => '/ted\\\.com/',
 				],
+				/* translators: embed provider */
 				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'TED', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
 				'post_title' => _x( 'TED', 'embed provider', 'embed-privacy' ),
@@ -714,6 +744,7 @@ class Migration {
 					'privacy_policy_url' => __( 'https://www.tumblr.com/privacy_policy', 'embed-privacy' ),
 					'regex_default' => '/tumblr\\\.com/',
 				],
+				/* translators: embed provider */
 				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Tumblr', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
 				'post_title' => _x( 'Tumblr', 'embed provider', 'embed-privacy' ),
@@ -725,6 +756,7 @@ class Migration {
 					'privacy_policy_url' => __( 'https://twitter.com/privacy', 'embed-privacy' ),
 					'regex_default' => '/twitter\\\.com/',
 				],
+				/* translators: embed provider */
 				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Twitter', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
 				'post_title' => _x( 'Twitter', 'embed provider', 'embed-privacy' ),
@@ -736,6 +768,7 @@ class Migration {
 					'privacy_policy_url' => __( 'https://automattic.com/privacy/', 'embed-privacy' ),
 					'regex_default' => '/videopress\\\.com/',
 				],
+				/* translators: embed provider */
 				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'VideoPress', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
 				'post_title' => _x( 'VideoPress', 'embed provider', 'embed-privacy' ),
@@ -747,6 +780,7 @@ class Migration {
 					'privacy_policy_url' => __( 'https://vimeo.com/privacy', 'embed-privacy' ),
 					'regex_default' => '/vimeo\\\.com/',
 				],
+				/* translators: embed provider */
 				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Vimeo', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
 				'post_title' => _x( 'Vimeo', 'embed provider', 'embed-privacy' ),
@@ -758,6 +792,7 @@ class Migration {
 					'privacy_policy_url' => __( 'https://www.wolfram.com/legal/privacy/wolfram/', 'embed-privacy' ),
 					'regex_default' => '/wolframcloud\\\.com/',
 				],
+				/* translators: embed provider */
 				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Wolfram Cloud', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
 				'post_title' => _x( 'Wolfram Cloud', 'embed provider', 'embed-privacy' ),
@@ -769,6 +804,7 @@ class Migration {
 					'privacy_policy_url' => __( 'https://wordpress.org/about/privacy/', 'embed-privacy' ),
 					'regex_default' => '/wordpress\\\.org\\\/plugins/',
 				],
+				/* translators: embed provider */
 				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'WordPress.org', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
 				'post_title' => _x( 'WordPress.org', 'embed provider', 'embed-privacy' ),
@@ -780,6 +816,7 @@ class Migration {
 					'privacy_policy_url' => __( 'https://wordpress.org/about/privacy/', 'embed-privacy' ),
 					'regex_default' => '/wordpress\\\.tv\/',
 				],
+				/* translators: embed provider */
 				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'WordPress.tv', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
 				'post_title' => _x( 'WordPress.tv', 'embed provider', 'embed-privacy' ),
@@ -791,6 +828,7 @@ class Migration {
 					'privacy_policy_url' => __( 'https://policies.google.com/privacy?hl=en', 'embed-privacy' ),
 					'regex_default' => '/https?:\\\/\\\/(?:.+?.)?youtu(?:.be|be.com)/',
 				],
+				/* translators: embed provider */
 				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'YouTube', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
 				'post_title' => _x( 'YouTube', 'embed provider', 'embed-privacy' ),

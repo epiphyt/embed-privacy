@@ -54,7 +54,8 @@ use function load_plugin_textdomain;
 use function mb_convert_encoding;
 use function md5;
 use function microtime;
-use function ob_get_clean;use function ob_start;
+use function ob_get_clean;
+use function ob_start;
 use function plugin_basename;
 use function plugin_dir_path;
 use function plugin_dir_url;
@@ -247,23 +248,33 @@ class Embed_Privacy {
 	public function clear_embed_cache() {
 		global $wpdb;
 		
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 		if ( is_plugin_active_for_network( 'embed-privacy/embed-privacy.php' ) ) {
 			// on networks we need to iterate through every site
 			$sites = get_sites( [ 'number' => 99999 ] );
 			
 			foreach ( $sites as $site ) {
 				$wpdb->query(
-					"DELETE FROM	" . $wpdb->get_blog_prefix( $site->blog_id ) . "postmeta
-					WHERE			meta_key LIKE '%_oembed_%'"
-				 );
+					$wpdb->prepare(
+						// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+						"DELETE FROM	$wpdb->get_blog_prefix( $site->blog_id )postmeta
+						WHERE			meta_key LIKE %s",
+						// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+						[ '%_oembed_%' ]
+					)
+				);
 			}
 		}
 		else {
 			$wpdb->query(
-				"DELETE FROM	$wpdb->postmeta
-				WHERE			meta_key LIKE '%_oembed_%'"
+				$wpdb->prepare(
+					"DELETE FROM	$wpdb->postmeta
+					WHERE			meta_key LIKE %s",
+					[ '%_oembed_%' ]
+				)
 			);
 		}
+		//phpcs:enable
 	}
 	
 	/**
@@ -359,6 +370,7 @@ class Embed_Privacy {
 		$embed_provider = $this->get_embed_by_name( 'youtube' );
 		$replacements = [];
 		
+		// phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		libxml_use_internal_errors( true );
 		$dom = new DOMDocument();
 		$dom->loadHTML(
@@ -435,6 +447,7 @@ class Embed_Privacy {
 		}
 		
 		libxml_use_internal_errors( false );
+		// phpcs:enable
 		
 		return $content;
 	}
@@ -520,6 +533,7 @@ class Embed_Privacy {
 			return $this->embeds[ $type ];
 		} 
 		
+		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 		switch ( $type ) {
 			case 'custom':
 				$custom_providers = get_posts( [
@@ -573,6 +587,7 @@ class Embed_Privacy {
 				
 				return $this->embeds['all'];
 		}
+		// phpcs:enable
 	}
 	
 	/**
@@ -610,6 +625,7 @@ class Embed_Privacy {
 			LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
 		);
 		
+		// phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		// remove script tag
 		foreach ( $dom->getElementsByTagName( 'script' ) as $script ) {
 			$script->parentNode->removeChild( $script );
@@ -659,6 +675,7 @@ class Embed_Privacy {
 		}
 		
 		$content = $dom->saveHTML( $dom->documentElement );
+		// phpcs:enable
 		
 		return str_replace( [ '<html>', '</html>' ], [ '<cite class="embed-privacy-local-tweet">', '</cite>' ], $content );
 	}
@@ -806,7 +823,7 @@ class Embed_Privacy {
 							'target',
 						],
 					];
-					echo $embed_post->post_content . PHP_EOL;
+					echo $embed_post->post_content . PHP_EOL; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 					$privacy_policy = get_post_meta( $embed_post->ID, 'privacy_policy_url', true );
 					
 					if ( $privacy_policy ) {
@@ -862,8 +879,8 @@ class Embed_Privacy {
 			$footer_content = '<div class="embed-privacy-footer"><span class="embed-privacy-url"><a href="' . esc_url( $args['embed_url'] ). '">';
 			$footer_content .= sprintf(
 				/* translators: content name or 'content' */
-				esc_html__( 'Open %s directly', 'impressum' ),
-				! empty( $args['embed_title'] ) && $args['embed_title'] !== '""' ? $args['embed_title'] : __( 'content', 'impressum' )
+				esc_html__( 'Open %s directly', 'embed-privacy' ),
+				! empty( $args['embed_title'] ) && $args['embed_title'] !== '""' ? $args['embed_title'] : __( 'content', 'embed-privacy' )
 			);
 			$footer_content .= '</a></span></div>' . PHP_EOL;
 			
@@ -882,15 +899,15 @@ class Embed_Privacy {
 				<div class="embed-privacy-inner">
 					<?php
 					echo ( file_exists( $logo_path ) ? '<div class="embed-privacy-logo"></div>' . PHP_EOL : '' );
-					echo $content . PHP_EOL;
+					echo $content . PHP_EOL; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 					?>
 				</div>
 				
-				<?php echo $footer_content; ?>
+				<?php echo $footer_content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			</div>
 			
 			<div class="embed-privacy-content">
-				<script>var _oembed_<?php echo $embed_md5; ?> = '<?php echo addslashes( wp_json_encode( [ 'embed' => htmlentities( $output ) ] ) ); ?>';</script>
+				<script>var _oembed_<?php echo $embed_md5; ?> = '<?php echo addslashes( wp_json_encode( [ 'embed' => htmlentities( $output ) ] ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>';</script>
 			</div>
 			
 			<style>
@@ -899,8 +916,8 @@ class Embed_Privacy {
 				if ( file_exists( $background_path ) ) :
 				$version = filemtime( $background_path );
 				?>
-				.<?php echo $embed_class; ?> {
-					background-image: url(<?php echo $background_url; ?>?v=<?php echo $version; ?>);
+				.<?php echo $embed_class; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> {
+					background-image: url(<?php echo $background_url; ?>?v=<?php echo $version; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>);
 				}
 				<?php
 				endif;
@@ -909,8 +926,8 @@ class Embed_Privacy {
 				if ( file_exists( $logo_path ) ) :
 				$version = filemtime( $logo_path );
 				?>
-				.<?php echo $embed_class; ?> .embed-privacy-logo {
-					background-image: url(<?php echo $logo_url; ?>?v=<?php echo $version; ?>);
+				.<?php echo $embed_class; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> .embed-privacy-logo {
+					background-image: url(<?php echo $logo_url; ?>?v=<?php echo $version; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>);
 				}
 				<?php endif; ?>
 			</style>
@@ -993,7 +1010,7 @@ class Embed_Privacy {
 			
 			foreach ( $dom->getElementsByTagName( $tag ) as $element ) {
 				// ignore embeds from the same (sub-)domain
-				if ( preg_match( '/https?:\/\/(.*\.)?' . preg_quote( $host ) . '/', $element->getAttribute( $attribute ) ) ) {
+				if ( preg_match( '/https?:\/\/(.*\.)?' . preg_quote( $host, '/' ) . '/', $element->getAttribute( $attribute ) ) ) {
 					continue;
 				}
 				
@@ -1032,7 +1049,7 @@ class Embed_Privacy {
 				}
 				
 				/* translators: embed title */
-				$args['embed_title'] = sprintf( __( '"%s"', 'impressum' ), $element->getAttribute( 'title' ) );
+				$args['embed_title'] = sprintf( __( '"%s"', 'embed-privacy' ), $element->getAttribute( 'title' ) );
 				$args['embed_url'] = $element->getAttribute( $attribute );
 				
 				// get overlay template as DOM element
@@ -1074,6 +1091,7 @@ class Embed_Privacy {
 				$elements = $dom->getElementsByTagName( $tag );
 				$i = $elements->length - 1;
 				
+				// phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 				// use regressive loop for replaceChild()
 				// see: https://www.php.net/manual/en/domnode.replacechild.php#50500
 				while ( $i > -1 ) {
@@ -1089,6 +1107,7 @@ class Embed_Privacy {
 				}
 				
 				$content = $dom->saveHTML( $dom->documentElement );
+				// phpcs:enable
 			}
 		}
 		
@@ -1131,7 +1150,7 @@ class Embed_Privacy {
 		}
 		
 		if ( is_numeric( $post ) ) {
-			$post = get_post( $post );
+			$post = get_post( $post ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		}
 		
 		/**
@@ -1414,7 +1433,7 @@ class Embed_Privacy {
 		
 		$embed_title = $this->get_oembed_title( $output );
 		/* translators: embed title */
-		$args['embed_title'] = ! empty( $embed_title ) ? sprintf( __( '"%s"', 'impressum' ), $embed_title ) : '';
+		$args['embed_title'] = ! empty( $embed_title ) ? sprintf( __( '"%s"', 'embed-privacy' ), $embed_title ) : '';
 		$args['embed_url'] = $url;
 		
 		// add two click to markup

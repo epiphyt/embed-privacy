@@ -6,6 +6,7 @@ use function add_action;
 use function add_meta_box;
 use function apply_filters;
 use function array_merge;
+use function check_admin_referer;
 use function checked;
 use function current_user_can;
 use function defined;
@@ -131,7 +132,7 @@ class Fields {
 	public function get_the_fields_html() {
 		global $post;
 		
-		foreach( $this->fields as $field ) {
+		foreach ( $this->fields as $field ) {
 			if ( $field['field_type'] !== 'input' || empty( $field['type'] ) || $field['type'] !== 'hidden' ) {
 				continue;
 			}
@@ -170,7 +171,7 @@ class Fields {
 				$fields = apply_filters( 'embed_privacy_editor_fields', $post->ID );
 				
 				if ( $fields !== $post->ID ) {
-					echo $fields;
+					echo $fields; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				}
 				?>
 			</tbody>
@@ -263,7 +264,8 @@ class Fields {
 		$input = ob_get_clean();
 		
 		if ( $attributes['option_type'] === 'option' ) {
-			echo $input;
+			echo $input; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			
 			return;
 		}
 		?>
@@ -272,7 +274,7 @@ class Fields {
 				<label for="<?php echo esc_attr( $attributes['name'] ); ?>"><?php echo esc_html( $attributes['title'] ); ?></label>
 			</th>
 			<td>
-				<?php echo $input; ?>
+				<?php echo $input; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			</td>
 		</tr>
 		<?php
@@ -292,14 +294,15 @@ class Fields {
 		$input = ob_get_clean();
 		
 		if ( $attributes['option_type'] === 'option' ) {
-			echo $input;
+			echo $input; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			
 			return;
 		}
 		?>
 		<tr>
 			<th scope="row"></th>
 			<td>
-				<?php echo $input; ?>
+				<?php echo $input; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			</td>
 		</tr>
 		<?php
@@ -322,7 +325,7 @@ class Fields {
 		$additional_fields = apply_filters( 'embed_privacy_register_fields', [] );
 		
 		if ( ! is_array( $additional_fields ) ) {
-			wp_die( new WP_Error( 'invalid_fields', esc_html__( 'Invalid value for additional Embed Privacy fields provided.', 'embed-privacy' ) ) );
+			wp_die( new WP_Error( 'invalid_fields', esc_html__( 'Invalid value for additional Embed Privacy fields provided.', 'embed-privacy' ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		}
 		
 		// merge fields
@@ -414,8 +417,12 @@ class Fields {
 			return;
 		}
 		
+		if ( ! check_admin_referer( 'update-post_' . $post_id ) ) {
+			return;
+		}
+		
 		// ignore actions to trash the post
-		if ( ! empty( $_GET['action'] ) && in_array( sanitize_text_field( wp_unslash( $_GET['action'] ) ), [ 'trash', 'untrash' ] ) ) {
+		if ( ! empty( $_GET['action'] ) && in_array( sanitize_text_field( wp_unslash( $_GET['action'] ) ), [ 'trash', 'untrash' ], true ) ) {
 			return;
 		}
 		
@@ -424,7 +431,7 @@ class Fields {
 			! defined( 'WP_CLI' ) && ! current_user_can( 'edit_posts', $post_id )
 			|| defined( 'WP_CLI' ) && ! WP_CLI
 		) {
-			wp_die( new WP_Error( 403, esc_html__( 'You are not allowed to edit an embed.', 'embed-privacy' ) ) );
+			wp_die( new WP_Error( 403, esc_html__( 'You are not allowed to edit an embed.', 'embed-privacy' ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		}
 		
 		foreach ( $this->fields as $field ) {
@@ -434,7 +441,7 @@ class Fields {
 				continue;
 			}
 			
-			$value = $_POST[ $field['name'] ];
+			$value = sanitize_text_field( wp_unslash( $_POST[ $field['name'] ] ) );
 			
 			// sanitizing
 			if ( is_array( $value ) ) {
