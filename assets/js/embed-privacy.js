@@ -18,7 +18,8 @@ document.addEventListener( 'DOMContentLoaded', function() {
 			}
 		} );
 		overlays[ i ].addEventListener( 'keypress', function( event ) {
-			if ( event.key === 'Enter' ) {
+			if ( event.code === 'Enter' || event.code === 'Space' ) {
+				event.preventDefault(); // prevent space from scrolling the page
 				overlayClick( event.currentTarget );
 			}
 		} );

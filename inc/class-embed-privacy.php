@@ -17,6 +17,7 @@ use function checked;
 use function defined;
 use function dirname;
 use function esc_attr;
+use function esc_attr__;
 use function esc_html;
 use function esc_html__;
 use function esc_html_e;
@@ -876,7 +877,8 @@ class Embed_Privacy {
 		
 		?>
 		<div class="embed-privacy-container is-disabled <?php echo esc_attr( $embed_classes ); ?>" id="oembed_<?php echo esc_attr( $embed_md5 ); ?>" data-embed-provider="<?php echo esc_attr( $embed_provider_lowercase ); ?>">
-			<div class="embed-privacy-overlay" role="button" tabindex="0">
+			<?php /* translators: embed provider */ ?>
+			<div class="embed-privacy-overlay" role="button" tabindex="0" aria-label="<?php printf( esc_attr__( 'Display content from %s', 'embed-privacy' ), esc_attr( $embed_provider ) ); ?>">
 				<div class="embed-privacy-inner">
 					<?php
 					echo ( file_exists( $logo_path ) ? '<div class="embed-privacy-logo"></div>' . PHP_EOL : '' );
