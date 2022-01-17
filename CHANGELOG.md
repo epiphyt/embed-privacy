@@ -9,6 +9,7 @@
 * Clicking on the "always enable content of X" enables all embeds of this provider on the current page immediately
 * Improved markup of local tweets
 * Added additional class to checkbox paragraph, thanks to @florianbrinkmann
+* Correctly handle backslashes in the regex field
 * System providers cannot be deleted anymore
 * Fixed oEmbed provider name if the provider is unknown
 * Fix enqueuing assets for unknown embed providers

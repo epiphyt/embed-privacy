@@ -90,6 +90,7 @@ use function wp_localize_script;
 use function wp_parse_url;
 use function wp_register_script;
 use function wp_register_style;
+use function wp_slash;
 use function wp_unslash;
 use const DEBUG_MODE;
 use const EPI_EMBED_PRIVACY_BASE;
@@ -217,6 +218,7 @@ class Embed_Privacy {
 		// actions
 		add_action( 'init', [ $this, 'load_textdomain' ], 0 );
 		add_action( 'init', [ $this, 'set_post_type' ], 5 );
+		add_action( 'save_post_epi_embed', [ $this, 'preserve_backslashes' ] );
 		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_assets' ] );
 		
 		// filters
@@ -1272,6 +1274,19 @@ class Embed_Privacy {
 	 */
 	public function load_textdomain() {
 		load_plugin_textdomain( 'embed-privacy', false, dirname( plugin_basename( $this->plugin_file ) ) . '/languages' );
+	}
+	
+	/**
+	 * Preserve backslashes in regex field.
+	 * 
+	 * @since	1.4.0
+	 */
+	public function preserve_backslashes() {
+		if ( ! isset( $_POST['regex_default'] ) ) {
+			return;
+		}
+		
+		$_POST['regex_default'] = wp_slash( $_POST['regex_default'] );
 	}
 	
 	/**
