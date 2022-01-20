@@ -882,7 +882,7 @@ class Embed_Privacy {
 			$footer_content .= sprintf(
 				/* translators: content name or 'content' */
 				esc_html__( 'Open %s directly', 'embed-privacy' ),
-				! empty( $args['embed_title'] ) && $args['embed_title'] !== '""' ? $args['embed_title'] : __( 'content', 'embed-privacy' )
+				! empty( $args['embed_title'] ) ? $args['embed_title'] : __( 'content', 'embed-privacy' )
 			);
 			$footer_content .= '</a></span></div>' . PHP_EOL;
 			
@@ -1053,7 +1053,7 @@ class Embed_Privacy {
 				}
 				
 				/* translators: embed title */
-				$args['embed_title'] = sprintf( __( '"%s"', 'embed-privacy' ), $element->getAttribute( 'title' ) );
+				$args['embed_title'] = ! empty( $element->getAttribute( 'title' ) ) ? sprintf( __( '"%s"', 'embed-privacy' ), $element->getAttribute( 'title' ) ) : '';
 				$args['embed_url'] = $element->getAttribute( $attribute );
 				
 				// get overlay template as DOM element
