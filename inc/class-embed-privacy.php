@@ -649,12 +649,12 @@ class Embed_Privacy {
 				continue;
 			}
 			
-			// create meta div
-			$parent_node = $dom->createElement( 'div' );
+			// create meta cite
+			$parent_node = $dom->createElement( 'cite' );
 			$parent_node->setAttribute( 'class', 'embed-privacy-tweet-meta' );
-			// append created div to blockquote
+			// append created cite to blockquote
 			$node->parentNode->appendChild( $parent_node );
-			// move author meta inside meta div
+			// move author meta inside meta cite
 			$parent_node->appendChild( $node );
 		}
 		
@@ -679,7 +679,7 @@ class Embed_Privacy {
 		$content = $dom->saveHTML( $dom->documentElement );
 		// phpcs:enable
 		
-		return str_replace( [ '<html>', '</html>' ], [ '<cite class="embed-privacy-local-tweet">', '</cite>' ], $content );
+		return str_replace( [ '<html>', '</html>' ], [ '<div class="embed-privacy-local-tweet">', '</div>' ], $content );
 	}
 	
 	/**
@@ -897,7 +897,9 @@ class Embed_Privacy {
 		?>
 		<div class="embed-privacy-container is-disabled <?php echo esc_attr( $embed_classes ); ?>" id="oembed_<?php echo esc_attr( $embed_md5 ); ?>" data-embed-provider="<?php echo esc_attr( $embed_provider_lowercase ); ?>">
 			<?php /* translators: embed provider */ ?>
-			<div class="embed-privacy-overlay" role="button" tabindex="0" aria-label="<?php printf( esc_attr__( 'Display content from %s', 'embed-privacy' ), esc_attr( $embed_provider ) ); ?>">
+			<button class="embed-privacy-enable screen-reader-text"><?php printf( esc_html__( 'Display content from %s', 'embed-privacy' ), esc_html( $embed_provider ) ); ?></button>
+			
+			<div class="embed-privacy-overlay">
 				<div class="embed-privacy-inner">
 					<?php
 					echo ( file_exists( $logo_path ) ? '<div class="embed-privacy-logo"></div>' . PHP_EOL : '' );

@@ -17,10 +17,22 @@ document.addEventListener( 'DOMContentLoaded', function() {
 				overlayClick( event.currentTarget );
 			}
 		} );
-		overlays[ i ].addEventListener( 'keypress', function( event ) {
+		
+		var button = overlays[ i ].parentNode.querySelector( '.embed-privacy-enable' );
+		
+		if ( ! button ) {
+			continue;
+		}
+		
+		button.addEventListener( 'click', function( event ) {
+			overlayClick( event.currentTarget.parentNode.querySelector( '.embed-privacy-overlay' ) );
+			event.currentTarget.parentNode.removeChild( event.currentTarget ); // IE11 doesn't support .remove()
+		} );
+		button.addEventListener( 'keypress', function( event ) {
 			if ( event.code === 'Enter' || event.code === 'Space' ) {
 				event.preventDefault(); // prevent space from scrolling the page
-				overlayClick( event.currentTarget );
+				overlayClick( event.currentTarget.parentNode.querySelector( '.embed-privacy-overlay' ) );
+				event.currentTarget.parentNode.removeChild( event.currentTarget ); // IE11 doesn't support .remove()
 			}
 		} );
 	}
