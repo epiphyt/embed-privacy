@@ -78,7 +78,6 @@ use function strpos;
 use function strtolower;
 use function strtotime;
 use function trim;
-use function urldecode;
 use function wp_date;
 use function wp_enqueue_script;
 use function wp_enqueue_style;
