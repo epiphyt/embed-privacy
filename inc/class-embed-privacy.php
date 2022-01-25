@@ -17,7 +17,6 @@ use function checked;
 use function defined;
 use function dirname;
 use function esc_attr;
-use function esc_attr__;
 use function esc_html;
 use function esc_html__;
 use function esc_html_e;
@@ -64,6 +63,7 @@ use function preg_match_all;
 use function preg_quote;
 use function preg_replace;
 use function printf;
+use function rawurldecode;
 use function register_activation_hook;
 use function register_deactivation_hook;
 use function register_post_type;
@@ -78,6 +78,7 @@ use function strpos;
 use function strtolower;
 use function strtotime;
 use function trim;
+use function urldecode;
 use function wp_date;
 use function wp_enqueue_script;
 use function wp_enqueue_style;
@@ -973,7 +974,8 @@ class Embed_Privacy {
 		$dom->loadHTML(
 			mb_convert_encoding(
 				// adding root element, see https://github.com/epiphyt/embed-privacy/issues/22
-				'<html>' . $content . '</html>',
+				// replace any % to make sure they won't get recognized as encoded content later
+				'<html>' . str_replace( '%', '%_epi_', $content ) . '</html>',
 				'HTML-ENTITIES',
 				'UTF-8'
 			),
@@ -1136,8 +1138,21 @@ class Embed_Privacy {
 			}
 		}
 		
-		// remove root element, see https://github.com/epiphyt/embed-privacy/issues/22
-		return str_replace( [ '<html>', '</html>' ], '', $content );
+		return 
+			// remove root element, see https://github.com/epiphyt/embed-privacy/issues/22
+			str_replace(
+			[
+				'<html>',
+				'</html>',
+				'%_epi_'
+			],
+			[
+				'',
+				'',
+				'%',
+			],
+			rawurldecode( $content ) // decode to make sure there is nothing left encoded
+		);
 	}
 	
 	/**
