@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.4.1
+* Fixed invalid HTML by changing the accessibility behavior (it's now a separate button)
+* Fixed potential empty link titles in other locales then English
+* Fixed potential unwanted URL encoding in the content after Embed Privacy replaced an embed
+
 ## 1.4.0
 * Added support for Pinterest and Wolfram Cloud
 * Improved migrations to fix duplicate providers or performance problems in multisite installations
