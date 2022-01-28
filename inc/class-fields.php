@@ -417,7 +417,7 @@ class Fields {
 			return;
 		}
 		
-		if ( ! check_admin_referer( 'update-post_' . $post_id ) ) {
+		if ( get_current_screen()->action !== 'add' && ! check_admin_referer( 'update-post_' . $post_id ) ) {
 			return;
 		}
 		
