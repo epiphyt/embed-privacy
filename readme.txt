@@ -122,6 +122,9 @@ We are [Epiphyt](https://epiph.yt/), your friendly neighborhood WordPress plugin
 
 == Changelog ==
 
+= 1.4.2 =
+* Fixed an expired link during plugin activation and creating a new embed provider
+
 = 1.4.1 =
 * Fixed invalid HTML by changing the accessibility behavior (it's now a separate button)
 * Fixed potential empty link titles in other locales then English
