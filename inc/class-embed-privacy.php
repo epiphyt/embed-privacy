@@ -1143,7 +1143,7 @@ class Embed_Privacy {
 			[
 				'<html>',
 				'</html>',
-				'%_epi_'
+				'%_epi_',
 			],
 			[
 				'',
