@@ -8,6 +8,7 @@ use function apply_filters;
 use function array_merge;
 use function check_admin_referer;
 use function checked;
+use function current_action;
 use function current_user_can;
 use function defined;
 use function delete_post_meta;
@@ -417,7 +418,23 @@ class Fields {
 			return;
 		}
 		
-		if ( get_current_screen()->action !== 'add' && ! check_admin_referer( 'update-post_' . $post_id ) ) {
+		if (
+			// plugin update
+			(
+				! isset( $_GET['activate'] )
+				|| $_GET['activate'] !== 'true'
+				|| current_action() !== 'save_post'
+			)
+			// manual post update
+			|| (
+				! get_current_screen()
+				|| empty( get_current_screen()->action )
+				|| (
+					get_current_screen()->action !== 'add'
+					&& ! check_admin_referer( 'update-post_' . $post_id )
+				)
+			)
+		) {
 			return;
 		}
 		
