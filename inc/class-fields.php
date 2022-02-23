@@ -419,21 +419,23 @@ class Fields {
 		}
 		
 		if (
-			// plugin update
 			(
-				! isset( $_GET['activate'] )
-				|| $_GET['activate'] !== 'true'
-				|| current_action() !== 'save_post'
-			)
-			// manual post update
-			|| (
-				! get_current_screen()
-				|| empty( get_current_screen()->action )
+				// plugin update
+				(
+					! isset( $_GET['activate'] )
+					|| $_GET['activate'] !== 'true'
+				)
+				// manual post update
 				|| (
-					get_current_screen()->action !== 'add'
-					&& ! check_admin_referer( 'update-post_' . $post_id )
+					! get_current_screen()
+					|| empty( get_current_screen()->action )
+					|| (
+						get_current_screen()->action !== 'add'
+						&& ! check_admin_referer( 'update-post_' . $post_id )
+					)
 				)
 			)
+			&& current_action() !== 'save_post'
 		) {
 			return;
 		}
