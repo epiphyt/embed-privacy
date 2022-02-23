@@ -122,6 +122,9 @@ We are [Epiphyt](https://epiph.yt/), your friendly neighborhood WordPress plugin
 
 == Changelog ==
 
+= 1.4.3 =
+* Fixed a problem that prevents embed fields from being stored.
+
 = 1.4.2 =
 * Fixed an expired link during plugin activation and creating a new embed provider
 
