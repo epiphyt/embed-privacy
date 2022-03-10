@@ -1137,6 +1137,12 @@ class Embed_Privacy {
 			}
 		}
 		
+		// decode to make sure there is nothing left encoded if replacements have been made
+		// otherwise, content is untouched by DOMDocument, and we don't need a decoding
+		if ( ! empty( $this->did_replacements ) ) {
+			$content = rawurldecode( $content );
+		}
+		
 		return 
 			// remove root element, see https://github.com/epiphyt/embed-privacy/issues/22
 			str_replace(
@@ -1150,7 +1156,7 @@ class Embed_Privacy {
 				'',
 				'%',
 			],
-			rawurldecode( $content ) // decode to make sure there is nothing left encoded
+			$content
 		);
 	}
 	

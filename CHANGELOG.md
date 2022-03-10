@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.4.4
+* Fixed a potential encoding issue.
+
 ## 1.4.3
 * Fixed a problem that prevents embed fields from being stored.
 
