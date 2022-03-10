@@ -87,6 +87,7 @@ use function wp_get_theme;
 use function wp_json_encode;
 use function wp_kses;
 use function wp_localize_script;
+use function wp_parse_args;
 use function wp_parse_url;
 use function wp_register_script;
 use function wp_register_style;
@@ -217,6 +218,7 @@ class Embed_Privacy {
 	public function init() {
 		// actions
 		add_action( 'init', [ $this, 'load_textdomain' ], 0 );
+		add_action( 'init', [ $this, 'register_assets' ] );
 		add_action( 'init', [ $this, 'set_post_type' ], 5 );
 		add_action( 'save_post_epi_embed', [ $this, 'preserve_backslashes' ] );
 		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_assets' ] );
@@ -281,49 +283,10 @@ class Embed_Privacy {
 	
 	/**
 	 * Enqueue our assets for the frontend.
+	 * 
+	 * @deprecated	1.4.4
 	 */
-	public function enqueue_assets() {
-		$suffix = ( defined( 'WP_DEBUG' ) && WP_DEBUG ? '' : '.min' );
-		$css_file = EPI_EMBED_PRIVACY_BASE . 'assets/style/embed-privacy' . $suffix . '.css';
-		$css_file_url = EPI_EMBED_PRIVACY_URL . 'assets/style/embed-privacy' . $suffix . '.css';
-		
-		wp_register_style( 'embed-privacy', $css_file_url, [], filemtime( $css_file ) );
-		
-		if ( ! $this->is_amp() ) {
-			$js_file = EPI_EMBED_PRIVACY_BASE . 'assets/js/embed-privacy' . $suffix . '.js';
-			$js_file_url = EPI_EMBED_PRIVACY_URL . 'assets/js/embed-privacy' . $suffix . '.js';
-			
-			wp_register_script( 'embed-privacy', $js_file_url, [], filemtime( $js_file ) );
-		}
-		
-		// Astra is too greedy at its CSS selectors
-		// see https://github.com/epiphyt/embed-privacy/issues/33
-		$css_file = EPI_EMBED_PRIVACY_BASE . 'assets/style/astra' . $suffix . '.css';
-		$css_file_url = EPI_EMBED_PRIVACY_URL . 'assets/style/astra' . $suffix . '.css';
-		
-		wp_register_style( 'embed-privacy-astra', $css_file_url, [], filemtime( $css_file ) );
-		
-		$css_file = EPI_EMBED_PRIVACY_BASE . 'assets/style/divi' . $suffix . '.css';
-		$css_file_url = EPI_EMBED_PRIVACY_URL . 'assets/style/divi' . $suffix . '.css';
-		
-		wp_register_style( 'embed-privacy-divi', $css_file_url, [], filemtime( $css_file ) );
-		
-		$js_file = EPI_EMBED_PRIVACY_BASE . 'assets/js/elementor-video' . $suffix . '.js';
-		$js_file_url = EPI_EMBED_PRIVACY_URL . 'assets/js/elementor-video' . $suffix . '.js';
-		
-		wp_register_script( 'embed-privacy-elementor-video', $js_file_url, [], filemtime( $js_file ) );
-		
-		$css_file = EPI_EMBED_PRIVACY_BASE . 'assets/style/elementor' . $suffix . '.css';
-		$css_file_url = EPI_EMBED_PRIVACY_URL . 'assets/style/elementor' . $suffix . '.css';
-		
-		wp_register_style( 'embed-privacy-elementor', $css_file_url, [], filemtime( $css_file ) );
-		
-		global $post;
-		
-		if ( is_a( $post, 'WP_Post' ) && has_shortcode( $post->post_content, 'embed_privacy_opt_out' ) ) {
-			$this->print_assets();
-		}
-	}
+	public function enqueue_assets() { }
 	
 	/**
 	 * Get the Embed Privacy cookie.
@@ -968,6 +931,13 @@ class Embed_Privacy {
 			return $content;
 		}
 		
+		$args = wp_parse_args( $args, [
+			'additional_checks' => [],
+			'element_attribute' => 'src',
+			'elements' => [ 'embed', 'iframe', 'object' ],
+			'regex' => '',
+		] );
+		
 		libxml_use_internal_errors( true );
 		$dom = new DOMDocument();
 		$dom->loadHTML(
@@ -1003,28 +973,29 @@ class Embed_Privacy {
 			}
 		}
 		
-		foreach ( [ 'embed', 'iframe', 'object' ] as $tag ) {
+		foreach ( $args['elements'] as $tag ) {
 			$replacements = [];
 			
-			if ( $tag !== 'object' ) {
-				$attribute = 'src';
-			}
-			else {
-				$attribute = 'data';
+			if ( $tag === 'object' ) {
+				$args['element_attribute'] = 'data';
 			}
 			
 			foreach ( $dom->getElementsByTagName( $tag ) as $element ) {
-				// ignore embeds from the same (sub-)domain
-				if ( preg_match( '/https?:\/\/(.*\.)?' . preg_quote( $host, '/' ) . '/', $element->getAttribute( $attribute ) ) ) {
+				if ( ! $this->run_checks( $args['additional_checks'], $element ) ) {
 					continue;
 				}
 				
-				if ( ! empty ( $args['regex'] ) && ! preg_match( $args['regex'], $element->getAttribute( $attribute ) ) ) {
+				// ignore embeds from the same (sub-)domain
+				if ( preg_match( '/https?:\/\/(.*\.)?' . preg_quote( $host, '/' ) . '/', $element->getAttribute( $args['element_attribute'] ) ) ) {
+					continue;
+				}
+				
+				if ( ! empty ( $args['regex'] ) && ! preg_match( $args['regex'], $element->getAttribute( $args['element_attribute'] ) ) ) {
 					continue;
 				}
 				
 				if ( $is_empty_provider ) {
-					$parsed_url = wp_parse_url( $element->getAttribute( $attribute ) );
+					$parsed_url = wp_parse_url( $element->getAttribute( $args['element_attribute'] ) );
 					
 					// embeds with relative paths have no host
 					// and they are local by definition, so do nothing
@@ -1047,7 +1018,7 @@ class Embed_Privacy {
 							continue;
 						}
 						
-						if ( preg_match( $regex, $element->getAttribute( $attribute ) ) ) {
+						if ( preg_match( $regex, $element->getAttribute( $args['element_attribute'] ) ) ) {
 							return $content;
 						}
 					}
@@ -1055,7 +1026,7 @@ class Embed_Privacy {
 				
 				/* translators: embed title */
 				$args['embed_title'] = ! empty( $element->getAttribute( 'title' ) ) ? sprintf( __( '"%s"', 'embed-privacy' ), $element->getAttribute( 'title' ) ) : '';
-				$args['embed_url'] = $element->getAttribute( $attribute );
+				$args['embed_url'] = $element->getAttribute( $args['element_attribute'] );
 				
 				// get overlay template as DOM element
 				$template_dom->loadHTML(
@@ -1339,6 +1310,54 @@ class Embed_Privacy {
 	}
 	
 	/**
+	 * Register our assets for the frontend.
+	 * 
+	 * @since	1.4.4
+	 */
+	public function register_assets() {
+		$suffix = ( defined( 'WP_DEBUG' ) && WP_DEBUG ? '' : '.min' );
+		$css_file = EPI_EMBED_PRIVACY_BASE . 'assets/style/embed-privacy' . $suffix . '.css';
+		$css_file_url = EPI_EMBED_PRIVACY_URL . 'assets/style/embed-privacy' . $suffix . '.css';
+		
+		wp_register_style( 'embed-privacy', $css_file_url, [], filemtime( $css_file ) );
+		
+		if ( ! $this->is_amp() ) {
+			$js_file = EPI_EMBED_PRIVACY_BASE . 'assets/js/embed-privacy' . $suffix . '.js';
+			$js_file_url = EPI_EMBED_PRIVACY_URL . 'assets/js/embed-privacy' . $suffix . '.js';
+			
+			wp_register_script( 'embed-privacy', $js_file_url, [], filemtime( $js_file ) );
+		}
+		
+		// Astra is too greedy at its CSS selectors
+		// see https://github.com/epiphyt/embed-privacy/issues/33
+		$css_file = EPI_EMBED_PRIVACY_BASE . 'assets/style/astra' . $suffix . '.css';
+		$css_file_url = EPI_EMBED_PRIVACY_URL . 'assets/style/astra' . $suffix . '.css';
+		
+		wp_register_style( 'embed-privacy-astra', $css_file_url, [], filemtime( $css_file ) );
+		
+		$css_file = EPI_EMBED_PRIVACY_BASE . 'assets/style/divi' . $suffix . '.css';
+		$css_file_url = EPI_EMBED_PRIVACY_URL . 'assets/style/divi' . $suffix . '.css';
+		
+		wp_register_style( 'embed-privacy-divi', $css_file_url, [], filemtime( $css_file ) );
+		
+		$js_file = EPI_EMBED_PRIVACY_BASE . 'assets/js/elementor-video' . $suffix . '.js';
+		$js_file_url = EPI_EMBED_PRIVACY_URL . 'assets/js/elementor-video' . $suffix . '.js';
+		
+		wp_register_script( 'embed-privacy-elementor-video', $js_file_url, [], filemtime( $js_file ) );
+		
+		$css_file = EPI_EMBED_PRIVACY_BASE . 'assets/style/elementor' . $suffix . '.css';
+		$css_file_url = EPI_EMBED_PRIVACY_URL . 'assets/style/elementor' . $suffix . '.css';
+		
+		wp_register_style( 'embed-privacy-elementor', $css_file_url, [], filemtime( $css_file ) );
+		
+		global $post;
+		
+		if ( is_a( $post, 'WP_Post' ) && has_shortcode( $post->post_content, 'embed_privacy_opt_out' ) ) {
+			$this->print_assets();
+		}
+	}
+	
+	/**
 	 * Replace embeds with a container and hide the embed with an HTML comment.
 	 * 
 	 * @since	1.2.0 Changed behaviour of the method
@@ -1388,6 +1407,30 @@ class Embed_Privacy {
 		// see: https://github.com/epiphyt/embed-privacy/issues/69
 		if ( strpos( $content, 'youtube-nocookie.com' ) === false || ! $this->is_always_active_provider( 'youtube' ) ) {
 			$new_content = $this->get_single_overlay( $content, '', '', [] );
+			
+			if ( $new_content !== $content ) {
+				$this->has_embed = true;
+				$content = $new_content;
+			}
+		}
+		
+		if ( strpos( $content, 'class="fb-post"' ) !== false ) {
+			$provider = $this->get_embed_by_name( 'facebook' );
+			$args = [
+				'additional_checks' => [
+					[
+						'attribute' => 'class',
+						'compare' => '===',
+						'type' => 'attribute',
+						'value' => 'fb-post',
+					],
+				],
+				'element_attribute' => 'data-href',
+				'elements' => [
+					'div',
+				],
+			];
+			$new_content = $this->get_single_overlay( $content, $provider->post_title, $provider->post_name, $args );
 			
 			if ( $new_content !== $content ) {
 				$this->has_embed = true;
@@ -1524,6 +1567,66 @@ class Embed_Privacy {
 		}
 		
 		return $content;
+	}
+	
+	/**
+	 * Run a compare check.
+	 * 
+	 * @since	1.4.4
+	 * 
+	 * @param	mixed	$value1 First value to compare
+	 * @param	mixed	$value2 Second value to compare
+	 * @param	string	$compare Compare operator
+	 * @return	bool Result of comparing the values
+	 */
+	private function run_check_compare( $value1, $value2, $compare ) {
+		switch ( $compare ) {
+			case '===':
+				return $value1 === $value2;
+			case '==':
+				return $value1 == $value2;
+			case '!==':
+				return $value1 !== $value2;
+			case '!=':
+				return $value1 != $value2;
+			case '>':
+				return $value1 > $value2;
+			case '>=':
+				return $value1 >= $value2;
+			case '<':
+				return $value1 < $value2;
+			case '<=':
+				return $value1 <= $value2;
+			default:
+				return false;
+		}
+	}
+	
+	/**
+	 * Run additional for a DOM node checks.
+	 * 
+	 * @since	1.4.4
+	 * 
+	 * @param	array		$checks A list of checks
+	 * @param	\DOMElement	$element The DOM Element
+	 * @return	bool Whether all checks are successful
+	 */
+	private function run_checks( $checks, $element ) {
+		if ( empty( $checks ) ) {
+			return true;
+		}
+		
+		foreach ( $checks as $check ) {
+			if ( $check['type'] === 'attribute' ) {
+				$compared = $this->run_check_compare( $element->getAttribute( $check['attribute'] ), $check['value'], $check['compare'] );
+				
+				if ( ! $compared ) {
+					return false;
+				}
+			}
+		}
+		
+		return true;
 	}
 	
 	/**

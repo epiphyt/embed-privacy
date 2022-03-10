@@ -2,6 +2,8 @@
 
 ## 1.4.4
 * Fixed a potential encoding issue.
+* Fixed issues with Facebook embed of Jetpack.
+* Fixed issues with registering assets.
 
 ## 1.4.3
 * Fixed a problem that prevents embed fields from being stored.
