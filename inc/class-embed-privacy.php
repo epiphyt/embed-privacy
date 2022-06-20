@@ -933,6 +933,7 @@ class Embed_Privacy {
 		
 		$args = wp_parse_args( $args, [
 			'additional_checks' => [],
+			'check_always_active' => false,
 			'element_attribute' => 'src',
 			'elements' => [ 'embed', 'iframe', 'object' ],
 			'regex' => '',
@@ -1006,6 +1007,12 @@ class Embed_Privacy {
 					
 					$embed_provider = $parsed_url['host'];
 					$embed_provider_lowercase = sanitize_title( $parsed_url['host'] );
+					
+					// unknown providers need to be explicitly checked if they're always active
+					// see https://github.com/epiphyt/embed-privacy/issues/115
+					if ( $args['check_always_active'] && $this->is_always_active_provider( $embed_provider_lowercase ) ) {
+						return $content;
+					}
 					
 					// check URL for available provider
 					foreach ( $providers as $provider ) {
@@ -1406,7 +1413,7 @@ class Embed_Privacy {
 		// and gets rewritten in Divi
 		// see: https://github.com/epiphyt/embed-privacy/issues/69
 		if ( strpos( $content, 'youtube-nocookie.com' ) === false || ! $this->is_always_active_provider( 'youtube' ) ) {
-			$new_content = $this->get_single_overlay( $content, '', '', [] );
+			$new_content = $this->get_single_overlay( $content, '', '', [ 'check_always_active' => true ] );
 			
 			if ( $new_content !== $content ) {
 				$this->has_embed = true;
