@@ -995,6 +995,12 @@ class Embed_Privacy {
 					continue;
 				}
 				
+				// providers need to be explicitly checked if they're always active
+				// see https://github.com/epiphyt/embed-privacy/issues/115
+				if ( $embed_provider_lowercase && $args['check_always_active'] && $this->is_always_active_provider( $embed_provider_lowercase ) ) {
+					return $content;
+				}
+				
 				if ( $is_empty_provider ) {
 					$parsed_url = wp_parse_url( $element->getAttribute( $args['element_attribute'] ) );
 					
@@ -1432,6 +1438,7 @@ class Embed_Privacy {
 						'value' => 'fb-post',
 					],
 				],
+				'check_always_active' => true,
 				'element_attribute' => 'data-href',
 				'elements' => [
 					'div',
