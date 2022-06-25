@@ -1,8 +1,10 @@
 <?php
 namespace epiphyt\Embed_Privacy;
+use Automattic\Jetpack\Assets;
 use DOMXPath;
 use Elementor\Plugin;
 use DOMDocument;
+use Jetpack;
 use WP_Post;
 use function __;
 use function add_action;
@@ -12,8 +14,10 @@ use function addslashes;
 use function apply_filters;
 use function array_keys;
 use function array_merge;
+use function array_reverse;
 use function array_splice;
 use function checked;
+use function class_exists;
 use function defined;
 use function dirname;
 use function esc_attr;
@@ -21,6 +25,7 @@ use function esc_html;
 use function esc_html__;
 use function esc_html_e;
 use function esc_html_x;
+use function esc_js;
 use function esc_url;
 use function explode;
 use function file_exists;
@@ -38,14 +43,17 @@ use function get_the_ID;
 use function get_the_post_thumbnail_url;
 use function has_shortcode;
 use function home_url;
+use function html_entity_decode;
 use function htmlentities;
 use function implode;
 use function in_array;
 use function is_a;
 use function is_admin;
+use function is_array;
 use function is_numeric;
 use function is_plugin_active;
 use function is_plugin_active_for_network;
+use function is_scalar;
 use function is_string;
 use function json_decode;
 use function libxml_use_internal_errors;
@@ -64,6 +72,7 @@ use function preg_quote;
 use function preg_replace;
 use function printf;
 use function rawurldecode;
+use function rawurlencode;
 use function register_activation_hook;
 use function register_deactivation_hook;
 use function register_post_type;
@@ -79,6 +88,7 @@ use function strtolower;
 use function strtotime;
 use function trim;
 use function wp_date;
+use function wp_deregister_script;
 use function wp_enqueue_script;
 use function wp_enqueue_style;
 use function wp_generate_uuid4;
@@ -94,9 +104,11 @@ use function wp_register_style;
 use function wp_slash;
 use function wp_unslash;
 use const DEBUG_MODE;
+use const ENT_QUOTES;
 use const EPI_EMBED_PRIVACY_BASE;
 use const EPI_EMBED_PRIVACY_URL;
 use const FILTER_VALIDATE_IP;
+use const JETPACK__VERSION;
 use const LIBXML_HTML_NODEFDTD;
 use const LIBXML_HTML_NOIMPLIED;
 use const PHP_EOL;
@@ -243,6 +255,10 @@ class Embed_Privacy {
 		Admin::get_instance()->init();
 		Fields::get_instance()->init();
 		Migration::get_instance()->init();
+		
+		add_action( 'wp_enqueue_scripts', function() {
+			wp_deregister_script( 'jetpack-facebook-embed' );
+		}, 100 );
 	}
 	
 	/**
@@ -742,6 +758,20 @@ class Embed_Privacy {
 			$logo_url = plugin_dir_url( $this->plugin_file ) . 'assets/images/embed-' . $embed_provider_lowercase . '.png';
 		}
 		
+		if ( ! empty( $args['assets'] ) && is_array( $args['assets'] ) ) {
+			/**
+			 * Filter the additional assets of an embed provider.
+			 * 
+			 * @since	1.4.5
+			 * 
+			 * @param	array	$assets List of embed assets
+			 * @param	string	$embed_provider_lowercase The current embed provider in lowercase
+			 */
+			$args['assets'] = apply_filters( "embed_privacy_assets_$embed_provider_lowercase", $args['assets'], $embed_provider_lowercase );
+			
+			$output = $this->print_embed_assets( $args['assets'], $output );
+		}
+		
 		/**
 		 * Filter the path to the background image.
 		 * 
@@ -998,6 +1028,10 @@ class Embed_Privacy {
 				// providers need to be explicitly checked if they're always active
 				// see https://github.com/epiphyt/embed-privacy/issues/115
 				if ( $embed_provider_lowercase && $args['check_always_active'] && $this->is_always_active_provider( $embed_provider_lowercase ) ) {
+					if ( ! empty( $args['assets'] ) ) {
+						$content = $this->print_embed_assets( $args['assets'], $content );
+					}
+					
 					return $content;
 				}
 				
@@ -1017,6 +1051,10 @@ class Embed_Privacy {
 					// unknown providers need to be explicitly checked if they're always active
 					// see https://github.com/epiphyt/embed-privacy/issues/115
 					if ( $args['check_always_active'] && $this->is_always_active_provider( $embed_provider_lowercase ) ) {
+						if ( ! empty( $args['assets'] ) ) {
+							$content = $this->print_embed_assets( $args['assets'], $content );
+						}
+						
 						return $content;
 					}
 					
@@ -1323,6 +1361,56 @@ class Embed_Privacy {
 	}
 	
 	/**
+	 * Print assets of an embed before the content.
+	 * 
+	 * @since	1.4.5
+	 * 
+	 * @param	array	$assets List of assets
+	 * @param	string	$output The output
+	 * @return	string The updated output
+	 */
+	private function print_embed_assets( $assets, $output ) {
+		if ( empty( $assets ) ) {
+			return $output;
+		}
+		
+		foreach ( array_reverse( $assets ) as $asset ) {
+			if ( empty( $asset['type'] ) ) {
+				continue;
+			}
+			
+			if ( $asset['type'] === 'script' ) {
+				if ( empty( $asset['handle'] ) || empty( $asset['src'] ) ) {
+					continue;
+				}
+				
+				$output = '<script src="' . esc_url( $asset['src'] ) . ( ! empty( $asset['version'] ) ? '?ver=' . esc_attr( rawurlencode( $asset['version'] ) ) : '' ) . '" id="' . esc_attr( $asset['handle'] ) . '"></script>' . PHP_EOL . $output; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+			}
+			else if ( $asset['type'] === 'inline' ) {
+				if ( empty( $asset['data'] ) || empty( $asset['object_name'] ) ) {
+					continue;
+				}
+				
+				if ( is_string( $asset['data'] ) ) {
+					$data = html_entity_decode( $asset['data'], ENT_QUOTES, 'UTF-8' );
+				}
+				else {
+					foreach ( (array) $asset['data'] as $key => $value ) {
+						if ( ! is_scalar( $value ) ) {
+							continue;
+						}
+						
+						$data[ $key ] = html_entity_decode( (string) $value, ENT_QUOTES, 'UTF-8' );
+					}
+				}
+				$output = '<script>var ' . esc_js( $asset['object_name'] ) . ' = ' . wp_json_encode( $data ) . ';</script>' . PHP_EOL . $output;
+			}
+		}
+		
+		return $output;
+	}
+	
+	/**
 	 * Register our assets for the frontend.
 	 * 
 	 * @since	1.4.4
@@ -1438,12 +1526,34 @@ class Embed_Privacy {
 						'value' => 'fb-post',
 					],
 				],
+				'assets' => [],
 				'check_always_active' => true,
 				'element_attribute' => 'data-href',
 				'elements' => [
 					'div',
 				],
 			];
+			
+			// register jetpack script if available
+			if ( class_exists( '\Automattic\Jetpack\Assets' ) && defined( 'JETPACK__VERSION' ) ) {
+				$jetpack = Jetpack::init();
+				
+				$args['assets'][] = [
+					'type' => 'inline',
+					'object_name' => 'jpfbembed',
+					'data' => [
+						'appid' => apply_filters( 'jetpack_sharing_facebook_app_id', '249643311490' ),
+						'locale' => $jetpack->get_locale(),
+					],
+				];
+				$args['assets'][] = [
+					'type' => 'script',
+					'handle' => 'jetpack-facebook-embed',
+					'src' => Assets::get_file_url_for_environment( '_inc/build/facebook-embed.min.js', '_inc/facebook-embed.js' ),
+					'version' => JETPACK__VERSION,
+				];
+			}
+			
 			$new_content = $this->get_single_overlay( $content, $provider->post_title, $provider->post_name, $args );
 			
 			if ( $new_content !== $content ) {
