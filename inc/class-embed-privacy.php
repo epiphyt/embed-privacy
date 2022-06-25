@@ -1326,11 +1326,13 @@ class Embed_Privacy {
 	 * @since	1.4.0
 	 */
 	public function preserve_backslashes() {
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		if ( ! isset( $_POST['regex_default'] ) ) {
 			return;
 		}
 		
-		$_POST['regex_default'] = wp_slash( $_POST['regex_default'] );
+		$_POST['regex_default'] = wp_slash( $_POST['regex_default'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		// phpcs:enable
 	}
 	
 	/**
@@ -1708,11 +1710,11 @@ class Embed_Privacy {
 			case '===':
 				return $value1 === $value2;
 			case '==':
-				return $value1 == $value2;
+				return $value1 == $value2; // phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison
 			case '!==':
 				return $value1 !== $value2;
 			case '!=':
-				return $value1 != $value2;
+				return $value1 != $value2; // phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison
 			case '>':
 				return $value1 > $value2;
 			case '>=':
