@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.5
+* Fixed an issue with always enable an unknown embed provider.
+* Fixed issues with missing JavaScript for Facebook embed of Jetpack.
+
 ## 1.4.4
 * Fixed a potential encoding issue.
 * Fixed issues with Facebook embed of Jetpack.
