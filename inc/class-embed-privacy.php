@@ -87,6 +87,7 @@ use function strpos;
 use function strtolower;
 use function strtotime;
 use function trim;
+use function url_to_postid;
 use function wp_date;
 use function wp_deregister_script;
 use function wp_enqueue_script;
@@ -1453,10 +1454,26 @@ class Embed_Privacy {
 		
 		wp_register_style( 'embed-privacy-elementor', $css_file_url, [], filemtime( $css_file ) );
 		
-		global $post;
+		$current_url = sprintf(
+			'http%1$s://$2%s%3$s%4$s',
+			! empty( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] == 'on' ? 's' : '',
+			! empty( $_SERVER['HTTP_HOST'] ) ? $_SERVER['HTTP_HOST'] : '',
+			! empty( $_SERVER['SERVER_PORT'] ) && $_SERVER['SERVER_PORT'] !== 80 && $_SERVER['SERVER_PORT'] !== 443 ? ':' . $_SERVER['HTTP_HOST'] : '',
+			! empty( $_SERVER['REQUEST_URI'] ) ? $_SERVER['REQUEST_URI'] : ''
+		);
 		
-		if ( is_a( $post, 'WP_Post' ) && has_shortcode( $post->post_content, 'embed_privacy_opt_out' ) ) {
-			$this->print_assets();
+		if ( empty( $_SERVER['HTTP_HOST'] ) ) {
+			return;
+		}
+		
+		$post_id = url_to_postid( $current_url );
+		
+		if ( $post_id ) {
+			$post = get_post( $post_id );
+		
+			if ( $post instanceof WP_Post && has_shortcode( $post->post_content, 'embed_privacy_opt_out' ) ) {
+				$this->print_assets();
+			}
 		}
 	}
 	
