@@ -5,11 +5,11 @@ use function define;
 use function defined;
 use function explode;
 use function file_exists;
-use function plugin_dir_path;
 use function plugin_dir_url;
 use function spl_autoload_register;
 use function str_replace;
 use function strtolower;
+use const WP_PLUGIN_DIR;
 
 /*
 Plugin Name:	Embed Privacy
@@ -39,8 +39,8 @@ along with Embed Privacy. If not, see https://www.gnu.org/licenses/gpl-2.0.html.
 // exit if ABSPATH is not defined
 defined( 'ABSPATH' ) || exit;
 
-if ( ! defined( 'EPI_EMBED_PRIVACY_BASE' ) ) define( 'EPI_EMBED_PRIVACY_BASE', plugin_dir_path( __FILE__ ) );
-if ( ! defined( 'EPI_EMBED_PRIVACY_URL' ) ) define( 'EPI_EMBED_PRIVACY_URL', plugin_dir_url( __FILE__ ) );
+if ( ! defined( 'EPI_EMBED_PRIVACY_BASE' ) ) define( 'EPI_EMBED_PRIVACY_BASE', WP_PLUGIN_DIR . '/embed-privacy/' );
+if ( ! defined( 'EPI_EMBED_PRIVACY_URL' ) ) define( 'EPI_EMBED_PRIVACY_URL', plugin_dir_url( EPI_EMBED_PRIVACY_BASE . 'embed-privacy.php' ) );
 
 /**
  * Autoload all necessary classes.
