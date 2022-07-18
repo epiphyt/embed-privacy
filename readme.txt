@@ -122,17 +122,20 @@ We are [Epiphyt](https://epiph.yt/), your friendly neighborhood WordPress plugin
 
 == Changelog ==
 
+= 1.4.6 =
+* Fixed an issue where JavaScript assets may be missing for the opt-out shortcode
+
 = 1.4.5 =
-* Fixed an issue with always enable an unknown embed provider.
-* Fixed issues with missing JavaScript for Facebook embed of Jetpack.
+* Fixed an issue with always enable an unknown embed provider
+* Fixed issues with missing JavaScript for Facebook embed of Jetpack
 
 = 1.4.4 =
-* Fixed a potential encoding issue.
-* Fixed issues with Facebook embed of Jetpack.
-* Fixed issues with registering assets.
+* Fixed a potential encoding issue
+* Fixed issues with Facebook embed of Jetpack
+* Fixed issues with registering assets
 
 = 1.4.3 =
-* Fixed a problem that prevents embed fields from being stored.
+* Fixed a problem that prevents embed fields from being stored
 
 = 1.4.2 =
 * Fixed an expired link during plugin activation and creating a new embed provider
