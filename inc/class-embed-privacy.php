@@ -234,7 +234,7 @@ class Embed_Privacy {
 		add_action( 'init', [ $this, 'register_assets' ] );
 		add_action( 'init', [ $this, 'set_post_type' ], 5 );
 		add_action( 'save_post_epi_embed', [ $this, 'preserve_backslashes' ] );
-		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_assets' ] );
+		add_action( 'wp_enqueue_scripts', [ $this, 'deregister_assets' ], 100 );
 		
 		// filters
 		if ( ! $this->usecache ) {
@@ -256,10 +256,6 @@ class Embed_Privacy {
 		Admin::get_instance()->init();
 		Fields::get_instance()->init();
 		Migration::get_instance()->init();
-		
-		add_action( 'wp_enqueue_scripts', function() {
-			wp_deregister_script( 'jetpack-facebook-embed' );
-		}, 100 );
 	}
 	
 	/**
@@ -296,6 +292,10 @@ class Embed_Privacy {
 			);
 		}
 		//phpcs:enable
+	}
+	
+	public function deregister_assets() {
+		wp_deregister_script( 'jetpack-facebook-embed' );
 	}
 	
 	/**
