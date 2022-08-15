@@ -1,3 +1,11 @@
 .embed-privacy-container {
 	line-height: 1.7em;
 }
+
+// prevent hiding container around Embed Privacy
+// see: https://github.com/epiphyt/embed-privacy/issues/119
+@media (max-width: 767px) {
+	.et_pb_video_box[data-et-multi-view][data-et-multi-view-load-phone-hidden="true"]:not(.et_multi_view_swapped) {
+		display: block !important;
+	}
+}
