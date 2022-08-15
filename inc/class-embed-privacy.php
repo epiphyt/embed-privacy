@@ -1455,10 +1455,10 @@ class Embed_Privacy {
 		wp_register_style( 'embed-privacy-elementor', $css_file_url, [], filemtime( $css_file ) );
 		
 		$current_url = sprintf(
-			'http%1$s://$2%s%3$s%4$s',
+			'http%1$s://%2$s%3$s%4$s',
 			! empty( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] == 'on' ? 's' : '',
 			! empty( $_SERVER['HTTP_HOST'] ) ? $_SERVER['HTTP_HOST'] : '',
-			! empty( $_SERVER['SERVER_PORT'] ) && $_SERVER['SERVER_PORT'] !== 80 && $_SERVER['SERVER_PORT'] !== 443 ? ':' . $_SERVER['HTTP_HOST'] : '',
+			! empty( $_SERVER['SERVER_PORT'] ) && (int) $_SERVER['SERVER_PORT'] !== 80 && (int) $_SERVER['SERVER_PORT'] !== 443 ? ':' . $_SERVER['SERVER_PORT'] : '',
 			! empty( $_SERVER['REQUEST_URI'] ) ? $_SERVER['REQUEST_URI'] : ''
 		);
 		
