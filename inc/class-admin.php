@@ -67,6 +67,7 @@ class Admin {
 	 * @param	int		$user_id The user ID
 	 * @param	array	$args Additional arguments
 	 * @return	array The updated capabilities
+	 * @noinspection PhpUnusedParameterInspection
 	 */
 	function disallow_deleting_system_embeds( array $caps, $cap, $user_id, array $args ) {
 		if ( $cap !== 'delete_post' ) {
@@ -117,7 +118,7 @@ class Admin {
 		add_settings_section(
 			'embed_privacy_general',
 			null,
-			null,
+			'__return_null',
 			'embed_privacy'
 		);
 		add_settings_field(

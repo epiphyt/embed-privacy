@@ -106,6 +106,8 @@ class Migration {
 	 * 
 	 * @param	string	$option The option name
 	 * @return	bool True if the option was deleted, false otherwise
+	 * @noinspection PhpReturnValueOfMethodIsNeverUsedInspection
+	 * @noinspection PhpSameParameterValueInspection
 	 */
 	private function delete_option( $option ) {
 		return delete_option( 'embed_privacy_' . $option );
@@ -866,6 +868,7 @@ class Migration {
 	 * @param	string	$option The option name
 	 * @param	mixed	$value The value to update
 	 * @return	bool Whether the update was successful
+	 * @noinspection PhpReturnValueOfMethodIsNeverUsedInspection
 	 */
 	private function update_option( $option, $value ) {
 		return update_option( 'embed_privacy_' . $option, $value );
