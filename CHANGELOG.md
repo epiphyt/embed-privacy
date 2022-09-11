@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.4.7
+* Fixed displaying embeds on mobile devices while using Divi
+* Fixed the output of assets
+* Improved regular expression for Google Maps
+
 ## 1.4.6
 * Fixed an issue where JavaScript assets may be missing for the opt-out shortcode
 
