@@ -57,7 +57,7 @@ class Migration {
 	 * @var		string Current migration version
 	 * @since	1.2.2
 	 */
-	private $version = '1.4.0';
+	private $version = '1.4.7';
 	
 	/**
 	 * Post Type constructor.
@@ -195,6 +195,9 @@ class Migration {
 		switch ( $version ) {
 			case $this->version:
 				// most recent version, do nothing
+				break;
+			case '1.4.0':
+				$this->migrate_1_4_7();
 				break;
 			case '1.3.0':
 				$this->migrate_1_4_0();
@@ -398,6 +401,26 @@ class Migration {
 	}
 	
 	/**
+	 * Migrations for version 1.4.7.
+	 * 
+	 * @see		https://github.com/epiphyt/embed-privacy/issues/120
+	 * @since	1.4.7
+	 * 
+	 * - Update regex for Google Maps
+	 */
+	private function migrate_1_4_7() {
+		$google_provider = get_posts( [
+			'meta_key' => 'is_system',
+			'meta_value' => 'yes',
+			'name' => 'google-maps',
+			'post_type' => 'epi_embed',
+		] );
+		$google_provider = reset( $google_provider );
+		
+		update_post_meta( $google_provider->ID, 'regex_default', '/google\\\.com\\\/maps\\\/(d\\\/)?embed/' );
+	}
+	
+	/**
 	 * Register default embed providers.
 	 */
 	public function register_default_embed_providers() {
@@ -502,7 +525,7 @@ class Migration {
 				'meta_input' => [
 					'is_system' => 'yes',
 					'privacy_policy_url' => __( 'https://policies.google.com/privacy?hl=en', 'embed-privacy' ),
-					'regex_default' => '/google\\\.com\\\/maps\\\/embed/',
+					'regex_default' => '/google\\\.com\\\/maps\\\/(d\\\/)?embed/',
 				],
 				/* translators: embed provider */
 				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Google Maps', 'embed provider', 'embed-privacy' ) ),
