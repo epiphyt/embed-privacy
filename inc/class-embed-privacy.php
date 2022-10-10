@@ -1837,14 +1837,15 @@ class Embed_Privacy {
 			'show_all' => 0,
 			'subline' => __( 'Enable or disable embed providers globally. By enabling a provider, its embedded content will be displayed directly on every page without asking you anymore.', 'embed-privacy' ),
 		], $attributes );
-		$cookie = $this->get_cookie();
-		$enabled_providers = array_keys( (array) $cookie );
 		$embed_providers = $this->get_embeds();
 		
 		if ( $attributes['show_all'] ) {
 			$providers = $embed_providers;
 		}
 		else {
+			$cookie = $this->get_cookie();
+			$enabled_providers = array_keys( (array) $cookie );
+			
 			if ( empty( $cookie ) ) {
 				return '';
 			}
