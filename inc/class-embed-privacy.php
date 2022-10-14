@@ -310,7 +310,7 @@ class Embed_Privacy {
 	 * 
 	 * @return	mixed The content of the cookie
 	 */
-	private function get_cookie() {
+	public function get_cookie() {
 		if ( empty( $_COOKIE['embed-privacy'] ) ) {
 			return '';
 		}
