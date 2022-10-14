@@ -154,6 +154,12 @@ class Embed_Privacy {
 	public $has_embed = false;
 	
 	/**
+	 * @since	1.4.8
+	 * @var		bool Whether the current request has printed Embed Privacy assets.
+	 */
+	private $is_printed = false;
+	
+	/**
 	 * @var		\epiphyt\Embed_Privacy\Embed_Privacy
 	 */
 	public static $instance;
@@ -1342,6 +1348,10 @@ class Embed_Privacy {
 	 * @since	1.3.0
 	 */
 	public function print_assets() {
+		if ( $this->is_printed ) {
+			return;
+		}
+		
 		wp_enqueue_script( 'embed-privacy' );
 		wp_enqueue_style( 'embed-privacy' );
 		wp_localize_script( 'embed-privacy', 'embedPrivacy', [
@@ -1361,6 +1371,8 @@ class Embed_Privacy {
 			wp_enqueue_script( 'embed-privacy-elementor-video' );
 			wp_enqueue_style( 'embed-privacy-elementor' );
 		}
+		
+		$this->is_printed = true;
 	}
 	
 	/**
@@ -1582,6 +1594,7 @@ class Embed_Privacy {
 		}
 		
 		if ( $this->has_embed ) {
+			$this->print_assets();
 			$this->print_assets();
 		}
 		
