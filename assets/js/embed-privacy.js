@@ -131,6 +131,23 @@ document.addEventListener( 'DOMContentLoaded', function() {
 	}
 	
 	/**
+	 * Get always active providers from cookie.
+	 * 
+	 * @since	1.4.8
+	 * 
+	 * @return	{string[]} List of always active providers
+	 */
+	function getAlwaysActiveProviders() {
+		const cookie = JSON.parse( get_cookie( 'embed-privacy' ) );
+		
+		if ( ! cookie ) {
+			return [];
+		}
+		
+		return Object.keys( cookie );
+	}
+	
+	/**
 	 * Opting in/out for embed providers.
 	 * 
 	 * @since	1.2.0
@@ -142,8 +159,10 @@ document.addEventListener( 'DOMContentLoaded', function() {
 			return;
 		}
 		
+		const alwaysActiveProviders = getAlwaysActiveProviders();
+		
 		for ( var i = 0; i < optOutCheckboxes.length; i++ ) {
-			if ( embedPrivacy.javascriptDetection === 'yes' && embedPrivacy.alwaysActiveProviders.indexOf( optOutCheckboxes[ i ].getAttribute( 'data-embed-provider' ) ) !== -1 ) {
+			if ( embedPrivacy.javascriptDetection === 'yes' && alwaysActiveProviders.indexOf( optOutCheckboxes[ i ].getAttribute( 'data-embed-provider' ) ) !== -1 ) {
 				optOutCheckboxes[ i ].checked = true;
 			}
 			

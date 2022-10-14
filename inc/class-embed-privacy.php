@@ -1345,7 +1345,7 @@ class Embed_Privacy {
 		wp_enqueue_script( 'embed-privacy' );
 		wp_enqueue_style( 'embed-privacy' );
 		wp_localize_script( 'embed-privacy', 'embedPrivacy', [
-			'alwaysActiveProviders' => array_keys( (array) $this->get_cookie() ),
+			'alwaysActiveProviders' => array_keys( (array) $this->get_cookie() ), // deprecated
 			'javascriptDetection' => get_option( 'embed_privacy_javascript_detection' ),
 		] );
 		
