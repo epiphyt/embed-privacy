@@ -1617,7 +1617,6 @@ class Embed_Privacy {
 		
 		if ( $this->has_embed ) {
 			$this->print_assets();
-			$this->print_assets();
 		}
 		
 		return $content;
