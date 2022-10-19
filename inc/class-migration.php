@@ -57,7 +57,7 @@ class Migration {
 	 * @var		string Current migration version
 	 * @since	1.2.2
 	 */
-	private $version = '1.4.7';
+	private $version = '1.5.0';
 	
 	/**
 	 * Post Type constructor.
@@ -198,22 +198,30 @@ class Migration {
 			case $this->version:
 				// most recent version, do nothing
 				break;
+			case '1.4.7':
+				$this->migrate_1_5_0();
+				break;
 			case '1.4.0':
+				$this->migrate_1_5_0();
 				$this->migrate_1_4_7();
 				break;
 			case '1.3.0':
+				$this->migrate_1_5_0();
 				$this->migrate_1_4_0();
 				break;
 			case '1.2.2':
+				$this->migrate_1_5_0();
 				$this->migrate_1_4_0();
 				$this->migrate_1_3_0();
 				break;
 			case '1.2.1':
+				$this->migrate_1_5_0();
 				$this->migrate_1_4_0();
 				$this->migrate_1_3_0();
 				$this->migrate_1_2_2();
 				break;
 			case '1.2.0':
+				$this->migrate_1_5_0();
 				$this->migrate_1_4_0();
 				$this->migrate_1_3_0();
 				$this->migrate_1_2_2();
@@ -423,6 +431,29 @@ class Migration {
 	}
 	
 	/**
+	 * Migrations for version 1.5.0.
+	 * 
+	 * @see		https://github.com/epiphyt/embed-privacy/issues/124
+	 * @since	1.5.0
+	 * 
+	 * - Add new embed provider Pocket Casts
+	 */
+	private function migrate_1_5_0() {
+		$this->add_embed( [
+			'meta_input' => [
+				'is_system' => 'yes',
+				'privacy_policy_url' => __( 'https://support.pocketcasts.com/article/privacy-policy/', 'embed-privacy' ),
+				'regex_default' => '/pca\\\.st/',
+			],
+			/* translators: embed provider */
+			'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Pocket Casts', 'embed provider', 'embed-privacy' ) ),
+			'post_status' => 'publish',
+			'post_title' => _x( 'Pocket Casts', 'embed provider', 'embed-privacy' ),
+			'post_type' => 'epi_embed',
+		] );
+	}
+	
+	/**
 	 * Register default embed providers.
 	 */
 	public function register_default_embed_providers() {
@@ -629,6 +660,18 @@ class Migration {
 				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Pinterest', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
 				'post_title' => _x( 'Pinterest', 'embed provider', 'embed-privacy' ),
+				'post_type' => 'epi_embed',
+			],
+			[
+				'meta_input' => [
+					'is_system' => 'yes',
+					'privacy_policy_url' => __( 'https://support.pocketcasts.com/article/privacy-policy/', 'embed-privacy' ),
+					'regex_default' => '/pca\\\.st/',
+				],
+				/* translators: embed provider */
+				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Pocket Casts', 'embed provider', 'embed-privacy' ) ),
+				'post_status' => 'publish',
+				'post_title' => _x( 'Pocket Casts', 'embed provider', 'embed-privacy' ),
 				'post_type' => 'epi_embed',
 			],
 			[
