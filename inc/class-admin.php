@@ -152,6 +152,21 @@ class Admin {
 		);
 		register_setting( 'embed_privacy', 'embed_privacy_local_tweets' );
 		add_settings_field(
+			'embed_privacy_disable_link',
+			null,
+			[ $this, 'get_field' ],
+			'embed_privacy',
+			'embed_privacy_general',
+			[
+				'description' => __( 'Disable the direct link on the lower right corner that opens the embed directly.', 'embed-privacy' ),
+				'name' => 'embed_privacy_disable_link',
+				'option_type' => 'option',
+				'title' => __( 'Disable direct link', 'embed-privacy' ),
+				'type' => 'checkbox',
+			]
+		);
+		register_setting( 'embed_privacy', 'embed_privacy_disable_link' );
+		add_settings_field(
 			'embed_privacy_preserve_data_on_uninstall',
 			__( 'Data handling', 'embed-privacy' ),
 			[ $this, 'get_field' ],

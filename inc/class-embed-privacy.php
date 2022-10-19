@@ -878,13 +878,19 @@ class Embed_Privacy {
 		$footer_content = '';
 		
 		if ( ! empty( $args['embed_url'] ) ) {
-			$footer_content = '<div class="embed-privacy-footer"><span class="embed-privacy-url"><a href="' . esc_url( $args['embed_url'] ). '">';
-			$footer_content .= sprintf(
+			$footer_content = '<div class="embed-privacy-footer">';
+			
+			if ( ! get_option( 'embed_privacy_disable_link' ) ) {
+				$footer_content .= '<span class="embed-privacy-url"><a href="' . esc_url( $args['embed_url'] ) . '">';
+				$footer_content .= sprintf(
 				/* translators: content name or 'content' */
-				esc_html__( 'Open %s directly', 'embed-privacy' ),
-				! empty( $args['embed_title'] ) ? $args['embed_title'] : __( 'content', 'embed-privacy' )
-			);
-			$footer_content .= '</a></span></div>' . PHP_EOL;
+					esc_html__( 'Open %s directly', 'embed-privacy' ),
+					! empty( $args['embed_title'] ) ? $args['embed_title'] : __( 'content', 'embed-privacy' )
+				);
+				$footer_content .= '</a></span>';
+			}
+			
+			$footer_content .= '</div>' . PHP_EOL;
 			
 			/**
 			 * Filter the overlay footer.
