@@ -1539,11 +1539,27 @@ class Embed_Privacy {
 			}
 		}
 		
+		/**
+		 * If set to true, unknown providers are not handled via Embed Privacy.
+		 * 
+		 * @since	1.5.0
+		 * 
+		 * @param	bool	$ignore_unknown Whether unknown providers should be ignored
+		 * @oaram	string	$content The original content
+		 */
+		$ignore_unknown_providers = apply_filters( 'embed_privacy_ignore_unknown_providers', false, $content );
+		
 		// get default external content
 		// special case for youtube-nocookie.com as it is part of YouTube provider
 		// and gets rewritten in Divi
 		// see: https://github.com/epiphyt/embed-privacy/issues/69
-		if ( strpos( $content, 'youtube-nocookie.com' ) === false || ! $this->is_always_active_provider( 'youtube' ) ) {
+		if (
+			! $ignore_unknown_providers
+			&& (
+				strpos( $content, 'youtube-nocookie.com' ) === false
+				|| ! $this->is_always_active_provider( 'youtube' )
+			)
+		) {
 			$new_content = $this->get_single_overlay( $content, '', '', [ 'check_always_active' => true ] );
 			
 			if ( $new_content !== $content ) {
