@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.8
+* Fixed an issue with always active providers being cached by page caching plugins
+* Fixed printing inline JavaScript only once
+
 ## 1.4.7
 * Fixed displaying embeds on mobile devices while using Divi
 * Fixed the output of assets
