@@ -252,6 +252,7 @@ class Embed_Privacy {
 		add_filter( 'embed_oembed_html', [ $this, 'replace_embeds_oembed' ], 10, 3 );
 		add_filter( 'embed_privacy_widget_output', [ $this, 'replace_embeds' ] );
 		add_filter( 'et_builder_get_oembed', [ $this, 'replace_embeds_divi' ], 10, 2 );
+		add_filter( 'pll_get_post_types', [ $this, 'register_polylang_post_type' ], 10, 2 );
 		add_filter( 'the_content', [ $this, 'replace_embeds' ] );
 		
 		add_shortcode( 'embed_privacy_opt_out', [ $this, 'shortcode_opt_out' ] );
@@ -1493,6 +1494,26 @@ class Embed_Privacy {
 				$this->print_assets();
 			}
 		}
+	}
+	
+	/**
+	 * Register post type in Polylang to allow translation.
+	 * 
+	 * @since	1.5.0
+	 * 
+	 * @param	array	$post_types List of current translatable custom post types
+	 * @param	bool	$is_settings Whether the current page is the settings page
+	 * @return	array Updated list of translatable custom post types
+	 */
+	public function register_polylang_post_type( array $post_types, $is_settings ) {
+		if ( $is_settings ) {
+			unset( $post_types['epi_embed'] );
+		}
+		else {
+			$post_types['epi_embed'] = 'epi_embed';
+		}
+		
+		return $post_types;
 	}
 	
 	/**
