@@ -21,6 +21,7 @@ $options = [
 	'embed_privacy_javascript_detection',
 	'embed_privacy_local_tweets',
 	'embed_privacy_migrate_version',
+	'embed_privacy_migration_count',
 	'embed_privacy_preserve_data_on_uninstall',
 ];
 

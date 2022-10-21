@@ -13,6 +13,7 @@ use function delete_option;
 use function delete_post_thumbnail;
 use function dirname;
 use function esc_html__;
+use function esc_url;
 use function get_option;
 use function get_post_meta;
 use function get_post_thumbnail_id;
@@ -21,10 +22,12 @@ use function get_site_option;
 use function in_array;
 use function is_int;
 use function is_multisite;
+use function is_numeric;
 use function load_plugin_textdomain;
 use function plugin_basename;
-use function reset;
+use function printf;use function reset;
 use function sprintf;
+use function time;
 use function update_option;
 use function update_post_meta;
 use function wp_delete_attachment;
@@ -32,6 +35,7 @@ use function wp_delete_post;
 use function wp_doing_ajax;
 use function WP_Filesystem;
 use function wp_insert_post;
+use const MINUTE_IN_SECONDS;
 
 /**
  * Migration class to update data in the database on upgrades.
@@ -75,6 +79,7 @@ class Migration {
 		// thus, we need to check on every page load in the admin if there are
 		// new migrations
 		add_action( 'admin_init', [ $this, 'migrate' ], 10, 0 );
+		add_action( 'admin_notices', [ $this, 'register_migration_failed_notice' ] );
 	}
 	
 	/**
@@ -173,12 +178,17 @@ class Migration {
 		}
 		
 		// check for active migration
-		if ( $this->get_option( 'is_migrating' ) ) {
+		if (
+			is_numeric( $this->get_option( 'is_migrating' ) )
+			&& $this->get_option( 'is_migrating' ) !== '1' // possible legacy value
+			&& (int) $this->get_option( 'is_migrating' ) > time() - MINUTE_IN_SECONDS
+		) {
 			return;
 		}
 		
 		// start the migration
-		$this->update_option( 'is_migrating', true );
+		$this->update_option( 'is_migrating', time() );
+		$this->update_option( 'migration_count', (int) $this->get_option( 'migration_count' ) + 1 );
 		
 		// load textdomain early for migrations
 		load_plugin_textdomain( 'embed-privacy', false, dirname( plugin_basename( Embed_Privacy::get_instance()->plugin_file ) ) . '/languages' );
@@ -236,6 +246,7 @@ class Migration {
 		// migration done
 		$this->update_option( 'migrate_version', $this->version );
 		$this->delete_option( 'is_migrating' );
+		$this->delete_option( 'migration_count' );
 	}
 	
 	/**
@@ -915,6 +926,32 @@ class Migration {
 				'post_type' => 'epi_embed',
 			],
 		];
+	}
+	
+	/**
+	 * Add a notice if migration failed.
+	 * 
+	 * @since	1.5.0
+	 */
+	public function register_migration_failed_notice() {
+		if ( (int) $this->get_option( 'migration_count' ) < 3 ) {
+			return;
+		}
+		?>
+		<div class="notice notice-error" data-notice="embed_privacy_migration_failed_notice">
+			<p>
+				<?php
+				printf(
+					/* translators: 1: current migration version, 2: target migration version, 3: starting HTML anchor, 4: ending HTML anchor */
+					esc_html__( 'Embed Privacy migration from version %1$s to %2$s failed. Please contact the %3$ssupport%4$s for further assistance.', 'embed-privacy' ),
+					$this->get_option( 'migrate_version' ),
+					$this->version,
+					'<a href="' . esc_url( __( 'https://wordpress.org/support/plugin/embed-privacy/#new-topic-0', 'embed-privacy' ) ) . '">',
+					'</a>'
+				); ?>
+			</p>
+		</div>
+		<?php
 	}
 	
 	/**
