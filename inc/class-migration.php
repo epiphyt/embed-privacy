@@ -112,7 +112,6 @@ class Migration {
 	 * @param	string	$option The option name
 	 * @return	bool True if the option was deleted, false otherwise
 	 * @noinspection PhpReturnValueOfMethodIsNeverUsedInspection
-	 * @noinspection PhpSameParameterValueInspection
 	 */
 	private function delete_option( $option ) {
 		return delete_option( 'embed_privacy_' . $option );
