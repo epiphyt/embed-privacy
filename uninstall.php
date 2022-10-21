@@ -1,5 +1,7 @@
 <?php
 namespace epiphyt\Embed_Privacy;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 use function defined;
 use function delete_option;
 use function delete_site_option;
@@ -8,8 +10,11 @@ use function get_posts;
 use function get_sites;
 use function is_multisite;
 use function restore_current_blog;
+use function rmdir;
 use function switch_to_blog;
+use function unlink;
 use function wp_delete_post;
+use const WP_CONTENT_DIR;
 
 // if uninstall.php is not called by WordPress, die
 if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
@@ -72,4 +77,20 @@ function delete_data() {
 	foreach ( $embeds as $embed ) {
 		wp_delete_post( $embed->ID, true );
 	}
+	
+	// delete thumbnail directory
+	$directory = WP_CONTENT_DIR . '/uploads/embed-privacy/thumbnails';
+	$iterator = new RecursiveDirectoryIterator( $directory, RecursiveDirectoryIterator::SKIP_DOTS );
+	$files = new RecursiveIteratorIterator( $iterator, RecursiveIteratorIterator::CHILD_FIRST );
+	
+	foreach ( $files as $file ) {
+		if ( $file->isDir() ) {
+			rmdir( $file->getRealPath() );
+		}
+		else {
+			unlink( $file->getRealPath() );
+		}
+	}
+	
+	rmdir( $directory );
 }
