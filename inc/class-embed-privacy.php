@@ -20,6 +20,7 @@ use function checked;
 use function class_exists;
 use function defined;
 use function dirname;
+use function download_url;
 use function esc_attr;
 use function esc_html;
 use function esc_html__;
@@ -55,6 +56,7 @@ use function is_plugin_active;
 use function is_plugin_active_for_network;
 use function is_scalar;
 use function is_string;
+use function is_wp_error;
 use function json_decode;
 use function libxml_use_internal_errors;
 use function load_plugin_textdomain;
@@ -76,6 +78,7 @@ use function rawurlencode;
 use function register_activation_hook;
 use function register_deactivation_hook;
 use function register_post_type;
+use function rename;
 use function sanitize_text_field;
 use function sanitize_title;
 use function shortcode_atts;
@@ -87,6 +90,7 @@ use function strpos;
 use function strtolower;
 use function strtotime;
 use function trim;
+use function update_post_meta;
 use function url_to_postid;
 use function wp_date;
 use function wp_deregister_script;
@@ -104,6 +108,7 @@ use function wp_register_script;
 use function wp_register_style;
 use function wp_slash;
 use function wp_unslash;
+use const ABSPATH;
 use const DEBUG_MODE;
 use const ENT_QUOTES;
 use const EPI_EMBED_PRIVACY_BASE;
@@ -114,6 +119,7 @@ use const LIBXML_HTML_NODEFDTD;
 use const LIBXML_HTML_NOIMPLIED;
 use const PHP_EOL;
 use const PHP_URL_HOST;
+use const WP_CONTENT_DIR;
 
 /**
  * Two click embed main class.
@@ -168,6 +174,12 @@ class Embed_Privacy {
 	 * @var		string The full path to the main plugin file
 	 */
 	public $plugin_file = '';
+	
+	/**
+	 * @since	1.5.0
+	 * @var		string The thumbnail directory
+	 */
+	public $thumbnail_directory = WP_CONTENT_DIR . '/uploads/embed-privacy/thumbnails';
 	
 	/**
 	 * @var		bool Determine if we use the cache
@@ -253,6 +265,7 @@ class Embed_Privacy {
 		add_filter( 'embed_oembed_html', [ $this, 'replace_embeds_oembed' ], 10, 3 );
 		add_filter( 'embed_privacy_widget_output', [ $this, 'replace_embeds' ] );
 		add_filter( 'et_builder_get_oembed', [ $this, 'replace_embeds_divi' ], 10, 2 );
+		add_filter( 'oembed_dataparse', [ $this, 'get_thumbnails_from_provider' ], 10, 3 );
 		add_filter( 'pll_get_post_types', [ $this, 'register_polylang_post_type' ], 10, 2 );
 		add_filter( 'the_content', [ $this, 'replace_embeds' ] );
 		
@@ -671,6 +684,63 @@ class Embed_Privacy {
 	}
 	
 	/**
+	 * Get path and URL to an embed thumbnail.
+	 * 
+	 * @since	1.5.0
+	 * 
+	 * @param	\WP_Post	$post Post object
+	 * @param	string		$url Embedded URL
+	 * @return	array Thumbnail path and URL
+	 */
+	private function get_thumbnail_data( $post, $url ) {
+		$thumbnail_path = '';
+		$thumbnail_url = '';
+		
+		if ( strpos( $url, 'youtube.com' ) !== false || strpos( $url, 'youtu.be' ) !== false ) {
+			$id = str_replace( [ 'https://www.youtube.com/watch?v=', 'https://youtu.be/' ], '', $url );
+			$thumbnail = get_post_meta( $post->ID, 'embed_privacy_thumbnail_youtube_' . $id, true );
+			$thumbnail_path = $this->thumbnail_directory . '/' . $thumbnail;
+			
+			if ( $thumbnail && file_exists( $thumbnail_path ) ) {
+				$relative_path = str_replace( ABSPATH, '', $thumbnail_path );
+				$thumbnail_url = home_url( $relative_path );
+			}
+		}
+		
+		return [
+			'thumbnail_path' => $thumbnail_path,
+			'thumbnail_url' => $thumbnail_url,
+		];
+	}
+	
+	/**
+	 * Get embed thumbnails from the embed provider.
+	 * 
+	 * @since	1.5.0
+	 * 
+	 * @param	string	$return The returned oEmbed HTML
+	 * @param	object	$data A data object result from an oEmbed provider
+	 * @param	string	$url The URL of the content to be embedded
+	 * @return mixed
+	 */
+	public function get_thumbnails_from_provider( $return, $data, $url ) {
+		if ( strpos( $url, 'youtube.com' ) !== false || strpos( $url, 'youtu.be' ) !== false ) {
+			$thumbnail_url = $data->thumbnail_url;
+			// format: <id>/<thumbnail-name>.jpg
+			$extracted = str_replace( 'https://i.ytimg.com/vi/', '', $thumbnail_url );
+			// first part is the ID
+			$parts = explode( '/', $extracted );
+			$id = isset( $parts[0] ) ? $parts[0] : false;
+			
+			if ( $id ) {
+				$this->set_youtube_thumbnail( $id, get_post( (int) $_GET['post'] ), $url );
+			}
+		}
+		
+		return $return;
+	}
+	
+	/**
 	 * Get en oEmbed title by its title attribute.
 	 * 
 	 * @since	1.4.0
@@ -735,6 +805,10 @@ class Embed_Privacy {
 		
 		$background_path = '';
 		$background_url = '';
+		$embed_thumbnail = [
+			'thumbnail_path' => '',
+			'thumbnail_url' => '',
+		];
 		$logo_path = '';
 		$logo_url = '';
 		
@@ -752,7 +826,6 @@ class Embed_Privacy {
 			$thumbnail_id = null;
 		}
 		
-		
 		if ( $background_image_id ) {
 			$background_path = get_attached_file( $background_image_id );
 			$background_url = wp_get_attachment_url( $background_image_id );
@@ -765,6 +838,10 @@ class Embed_Privacy {
 		else if ( file_exists( plugin_dir_path( $this->plugin_file ) . 'assets/images/embed-' . $embed_provider_lowercase . '.png' ) ) {
 			$logo_path = plugin_dir_path( $this->plugin_file ) . 'assets/images/embed-' . $embed_provider_lowercase . '.png';
 			$logo_url = plugin_dir_url( $this->plugin_file ) . 'assets/images/embed-' . $embed_provider_lowercase . '.png';
+		}
+		
+		if ( ! empty( $args['embed_url'] ) ) {
+			$embed_thumbnail = $this->get_thumbnail_data( get_post(), $args['embed_url'] );
 		}
 		
 		if ( ! empty( $args['assets'] ) && is_array( $args['assets'] ) ) {
@@ -796,6 +873,22 @@ class Embed_Privacy {
 		 * @param	string	$embed_provider_lowercase The current embed provider in lowercase
 		 */
 		$background_url = apply_filters( "embed_privacy_background_url_$embed_provider_lowercase", $background_url, $embed_provider_lowercase );
+		
+		/**
+		 * Filter the path to the thumbnail.
+		 * 
+		 * @param	string	$logo_path The default background path
+		 * @param	string	$embed_provider_lowercase The current embed provider in lowercase
+		 */
+		$embed_thumbnail['thumbnail_path'] = apply_filters( "embed_privacy_thumbnail_path_$embed_provider_lowercase", $embed_thumbnail['thumbnail_path'], $embed_provider_lowercase );
+		
+		/**
+		 * Filter the URL to the thumbnail.
+		 * 
+		 * @param	string	$logo_url The default background URL
+		 * @param	string	$embed_provider_lowercase The current embed provider in lowercase
+		 */
+		$embed_thumbnail['thumbnail_url'] = apply_filters( "embed_privacy_thumbnail_url_$embed_provider_lowercase", $embed_thumbnail['thumbnail_url'], $embed_provider_lowercase );
 		
 		/**
 		 * Filter the path to the logo.
@@ -903,7 +996,7 @@ class Embed_Privacy {
 		}
 		
 		?>
-		<div class="embed-privacy-container is-disabled <?php echo esc_attr( $embed_classes ); ?>" id="oembed_<?php echo esc_attr( $embed_md5 ); ?>" data-embed-provider="<?php echo esc_attr( $embed_provider_lowercase ); ?>">
+		<div class="embed-privacy-container is-disabled <?php echo esc_attr( $embed_classes ); ?>" id="oembed_<?php echo esc_attr( $embed_md5 ); ?>" data-embed-provider="<?php echo esc_attr( $embed_provider_lowercase ); ?>"<?php echo ( ! empty( $embed_thumbnail['thumbnail_path'] ) && file_exists( $embed_thumbnail['thumbnail_path'] ) ? ' style="background-image: url(' . esc_url( $embed_thumbnail['thumbnail_url'] ) . ');"' : '' ); ?>>
 			<?php /* translators: embed provider */ ?>
 			<button class="embed-privacy-enable screen-reader-text"><?php printf( esc_html__( 'Display content from %s', 'embed-privacy' ), esc_html( $embed_provider ) ); ?></button>
 			
@@ -1195,6 +1288,45 @@ class Embed_Privacy {
 			],
 			$content
 		);
+	}
+	
+	/**
+	 * Download and save a YouTube thumbnail.
+	 * 
+	 * @since	1.5.0
+	 * 
+	 * @param	string		$id YouTube video ID
+	 * @param	\WP_Post	$post Post object
+	 * @param	string		$url YouTube video URL
+	 */
+	public function set_youtube_thumbnail( $id, $post, $url ) {
+		if ( ! $post ) {
+			return;
+		}
+		
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+		
+		// list of images we try to retrieve
+		// see: https://stackoverflow.com/a/2068371
+		$images = [
+			'maxresdefault',
+			'hqdefault',
+			'0',
+		];
+		$thumbnail_url = 'https://img.youtube.com/vi/%1$s/%2$s.jpg';
+		
+		foreach ( $images as $image ) {
+			$file = download_url( sprintf( $thumbnail_url, $id, $image ) );
+			
+			if ( is_wp_error( $file ) ) {
+				continue;
+			}
+			
+			rename( $file, $this->thumbnail_directory . '/youtube-' . $id . '-' . $image . '.jpg' );
+			update_post_meta( $post->ID, 'embed_privacy_thumbnail_youtube_' . $id, 'youtube-' . $id . '-' . $image . '.jpg' );
+			update_post_meta( $post->ID, 'embed_privacy_thumbnail_youtube_' . $id . '_url', $url );
+			break;
+		}
 	}
 	
 	/**

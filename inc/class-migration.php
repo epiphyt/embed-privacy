@@ -15,16 +15,19 @@ use function dirname;
 use function esc_html;
 use function esc_html__;
 use function esc_url;
+use function file_exists;
 use function get_option;
 use function get_post_meta;
 use function get_post_thumbnail_id;
 use function get_posts;
 use function get_site_option;
 use function in_array;
+use function is_dir;
 use function is_int;
 use function is_multisite;
 use function is_numeric;
 use function load_plugin_textdomain;
+use function mkdir;
 use function plugin_basename;
 use function printf;
 use function reset;
@@ -105,6 +108,21 @@ class Migration {
 			foreach ( $meta_data as $meta_key => $meta_value ) {
 				add_post_meta( $post_id, $meta_key, $meta_value );
 			}
+		}
+	}
+	
+	/**
+	 * Create thumbnails directory.
+	 * 
+	 * @since	1.5.0
+	 */
+	private function create_thumbnails_dir() {
+		if ( file_exists( Embed_Privacy::get_instance()->thumbnail_directory ) && ! is_dir( Embed_Privacy::get_instance()->thumbnail_directory ) ) {
+			return;
+		}
+		
+		if ( ! is_dir( Embed_Privacy::get_instance()->thumbnail_directory ) ) {
+			mkdir( Embed_Privacy::get_instance()->thumbnail_directory, 0777, true );
 		}
 	}
 	
@@ -262,6 +280,8 @@ class Migration {
 		foreach ( $this->providers as $embed ) {
 			$this->add_embed( $embed );
 		}
+		
+		$this->create_thumbnails_dir();
 	}
 	
 	/**
@@ -475,6 +495,7 @@ class Migration {
 			'post_title' => _x( 'Maps Marker', 'embed provider', 'embed-privacy' ),
 			'post_type' => 'epi_embed',
 		] );
+		$this->create_thumbnails_dir();
 	}
 	
 	/**
