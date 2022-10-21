@@ -138,7 +138,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 	 * @return	{string[]} List of always active providers
 	 */
 	function getAlwaysActiveProviders() {
-		const cookie = JSON.parse( get_cookie( 'embed-privacy' ) );
+		const cookie = ( get_cookie( 'embed-privacy' ) ? JSON.parse( get_cookie( 'embed-privacy' ) ) : '' );
 		
 		if ( ! cookie ) {
 			return [];
