@@ -1476,10 +1476,10 @@ class Embed_Privacy {
 		
 		$current_url = sprintf(
 			'http%1$s://%2$s%3$s%4$s',
-			! empty( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] == 'on' ? 's' : '',
-			! empty( $_SERVER['HTTP_HOST'] ) ? $_SERVER['HTTP_HOST'] : '',
-			! empty( $_SERVER['SERVER_PORT'] ) && (int) $_SERVER['SERVER_PORT'] !== 80 && (int) $_SERVER['SERVER_PORT'] !== 443 ? ':' . $_SERVER['SERVER_PORT'] : '',
-			! empty( $_SERVER['REQUEST_URI'] ) ? $_SERVER['REQUEST_URI'] : ''
+			! empty( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] === 'on' ? 's' : '',
+			! empty( $_SERVER['HTTP_HOST'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ) ) : '',
+			! empty( $_SERVER['SERVER_PORT'] ) && (int) $_SERVER['SERVER_PORT'] !== 80 && (int) $_SERVER['SERVER_PORT'] !== 443 ? ':' . (int) $_SERVER['SERVER_PORT'] : '',
+			! empty( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : ''
 		);
 		
 		if ( empty( $_SERVER['HTTP_HOST'] ) ) {

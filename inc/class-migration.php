@@ -12,6 +12,7 @@ use function array_search;
 use function delete_option;
 use function delete_post_thumbnail;
 use function dirname;
+use function esc_html;
 use function esc_html__;
 use function esc_url;
 use function get_option;
@@ -944,8 +945,8 @@ class Migration {
 				printf(
 					/* translators: 1: current migration version, 2: target migration version, 3: starting HTML anchor, 4: ending HTML anchor */
 					esc_html__( 'Embed Privacy migration from version %1$s to %2$s failed. Please contact the %3$ssupport%4$s for further assistance.', 'embed-privacy' ),
-					$this->get_option( 'migrate_version' ),
-					$this->version,
+					esc_html( $this->get_option( 'migrate_version' ) ),
+					esc_html( $this->version ),
 					'<a href="' . esc_url( __( 'https://wordpress.org/support/plugin/embed-privacy/#new-topic-0', 'embed-privacy' ) ) . '">',
 					'</a>'
 				); ?>
