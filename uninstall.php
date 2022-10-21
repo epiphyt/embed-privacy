@@ -36,22 +36,7 @@ if ( is_multisite() ) {
 			continue;
 		}
 		
-		// delete options
-		foreach ( $options as $option ) {
-			delete_option( $option );
-		}
-		
-		// delete posts of custom post type
-		$embeds = get_posts( [
-			'numberposts' => -1,
-			'post_status' => 'any',
-			'post_type' => 'epi_embed',
-		] );
-		
-		foreach ( $embeds as $embed ) {
-			wp_delete_post( $embed->ID, true );
-		}
-		
+		delete_data();
 		restore_current_blog();
 	}
 	
@@ -61,6 +46,17 @@ if ( is_multisite() ) {
 	}
 }
 else if ( ! get_option( 'embed_privacy_preserve_data_on_uninstall' ) ) {
+	delete_data();
+}
+
+/**
+ * Delete all data
+ * 
+ * @since	1.5.0
+ */
+function delete_data() {
+	global $options;
+	
 	// delete options
 	foreach ( $options as $option ) {
 		delete_option( $option );
