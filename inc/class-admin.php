@@ -19,6 +19,7 @@ use function reset;
 use function settings_errors;
 use function settings_fields;
 use function submit_button;
+use function wp_sprintf;
 
 /**
  * Admin related methods for Embed Privacy.
@@ -166,6 +167,22 @@ class Admin {
 			]
 		);
 		register_setting( 'embed_privacy', 'embed_privacy_disable_link' );
+		add_settings_field(
+			'embed_privacy_download_thumbnails',
+			null,
+			[ $this, 'get_field' ],
+			'embed_privacy',
+			'embed_privacy_general',
+			[
+				/* translators: list of supported embed providers */
+				'description' => wp_sprintf( __( 'Try to automatically download thumbnails of the embedded content and use them as background image of the overlay. Currently supported: %l.', 'embed-privacy' ), [ _x( 'YouTube', 'embed provider', 'embed-privacy' ) ] ),
+				'name' => 'embed_privacy_download_thumbnails',
+				'option_type' => 'option',
+				'title' => __( 'Download thumbnails', 'embed-privacy' ),
+				'type' => 'checkbox',
+			]
+		);
+		register_setting( 'embed_privacy', 'embed_privacy_download_thumbnails' );
 		add_settings_field(
 			'embed_privacy_preserve_data_on_uninstall',
 			__( 'Data handling', 'embed-privacy' ),

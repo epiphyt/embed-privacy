@@ -840,7 +840,7 @@ class Embed_Privacy {
 			$logo_url = plugin_dir_url( $this->plugin_file ) . 'assets/images/embed-' . $embed_provider_lowercase . '.png';
 		}
 		
-		if ( ! empty( $args['embed_url'] ) ) {
+		if ( ! empty( $args['embed_url'] ) && get_option( 'embed_privacy_download_thumbnails' ) ) {
 			$embed_thumbnail = $this->get_thumbnail_data( get_post(), $args['embed_url'] );
 		}
 		
