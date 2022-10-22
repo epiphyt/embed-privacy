@@ -19,9 +19,7 @@ use function array_splice;
 use function checked;
 use function class_exists;
 use function defined;
-use function delete_post_meta;
 use function dirname;
-use function download_url;
 use function esc_attr;
 use function esc_html;
 use function esc_html__;
@@ -57,7 +55,6 @@ use function is_plugin_active;
 use function is_plugin_active_for_network;
 use function is_scalar;
 use function is_string;
-use function is_wp_error;
 use function json_decode;
 use function libxml_use_internal_errors;
 use function load_plugin_textdomain;
@@ -79,8 +76,6 @@ use function rawurlencode;
 use function register_activation_hook;
 use function register_deactivation_hook;
 use function register_post_type;
-use function rename;
-use function reset;
 use function sanitize_text_field;
 use function sanitize_title;
 use function shortcode_atts;
@@ -92,8 +87,6 @@ use function strpos;
 use function strtolower;
 use function strtotime;
 use function trim;
-use function unlink;
-use function update_post_meta;
 use function url_to_postid;
 use function wp_date;
 use function wp_deregister_script;
@@ -112,7 +105,6 @@ use function wp_register_style;
 use function wp_slash;
 use function wp_unslash;
 use const ABSPATH;
-use const ARRAY_A;
 use const DEBUG_MODE;
 use const ENT_QUOTES;
 use const EPI_EMBED_PRIVACY_BASE;
@@ -123,7 +115,6 @@ use const LIBXML_HTML_NODEFDTD;
 use const LIBXML_HTML_NOIMPLIED;
 use const PHP_EOL;
 use const PHP_URL_HOST;
-use const WP_CONTENT_DIR;
 
 /**
  * Two click embed main class.
@@ -178,12 +169,6 @@ class Embed_Privacy {
 	 * @var		string The full path to the main plugin file
 	 */
 	public $plugin_file = '';
-	
-	/**
-	 * @since	1.5.0
-	 * @var		string The thumbnail directory
-	 */
-	public $thumbnail_directory = WP_CONTENT_DIR . '/uploads/embed-privacy/thumbnails';
 	
 	/**
 	 * @var		bool Determine if we use the cache
@@ -252,11 +237,9 @@ class Embed_Privacy {
 	 */
 	public function init() {
 		// actions
-		add_action( 'before_delete_post', [ $this, 'delete_thumbnails' ] );
 		add_action( 'init', [ $this, 'load_textdomain' ], 0 );
 		add_action( 'init', [ $this, 'register_assets' ] );
 		add_action( 'init', [ $this, 'set_post_type' ], 5 );
-		add_action( 'post_updated', [ $this, 'check_for_orphaned_thumbnails' ], 10, 2 );
 		add_action( 'save_post_epi_embed', [ $this, 'preserve_backslashes' ] );
 		add_action( 'wp_enqueue_scripts', [ $this, 'deregister_assets' ], 100 );
 		
@@ -271,7 +254,6 @@ class Embed_Privacy {
 		add_filter( 'embed_oembed_html', [ $this, 'replace_embeds_oembed' ], 10, 3 );
 		add_filter( 'embed_privacy_widget_output', [ $this, 'replace_embeds' ] );
 		add_filter( 'et_builder_get_oembed', [ $this, 'replace_embeds_divi' ], 10, 2 );
-		add_filter( 'oembed_dataparse', [ $this, 'get_thumbnails_from_provider' ], 10, 3 );
 		add_filter( 'pll_get_post_types', [ $this, 'register_polylang_post_type' ], 10, 2 );
 		add_filter( 'the_content', [ $this, 'replace_embeds' ] );
 		
@@ -283,41 +265,7 @@ class Embed_Privacy {
 		Admin::get_instance()->init();
 		Fields::get_instance()->init();
 		Migration::get_instance()->init();
-	}
-	
-	/**
-	 * Check and delete orphaned thumbnails.
-	 * 
-	 * @since	1.5.0
-	 * 
-	 * @param	int			$post_id The post ID
-	 * @param	\WP_Post	$post The post object
-	 */
-	public function check_for_orphaned_thumbnails( $post_id, $post ) {
-		$global_metadata = $this->get_thumbnail_metadata();
-		$metadata = get_post_meta( $post_id );
-		
-		foreach ( $metadata as $meta_key => $meta_value ) {
-			if ( strpos( $meta_key, 'embed_privacy_thumbnail_' ) === false ) {
-				continue;
-			}
-			
-			if ( is_array( $meta_value ) ) {
-				$meta_value = reset( $meta_value );
-			}
-			
-			if ( strpos( $meta_key, '_youtube_' ) !== false && strpos( $meta_key, '_url' ) === false ) {
-				$id = str_replace( 'embed_privacy_thumbnail_youtube_', '', $meta_key );
-				
-				if ( strpos( $post->post_content, $id ) === false ) {
-					if ( ! $this->is_thumbnail_in_use( $meta_value, $post_id, $global_metadata ) ) {
-						$this->delete_thumbnail( $meta_value );
-						delete_post_meta( $post_id, $meta_key );
-						delete_post_meta( $post_id, $meta_key . '_url' );
-					}
-				}
-			}
-		}
+		Thumbnails::get_instance()->init();
 	}
 	
 	/**
@@ -354,47 +302,6 @@ class Embed_Privacy {
 			);
 		}
 		//phpcs:enable
-	}
-	
-	/**
-	 * Delete a thumbnail.
-	 * 
-	 * @since	1.5.0
-	 * 
-	 * @param	string	$filename The thumbnail filename
-	 */
-	private function delete_thumbnail( $filename ) {
-		if ( ! file_exists( $this->thumbnail_directory . '/' . $filename ) ) {
-			return;
-		}
-		
-		unlink( $this->thumbnail_directory . '/' . $filename );
-	}
-	
-	/**
-	 * Delete thumbnails for a given post ID.
-	 * 
-	 * @since	1.5.0
-	 * 
-	 * @param	int		$post_id Post ID
-	 */
-	public function delete_thumbnails( $post_id ) {
-		$global_metadata = $this->get_thumbnail_metadata();
-		$metadata = get_post_meta( $post_id );
-		
-		foreach ( $metadata as $meta_key => $meta_value ) {
-			if ( strpos( $meta_key, 'embed_privacy_thumbnail_' ) === false ) {
-				continue;
-			}
-			
-			if ( is_array( $meta_value ) ) {
-				$meta_value = reset( $meta_value );
-			}
-			
-			if ( ! $this->is_thumbnail_in_use( $meta_value, $post_id, $global_metadata ) ) {
-				$this->delete_thumbnail( $meta_value );
-			}
-		}
 	}
 	
 	/**
@@ -771,63 +678,6 @@ class Embed_Privacy {
 	}
 	
 	/**
-	 * Get path and URL to an embed thumbnail.
-	 * 
-	 * @since	1.5.0
-	 * 
-	 * @param	\WP_Post	$post Post object
-	 * @param	string		$url Embedded URL
-	 * @return	array Thumbnail path and URL
-	 */
-	private function get_thumbnail_data( $post, $url ) {
-		$thumbnail_path = '';
-		$thumbnail_url = '';
-		
-		if ( strpos( $url, 'youtube.com' ) !== false || strpos( $url, 'youtu.be' ) !== false ) {
-			$id = str_replace( [ 'https://www.youtube.com/watch?v=', 'https://youtu.be/' ], '', $url );
-			$thumbnail = get_post_meta( $post->ID, 'embed_privacy_thumbnail_youtube_' . $id, true );
-			$thumbnail_path = $this->thumbnail_directory . '/' . $thumbnail;
-			
-			if ( $thumbnail && file_exists( $thumbnail_path ) ) {
-				$relative_path = str_replace( ABSPATH, '', $thumbnail_path );
-				$thumbnail_url = home_url( $relative_path );
-			}
-		}
-		
-		return [
-			'thumbnail_path' => $thumbnail_path,
-			'thumbnail_url' => $thumbnail_url,
-		];
-	}
-	
-	/**
-	 * Get embed thumbnails from the embed provider.
-	 * 
-	 * @since	1.5.0
-	 * 
-	 * @param	string	$return The returned oEmbed HTML
-	 * @param	object	$data A data object result from an oEmbed provider
-	 * @param	string	$url The URL of the content to be embedded
-	 * @return mixed
-	 */
-	public function get_thumbnails_from_provider( $return, $data, $url ) {
-		if ( strpos( $url, 'youtube.com' ) !== false || strpos( $url, 'youtu.be' ) !== false ) {
-			$thumbnail_url = $data->thumbnail_url;
-			// format: <id>/<thumbnail-name>.jpg
-			$extracted = str_replace( 'https://i.ytimg.com/vi/', '', $thumbnail_url );
-			// first part is the ID
-			$parts = explode( '/', $extracted );
-			$id = isset( $parts[0] ) ? $parts[0] : false;
-			
-			if ( $id ) {
-				$this->set_youtube_thumbnail( $id, get_post( (int) $_GET['post'] ), $url );
-			}
-		}
-		
-		return $return;
-	}
-	
-	/**
 	 * Get en oEmbed title by its title attribute.
 	 * 
 	 * @since	1.4.0
@@ -928,7 +778,7 @@ class Embed_Privacy {
 		}
 		
 		if ( ! empty( $args['embed_url'] ) && get_option( 'embed_privacy_download_thumbnails' ) ) {
-			$embed_thumbnail = $this->get_thumbnail_data( get_post(), $args['embed_url'] );
+			$embed_thumbnail = Thumbnails::get_instance()->get_data( get_post(), $args['embed_url'] );
 		}
 		
 		if ( ! empty( $args['assets'] ) && is_array( $args['assets'] ) ) {
@@ -1378,28 +1228,6 @@ class Embed_Privacy {
 	}
 	
 	/**
-	 * Get all thumbnail metadata of all posts.
-	 * 
-	 * @since	1.5.0
-	 * 
-	 * @return	array All thumbnail metadata
-	 */
-	private function get_thumbnail_metadata() {
-		global $wpdb;
-		
-		return $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT DISTINCT	post_id,
-									meta_value
-				FROM				$wpdb->postmeta
-				WHERE				meta_key LIKE %s",
-				'embed_privacy_thumbnail_%'
-			),
-			ARRAY_A
-		);
-	}
-	
-	/**
 	 * Check if a post contains an embed.
 	 * 
 	 * @since	1.3.0
@@ -1528,33 +1356,6 @@ class Embed_Privacy {
 		}
 		
 		return false;
-	}
-	
-	/**
-	 * Check whether a thumbnail is in use in another post.
-	 * 
-	 * @since	1.5.0
-	 * 
-	 * @param	string	$meta_value The thumbnail filename
-	 * @param	int		$post_id The post ID of the current post
-	 * @param	array	$global_metadata Global metadata to check in
-	 * @return	bool Whether a thumbnail is in use in another post
-	 */
-	private function is_thumbnail_in_use( $meta_value, $post_id, $global_metadata ) {
-		$is_in_use = false;
-		
-		foreach ( $global_metadata as $global_meta_value ) {
-			if ( (int) $global_meta_value['post_id'] === $post_id ) {
-				continue;
-			}
-			
-			if ( $global_meta_value['meta_value'] === $meta_value ) {
-				$is_in_use = true;
-				break;
-			}
-		}
-		
-		return $is_in_use;
 	}
 	
 	/**
@@ -2128,45 +1929,6 @@ class Embed_Privacy {
 				],
 			]
 		);
-	}
-	
-	/**
-	 * Download and save a YouTube thumbnail.
-	 * 
-	 * @since	1.5.0
-	 * 
-	 * @param	string		$id YouTube video ID
-	 * @param	\WP_Post	$post Post object
-	 * @param	string		$url YouTube video URL
-	 */
-	public function set_youtube_thumbnail( $id, $post, $url ) {
-		if ( ! $post ) {
-			return;
-		}
-		
-		require_once ABSPATH . 'wp-admin/includes/file.php';
-		
-		// list of images we try to retrieve
-		// see: https://stackoverflow.com/a/2068371
-		$images = [
-			'maxresdefault',
-			'hqdefault',
-			'0',
-		];
-		$thumbnail_url = 'https://img.youtube.com/vi/%1$s/%2$s.jpg';
-		
-		foreach ( $images as $image ) {
-			$file = download_url( sprintf( $thumbnail_url, $id, $image ) );
-			
-			if ( is_wp_error( $file ) ) {
-				continue;
-			}
-			
-			rename( $file, $this->thumbnail_directory . '/youtube-' . $id . '-' . $image . '.jpg' );
-			update_post_meta( $post->ID, 'embed_privacy_thumbnail_youtube_' . $id, 'youtube-' . $id . '-' . $image . '.jpg' );
-			update_post_meta( $post->ID, 'embed_privacy_thumbnail_youtube_' . $id . '_url', $url );
-			break;
-		}
 	}
 	
 	/**
