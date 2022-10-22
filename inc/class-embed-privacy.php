@@ -1367,45 +1367,6 @@ class Embed_Privacy {
 	}
 	
 	/**
-	 * Download and save a YouTube thumbnail.
-	 * 
-	 * @since	1.5.0
-	 * 
-	 * @param	string		$id YouTube video ID
-	 * @param	\WP_Post	$post Post object
-	 * @param	string		$url YouTube video URL
-	 */
-	public function set_youtube_thumbnail( $id, $post, $url ) {
-		if ( ! $post ) {
-			return;
-		}
-		
-		require_once ABSPATH . 'wp-admin/includes/file.php';
-		
-		// list of images we try to retrieve
-		// see: https://stackoverflow.com/a/2068371
-		$images = [
-			'maxresdefault',
-			'hqdefault',
-			'0',
-		];
-		$thumbnail_url = 'https://img.youtube.com/vi/%1$s/%2$s.jpg';
-		
-		foreach ( $images as $image ) {
-			$file = download_url( sprintf( $thumbnail_url, $id, $image ) );
-			
-			if ( is_wp_error( $file ) ) {
-				continue;
-			}
-			
-			rename( $file, $this->thumbnail_directory . '/youtube-' . $id . '-' . $image . '.jpg' );
-			update_post_meta( $post->ID, 'embed_privacy_thumbnail_youtube_' . $id, 'youtube-' . $id . '-' . $image . '.jpg' );
-			update_post_meta( $post->ID, 'embed_privacy_thumbnail_youtube_' . $id . '_url', $url );
-			break;
-		}
-	}
-	
-	/**
 	 * Check if a post contains an embed.
 	 * 
 	 * @since	1.3.0
@@ -2107,6 +2068,45 @@ class Embed_Privacy {
 				],
 			]
 		);
+	}
+	
+	/**
+	 * Download and save a YouTube thumbnail.
+	 * 
+	 * @since	1.5.0
+	 * 
+	 * @param	string		$id YouTube video ID
+	 * @param	\WP_Post	$post Post object
+	 * @param	string		$url YouTube video URL
+	 */
+	public function set_youtube_thumbnail( $id, $post, $url ) {
+		if ( ! $post ) {
+			return;
+		}
+		
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+		
+		// list of images we try to retrieve
+		// see: https://stackoverflow.com/a/2068371
+		$images = [
+			'maxresdefault',
+			'hqdefault',
+			'0',
+		];
+		$thumbnail_url = 'https://img.youtube.com/vi/%1$s/%2$s.jpg';
+		
+		foreach ( $images as $image ) {
+			$file = download_url( sprintf( $thumbnail_url, $id, $image ) );
+			
+			if ( is_wp_error( $file ) ) {
+				continue;
+			}
+			
+			rename( $file, $this->thumbnail_directory . '/youtube-' . $id . '-' . $image . '.jpg' );
+			update_post_meta( $post->ID, 'embed_privacy_thumbnail_youtube_' . $id, 'youtube-' . $id . '-' . $image . '.jpg' );
+			update_post_meta( $post->ID, 'embed_privacy_thumbnail_youtube_' . $id . '_url', $url );
+			break;
+		}
 	}
 	
 	/**
