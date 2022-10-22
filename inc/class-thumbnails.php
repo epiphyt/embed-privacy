@@ -106,8 +106,6 @@ class Thumbnails {
 	/**
 	 * Delete a thumbnail.
 	 * 
-	 * @since	1.5.0
-	 * 
 	 * @param	string	$filename The thumbnail filename
 	 */
 	private function delete( $filename ) {
@@ -120,8 +118,6 @@ class Thumbnails {
 	
 	/**
 	 * Delete thumbnails for a given post ID.
-	 * 
-	 * @since	1.5.0
 	 * 
 	 * @param	int		$post_id Post ID
 	 */
@@ -146,8 +142,6 @@ class Thumbnails {
 	
 	/**
 	 * Get path and URL to an embed thumbnail.
-	 * 
-	 * @since	1.5.0
 	 * 
 	 * @param	\WP_Post	$post Post object
 	 * @param	string		$url Embedded URL
@@ -184,8 +178,6 @@ class Thumbnails {
 	
 	/**
 	 * Get embed thumbnails from the embed provider.
-	 * 
-	 * @since	1.5.0
 	 * 
 	 * @param	string	$return The returned oEmbed HTML
 	 * @param	object	$data A data object result from an oEmbed provider
@@ -235,8 +227,6 @@ class Thumbnails {
 	/**
 	 * Get all thumbnail metadata of all posts.
 	 * 
-	 * @since	1.5.0
-	 * 
 	 * @return	array All thumbnail metadata
 	 */
 	private function get_metadata() {
@@ -270,8 +260,6 @@ class Thumbnails {
 	
 	/**
 	 * Check whether a thumbnail is in use in another post.
-	 * 
-	 * @since	1.5.0
 	 * 
 	 * @param	string	$meta_value The thumbnail filename
 	 * @param	int		$post_id The post ID of the current post
@@ -324,8 +312,6 @@ class Thumbnails {
 	
 	/**
 	 * Download and save a YouTube thumbnail.
-	 * 
-	 * @since	1.5.0
 	 * 
 	 * @param	string	$id YouTube video ID
 	 * @param	string	$url YouTube video URL
