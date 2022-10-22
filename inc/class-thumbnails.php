@@ -186,7 +186,7 @@ class Thumbnails {
 			$id = isset( $parts[0] ) ? $parts[0] : false;
 			
 			if ( $id ) {
-				$this->set_youtube_thumbnail( $id, get_post( (int) $_GET['post'] ), $url );
+				$this->set_youtube_thumbnail( $id, $url );
 			}
 		}
 		
@@ -260,11 +260,12 @@ class Thumbnails {
 	 * 
 	 * @since	1.5.0
 	 * 
-	 * @param	string		$id YouTube video ID
-	 * @param	\WP_Post	$post Post object
-	 * @param	string		$url YouTube video URL
+	 * @param	string	$id YouTube video ID
+	 * @param	string	$url YouTube video URL
 	 */
-	public function set_youtube_thumbnail( $id, $post, $url ) {
+	public function set_youtube_thumbnail( $id, $url ) {
+		$post = get_post();
+		
 		if ( ! $post ) {
 			return;
 		}
