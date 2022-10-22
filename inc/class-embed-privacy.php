@@ -932,7 +932,7 @@ class Embed_Privacy {
 			$footer_content = apply_filters( 'embed_privacy_overlay_footer', $footer_content );
 		}
 		?>
-		<div class="embed-privacy-container is-disabled <?php echo esc_attr( $embed_classes ); ?>" id="oembed_<?php echo esc_attr( $embed_md5 ); ?>" data-embed-provider="<?php echo esc_attr( $embed_provider_lowercase ); ?>"<?php echo ( ! empty( $embed_thumbnail['thumbnail_path'] ) && file_exists( $embed_thumbnail['thumbnail_path'] ) ? ' style="background-image: url(' . esc_url( $embed_thumbnail['thumbnail_url'] ) . ');"' : '' ); ?>>
+		<div class="embed-privacy-container is-disabled <?php echo esc_attr( $embed_classes ); ?>" data-embed-id="oembed_<?php echo esc_attr( $embed_md5 ); ?>" data-embed-provider="<?php echo esc_attr( $embed_provider_lowercase ); ?>"<?php echo ( ! empty( $embed_thumbnail['thumbnail_path'] ) && file_exists( $embed_thumbnail['thumbnail_path'] ) ? ' style="background-image: url(' . esc_url( $embed_thumbnail['thumbnail_url'] ) . ');"' : '' ); ?>>
 			<?php /* translators: embed provider */ ?>
 			<button class="embed-privacy-enable screen-reader-text"><?php printf( esc_html__( 'Display content from %s', 'embed-privacy' ), esc_html( $embed_provider ) ); ?></button>
 			
