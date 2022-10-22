@@ -117,12 +117,12 @@ class Migration {
 	 * @since	1.5.0
 	 */
 	private function create_thumbnails_dir() {
-		if ( file_exists( Embed_Privacy::get_instance()->thumbnail_directory ) && ! is_dir( Embed_Privacy::get_instance()->thumbnail_directory ) ) {
+		if ( file_exists( Thumbnails::DIRECTORY ) && ! is_dir( Thumbnails::DIRECTORY ) ) {
 			return;
 		}
 		
-		if ( ! is_dir( Embed_Privacy::get_instance()->thumbnail_directory ) ) {
-			mkdir( Embed_Privacy::get_instance()->thumbnail_directory, 0777, true );
+		if ( ! is_dir( Thumbnails::DIRECTORY ) ) {
+			mkdir( Thumbnails::DIRECTORY, 0777, true );
 		}
 	}
 	
