@@ -90,6 +90,7 @@ use function strpos;
 use function strtolower;
 use function strtotime;
 use function trim;
+use function unlink;
 use function update_post_meta;
 use function url_to_postid;
 use function wp_date;
@@ -109,6 +110,7 @@ use function wp_register_style;
 use function wp_slash;
 use function wp_unslash;
 use const ABSPATH;
+use const ARRAY_A;
 use const DEBUG_MODE;
 use const ENT_QUOTES;
 use const EPI_EMBED_PRIVACY_BASE;
@@ -248,6 +250,7 @@ class Embed_Privacy {
 	 */
 	public function init() {
 		// actions
+		add_action( 'before_delete_post', [ $this, 'delete_thumbnails' ] );
 		add_action( 'init', [ $this, 'load_textdomain' ], 0 );
 		add_action( 'init', [ $this, 'register_assets' ] );
 		add_action( 'init', [ $this, 'set_post_type' ], 5 );
@@ -313,6 +316,57 @@ class Embed_Privacy {
 			);
 		}
 		//phpcs:enable
+	}
+	
+	/**
+	 * Delete a thumbnail.
+	 * 
+	 * @since	1.5.0
+	 * 
+	 * @param	string	$filename The thumbnail filename
+	 */
+	private function delete_thumbnail( $filename ) {
+		if ( ! file_exists( $this->thumbnail_directory . '/' . $filename ) ) {
+			return;
+		}
+		
+		unlink( $this->thumbnail_directory . '/' . $filename );
+	}
+	
+	/**
+	 * Delete thumbnails for a given post ID.
+	 * 
+	 * @since	1.5.0
+	 * 
+	 * @param	int		$post_id Post ID
+	 */
+	public function delete_thumbnails( $post_id ) {
+		$global_metadata = $this->get_thumbnail_metadata();
+		$metadata = get_post_meta( $post_id );
+		
+		foreach ( $metadata as $meta_key => $meta_value ) {
+			if ( strpos( $meta_key, 'embed_privacy_thumbnail_' ) === false ) {
+				continue;
+			}
+			
+			// check whether this thumbnail is in use by another post
+			$is_in_use = false;
+			
+			foreach ( $global_metadata as $global_meta_value ) {
+				if ( (int) $global_meta_value['post_id'] === $post_id ) {
+					continue;
+				}
+				
+				if ( $global_meta_value['meta_value'] === $meta_value ) {
+					$is_in_use = true;
+					break;
+				}
+			}
+			
+			if ( ! $is_in_use ) {
+				$this->delete_thumbnail( $meta_value );
+			}
+		}
 	}
 	
 	public function deregister_assets() {
@@ -1287,6 +1341,28 @@ class Embed_Privacy {
 				'%',
 			],
 			$content
+		);
+	}
+	
+	/**
+	 * Get all thumbnail metadata of all posts.
+	 * 
+	 * @since	1.5.0
+	 * 
+	 * @return	array All thumbnail metadata
+	 */
+	private function get_thumbnail_metadata() {
+		global $wpdb;
+		
+		return $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT DISTINCT	post_id,
+									meta_value
+				FROM				$wpdb->postmeta
+				WHERE				meta_key LIKE %s",
+				'embed_privacy_thumbnail_%'
+			),
+			ARRAY_A
 		);
 	}
 	
