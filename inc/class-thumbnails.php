@@ -193,7 +193,17 @@ class Thumbnails {
 	 * @return	string The returned oEmbed HTML
 	 */
 	public function get_from_provider( $return, $data, $url ) {
-		if ( strpos( $url, 'youtube.com' ) !== false || strpos( $url, 'youtu.be' ) !== false ) {
+		if ( strpos( $url, 'vimeo.com' ) !== false ) {
+			// the thumbnail URL has usually something like _295x166 in the end
+			// remove this to get the maximum resolution
+			$thumbnail_url = substr( $data->thumbnail_url, 0, strrpos( $data->thumbnail_url, '_' ) );
+			$id = str_replace( 'https://vimeo.com/', '', $url );
+			
+			if ( $id ) {
+				$this->set_vimeo_thumbnail( $id, $url, $thumbnail_url );
+			}
+		}
+		else if ( strpos( $url, 'youtube.com' ) !== false || strpos( $url, 'youtu.be' ) !== false ) {
 			$thumbnail_url = $data->thumbnail_url;
 			// format: <id>/<thumbnail-name>.jpg
 			$extracted = str_replace( 'https://i.ytimg.com/vi/', '', $thumbnail_url );
@@ -203,17 +213,6 @@ class Thumbnails {
 			
 			if ( $id ) {
 				$this->set_youtube_thumbnail( $id, $url );
-			}
-		}
-		
-		if ( strpos( $url, 'vimeo.com' ) !== false ) {
-			// the thumbnail URL has usually something like _295x166 in the end
-			// remove this to get the maximum resolution
-			$thumbnail_url = substr( $data->thumbnail_url, 0, strrpos( $data->thumbnail_url, '_' ) );
-			$id = str_replace( 'https://vimeo.com/', '', $url );
-			
-			if ( $id ) {
-				$this->set_vimeo_thumbnail( $id, $url, $thumbnail_url );
 			}
 		}
 		
