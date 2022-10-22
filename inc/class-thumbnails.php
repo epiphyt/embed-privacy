@@ -154,23 +154,26 @@ class Thumbnails {
 	 * @return	array Thumbnail path and URL
 	 */
 	public function get_data( $post, $url ) {
+		$thumbnail = '';
 		$thumbnail_path = '';
 		$thumbnail_url = '';
 		
 		if ( strpos( $url, 'vimeo.com' ) !== false ) {
 			$id = str_replace( 'https://vimeo.com/', '', $url );
 			$thumbnail = get_post_meta( $post->ID, 'embed_privacy_thumbnail_vimeo_' . $id, true );
-			$thumbnail_path = self::DIRECTORY . '/' . $thumbnail;
 		}
 		else if ( strpos( $url, 'youtube.com' ) !== false || strpos( $url, 'youtu.be' ) !== false ) {
 			$id = str_replace( [ 'https://www.youtube.com/watch?v=', 'https://youtu.be/' ], '', $url );
 			$thumbnail = get_post_meta( $post->ID, 'embed_privacy_thumbnail_youtube_' . $id, true );
-			$thumbnail_path = self::DIRECTORY . '/' . $thumbnail;
 		}
 		
-		if ( $thumbnail && file_exists( $thumbnail_path ) ) {
-			$relative_path = str_replace( ABSPATH, '', $thumbnail_path );
-			$thumbnail_url = home_url( $relative_path );
+		if ( $thumbnail ) {
+			$thumbnail_path = self::DIRECTORY . '/' . $thumbnail;
+			
+			if ( file_exists( $thumbnail_path ) ) {
+				$relative_path = str_replace( ABSPATH, '', $thumbnail_path );
+				$thumbnail_url = home_url( $relative_path );
+			}
 		}
 		
 		return [
