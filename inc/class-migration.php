@@ -662,6 +662,18 @@ class Migration {
 			[
 				'meta_input' => [
 					'is_system' => 'yes',
+					'privacy_policy_url' => '',
+					'regex_default' => '',
+				],
+				/* translators: embed provider */
+				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Maps Marker', 'embed provider', 'embed-privacy' ) ),
+				'post_status' => 'publish',
+				'post_title' => _x( 'Maps Marker', 'embed provider', 'embed-privacy' ),
+				'post_type' => 'epi_embed',
+			],
+			[
+				'meta_input' => [
+					'is_system' => 'yes',
 					'privacy_policy_url' => __( 'https://www.meetup.com/privacy/', 'embed-privacy' ),
 					'regex_default' => '/meetup\\\.com/',
 				],
