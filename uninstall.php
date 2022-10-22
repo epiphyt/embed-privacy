@@ -79,7 +79,7 @@ function delete_data() {
 	}
 	
 	// delete thumbnail directory
-	$directory = WP_CONTENT_DIR . '/uploads/embed-privacy/thumbnails';
+	$directory = WP_CONTENT_DIR . '/uploads/embed-privacy';
 	$iterator = new RecursiveDirectoryIterator( $directory, RecursiveDirectoryIterator::SKIP_DOTS );
 	$files = new RecursiveIteratorIterator( $iterator, RecursiveIteratorIterator::CHILD_FIRST );
 	
