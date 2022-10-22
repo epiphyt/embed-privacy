@@ -15,6 +15,8 @@ use function reset;
 use function sprintf;
 use function str_replace;
 use function strpos;
+use function strrpos;
+use function substr;
 use function unlink;
 use function update_post_meta;
 use const ARRAY_A;
@@ -71,6 +73,10 @@ class Thumbnails {
 	public function check_orphaned( $post_id, $post ) {
 		$global_metadata = $this->get_metadata();
 		$metadata = get_post_meta( $post_id );
+		$supported_providers = [
+			'vimeo',
+			'youtube',
+		];
 		
 		foreach ( $metadata as $meta_key => $meta_value ) {
 			if ( strpos( $meta_key, 'embed_privacy_thumbnail_' ) === false ) {
@@ -81,14 +87,16 @@ class Thumbnails {
 				$meta_value = reset( $meta_value );
 			}
 			
-			if ( strpos( $meta_key, '_youtube_' ) !== false && strpos( $meta_key, '_url' ) === false ) {
-				$id = str_replace( 'embed_privacy_thumbnail_youtube_', '', $meta_key );
-				
-				if ( strpos( $post->post_content, $id ) === false ) {
-					if ( ! $this->is_in_use( $meta_value, $post_id, $global_metadata ) ) {
-						$this->delete( $meta_value );
-						delete_post_meta( $post_id, $meta_key );
-						delete_post_meta( $post_id, $meta_key . '_url' );
+			foreach ( $supported_providers as $provider ) {
+				if ( strpos( $meta_key, '_' . $provider . '_' ) !== false && strpos( $meta_key, '_url' ) === false ) {
+					$id = str_replace( 'embed_privacy_thumbnail_' . $provider . '_', '', $meta_key );
+					
+					if ( strpos( $post->post_content, $id ) === false ) {
+						if ( ! $this->is_in_use( $meta_value, $post_id, $global_metadata ) ) {
+							$this->delete( $meta_value );
+							delete_post_meta( $post_id, $meta_key );
+							delete_post_meta( $post_id, $meta_key . '_url' );
+						}
 					}
 				}
 			}
@@ -149,15 +157,20 @@ class Thumbnails {
 		$thumbnail_path = '';
 		$thumbnail_url = '';
 		
-		if ( strpos( $url, 'youtube.com' ) !== false || strpos( $url, 'youtu.be' ) !== false ) {
+		if ( strpos( $url, 'vimeo.com' ) !== false ) {
+			$id = str_replace( 'https://vimeo.com/', '', $url );
+			$thumbnail = get_post_meta( $post->ID, 'embed_privacy_thumbnail_vimeo_' . $id, true );
+			$thumbnail_path = self::DIRECTORY . '/' . $thumbnail;
+		}
+		else if ( strpos( $url, 'youtube.com' ) !== false || strpos( $url, 'youtu.be' ) !== false ) {
 			$id = str_replace( [ 'https://www.youtube.com/watch?v=', 'https://youtu.be/' ], '', $url );
 			$thumbnail = get_post_meta( $post->ID, 'embed_privacy_thumbnail_youtube_' . $id, true );
 			$thumbnail_path = self::DIRECTORY . '/' . $thumbnail;
-			
-			if ( $thumbnail && file_exists( $thumbnail_path ) ) {
-				$relative_path = str_replace( ABSPATH, '', $thumbnail_path );
-				$thumbnail_url = home_url( $relative_path );
-			}
+		}
+		
+		if ( $thumbnail && file_exists( $thumbnail_path ) ) {
+			$relative_path = str_replace( ABSPATH, '', $thumbnail_path );
+			$thumbnail_url = home_url( $relative_path );
 		}
 		
 		return [
@@ -187,6 +200,17 @@ class Thumbnails {
 			
 			if ( $id ) {
 				$this->set_youtube_thumbnail( $id, $url );
+			}
+		}
+		
+		if ( strpos( $url, 'vimeo.com' ) !== false ) {
+			// the thumbnail URL has usually something like _295x166 in the end
+			// remove this to get the maximum resolution
+			$thumbnail_url = substr( $data->thumbnail_url, 0, strrpos( $data->thumbnail_url, '_' ) );
+			$id = str_replace( 'https://vimeo.com/', '', $url );
+			
+			if ( $id ) {
+				$this->set_vimeo_thumbnail( $id, $url, $thumbnail_url );
 			}
 		}
 		
@@ -229,6 +253,18 @@ class Thumbnails {
 	}
 	
 	/**
+	 * Get a list of supported embed providers for thumbnails.
+	 * 
+	 * @return	array A list of supported embed providers
+	 */
+	public function get_supported_providers() {
+		return [
+			_x( 'Vimeo', 'embed provider', 'embed-privacy' ),
+			_x( 'YouTube', 'embed provider', 'embed-privacy' ),
+		];
+	}
+	
+	/**
 	 * Check whether a thumbnail is in use in another post.
 	 * 
 	 * @since	1.5.0
@@ -253,6 +289,33 @@ class Thumbnails {
 		}
 		
 		return $is_in_use;
+	}
+	
+	/**
+	 * Download and save a Vimeo thumbnail.
+	 * 
+	 * @param	string	$id Vimeo video ID
+	 * @param	string	$url Vimeo video URL
+	 * @param	string	$thumbnail_url Vimeo thumbnail URL
+	 */
+	public function set_vimeo_thumbnail( $id, $url, $thumbnail_url ) {
+		$post = get_post();
+		
+		if ( ! $post ) {
+			return;
+		}
+		
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+		
+		$file = download_url( $thumbnail_url );
+		
+		if ( is_wp_error( $file ) ) {
+			return;
+		}
+		
+		rename( $file, self::DIRECTORY . '/vimeo-' . $id . '.jpg' );
+		update_post_meta( $post->ID, 'embed_privacy_thumbnail_vimeo_' . $id, 'vimeo-' . $id . '.jpg' );
+		update_post_meta( $post->ID, 'embed_privacy_thumbnail_vimeo_' . $id . '_url', $url );
 	}
 	
 	/**

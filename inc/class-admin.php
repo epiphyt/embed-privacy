@@ -175,7 +175,7 @@ class Admin {
 			'embed_privacy_general',
 			[
 				/* translators: list of supported embed providers */
-				'description' => wp_sprintf( __( 'Try to automatically download thumbnails of the embedded content and use them as background image of the overlay. Currently supported: %l.', 'embed-privacy' ), [ _x( 'YouTube', 'embed provider', 'embed-privacy' ) ] ),
+				'description' => wp_sprintf( __( 'Try to automatically download thumbnails of the embedded content and use them as background image of the overlay. Currently supported: %l.', 'embed-privacy' ), Thumbnails::get_instance()->get_supported_providers() ),
 				'name' => 'embed_privacy_download_thumbnails',
 				'option_type' => 'option',
 				'title' => __( 'Download thumbnails', 'embed-privacy' ),
