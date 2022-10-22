@@ -1,5 +1,6 @@
 <?php
 namespace epiphyt\Embed_Privacy;
+use WP_Post;
 use function add_action;
 use function delete_post_meta;
 use function download_url;
@@ -148,6 +149,13 @@ class Thumbnails {
 	 * @return	array Thumbnail path and URL
 	 */
 	public function get_data( $post, $url ) {
+		if ( ! $post instanceof WP_Post ) {
+			return [
+				'thumbnail_path' => '',
+				'thumbnail_url' => '',
+			];
+		}
+		
 		$thumbnail = '';
 		$thumbnail_path = '';
 		$thumbnail_url = '';
