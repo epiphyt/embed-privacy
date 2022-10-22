@@ -369,6 +369,11 @@ class Embed_Privacy {
 		}
 	}
 	
+	/**
+	 * Deregister assets.
+	 * 
+	 * @since	1.4.6
+	 */
 	public function deregister_assets() {
 		wp_deregister_script( 'jetpack-facebook-embed' );
 	}
