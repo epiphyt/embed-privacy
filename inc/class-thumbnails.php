@@ -242,6 +242,7 @@ class Thumbnails {
 	private function get_metadata() {
 		global $wpdb;
 		
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 		return $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT DISTINCT	post_id,
@@ -252,6 +253,7 @@ class Thumbnails {
 			),
 			ARRAY_A
 		);
+		// phpcs:enable
 	}
 	
 	/**
