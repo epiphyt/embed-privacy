@@ -19,6 +19,7 @@ use function array_splice;
 use function checked;
 use function class_exists;
 use function defined;
+use function delete_post_meta;
 use function dirname;
 use function download_url;
 use function esc_attr;
@@ -79,6 +80,7 @@ use function register_activation_hook;
 use function register_deactivation_hook;
 use function register_post_type;
 use function rename;
+use function reset;
 use function sanitize_text_field;
 use function sanitize_title;
 use function shortcode_atts;
@@ -254,6 +256,7 @@ class Embed_Privacy {
 		add_action( 'init', [ $this, 'load_textdomain' ], 0 );
 		add_action( 'init', [ $this, 'register_assets' ] );
 		add_action( 'init', [ $this, 'set_post_type' ], 5 );
+		add_action( 'post_updated', [ $this, 'check_for_orphaned_thumbnails' ], 10, 2 );
 		add_action( 'save_post_epi_embed', [ $this, 'preserve_backslashes' ] );
 		add_action( 'wp_enqueue_scripts', [ $this, 'deregister_assets' ], 100 );
 		
@@ -280,6 +283,41 @@ class Embed_Privacy {
 		Admin::get_instance()->init();
 		Fields::get_instance()->init();
 		Migration::get_instance()->init();
+	}
+	
+	/**
+	 * Check and delete orphaned thumbnails.
+	 * 
+	 * @since	1.5.0
+	 * 
+	 * @param	int			$post_id The post ID
+	 * @param	\WP_Post	$post The post object
+	 */
+	public function check_for_orphaned_thumbnails( $post_id, $post ) {
+		$global_metadata = $this->get_thumbnail_metadata();
+		$metadata = get_post_meta( $post_id );
+		
+		foreach ( $metadata as $meta_key => $meta_value ) {
+			if ( strpos( $meta_key, 'embed_privacy_thumbnail_' ) === false ) {
+				continue;
+			}
+			
+			if ( is_array( $meta_value ) ) {
+				$meta_value = reset( $meta_value );
+			}
+			
+			if ( strpos( $meta_key, '_youtube_' ) !== false && strpos( $meta_key, '_url' ) === false ) {
+				$id = str_replace( 'embed_privacy_thumbnail_youtube_', '', $meta_key );
+				
+				if ( strpos( $post->post_content, $id ) === false ) {
+					if ( ! $this->is_thumbnail_in_use( $meta_value, $post_id, $global_metadata ) ) {
+						$this->delete_thumbnail( $meta_value );
+						delete_post_meta( $post_id, $meta_key );
+						delete_post_meta( $post_id, $meta_key . '_url' );
+					}
+				}
+			}
+		}
 	}
 	
 	/**
@@ -349,21 +387,11 @@ class Embed_Privacy {
 				continue;
 			}
 			
-			// check whether this thumbnail is in use by another post
-			$is_in_use = false;
-			
-			foreach ( $global_metadata as $global_meta_value ) {
-				if ( (int) $global_meta_value['post_id'] === $post_id ) {
-					continue;
-				}
-				
-				if ( $global_meta_value['meta_value'] === $meta_value ) {
-					$is_in_use = true;
-					break;
-				}
+			if ( is_array( $meta_value ) ) {
+				$meta_value = reset( $meta_value );
 			}
 			
-			if ( ! $is_in_use ) {
+			if ( ! $this->is_thumbnail_in_use( $meta_value, $post_id, $global_metadata ) ) {
 				$this->delete_thumbnail( $meta_value );
 			}
 		}
@@ -1500,6 +1528,33 @@ class Embed_Privacy {
 		}
 		
 		return false;
+	}
+	
+	/**
+	 * Check whether a thumbnail is in use in another post.
+	 * 
+	 * @since	1.5.0
+	 * 
+	 * @param	string	$meta_value The thumbnail filename
+	 * @param	int		$post_id The post ID of the current post
+	 * @param	array	$global_metadata Global metadata to check in
+	 * @return	bool Whether a thumbnail is in use in another post
+	 */
+	private function is_thumbnail_in_use( $meta_value, $post_id, $global_metadata ) {
+		$is_in_use = false;
+		
+		foreach ( $global_metadata as $global_meta_value ) {
+			if ( (int) $global_meta_value['post_id'] === $post_id ) {
+				continue;
+			}
+			
+			if ( $global_meta_value['meta_value'] === $meta_value ) {
+				$is_in_use = true;
+				break;
+			}
+		}
+		
+		return $is_in_use;
 	}
 	
 	/**
