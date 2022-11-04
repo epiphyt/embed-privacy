@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.5.0
+* Added support for embed provider Pocket Casts
+* Added support for Maps Marker and Maps Marker Pro
+* Added support for Google Maps in Shortcodes Ultimate
+* Added support to automatically download and display a thumbnail of the embed for Vimeo and YouTube (only in posts)
+* Added support to re-initiate the database migration and display an error message if it has been failed at least three times
+* Added support for Polylang and Polylang Pro
+* Added a new filter to allow stopping Embed Privacy from handling unknown embeds
+* Added option to disable the direct link in the overlay
+* Updated logos for Reddit, SmugMug and SoundCloud for better readability
+* Use the plugin version as parameter for assets to allow better caching and prevent problems with some setups
+* General code improvements
+* Fixed a JavaScript error
+
 ## 1.4.8
 * Fixed an issue with always active providers being cached by page caching plugins
 * Fixed printing inline JavaScript only once

@@ -40,9 +40,15 @@ Sure thing! We enjoy playing with the new WordPress editor and developed Embed P
 
 ### Which embeds are currently supported?
 
-We currently support all oEmbed providers known to WordPress core by default. Want to know about them? Here you go: Amazon Kindle, Animoto, Cloudup, DailyMotion, Facebook, Flickr, Funny Or Die, Imgur, Instagram, Issuu, Kickstarter, Meetup, Mixcloud, Photobucket, Polldaddy.com, Reddit, ReverbNation, Scribd, Sketchfab, SlideShare, SmugMug, SoundCloud, Speaker Deck, Spotify, TikTok, TED, Tumblr, Twitter, VideoPress, Vimeo, WordPress.org, WordPress.tv, YouTube.
+We currently support all oEmbed providers known to WordPress core by default. Want to know about them? Here you go: Amazon Kindle, Animoto, Cloudup, DailyMotion, Facebook, Flickr, Funny Or Die, Imgur, Instagram, Issuu, Kickstarter, Meetup, Mixcloud, Photobucket, Pocket Casts, Polldaddy.com, Reddit, ReverbNation, Scribd, Sketchfab, SlideShare, SmugMug, SoundCloud, Speaker Deck, Spotify, TikTok, TED, Tumblr, Twitter, VideoPress, Vimeo, WordPress.org, WordPress.tv, YouTube.
+
+We also support Google Maps via iframe and the plugins Maps Marker, Maps Marker Pro and Shortcodes Ultimate.
 
 Since version 1.2.0, you can also add custom embed providers by going to **Settings > Embed Privacy > Manage embeds**. Here you can also modify any existing embed provider, change its logo, add a background image, change the text displaying on the embed or disable the embed provider entirely.
+
+### Can Embed Privacy automatically download thumbnails of the embedded content?
+
+Yes! Since version 1.5.0, Embed Privacy supports downloading and displaying thumbnails in posts for Vimeo and YouTube as background of Embed Privacy’s overlay.
 
 ### Developers: How to use Embed Privacy’s methods for custom content?
 

@@ -2,7 +2,8 @@
 Contributors: epiphyt, kittmedia, krafit
 Tags: oembed, privacy, gutenberg
 Requires at least: 4.7
-Tested up to: 6.0
+Stable tag: 1.5.0
+Tested up to: 6.1
 Requires PHP: 5.6
 License: GPL2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -43,9 +44,15 @@ Sure thing! We enjoy playing with the new WordPress editor and developed Embed P
 
 = Which embeds are currently supported? =
 
-We currently support all oEmbed providers known to WordPress core by default. Want to know about them? Here you go: Amazon Kindle, Animoto, Cloudup, DailyMotion, Facebook, Flickr, Funny Or Die, Imgur, Instagram, Issuu, Kickstarter, Meetup, Mixcloud, Photobucket, Polldaddy.com, Reddit, ReverbNation, Scribd, Sketchfab, SlideShare, SmugMug, SoundCloud, Speaker Deck, Spotify, TikTok, TED, Tumblr, Twitter, VideoPress, Vimeo, WordPress.org, WordPress.tv, YouTube.
+We currently support all oEmbed providers known to WordPress core by default. Want to know about them? Here you go: Amazon Kindle, Animoto, Cloudup, DailyMotion, Facebook, Flickr, Funny Or Die, Imgur, Instagram, Issuu, Kickstarter, Meetup, Mixcloud, Photobucket, Pocket Casts, Polldaddy.com, Reddit, ReverbNation, Scribd, Sketchfab, SlideShare, SmugMug, SoundCloud, Speaker Deck, Spotify, TikTok, TED, Tumblr, Twitter, VideoPress, Vimeo, WordPress.org, WordPress.tv, YouTube.
+
+We also support Google Maps via iframe and the plugins Maps Marker, Maps Marker Pro and Shortcodes Ultimate.
 
 Since version 1.2.0, you can also add custom embed providers by going to **Settings > Embed Privacy > Manage embeds**. Here you can also modify any existing embed provider, change its logo, add a background image, change the text displaying on the embed or disable the embed provider entirely.
+
+= Can Embed Privacy automatically download thumbnails of the embedded content? =
+
+Yes! Since version 1.5.0, Embed Privacy supports downloading and displaying thumbnails in posts for Vimeo and YouTube as background of Embed Privacy’s overlay.
 
 = Developers: How to use Embed Privacy’s methods for custom content? =
 
@@ -121,6 +128,20 @@ We are [Epiphyt](https://epiph.yt/), your friendly neighborhood WordPress plugin
 
 
 == Changelog ==
+
+= 1.5.0 =
+* Added support for embed provider Pocket Casts
+* Added support for Maps Marker and Maps Marker Pro
+* Added support for Google Maps in Shortcodes Ultimate
+* Added support to automatically download and display a thumbnail of the embed for Vimeo and YouTube (only in posts)
+* Added support to re-initiate the database migration and display an error message if it has been failed at least three times
+* Added support for Polylang and Polylang Pro
+* Added a new filter to allow stopping Embed Privacy from handling unknown embeds
+* Added option to disable the direct link in the overlay
+* Updated logos for Reddit, SmugMug and SoundCloud for better readability
+* Use the plugin version as parameter for assets to allow better caching and prevent problems with some setups
+* General code improvements
+* Fixed a JavaScript error
 
 = 1.4.8 =
 * Fixed an issue with always active providers being cached by page caching plugins
