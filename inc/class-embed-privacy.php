@@ -90,6 +90,7 @@ use function trim;
 use function url_to_postid;
 use function wp_date;
 use function wp_deregister_script;
+use function wp_doing_cron;
 use function wp_enqueue_script;
 use function wp_enqueue_style;
 use function wp_generate_uuid4;
@@ -1468,6 +1469,10 @@ class Embed_Privacy {
 	 * @since	1.4.4
 	 */
 	public function register_assets() {
+		if ( wp_doing_cron() ) {
+			return;
+		}
+		
 		$suffix = ( defined( 'WP_DEBUG' ) && WP_DEBUG ? '' : '.min' );
 		$css_file = EPI_EMBED_PRIVACY_BASE . 'assets/style/embed-privacy' . $suffix . '.css';
 		$css_file_url = EPI_EMBED_PRIVACY_URL . 'assets/style/embed-privacy' . $suffix . '.css';
