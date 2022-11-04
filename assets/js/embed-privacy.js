@@ -203,7 +203,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		// hide the embed overlay
 		target.style.display = 'none';
 		// get stored content from JavaScript
-		var embedObject = JSON.parse( window[ '_' + target.parentNode.id ] );
+		var embedObject = JSON.parse( window[ '_' + target.parentNode.getAttribute( 'data-embed-id' ) ] );
 		
 		embedContent.innerHTML = htmlentities_decode( embedObject.embed );
 		
