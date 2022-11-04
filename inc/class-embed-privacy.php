@@ -90,6 +90,7 @@ use function trim;
 use function url_to_postid;
 use function wp_date;
 use function wp_deregister_script;
+use function wp_doing_ajax;
 use function wp_doing_cron;
 use function wp_enqueue_script;
 use function wp_enqueue_style;
@@ -1469,7 +1470,7 @@ class Embed_Privacy {
 	 * @since	1.4.4
 	 */
 	public function register_assets() {
-		if ( wp_doing_cron() ) {
+		if ( wp_doing_ajax() || wp_doing_cron() ) {
 			return;
 		}
 		
