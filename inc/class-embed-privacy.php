@@ -117,6 +117,7 @@ use const LIBXML_HTML_NODEFDTD;
 use const LIBXML_HTML_NOIMPLIED;
 use const PHP_EOL;
 use const PHP_URL_HOST;
+use const WPINC;
 
 /**
  * Two click embed main class.
@@ -1411,6 +1412,14 @@ class Embed_Privacy {
 			wp_enqueue_style( 'embed-privacy-elementor' );
 		}
 		
+		if ( ! function_exists( 'is_plugin_active' ) ) {
+			require_once ABSPATH . WPINC . '/plugin.php';
+		}
+		
+		if ( is_plugin_active( 'shortcodes-ultimate/shortcodes-ultimate.php' ) ) {
+			wp_enqueue_style( 'embed-privacy-shortcodes-ultimate' );
+		}
+		
 		$this->is_printed = true;
 	}
 	
@@ -1508,6 +1517,11 @@ class Embed_Privacy {
 		$css_file_url = EPI_EMBED_PRIVACY_URL . 'assets/style/elementor' . $suffix . '.css';
 		
 		wp_register_style( 'embed-privacy-elementor', $css_file_url, [], filemtime( $css_file ) );
+		
+		$css_file = EPI_EMBED_PRIVACY_BASE . 'assets/style/shortcodes-ultimate' . $suffix . '.css';
+		$css_file_url = EPI_EMBED_PRIVACY_URL . 'assets/style/shortcodes-ultimate' . $suffix . '.css';
+		
+		wp_register_style( 'embed-privacy-shortcodes-ultimate', $css_file_url, [], filemtime( $css_file ) );
 		
 		$current_url = sprintf(
 			'http%1$s://%2$s%3$s%4$s',

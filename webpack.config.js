@@ -17,6 +17,7 @@ const scssFiles = {
 	'elementor': path.resolve( process.cwd(), 'assets/style/scss', 'elementor.scss' ),
 	'embed-privacy': path.resolve( process.cwd(), 'assets/style/scss', 'embed-privacy.scss' ),
 	'embed-privacy-admin': path.resolve( process.cwd(), 'assets/style/scss', 'embed-privacy-admin.scss' ),
+	'shortcodes-ultimate': path.resolve( process.cwd(), 'assets/style/scss', 'shortcodes-ultimate.scss' ),
 };
 
 module.exports = [

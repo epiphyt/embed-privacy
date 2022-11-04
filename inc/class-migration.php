@@ -496,6 +496,18 @@ class Migration {
 			'post_type' => 'epi_embed',
 		] );
 		$this->create_thumbnails_dir();
+		
+		$google_provider = get_posts( [
+			'meta_key' => 'is_system',
+			'meta_value' => 'yes',
+			'name' => 'google-maps',
+			'post_type' => 'epi_embed',
+		] );
+		$google_provider = reset( $google_provider );
+		
+		if ( $google_provider instanceof WP_Post ) {
+			update_post_meta( $google_provider->ID, 'regex_default', '/(google\\\.com\\\/maps\\\/embed|maps\\\.google\\\.com\\\/(maps)?)' );
+		}
 	}
 	
 	/**
