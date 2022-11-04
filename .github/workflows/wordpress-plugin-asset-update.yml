@@ -6,8 +6,8 @@ on:
     tags-ignore:
       - '*'
 jobs:
-  master:
-    name: Push to master
+  trunk:
+    name: Asset update
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
