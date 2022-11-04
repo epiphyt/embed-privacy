@@ -108,6 +108,7 @@ use function wp_slash;
 use function wp_unslash;
 use const ABSPATH;
 use const DEBUG_MODE;
+use const EMBED_PRIVACY_VERSION;
 use const ENT_QUOTES;
 use const EPI_EMBED_PRIVACY_BASE;
 use const EPI_EMBED_PRIVACY_URL;
@@ -956,9 +957,11 @@ class Embed_Privacy {
 			
 			<style>
 				<?php
+				$is_debug = defined( 'WP_DEBUG' ) && WP_DEBUG;
+				
 				// display only if file exists
 				if ( file_exists( $background_path ) ) :
-				$version = filemtime( $background_path );
+				$version = $is_debug ? filemtime( $background_path ) : EMBED_PRIVACY_VERSION;
 				?>
 				.<?php echo $embed_class; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> {
 					background-image: url(<?php echo $background_url; ?>?v=<?php echo $version; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>);
@@ -968,7 +971,7 @@ class Embed_Privacy {
 				
 				// display only if file exists
 				if ( file_exists( $logo_path ) ) :
-				$version = filemtime( $logo_path );
+				$version = $is_debug ? filemtime( $logo_path ) : EMBED_PRIVACY_VERSION;
 				?>
 				.<?php echo $embed_class; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> .embed-privacy-logo {
 					background-image: url(<?php echo $logo_url; ?>?v=<?php echo $version; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>);
@@ -1483,45 +1486,46 @@ class Embed_Privacy {
 			return;
 		}
 		
-		$suffix = ( defined( 'WP_DEBUG' ) && WP_DEBUG ? '' : '.min' );
-		$css_file = EPI_EMBED_PRIVACY_BASE . 'assets/style/embed-privacy' . $suffix . '.css';
+		$is_debug = defined( 'WP_DEBUG' ) && WP_DEBUG;
+		$suffix = ( $is_debug ? '' : '.min' );
 		$css_file_url = EPI_EMBED_PRIVACY_URL . 'assets/style/embed-privacy' . $suffix . '.css';
+		$file_version = $is_debug ? filemtime( EPI_EMBED_PRIVACY_BASE . 'assets/style/embed-privacy' . $suffix . '.css' ) : EMBED_PRIVACY_VERSION;
 		
-		wp_register_style( 'embed-privacy', $css_file_url, [], filemtime( $css_file ) );
+		wp_register_style( 'embed-privacy', $css_file_url, [], $file_version );
 		
 		if ( ! $this->is_amp() ) {
-			$js_file = EPI_EMBED_PRIVACY_BASE . 'assets/js/embed-privacy' . $suffix . '.js';
 			$js_file_url = EPI_EMBED_PRIVACY_URL . 'assets/js/embed-privacy' . $suffix . '.js';
+			$file_version = $is_debug ? filemtime( EPI_EMBED_PRIVACY_BASE . 'assets/js/embed-privacy' . $suffix . '.js' ) : EMBED_PRIVACY_VERSION;
 			
-			wp_register_script( 'embed-privacy', $js_file_url, [], filemtime( $js_file ) );
+			wp_register_script( 'embed-privacy', $js_file_url, [], $file_version );
 		}
 		
 		// Astra is too greedy at its CSS selectors
 		// see https://github.com/epiphyt/embed-privacy/issues/33
-		$css_file = EPI_EMBED_PRIVACY_BASE . 'assets/style/astra' . $suffix . '.css';
 		$css_file_url = EPI_EMBED_PRIVACY_URL . 'assets/style/astra' . $suffix . '.css';
+		$file_version = $is_debug ? filemtime( EPI_EMBED_PRIVACY_BASE . 'assets/style/astra' . $suffix . '.css' ) : EMBED_PRIVACY_VERSION;
 		
-		wp_register_style( 'embed-privacy-astra', $css_file_url, [], filemtime( $css_file ) );
+		wp_register_style( 'embed-privacy-astra', $css_file_url, [], $file_version );
 		
-		$css_file = EPI_EMBED_PRIVACY_BASE . 'assets/style/divi' . $suffix . '.css';
 		$css_file_url = EPI_EMBED_PRIVACY_URL . 'assets/style/divi' . $suffix . '.css';
+		$file_version = $is_debug ? filemtime( EPI_EMBED_PRIVACY_BASE . 'assets/style/divi' . $suffix . '.css' ) : EMBED_PRIVACY_VERSION;
 		
-		wp_register_style( 'embed-privacy-divi', $css_file_url, [], filemtime( $css_file ) );
+		wp_register_style( 'embed-privacy-divi', $css_file_url, [], $file_version );
 		
-		$js_file = EPI_EMBED_PRIVACY_BASE . 'assets/js/elementor-video' . $suffix . '.js';
 		$js_file_url = EPI_EMBED_PRIVACY_URL . 'assets/js/elementor-video' . $suffix . '.js';
+		$file_version = $is_debug ? filemtime( EPI_EMBED_PRIVACY_BASE . 'assets/js/elementor-video' . $suffix . '.js' ) : EMBED_PRIVACY_VERSION;
 		
-		wp_register_script( 'embed-privacy-elementor-video', $js_file_url, [], filemtime( $js_file ) );
+		wp_register_script( 'embed-privacy-elementor-video', $js_file_url, [], $file_version );
 		
-		$css_file = EPI_EMBED_PRIVACY_BASE . 'assets/style/elementor' . $suffix . '.css';
 		$css_file_url = EPI_EMBED_PRIVACY_URL . 'assets/style/elementor' . $suffix . '.css';
+		$file_version = $is_debug ? filemtime( EPI_EMBED_PRIVACY_BASE . 'assets/style/elementor' . $suffix . '.css' ) : EMBED_PRIVACY_VERSION;
 		
-		wp_register_style( 'embed-privacy-elementor', $css_file_url, [], filemtime( $css_file ) );
+		wp_register_style( 'embed-privacy-elementor', $css_file_url, [], $file_version );
 		
-		$css_file = EPI_EMBED_PRIVACY_BASE . 'assets/style/shortcodes-ultimate' . $suffix . '.css';
 		$css_file_url = EPI_EMBED_PRIVACY_URL . 'assets/style/shortcodes-ultimate' . $suffix . '.css';
+		$file_version = $is_debug ? filemtime( EPI_EMBED_PRIVACY_BASE . 'assets/style/shortcodes-ultimate' . $suffix . '.css' ) : EMBED_PRIVACY_VERSION;
 		
-		wp_register_style( 'embed-privacy-shortcodes-ultimate', $css_file_url, [], filemtime( $css_file ) );
+		wp_register_style( 'embed-privacy-shortcodes-ultimate', $css_file_url, [], $file_version );
 		
 		$current_url = sprintf(
 			'http%1$s://%2$s%3$s%4$s',

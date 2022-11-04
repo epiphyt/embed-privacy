@@ -39,6 +39,8 @@ along with Embed Privacy. If not, see https://www.gnu.org/licenses/gpl-2.0.html.
 // exit if ABSPATH is not defined
 defined( 'ABSPATH' ) || exit;
 
+define( 'EMBED_PRIVACY_VERSION', '1.5.0' );
+
 if ( ! defined( 'EPI_EMBED_PRIVACY_BASE' ) ) define( 'EPI_EMBED_PRIVACY_BASE', WP_PLUGIN_DIR . '/embed-privacy/' );
 if ( ! defined( 'EPI_EMBED_PRIVACY_URL' ) ) define( 'EPI_EMBED_PRIVACY_URL', plugin_dir_url( EPI_EMBED_PRIVACY_BASE . 'embed-privacy.php' ) );
 
