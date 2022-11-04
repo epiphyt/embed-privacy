@@ -1470,7 +1470,7 @@ class Embed_Privacy {
 	 * @since	1.4.4
 	 */
 	public function register_assets() {
-		if ( wp_doing_ajax() || wp_doing_cron() ) {
+		if ( is_admin() || wp_doing_ajax() || wp_doing_cron() ) {
 			return;
 		}
 		
