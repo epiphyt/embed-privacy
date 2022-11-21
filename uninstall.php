@@ -5,6 +5,7 @@ use RecursiveIteratorIterator;
 use function defined;
 use function delete_option;
 use function delete_site_option;
+use function file_exists;
 use function get_option;
 use function get_posts;
 use function get_sites;
@@ -21,7 +22,9 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 
-$options = [
+$GLOBALS['options'] = [
+	'embed_privacy_disable_link',
+	'embed_privacy_download_thumbnails',
 	'embed_privacy_is_migrating',
 	'embed_privacy_javascript_detection',
 	'embed_privacy_local_tweets',
@@ -80,17 +83,20 @@ function delete_data() {
 	
 	// delete thumbnail directory
 	$directory = WP_CONTENT_DIR . '/uploads/embed-privacy';
-	$iterator = new RecursiveDirectoryIterator( $directory, RecursiveDirectoryIterator::SKIP_DOTS );
-	$files = new RecursiveIteratorIterator( $iterator, RecursiveIteratorIterator::CHILD_FIRST );
 	
-	foreach ( $files as $file ) {
-		if ( $file->isDir() ) {
-			rmdir( $file->getRealPath() );
+	if ( file_exists( $directory ) ) {
+		$iterator = new RecursiveDirectoryIterator( $directory, RecursiveDirectoryIterator::SKIP_DOTS );
+		$files = new RecursiveIteratorIterator( $iterator, RecursiveIteratorIterator::CHILD_FIRST );
+		
+		foreach ( $files as $file ) {
+			if ( $file->isDir() ) {
+				rmdir( $file->getRealPath() );
+			}
+			else {
+				unlink( $file->getRealPath() );
+			}
 		}
-		else {
-			unlink( $file->getRealPath() );
-		}
+		
+		rmdir( $directory );
 	}
-	
-	rmdir( $directory );
 }
