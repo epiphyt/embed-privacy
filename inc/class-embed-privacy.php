@@ -41,6 +41,7 @@ use function get_posts;
 use function get_sites;
 use function get_the_ID;
 use function get_the_post_thumbnail_url;
+use function has_blocks;
 use function has_shortcode;
 use function home_url;
 use function html_entity_decode;
@@ -992,6 +993,10 @@ class Embed_Privacy {
 		
 		$this->has_embed = true;
 		
+		if ( ! empty( $args['strip_newlines'] ) ) {
+			$markup = str_replace( PHP_EOL, '', $markup );
+		}
+		
 		return $markup;
 	}
 	
@@ -1017,6 +1022,7 @@ class Embed_Privacy {
 			'element_attribute' => 'src',
 			'elements' => [ 'embed', 'iframe', 'object' ],
 			'regex' => '',
+			'strip_newlines' => ! has_blocks( $content ),
 		] );
 		
 		libxml_use_internal_errors( true );
@@ -1766,6 +1772,7 @@ class Embed_Privacy {
 		/* translators: embed title */
 		$args['embed_title'] = ! empty( $embed_title ) ? sprintf( __( '"%s"', 'embed-privacy' ), $embed_title ) : '';
 		$args['embed_url'] = $url;
+		$args['strip_newlines'] = true;
 		
 		// add two click to markup
 		return $this->get_output_template( $embed_provider, $embed_provider_lowercase, $output, $args );
