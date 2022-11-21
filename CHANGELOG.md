@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.5.1
+* Fixed storing and displaying video thumbnails from Vimeo that are embedded using the domain player.vimeo.com
+* Fixed unnecessary line breaks within the classic editor
+* Fixed displaying the overlay if an embed of a known embed provider followed an embed of an unknown embed provider
+* Fixed uninstallation issues
+
 ## 1.5.0
 * Added support for embed provider Pocket Casts
 * Added support for Maps Marker and Maps Marker Pro
