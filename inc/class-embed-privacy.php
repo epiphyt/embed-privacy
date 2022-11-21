@@ -1119,8 +1119,8 @@ class Embed_Privacy {
 							continue;
 						}
 						
-						if ( preg_match( $regex, $element->getAttribute( $args['element_attribute'] ) ) ) {
-							return $content;
+						if ( preg_match( $regex, $element->getAttribute( $args['element_attribute'] ) ) && empty( $replacements ) ) {
+							continue 2;
 						}
 					}
 				}
