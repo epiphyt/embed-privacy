@@ -161,7 +161,12 @@ class Thumbnails {
 		$thumbnail_url = '';
 		
 		if ( strpos( $url, 'vimeo.com' ) !== false ) {
-			$id = str_replace( 'https://vimeo.com/', '', $url );
+			$id = str_replace( [ 'https://vimeo.com/', 'https://player.vimeo.com/video/' ], '', $url );
+			
+			if ( strpos( $id, '?' ) !== false ) {
+				$id = substr( $id, 0, strpos( $id, '?' ) );
+			}
+			
 			$thumbnail = get_post_meta( $post->ID, 'embed_privacy_thumbnail_vimeo_' . $id, true );
 		}
 		else if ( strpos( $url, 'youtube.com' ) !== false || strpos( $url, 'youtu.be' ) !== false ) {
@@ -197,7 +202,11 @@ class Thumbnails {
 			// the thumbnail URL has usually something like _295x166 in the end
 			// remove this to get the maximum resolution
 			$thumbnail_url = substr( $data->thumbnail_url, 0, strrpos( $data->thumbnail_url, '_' ) );
-			$id = str_replace( 'https://vimeo.com/', '', $url );
+			$id = str_replace( [ 'https://vimeo.com/', 'https://player.vimeo.com/video/' ], '', $url );
+			
+			if ( strpos( $id, '?' ) !== false ) {
+				$id = substr( $id, 0, strpos( $id, '?' ) );
+			}
 			
 			if ( $id ) {
 				$this->set_vimeo_thumbnail( $id, $url, $thumbnail_url );
