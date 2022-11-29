@@ -160,6 +160,14 @@ class Embed_Privacy {
 	public $has_embed = false;
 	
 	/**
+	 * @since	1.6.0
+	 * @var		string[] List of ignored shortcodes
+	 */
+	private $ignored_shortcodes = [
+		'grw',
+	];
+	
+	/**
 	 * @since	1.4.8
 	 * @var		bool Whether the current request has printed Embed Privacy assets.
 	 */
@@ -254,7 +262,7 @@ class Embed_Privacy {
 			add_filter( 'oembed_ttl', '__return_zero' );
 		}
 		
-		add_filter( 'do_shortcode_tag', [ $this, 'replace_embeds' ] );
+		add_filter( 'do_shortcode_tag', [ $this, 'replace_embeds' ], 10, 2 );
 		add_filter( 'do_shortcode_tag', [ $this, 'replace_maps_marker' ], 10, 2 );
 		add_filter( 'embed_oembed_html', [ $this, 'replace_embeds_oembed' ], 10, 3 );
 		add_filter( 'embed_privacy_widget_output', [ $this, 'replace_embeds' ] );
@@ -590,6 +598,26 @@ class Embed_Privacy {
 				return $this->embeds['all'];
 		}
 		// phpcs:enable
+	}
+	
+	/**
+	 * Get a list with ignored shortcodes.
+	 * 
+	 * @since	1.6.0
+	 * 
+	 * @return	string[] List with ignored shortcodes
+	 */
+	public function get_ignored_shortcodes() {
+		/**
+		 * Filter the ignored shortcodes list.
+		 * 
+		 * @since	1.6.0
+		 * 
+		 * @param	string[]	$ignored_shortcodes Current list of ignored shortcodes
+		 */
+		$this->ignored_shortcodes = apply_filters( 'embed_privacy_ignored_shortcodes', $this->ignored_shortcodes );
+		
+		return $this->ignored_shortcodes;
 	}
 	
 	/**
@@ -1580,13 +1608,20 @@ class Embed_Privacy {
 	 * Replace embeds with a container and hide the embed with an HTML comment.
 	 * 
 	 * @since	1.2.0 Changed behaviour of the method
+	 * @since	1.6.0 Added optional $tag parameter
 	 * 
 	 * @param	string	$content The original content
+	 * @param	string	$tag The shortcode tag if called via do_shortcode
 	 * @return	string The updated content
 	 */
-	public function replace_embeds( $content ) {
+	public function replace_embeds( $content, $tag = '' ) {
 		// do nothing in admin
 		if ( ! $this->usecache ) {
+			return $content;
+		}
+		
+		// do nothing for ignored shortcodes
+		if ( ! empty( $tag ) && in_array( $tag, $this->get_ignored_shortcodes(), true ) ) {
 			return $content;
 		}
 		
