@@ -469,6 +469,9 @@ class Migration {
 	 * @since	1.5.0
 	 * 
 	 * - Add new embed provider Pocket Casts
+	 * - Add new embed provider Maps Marker
+	 * - Add thumbnails directory
+	 * - Update Google Maps regex
 	 */
 	private function migrate_1_5_0() {
 		$this->add_embed( [
@@ -506,7 +509,29 @@ class Migration {
 		$google_provider = reset( $google_provider );
 		
 		if ( $google_provider instanceof WP_Post ) {
-			update_post_meta( $google_provider->ID, 'regex_default', '/(google\\\.com\\\/maps\\\/embed|maps\\\.google\\\.com\\\/(maps)?)' );
+			update_post_meta( $google_provider->ID, 'regex_default', '/(google\\\.com\\\/maps\\\/embed|maps\\\.google\\\.com\\\/(maps)?)/' );
+		}
+	}
+	
+	/**
+	 * Migrations for version 1.6.0.
+	 * 
+	 * @see		https://github.com/epiphyt/embed-privacy/issues/124
+	 * @since	1.6.0
+	 * 
+	 * - Update Google Maps regex
+	 */
+	private function migrate_1_6_0() {
+		$google_provider = get_posts( [
+			'meta_key' => 'is_system',
+			'meta_value' => 'yes',
+			'name' => 'google-maps',
+			'post_type' => 'epi_embed',
+		] );
+		$google_provider = reset( $google_provider );
+		
+		if ( $google_provider instanceof WP_Post ) {
+			update_post_meta( $google_provider->ID, 'regex_default', '/(google\\\.com\\\/maps\\\/embed|maps\\\.google\\\.com\\\/(maps)?)/' );
 		}
 	}
 	
@@ -615,7 +640,7 @@ class Migration {
 				'meta_input' => [
 					'is_system' => 'yes',
 					'privacy_policy_url' => __( 'https://policies.google.com/privacy?hl=en', 'embed-privacy' ),
-					'regex_default' => '/google\\\.com\\\/maps\\\/(d\\\/)?embed/',
+					'regex_default' => '/(google\\\.com\\\/maps\\\/embed|maps\\\.google\\\.com\\\/(maps)?)/',
 				],
 				/* translators: embed provider */
 				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Google Maps', 'embed provider', 'embed-privacy' ) ),
