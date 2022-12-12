@@ -460,14 +460,15 @@ class Fields {
 				continue;
 			}
 			
-			$value = sanitize_text_field( wp_unslash( $_POST[ $field['name'] ] ) );
-			
 			// sanitizing
-			if ( is_array( $value ) ) {
-				$value = $this->sanitize_array( $value );
+			if ( is_array( $_POST[ $field['name'] ] ) ) {
+				$value = $this->sanitize_array( $_POST[ $field['name'] ] );
 			}
 			else if ( strpos( $field['name'], 'regex') === false ) {
-				$value = sanitize_text_field( wp_unslash( $value ) );
+				$value = sanitize_text_field( wp_unslash( $_POST[ $field['name'] ] ) );
+			}
+			else {
+				$value = (string) wp_unslash( $_POST[ $field['name'] ] );
 			}
 			
 			update_post_meta( $post_id, $field['name'], $value );
