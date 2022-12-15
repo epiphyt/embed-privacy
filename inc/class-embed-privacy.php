@@ -1660,7 +1660,7 @@ class Embed_Privacy {
 		}
 		
 		// get all non-system embed providers
-		$embed_providers = $this->get_embeds( 'custom' );
+		$embed_providers = $this->get_embeds();
 		
 		// get embed provider name
 		foreach ( $embed_providers as $provider ) {
