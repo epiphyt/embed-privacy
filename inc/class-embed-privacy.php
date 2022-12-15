@@ -12,6 +12,7 @@ use function add_filter;
 use function add_shortcode;
 use function addslashes;
 use function apply_filters;
+use function array_filter;
 use function array_keys;
 use function array_merge;
 use function array_reverse;
@@ -1239,6 +1240,34 @@ class Embed_Privacy {
 				&& get_post_meta( $provider->ID, 'is_disabled', true ) !== 'yes'
 				&& preg_match( $args['regex'], $content )
 			) {
+				// extend regular expression to match the full element
+				if ( strpos( $args['regex'], '<' ) === false || strpos( $args['regex'], '>' ) === false ) {
+					$allowed_tags = [
+						'blockquote',
+						'div',
+						'embed',
+						'iframe',
+						'object',
+					];
+					
+					/**
+					 * Filter allowed HTML tags in regular expressions.
+					 * Only elements matching these tags get processed.
+					 * 
+					 * @since	1.6.0
+					 * 
+					 * @param	array	$allowed_tags The allowed tags
+					 * @param	string	$embed_provider_lowercase The embed provider without spaces and in lowercase
+					 * @return	array A list of allowed tags
+					 */
+					$allowed_tags = apply_filters( 'embed_privacy_matcher_elements', $allowed_tags, $embed_provider_lowercase );
+					
+					$tags_regex = '(' . implode( '|', array_filter( $allowed_tags, function( $tag ) {
+						return preg_quote( $tag );
+					} ) ) . ')';
+					$args['regex'] = '/<' . $tags_regex . '([^"]*)"(.*)' . trim( $args['regex'], '/' ) . '([^"]*)"([^>]*)(>(.*)<\/' . $tags_regex . ')?>/';
+				}
+				
 				$content = preg_replace( $args['regex'], $this->get_output_template( $embed_provider, $embed_provider_lowercase, $content, $args ), $content );
 			}
 		}
