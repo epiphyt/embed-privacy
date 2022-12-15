@@ -982,7 +982,7 @@ class Embed_Privacy {
 			</div>
 			
 			<div class="embed-privacy-content">
-				<script>var _oembed_<?php echo $embed_md5; ?> = '<?php echo addslashes( wp_json_encode( [ 'embed' => htmlentities( preg_replace( '/\s+/', ' ', $output ) ) ] ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>';</script>
+				<script>var _oembed_<?php echo $embed_md5; ?> = '<?php echo addslashes( wp_json_encode( [ 'embed' => htmlentities( preg_replace( '/\s+/S', ' ', $output ) ) ] ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>';</script>
 			</div>
 			
 			<style>
