@@ -265,7 +265,7 @@ class Embed_Privacy {
 		
 		add_filter( 'do_shortcode_tag', [ $this, 'replace_embeds' ], 10, 2 );
 		add_filter( 'do_shortcode_tag', [ $this, 'replace_maps_marker' ], 10, 2 );
-		add_filter( 'embed_oembed_html', [ $this, 'replace_embeds_oembed' ], 10, 3 );
+		//add_filter( 'embed_oembed_html', [ $this, 'replace_embeds_oembed' ], 10, 3 );
 		add_filter( 'embed_privacy_widget_output', [ $this, 'replace_embeds' ] );
 		add_filter( 'et_builder_get_oembed', [ $this, 'replace_embeds_divi' ], 10, 2 );
 		add_filter( 'pll_get_post_types', [ $this, 'register_polylang_post_type' ], 10, 2 );
@@ -366,7 +366,7 @@ class Embed_Privacy {
 		
 		// doesn't currently run with YouTube
 		// see https://github.com/elementor/elementor/issues/14276
-		add_filter( 'oembed_result', [ $this, 'replace_embeds_oembed' ], 10, 3 );
+		add_filter( 'oembed_result', [ $this, 'replace_embeds' ], 10, 3 );
 	}
 	
 	/**
@@ -982,7 +982,7 @@ class Embed_Privacy {
 			</div>
 			
 			<div class="embed-privacy-content">
-				<script>var _oembed_<?php echo $embed_md5; ?> = '<?php echo addslashes( wp_json_encode( [ 'embed' => htmlentities( $output ) ] ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>';</script>
+				<script>var _oembed_<?php echo $embed_md5; ?> = '<?php echo addslashes( wp_json_encode( [ 'embed' => htmlentities( preg_replace( '/\s+/', ' ', $output ) ) ] ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>';</script>
 			</div>
 			
 			<style>
@@ -1664,7 +1664,17 @@ class Embed_Privacy {
 		
 		// get embed provider name
 		foreach ( $embed_providers as $provider ) {
+			if ( $provider->post_name === 'twitter' && get_option( 'embed_privacy_local_tweets' ) ) {
+				// check for local tweets
+				return $this->get_local_tweet( $content );
+			}
+			
 			$content = $this->get_embed_overlay( $provider, $content );
+			
+			if ( $provider->post_name === 'youtube' ) {
+				// replace youtube.com to youtube-nocookie.com
+				$content = str_replace( 'youtube.com', 'youtube-nocookie.com', $content );
+			}
 		}
 		
 		// Elementor video providers need special treatment
@@ -1769,8 +1779,9 @@ class Embed_Privacy {
 	/**
 	 * Replace oembed embeds with a container and hide the embed with an HTML comment.
 	 * 
-	 * @since	1.2.0
-	 * @version	1.0.0
+	 * @deprecated	1.6.0 Use Embed_Privacy::replace_embeds() instead
+	 * @since		1.2.0
+	 * @version		1.0.0
 	 * 
 	 * @param	string	$output The original output
 	 * @param	string	$url The URL to the embed
@@ -1846,13 +1857,14 @@ class Embed_Privacy {
 	 * Replace embeds in Divi Builder.
 	 * 
 	 * @since	1.2.0
+	 * @since	1.6.0 Deprecated second parameter
 	 * 
 	 * @param	string	$item_embed The original output
-	 * @param	string	$url The URL of the embed
+	 * @param	string	$url The URL of the embed (deprecated)
 	 * @return	string The updated embed code
 	 */
 	public function replace_embeds_divi( $item_embed, $url ) {
-		return $this->replace_embeds_oembed( $item_embed, $url, [] );
+		return $this->replace_embeds( $item_embed );
 	}
 	
 	/**
