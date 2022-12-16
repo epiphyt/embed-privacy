@@ -987,6 +987,14 @@ class Embed_Privacy {
 			
 			<style>
 				<?php
+				if ( ! empty( $args['height'] ) && ! empty( $args['width'] ) ) :
+				?>
+				[data-embed-id="oembed_<?php echo esc_attr( $embed_md5 ); ?>"] {
+					aspect-ratio: <?php echo esc_html( $args['width'] . '/' . $args['height'] ); ?>;
+				}
+				<?php
+				endif;
+				
 				$is_debug = defined( 'WP_DEBUG' ) && WP_DEBUG;
 				
 				// display only if file exists
@@ -1050,8 +1058,10 @@ class Embed_Privacy {
 			'check_always_active' => false,
 			'element_attribute' => 'src',
 			'elements' => [ 'embed', 'iframe', 'object' ],
+			'height' => 0,
 			'regex' => '',
 			'strip_newlines' => ! has_blocks( $content ),
+			'width' => 0,
 		] );
 		
 		libxml_use_internal_errors( true );
@@ -1163,6 +1173,8 @@ class Embed_Privacy {
 				/* translators: embed title */
 				$args['embed_title'] = ! empty( $element->getAttribute( 'title' ) ) ? sprintf( __( '"%s"', 'embed-privacy' ), $element->getAttribute( 'title' ) ) : '';
 				$args['embed_url'] = $element->getAttribute( $args['element_attribute'] );
+				$args['height'] = ! empty( $element->getAttribute( 'height' ) ) ? $element->getAttribute( 'height' ) : 0;
+				$args['width'] = ! empty( $element->getAttribute( 'width' ) ) ? $element->getAttribute( 'width' ) : 0;
 				
 				// get overlay template as DOM element
 				$template_dom->loadHTML(
@@ -1636,7 +1648,7 @@ class Embed_Privacy {
 	/**
 	 * Replace embeds with a container and hide the embed with an HTML comment.
 	 * 
-	 * @since	1.2.0 Changed behaviour of the method
+	 * @since	1.2.0 Changed behavior of the method
 	 * @since	1.6.0 Added optional $tag parameter
 	 * 
 	 * @param	string	$content The original content
