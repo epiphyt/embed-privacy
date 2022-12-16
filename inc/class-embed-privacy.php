@@ -1277,7 +1277,7 @@ class Embed_Privacy {
 					$tags_regex = '(' . implode( '|', array_filter( $allowed_tags, function( $tag ) {
 						return preg_quote( $tag );
 					} ) ) . ')';
-					$args['regex'] = '/<' . $tags_regex . '([^"]*)"(.*)' . trim( $args['regex'], '/' ) . '([^"]*)"([^>]*)(>(.*)<\/' . $tags_regex . ')?>/';
+					$args['regex'] = '/<' . $tags_regex . '([^"]*)"([^<]*)' . trim( $args['regex'], '/' ) . '([^"]*)"([^>]*)(>(.*)<\/' . $tags_regex . ')?>/';
 				}
 				
 				$content = preg_replace( $args['regex'], $this->get_output_template( $embed_provider, $embed_provider_lowercase, $content, $args ), $content );
