@@ -7,6 +7,7 @@ use function add_settings_field;
 use function add_settings_section;
 use function add_submenu_page;
 use function admin_url;
+use function array_merge;
 use function current_user_can;
 use function do_settings_sections;
 use function esc_html__;
@@ -14,12 +15,15 @@ use function esc_html_e;
 use function esc_url;
 use function get_post;
 use function get_post_meta;
+use function plugin_basename;
+use function rawurlencode;
 use function register_setting;
 use function reset;
 use function settings_errors;
 use function settings_fields;
 use function submit_button;
 use function wp_sprintf;
+use const EMBED_PRIVACY_VERSION;
 
 /**
  * Admin related methods for Embed Privacy.
@@ -56,6 +60,30 @@ class Admin {
 		add_action( 'admin_menu', [ $this, 'register_menu' ] );
 		
 		add_filter( 'map_meta_cap', [ $this, 'disallow_deleting_system_embeds' ], 10, 4 );
+		add_filter( 'plugin_row_meta', [ $this, 'add_meta_link' ], 10, 2 );
+	}
+	
+	/**
+	 * Add plugin meta links.
+	 * 
+	 * @since	1.6.0
+	 * 
+	 * @param	array	$input Registered links.
+	 * @param	string	$file  Current plugin file.
+	 * @return	array Merged links
+	 */
+	public function add_meta_link( $input, $file ) {
+		// bail on other plugins
+		if ( $file !== plugin_basename( Embed_Privacy::get_instance()->plugin_file ) ) {
+			return $input;
+		}
+		
+		return array_merge(
+			$input,
+			[
+				'<a href="https://epiph.yt/en/embed-privacy/documentation/?version=' . rawurlencode( EMBED_PRIVACY_VERSION ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Documentation', 'embed-privacy' ) . '</a>',
+			]
+		);
 	}
 	
 	/**

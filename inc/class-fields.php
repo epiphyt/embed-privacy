@@ -16,6 +16,7 @@ use function esc_attr;
 use function esc_html;
 use function esc_html__;
 use function esc_html_e;
+use function esc_url;
 use function filemtime;
 use function get_current_screen;
 use function get_option;
@@ -30,6 +31,7 @@ use function plugin_dir_url;
 use function remove_meta_box;
 use function sanitize_text_field;
 use function sanitize_title;
+use function sprintf;
 use function strpos;
 use function trim;
 use function update_post_meta;
@@ -40,10 +42,12 @@ use function WP_Filesystem;
 use function wp_generate_attachment_metadata;
 use function wp_get_attachment_image;
 use function wp_insert_attachment;
+use function wp_kses;
 use function wp_parse_args;
 use function wp_unslash;
 use function wp_update_attachment_metadata;
 use function wp_upload_bits;
+use const EMBED_PRIVACY_VERSION;
 use const WP_CLI;
 
 /**
@@ -241,6 +245,7 @@ class Fields {
 			'single' => true,
 			'title' => '',
 			'type' => 'text',
+			'validation' => '',
 		] );
 		
 		if ( empty( $attributes['name'] ) || empty( $attributes['title'] ) ) {
@@ -259,7 +264,22 @@ class Fields {
 		?>
 		<input type="<?php echo esc_attr( $attributes['type'] ); ?>" name="<?php echo esc_attr( $attributes['name'] ); ?>" id="<?php echo esc_attr( $attributes['name'] ); ?>" value="<?php echo esc_attr( $current_value ); ?>" class="<?php echo esc_attr( $attributes['classes'] ); ?>">
 		<?php if ( ! empty( $attributes['description'] ) ) : ?>
-		<p><?php echo esc_html( $attributes['description'] ); ?></p>
+		<p>
+			<?php
+			if ( empty( $attributes['validation'] ) ) {
+				echo esc_html( $attributes['description'] );
+			}
+			else if ( $attributes['validation'] === 'allow-links' ) {
+				echo wp_kses( $attributes['description'], [
+					'a' => [
+						'href' => true,
+						'rel' => true,
+						'target' => true,
+					],
+				] );
+			}
+			?>
+		</p>
 		<?php
 		endif;
 		$input = ob_get_clean();
@@ -289,7 +309,22 @@ class Fields {
 		?>
 		<label for="<?php echo esc_attr( $attributes['name'] ); ?>"><input type="<?php echo esc_attr( $attributes['type'] ); ?>" name="<?php echo esc_attr( $attributes['name'] ); ?>" id="<?php echo esc_attr( $attributes['name'] ); ?>" value="<?php echo esc_attr( $attributes['value'] ); ?>" class="<?php echo esc_attr( $attributes['classes'] ); ?>"<?php checked( $current_value, $attributes['value'] ); ?>> <?php echo esc_html( $attributes['title'] ); ?></label>
 		<?php if ( ! empty( $attributes['description'] ) ) : ?>
-		<p><?php echo esc_html( $attributes['description'] ); ?></p>
+		<p>
+			<?php
+			if ( empty( $attributes['validation'] ) ) {
+				echo esc_html( $attributes['description'] );
+			}
+			else if ( $attributes['validation'] === 'allow-links' ) {
+				echo wp_kses( $attributes['description'], [
+					'a' => [
+						'href' => true,
+						'rel' => true,
+						'target' => true,
+					],
+				] );
+			}
+			?>
+		</p>
 		<?php
 		endif;
 		$input = ob_get_clean();
@@ -358,10 +393,21 @@ class Fields {
 				'title' => __( 'Background Image', 'embed-privacy' ),
 			],
 			'regex_default' => [
-				'description' => __( 'Regular expression that will be be searched for in the content.', 'embed-privacy' ),
+				'description' => sprintf(
+					/* translators: link to documentation */
+					__( 'Regular expression that will be searched for in the content. See the %s for more information.', 'embed-privacy' ),
+					'<a href="' . esc_url(
+						sprintf(
+							/* translators: plugin version */
+							__( 'https://epiph.yt/en/embed-privacy/documentation/?version=%s', 'embed-privacy' ),
+							EMBED_PRIVACY_VERSION
+						)
+					) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'documentation', 'embed-privacy' ) . '</a>'
+				),
 				'field_type' => 'input',
 				'name' => 'regex_default',
 				'title' => __( 'Regex Pattern', 'embed-privacy' ),
+				'validation' => 'allow-links',
 			],
 			'is_disabled' => [
 				'field_type' => 'input',
