@@ -848,7 +848,7 @@ class Embed_Privacy {
 		/**
 		 * Filter the path to the thumbnail.
 		 * 
-		 * @param	string	$logo_path The default background path
+		 * @param	string	$thumbnail_path The default thumbnail path
 		 * @param	string	$embed_provider_lowercase The current embed provider in lowercase
 		 */
 		$embed_thumbnail['thumbnail_path'] = apply_filters( "embed_privacy_thumbnail_path_$embed_provider_lowercase", $embed_thumbnail['thumbnail_path'], $embed_provider_lowercase );
@@ -856,7 +856,7 @@ class Embed_Privacy {
 		/**
 		 * Filter the URL to the thumbnail.
 		 * 
-		 * @param	string	$logo_url The default background URL
+		 * @param	string	$thumbnail_url The default thumbnail URL
 		 * @param	string	$embed_provider_lowercase The current embed provider in lowercase
 		 */
 		$embed_thumbnail['thumbnail_url'] = apply_filters( "embed_privacy_thumbnail_url_$embed_provider_lowercase", $embed_thumbnail['thumbnail_url'], $embed_provider_lowercase );
@@ -864,7 +864,7 @@ class Embed_Privacy {
 		/**
 		 * Filter the path to the logo.
 		 * 
-		 * @param	string	$logo_path The default background path
+		 * @param	string	$logo_path The default logo path
 		 * @param	string	$embed_provider_lowercase The current embed provider in lowercase
 		 */
 		$logo_path = apply_filters( "embed_privacy_logo_path_$embed_provider_lowercase", $logo_path, $embed_provider_lowercase );
@@ -872,7 +872,7 @@ class Embed_Privacy {
 		/**
 		 * Filter the URL to the logo.
 		 * 
-		 * @param	string	$logo_url The default background URL
+		 * @param	string	$logo_url The default logo URL
 		 * @param	string	$embed_provider_lowercase The current embed provider in lowercase
 		 */
 		$logo_url = apply_filters( "embed_privacy_logo_url_$embed_provider_lowercase", $logo_url, $embed_provider_lowercase );
@@ -1268,8 +1268,8 @@ class Embed_Privacy {
 					 * 
 					 * @since	1.6.0
 					 * 
-					 * @param	array	$allowed_tags The allowed tags
-					 * @param	string	$embed_provider_lowercase The embed provider without spaces and in lowercase
+					 * @param	string[]	$allowed_tags The allowed tags
+					 * @param	string		$embed_provider_lowercase The embed provider without spaces and in lowercase
 					 * @return	array A list of allowed tags
 					 */
 					$allowed_tags = apply_filters( 'embed_privacy_matcher_elements', $allowed_tags, $embed_provider_lowercase );
@@ -1711,7 +1711,7 @@ class Embed_Privacy {
 		 * @since	1.5.0
 		 * 
 		 * @param	bool	$ignore_unknown Whether unknown providers should be ignored
-		 * @oaram	string	$content The original content
+		 * @param	string	$content The original content
 		 */
 		$ignore_unknown_providers = apply_filters( 'embed_privacy_ignore_unknown_providers', false, $content );
 		
@@ -1761,6 +1761,13 @@ class Embed_Privacy {
 					'type' => 'inline',
 					'object_name' => 'jpfbembed',
 					'data' => [
+						/**
+						 * Filter the Jetpack sharing Facebook app ID.
+						 * 
+						 * @since	1.4.5
+						 * 
+						 * @param	string	$app_id The current app ID
+						 */
 						'appid' => apply_filters( 'jetpack_sharing_facebook_app_id', '249643311490' ),
 						'locale' => $jetpack->get_locale(),
 					],
