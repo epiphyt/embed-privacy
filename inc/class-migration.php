@@ -272,8 +272,10 @@ class Migration {
 	 * Migrations for version 1.2.0.
 	 * 
 	 * @since	1.2.0
+	 * @since	1.5.0 Create thumbnails directory
 	 * 
 	 * - Add default embed providers
+	 * - Add thumbnails directory
 	 */
 	private function migrate_1_2_0() {
 		// add embeds

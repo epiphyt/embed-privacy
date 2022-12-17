@@ -330,7 +330,7 @@ class Embed_Privacy {
 	/**
 	 * Enqueue our assets for the frontend.
 	 * 
-	 * @deprecated	1.4.4
+	 * @deprecated	1.4.4 Use Embed_Privacy::print_assets() instead
 	 */
 	public function enqueue_assets() { }
 	
@@ -1889,7 +1889,7 @@ class Embed_Privacy {
 	/**
 	 * Replace Google Maps iframes.
 	 * 
-	 * @deprecated	1.2.0
+	 * @deprecated	1.2.0 Use Embed_Privacy::get_embed_overlay() instead
 	 * @since		1.1.0
 	 * 
 	 * @param	string	$content The post content
