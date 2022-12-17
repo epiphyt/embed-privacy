@@ -55,6 +55,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		} );
 	}
 	
+	console.log( {checkboxes} );
 	for ( var i = 0; i < checkboxes.length; i++ ) {
 		checkboxes[ i ].addEventListener( 'click', function( event ) {
 			// don't trigger the overlays click
@@ -81,6 +82,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 	function checkboxActivation( target ) {
 		var embedProvider = target.getAttribute( 'data-embed-provider' );
 		var cookie = ( get_cookie( 'embed-privacy' ) ? JSON.parse( get_cookie( 'embed-privacy' ) ) : '' );
+		console.log( {embedProvider, cookie} );
 		
 		if ( target.checked ) {
 			// add|update the cookie's value
@@ -153,7 +155,14 @@ document.addEventListener( 'DOMContentLoaded', function() {
 	 * @since	1.2.0
 	 */
 	function optOut() {
-		var optOutCheckboxes = document.querySelectorAll( '.embed-privacy-opt-out-input' );
+		const optOutContainer = document.querySelector( '.embed-privacy-opt-out' );
+		
+		if ( ! optOutContainer ) {
+			return;
+		}
+		
+		var optOutCheckboxes = optOutContainer.querySelectorAll( '.embed-privacy-opt-out-input' );
+		const showAll = optOutContainer.getAttribute( 'data-show-all' ) === '1';
 		
 		if ( ! optOutCheckboxes ) {
 			return;
@@ -164,6 +173,11 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		for ( var i = 0; i < optOutCheckboxes.length; i++ ) {
 			if ( embedPrivacy.javascriptDetection === 'yes' && alwaysActiveProviders.indexOf( optOutCheckboxes[ i ].getAttribute( 'data-embed-provider' ) ) !== -1 ) {
 				optOutCheckboxes[ i ].checked = true;
+			}
+			else if ( embedPrivacy.javascriptDetection === 'yes' && ! showAll ) {
+				optOutCheckboxes[ i ].parentNode.classList.add( 'is-hidden' );
+				
+				continue;
 			}
 			
 			optOutCheckboxes[ i ].addEventListener( 'click', function( event ) {
@@ -184,6 +198,13 @@ document.addEventListener( 'DOMContentLoaded', function() {
 				
 				checkboxActivation( currentTarget );
 			} );
+		}
+		
+		const nonHiddenProviders = optOutContainer.querySelectorAll( '.embed-privacy-provider:not(.is-hidden)' );
+		
+		// remove the container completely if there is no provider to display
+		if ( ! showAll && ! nonHiddenProviders.length ) {
+			optOutContainer.remove();
 		}
 	}
 	

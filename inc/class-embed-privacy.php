@@ -2073,25 +2073,13 @@ class Embed_Privacy {
 		$cookie = $this->get_cookie();
 		$embed_providers = $this->get_embeds();
 		$enabled_providers = array_keys( (array) $cookie );
+		$is_javascript_detection = get_option( 'embed_privacy_javascript_detection' ) === 'yes';
 		
-		if ( $attributes['show_all'] ) {
-			$providers = $embed_providers;
-		}
-		else {
-			if ( empty( $cookie ) ) {
-				return '';
-			}
-			
-			$providers = [];
-			
-			foreach ( $embed_providers as $embed_provider ) {
-				if ( in_array( $embed_provider->post_name, $enabled_providers, true ) ) {
-					$providers[] = $embed_provider;
-				}
-			}
+		if ( empty( $embed_providers ) ) {
+			return '';
 		}
 		
-		if ( empty( $providers ) ) {
+		if ( ! $is_javascript_detection && ! $attributes['show_all'] && ! $enabled_providers ) {
 			return '';
 		}
 		
@@ -2113,11 +2101,10 @@ class Embed_Privacy {
 		 */
 		$subline = apply_filters( 'embed_privacy_opt_out_subline', '<p>' . esc_html( $attributes['subline'] ) . '</p>' . PHP_EOL, $attributes );
 		
-		$output = '<div class="embed-privacy-opt-out">' . PHP_EOL . $headline . $subline;
-		$output .= '<p>' . PHP_EOL;
+		$output = '<div class="embed-privacy-opt-out" data-show-all="' . $attributes['show_all'] . '">' . PHP_EOL . $headline . $subline;
 		
-		foreach ( $providers as $provider ) {
-			if ( get_option( 'embed_privacy_javascript_detection' ) === 'yes' ) {
+		foreach ( $embed_providers as $provider ) {
+			if ( $is_javascript_detection ) {
 				$is_checked = false;
 			}
 			else if ( $attributes['show_all'] ) {
@@ -2127,13 +2114,16 @@ class Embed_Privacy {
 				$is_checked = true;
 			}
 			
+			$is_hidden = ! $is_javascript_detection && ! $attributes['show_all'] && ! in_array( $provider->post_name, $enabled_providers, true );
 			$microtime = str_replace( '.', '', microtime( true ) );
+			$output .= '<span class="embed-privacy-provider' . ( $is_hidden ? ' is-hidden' : '' ) . '">' . PHP_EOL;
 			$output .= '<input type="checkbox" id="embed-privacy-provider-' . esc_attr( $provider->post_name ) . '-' . $microtime . '" ' . checked( $is_checked, true, false ) . ' class="embed-privacy-opt-out-input ' . ( $is_checked ? 'is-enabled' : 'is-disabled' ) . '" data-embed-provider="' . esc_attr( $provider->post_name ) . '">';
 			$output .= '<label class="embed-privacy-opt-out-label" for="embed-privacy-provider-' . esc_attr( $provider->post_name ) . '-' . $microtime . '" data-embed-provider="' . esc_attr( $provider->post_name ) . '">';
 			$enable_disable = '<span class="embed-privacy-provider-is-enabled">' . esc_html_x( 'Disable', 'complete string: Disable <embed name>', 'embed-privacy' ) . '</span><span class="embed-privacy-provider-is-disabled">' . esc_html_x( 'Enable', 'complete string: Disable <embed name>', 'embed-privacy' ) . '</span>';
 			/* translators: 1: Enable/Disable, 2: embed provider title */
 			$output .= wp_kses( sprintf( __( '%1$s %2$s', 'embed-privacy' ), $enable_disable, esc_html( $provider->post_title ) ), [ 'span' => [ 'class' => true ] ] );
 			$output .= '</label><br>' . PHP_EOL;
+			$output .= '</span>' . PHP_EOL;
 		}
 		
 		$output .= '</p>' . PHP_EOL . '</div>' . PHP_EOL;

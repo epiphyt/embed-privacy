@@ -137,6 +137,12 @@
 }
 
 // shortcode
+.embed-privacy-provider {
+	&.is-hidden {
+		display: none;
+	}
+}
+
 .embed-privacy-opt-out-label {
 	display: inline-block;
 }
