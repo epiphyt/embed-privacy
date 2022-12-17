@@ -361,7 +361,7 @@ class Fields {
 				'description' => __( 'Regular expression that will be be searched for in the content.', 'embed-privacy' ),
 				'field_type' => 'input',
 				'name' => 'regex_default',
-				'title' => __( 'Default Regex', 'embed-privacy' ),
+				'title' => __( 'Regex Pattern', 'embed-privacy' ),
 			],
 			'is_disabled' => [
 				'field_type' => 'input',
