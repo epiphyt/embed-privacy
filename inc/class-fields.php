@@ -399,7 +399,7 @@ class Fields {
 					'<a href="' . esc_url(
 						sprintf(
 							/* translators: plugin version */
-							__( 'https://epiph.yt/en/embed-privacy/documentation/?version=%s', 'embed-privacy' ),
+							__( 'https://epiph.yt/en/embed-privacy/documentation/?version=%s#regex-pattern', 'embed-privacy' ),
 							EMBED_PRIVACY_VERSION
 						)
 					) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'documentation', 'embed-privacy' ) . '</a>'
