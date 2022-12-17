@@ -66,7 +66,7 @@ class Migration {
 	 * @var		string Current migration version
 	 * @since	1.2.2
 	 */
-	private $version = '1.5.0';
+	private $version = '1.6.0';
 	
 	/**
 	 * Post Type constructor.
@@ -227,29 +227,38 @@ class Migration {
 			case $this->version:
 				// most recent version, do nothing
 				break;
+			case '1.5.0':
+				$this->migrate_1_6_0();
+				break;
 			case '1.4.7':
+				$this->migrate_1_6_0();
 				$this->migrate_1_5_0();
 				break;
 			case '1.4.0':
+				$this->migrate_1_6_0();
 				$this->migrate_1_5_0();
 				$this->migrate_1_4_7();
 				break;
 			case '1.3.0':
+				$this->migrate_1_6_0();
 				$this->migrate_1_5_0();
 				$this->migrate_1_4_0();
 				break;
 			case '1.2.2':
+				$this->migrate_1_6_0();
 				$this->migrate_1_5_0();
 				$this->migrate_1_4_0();
 				$this->migrate_1_3_0();
 				break;
 			case '1.2.1':
+				$this->migrate_1_6_0();
 				$this->migrate_1_5_0();
 				$this->migrate_1_4_0();
 				$this->migrate_1_3_0();
 				$this->migrate_1_2_2();
 				break;
 			case '1.2.0':
+				$this->migrate_1_6_0();
 				$this->migrate_1_5_0();
 				$this->migrate_1_4_0();
 				$this->migrate_1_3_0();

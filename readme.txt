@@ -2,7 +2,7 @@
 Contributors: epiphyt, kittmedia, krafit
 Tags: oembed, privacy, gutenberg
 Requires at least: 4.7
-Stable tag: 1.5.1
+Stable tag: 1.6.0
 Tested up to: 6.1
 Requires PHP: 5.6
 License: GPL2
@@ -122,12 +122,27 @@ You can also combine all of these attributes:
 
 If you’re using a caching plugin, make sure you enable the "JavaScript detection for active providers" in **Settings > Embed Privacy > JavaScript detection**. Then, the plugin is fully compatible with your caching plugin.
 
+= How can Embed Privacy be extended? =
+
+Check out our documentation: https://epiph.yt/en/embed-privacy/documentation/
+
 = Who are you, folks? =
 
 We are [Epiphyt](https://epiph.yt/), your friendly neighborhood WordPress plugin shop from southern Germany.
 
 
 == Changelog ==
+
+= 1.6.0 =
+* Added automatic detection of aspect ratio if given by the embed
+* Added ability to work with HTML of regular oEmbed providers
+* Added filter to ignore shortcodes (see documentation: https://epiph.yt/en/embed-privacy/documentation/#embed_privacy_ignored_shortcodes)
+* Added matching links to the new documentation at https://epiph.yt/en/embed-privacy/documentation/
+* Improved handling of matching non-standard elements (embed, iframe, object, see documentation: https://epiph.yt/en/embed-privacy/documentation/#regex-pattern)
+* Fixed Google Maps regex pattern after installation
+* Fixed behavior of the opt-out shortcode with enabled page caching
+* Fixed line-height of custom embeds in Elementor
+* General code improvements
 
 = 1.5.1 =
 * Fixed storing and displaying video thumbnails from Vimeo that are embedded using the domain player.vimeo.com

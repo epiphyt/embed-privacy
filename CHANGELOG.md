@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.6.0
+* Added automatic detection of aspect ratio if given by the embed
+* Added ability to work with HTML of regular oEmbed providers
+* Added filter to ignore shortcodes (see documentation: https://epiph.yt/en/embed-privacy/documentation/#embed_privacy_ignored_shortcodes)
+* Added matching links to the new documentation at https://epiph.yt/en/embed-privacy/documentation/
+* Improved handling of matching non-standard elements (embed, iframe, object, see documentation: https://epiph.yt/en/embed-privacy/documentation/#regex-pattern)
+* Fixed Google Maps regex pattern after installation
+* Fixed behavior of the opt-out shortcode with enabled page caching
+* Fixed line-height of custom embeds in Elementor
+* General code improvements
+
 ## 1.5.1
 * Fixed storing and displaying video thumbnails from Vimeo that are embedded using the domain player.vimeo.com
 * Fixed unnecessary line breaks within the classic editor
