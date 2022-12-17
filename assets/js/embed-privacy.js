@@ -55,7 +55,6 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		} );
 	}
 	
-	console.log( {checkboxes} );
 	for ( var i = 0; i < checkboxes.length; i++ ) {
 		checkboxes[ i ].addEventListener( 'click', function( event ) {
 			// don't trigger the overlays click
@@ -82,7 +81,6 @@ document.addEventListener( 'DOMContentLoaded', function() {
 	function checkboxActivation( target ) {
 		var embedProvider = target.getAttribute( 'data-embed-provider' );
 		var cookie = ( get_cookie( 'embed-privacy' ) ? JSON.parse( get_cookie( 'embed-privacy' ) ) : '' );
-		console.log( {embedProvider, cookie} );
 		
 		if ( target.checked ) {
 			// add|update the cookie's value
