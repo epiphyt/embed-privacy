@@ -1,11 +1,16 @@
 # Changelog
 
+## 1.6.1
+* Updated required WordPress version to 5.0
+* Fixed text links to youtube.com
+* Fixed Twitter embeds
+
 ## 1.6.0
 * Added automatic detection of aspect ratio if given by the embed
 * Added ability to work with HTML of regular oEmbed providers
-* Added filter to ignore shortcodes (see documentation: https://epiph.yt/en/embed-privacy/documentation/#embed_privacy_ignored_shortcodes)
-* Added matching links to the new documentation at https://epiph.yt/en/embed-privacy/documentation/
-* Improved handling of matching non-standard elements (embed, iframe, object, see documentation: https://epiph.yt/en/embed-privacy/documentation/#regex-pattern)
+* Added filter to ignore shortcodes (see [documentation](https://epiph.yt/en/embed-privacy/documentation/#embed_privacy_ignored_shortcodes))
+* Added matching links to the new documentation at [https://epiph.yt/en/embed-privacy/documentation/](https://epiph.yt/en/embed-privacy/documentation/)
+* Improved handling of matching non-standard elements (embed, iframe, object, see [documentation](https://epiph.yt/en/embed-privacy/documentation/#regex-pattern))
 * Fixed Google Maps regex pattern after installation
 * Fixed behavior of the opt-out shortcode with enabled page caching
 * Fixed line-height of custom embeds in Elementor
