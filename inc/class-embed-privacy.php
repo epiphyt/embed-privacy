@@ -1,4 +1,5 @@
 <?php
+/** @noinspection CssUnusedSymbol */
 namespace epiphyt\Embed_Privacy;
 use Automattic\Jetpack\Assets;
 use DOMXPath;
@@ -109,7 +110,6 @@ use function wp_register_style;
 use function wp_slash;
 use function wp_unslash;
 use const ABSPATH;
-use const DEBUG_MODE;
 use const EMBED_PRIVACY_VERSION;
 use const ENT_QUOTES;
 use const EPI_EMBED_PRIVACY_BASE;
@@ -295,6 +295,7 @@ class Embed_Privacy {
 			$sites = get_sites( [ 'number' => 99999 ] );
 			
 			foreach ( $sites as $site ) {
+				/** @noinspection SqlWithoutWhere */
 				$wpdb->query(
 					$wpdb->prepare(
 						// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -358,6 +359,7 @@ class Embed_Privacy {
 	 * 
 	 * @since		1.3.0
 	 * @deprecated	1.3.5
+	 * @noinspection PhpUnused
 	 */
 	public function get_elementor_filters() {
 		if ( ! $this->is_elementor() ) {
@@ -1374,6 +1376,7 @@ class Embed_Privacy {
 	 * @return	bool True if the current page is an AMP page, false otherwise
 	 */
 	private function is_amp() {
+		/** @noinspection PhpUndefinedFunctionInspection */
 		return function_exists( 'is_amp_endpoint' ) && is_amp_endpoint();
 	}
 	
