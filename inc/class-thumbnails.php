@@ -170,7 +170,8 @@ class Thumbnails {
 			$thumbnail = get_post_meta( $post->ID, 'embed_privacy_thumbnail_vimeo_' . $id, true );
 		}
 		else if ( strpos( $url, 'youtube.com' ) !== false || strpos( $url, 'youtu.be' ) !== false ) {
-			$id = str_replace( [ 'https://www.youtube.com/watch?v=', 'https://youtu.be/' ], '', $url );
+			$id = str_replace( [ 'https://www.youtube.com/watch?v=', 'https://www.youtube.com/embed/', 'https://youtu.be/' ], '', $url );
+			$id = strpos( $id, '?' ) !== false ? substr( $id, 0, strpos( $id, '?' ) ) : $id;
 			$thumbnail = get_post_meta( $post->ID, 'embed_privacy_thumbnail_youtube_' . $id, true );
 		}
 		
