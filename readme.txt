@@ -2,7 +2,7 @@
 Contributors: epiphyt, kittmedia, krafit
 Tags: oembed, privacy, gutenberg
 Requires at least: 5.0
-Stable tag: 1.6.1
+Stable tag: 1.6.2
 Tested up to: 6.1
 Requires PHP: 5.6
 License: GPL2
@@ -132,6 +132,9 @@ We are [Epiphyt](https://epiph.yt/), your friendly neighborhood WordPress plugin
 
 
 == Changelog ==
+
+= 1.6.2 =
+* Restore displaying YouTube thumbnails
 
 = 1.6.1 =
 * Updated required WordPress version to 5.0

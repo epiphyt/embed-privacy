@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.6.2
+* Restore displaying YouTube thumbnails
+
 ## 1.6.1
 * Updated required WordPress version to 5.0
 * Fixed text links to youtube.com
