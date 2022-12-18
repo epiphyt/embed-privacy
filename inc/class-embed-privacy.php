@@ -265,7 +265,7 @@ class Embed_Privacy {
 		
 		add_filter( 'do_shortcode_tag', [ $this, 'replace_embeds' ], 10, 2 );
 		add_filter( 'do_shortcode_tag', [ $this, 'replace_maps_marker' ], 10, 2 );
-		//add_filter( 'embed_oembed_html', [ $this, 'replace_embeds_oembed' ], 10, 3 );
+		add_filter( 'embed_oembed_html', [ $this, 'replace_embeds_twitter' ], 10, 3 );
 		add_filter( 'embed_privacy_widget_output', [ $this, 'replace_embeds' ] );
 		add_filter( 'et_builder_get_oembed', [ $this, 'replace_embeds_divi' ], 10, 2 );
 		add_filter( 'pll_get_post_types', [ $this, 'register_polylang_post_type' ], 10, 2 );
@@ -993,7 +993,7 @@ class Embed_Privacy {
 			
 			<style>
 				<?php
-				if ( ! empty( $args['height'] ) && ! empty( $args['width'] ) ) :
+				if ( ! empty( $args['height'] ) && ! empty( $args['width'] ) && empty( $args['ignore_aspect_ratio'] ) ) :
 				?>
 				[data-embed-id="oembed_<?php echo esc_attr( $embed_md5 ); ?>"] {
 					aspect-ratio: <?php echo esc_html( $args['width'] . '/' . $args['height'] ); ?>;
@@ -1065,6 +1065,7 @@ class Embed_Privacy {
 			'element_attribute' => 'src',
 			'elements' => [ 'embed', 'iframe', 'object' ],
 			'height' => 0,
+			'ignore_aspect_ratio' => false,
 			'regex' => '',
 			'strip_newlines' => ! has_blocks( $content ),
 			'width' => 0,
@@ -1681,13 +1682,7 @@ class Embed_Privacy {
 		// get all non-system embed providers
 		$embed_providers = $this->get_embeds();
 		
-		// get embed provider name
 		foreach ( $embed_providers as $provider ) {
-			if ( $provider->post_name === 'twitter' && get_option( 'embed_privacy_local_tweets' ) ) {
-				// check for local tweets
-				return $this->get_local_tweet( $content );
-			}
-			
 			$content = $this->get_embed_overlay( $provider, $content );
 		}
 		
@@ -1886,6 +1881,44 @@ class Embed_Privacy {
 	 */
 	public function replace_embeds_divi( $item_embed, $url ) {
 		return $this->replace_embeds( $item_embed );
+	}
+	
+	/**
+	 * Replace twitter embeds.
+	 * 
+	 * @since	1.6.1
+	 * 
+	 * @param	string	$output The original output
+	 * @param	string	$url The URL to the embed
+	 * @param	array	$args Additional arguments of the embed
+	 * @return	string The updated embed code
+	 */
+	public function replace_embeds_twitter( $output, $url, $args ) {
+		// do nothing in admin
+		if ( ! $this->usecache ) {
+			return $output;
+		}
+		
+		$provider = $this->get_embed_by_name( 'twitter' );
+		
+		if ( ! preg_match( get_post_meta( $provider->ID, 'regex_default', true ), $url ) ) {
+			return $output;
+		}
+		
+		if ( $this->is_always_active_provider( $provider->post_name ) ) {
+			return $output;
+		}
+		
+		if ( get_option( 'embed_privacy_local_tweets' ) ) {
+			// check for local tweets
+			return $this->get_local_tweet( $output );
+		}
+		
+		$args['embed_url'] = $url;
+		$args['ignore_aspect_ratio'] = true;
+		$args['strip_newlines'] = true;
+		
+		return $this->get_output_template( $provider->post_title, $provider->post_name, $output, $args );
 	}
 	
 	/**
