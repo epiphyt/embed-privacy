@@ -770,6 +770,10 @@ class Embed_Privacy {
 			$embed_post = null;
 		}
 		
+		if ( $embed_provider_lowercase === 'youtube' ) {
+			$output = str_replace( 'youtube.com', 'youtube-nocookie.com', $output );
+		}
+		
 		$embed_provider_lowercase = sanitize_title( $embed_provider_lowercase );
 		$embed_class = 'embed-' . ( ! empty( $embed_provider_lowercase ) ? $embed_provider_lowercase : 'default' );
 		$embed_classes = $embed_class;
@@ -1682,11 +1686,6 @@ class Embed_Privacy {
 			}
 			
 			$content = $this->get_embed_overlay( $provider, $content );
-			
-			if ( $provider->post_name === 'youtube' ) {
-				// replace youtube.com to youtube-nocookie.com
-				$content = str_replace( 'youtube.com', 'youtube-nocookie.com', $content );
-			}
 		}
 		
 		// Elementor video providers need special treatment
