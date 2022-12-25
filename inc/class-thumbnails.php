@@ -77,6 +77,7 @@ class Thumbnails {
 		$supported_providers = [
 			'vimeo',
 			'youtube',
+			'slideshare',
 		];
 		
 		foreach ( $metadata as $meta_key => $meta_value ) {
@@ -92,7 +93,16 @@ class Thumbnails {
 				if ( strpos( $meta_key, '_' . $provider . '_' ) !== false && strpos( $meta_key, '_url' ) === false ) {
 					$id = str_replace( 'embed_privacy_thumbnail_' . $provider . '_', '', $meta_key );
 					
-					if ( strpos( $post->post_content, $id ) === false ) {
+					$missing_id = strpos( $post->post_content, $id ) === false;
+					$missing_url = true;
+					if ( $missing_id && isset( $metadata[ $meta_key . '_url' ] ) ) {
+						$url = $metadata[ $meta_key . '_url' ];
+						if ( is_array( $url ) ) {
+							$url = reset( $url );
+						}
+						$missing_url = strpos( $post->post_content, $url ) === false;
+					}
+					if ( $missing_id && $missing_url ) {
 						if ( ! $this->is_in_use( $meta_value, $post_id, $global_metadata ) ) {
 							$this->delete( $meta_value );
 							delete_post_meta( $post_id, $meta_key );
@@ -174,6 +184,15 @@ class Thumbnails {
 			$id = strpos( $id, '?' ) !== false ? substr( $id, 0, strpos( $id, '?' ) ) : $id;
 			$thumbnail = get_post_meta( $post->ID, 'embed_privacy_thumbnail_youtube_' . $id, true );
 		}
+		else if ( strpos( $url, 'slideshare.net' ) !== false ) {
+			$id = preg_replace( '/.*\/embed_code\/key\//', '', $url );
+			
+			if ( strpos( $id, '?' ) !== false ) {
+				$id = substr( $id, 0, strpos( $id, '?' ) );
+			}
+			
+			$thumbnail = get_post_meta( $post->ID, 'embed_privacy_thumbnail_slideshare_' . $id, true );
+		}
 		
 		if ( $thumbnail ) {
 			$thumbnail_path = self::DIRECTORY . '/' . $thumbnail;
@@ -225,6 +244,18 @@ class Thumbnails {
 				$this->set_youtube_thumbnail( $id, $url );
 			}
 		}
+		else if ( strpos( $url, 'slideshare.net' ) !== false ) {
+			// the thumbnail URL contains sizing parameters in the query string
+			// remove this to get the maximum resolution
+			$thumbnail_url = preg_replace( '/\?.*/', '', $data->thumbnail_url );
+			$extracted = preg_replace( '/.*\/embed_code\/key\//', '', $data->html );
+			$parts = explode( '"', $extracted );
+			$id = isset( $parts[0] ) ? $parts[0] : false;
+			
+			if ( $id ) {
+				$this->set_slideshare_thumbnail( $id, $url, $thumbnail_url );
+			}
+		}
 		
 		return $return;
 	}
@@ -273,6 +304,7 @@ class Thumbnails {
 		return [
 			_x( 'Vimeo', 'embed provider', 'embed-privacy' ),
 			_x( 'YouTube', 'embed provider', 'embed-privacy' ),
+			_x( 'Slideshare', 'embed provider', 'embed-privacy' ),
 		];
 	}
 	
@@ -364,5 +396,33 @@ class Thumbnails {
 			update_post_meta( $post->ID, 'embed_privacy_thumbnail_youtube_' . $id . '_url', $url );
 			break;
 		}
+	}
+
+	/**
+	 * Download and save a Slideshare thumbnail.
+	 * 
+	 * @param	string	$id Slideshare embed ID
+	 * @param	string	$url Slideshare deck URL
+	 * @param	string	$thumbnail_url Slideshare thumbnail URL
+	 */
+	public function set_slideshare_thumbnail( $id, $url, $thumbnail_url ) {
+		$post = get_post();
+		
+		if ( ! $post ) {
+			return;
+		}
+		
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+		
+		$file = download_url( $thumbnail_url );
+		
+		if ( is_wp_error( $file ) ) {
+			return;
+		}
+		
+		$filename = 'slideshare-' . $id . '.jpg' ;
+		rename( $file, self::DIRECTORY . '/' . $filename );
+		update_post_meta( $post->ID, 'embed_privacy_thumbnail_slideshare_' . $id, $filename );
+		update_post_meta( $post->ID, 'embed_privacy_thumbnail_slideshare_' . $id . '_url', $url );
 	}
 }
