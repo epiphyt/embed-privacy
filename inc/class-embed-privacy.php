@@ -480,9 +480,10 @@ class Embed_Privacy {
 		
 		$embed_providers = $this->get_embeds();
 		$embed = null;
+		$pattern = '/^' . preg_quote( $name ) . '\-\d+/';
 		
 		foreach ( $embed_providers as $embed_provider ) {
-			if ( $embed_provider->post_name !== $name ) {
+			if ( $embed_provider->post_name !== $name && ! preg_match( $pattern, $embed_provider->post_name ) ) {
 				continue;
 			}
 			
