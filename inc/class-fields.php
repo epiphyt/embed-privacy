@@ -499,6 +499,10 @@ class Fields {
 			wp_die( new WP_Error( 403, esc_html__( 'You are not allowed to edit an embed.', 'embed-privacy' ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		}
 		
+		if ( defined( 'WP_CLI' ) && WP_CLI ) {
+			return;
+		}
+		
 		foreach ( $this->fields as $field ) {
 			if ( empty( $_POST[ $field['name'] ] ) ) {
 				delete_post_meta( $post_id, $field['name'] );
