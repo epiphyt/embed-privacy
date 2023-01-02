@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.6.3
+* Fixed replacing some oEmbeds
+* Fixed potential problems while retrieving a single embed provider
+* Fixed deleting post metadata of embed providers while editing them via WP-CLI
+
 ## 1.6.2
 * Restore displaying YouTube thumbnails
 
