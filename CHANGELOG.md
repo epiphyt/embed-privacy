@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.6.4
+* Fixed aspect ratio for many oEmbeds
+
 ## 1.6.3
 * Fixed replacing some oEmbeds
 * Fixed potential problems while retrieving a single embed provider
