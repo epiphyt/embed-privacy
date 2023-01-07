@@ -717,6 +717,45 @@ class Embed_Privacy {
 	/**
 	 * Get en oEmbed title by its title attribute.
 	 * 
+	 * @since	1.6.4
+	 * 
+	 * @param	string	$content The content to get the title of
+	 * @return	array The dimensions or an empty array
+	 */
+	private function get_oembed_dimensions( $content ) {
+		libxml_use_internal_errors( true );
+		$dom = new DOMDocument();
+		$dom->loadHTML(
+			mb_convert_encoding(
+				// adding root element, see https://github.com/epiphyt/embed-privacy/issues/22
+				'<html>' . $content . '</html>',
+				'HTML-ENTITIES',
+				'UTF-8'
+			),
+			LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
+		);
+		libxml_use_internal_errors( false );
+		
+		foreach ( [ 'embed', 'iframe', 'img', 'object' ] as $tag ) {
+			foreach ( $dom->getElementsByTagName( $tag ) as $element ) {
+				$height = $element->getAttribute( 'height' );
+				$width = $element->getAttribute( 'width' );
+				
+				if ( $height && $width ) {
+					return [
+						'height' => $height,
+						'width' => $width,
+					];
+				}
+			}
+		}
+		
+		return [];
+	}
+	
+	/**
+	 * Get en oEmbed title by its title attribute.
+	 * 
 	 * @since	1.4.0
 	 * 
 	 * @param	string	$content The content to get the title of
@@ -1864,6 +1903,20 @@ class Embed_Privacy {
 		$args['embed_title'] = ! empty( $embed_title ) ? sprintf( __( '"%s"', 'embed-privacy' ), $embed_title ) : '';
 		$args['embed_url'] = $url;
 		$args['strip_newlines'] = true;
+		
+		// the default dimensions are useless
+		if (
+			! empty( $args['height'] ) && $args['height'] === 1000
+			&& ! empty( $args['width'] ) && $args['width'] === 750
+		) {
+			unset( $args['height'], $args['width'] );
+			
+			$dimensions = $this->get_oembed_dimensions( $output );
+			
+			if ( ! empty( $dimensions ) ) {
+				$args = array_merge( $args, $dimensions );
+			}
+		}
 		
 		// add two click to markup
 		return $this->get_output_template( $embed_provider, $embed_provider_lowercase, $output, $args );
