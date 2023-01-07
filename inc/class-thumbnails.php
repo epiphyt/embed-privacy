@@ -105,12 +105,10 @@ class Thumbnails {
 
 						$missing_url = strpos( $post->post_content, $url ) === false;
 					}
-					if ( $missing_id && $missing_url ) {
-						if ( ! $this->is_in_use( $meta_value, $post_id, $global_metadata ) ) {
-							$this->delete( $meta_value );
-							delete_post_meta( $post_id, $meta_key );
-							delete_post_meta( $post_id, $meta_key . '_url' );
-						}
+					if ( $missing_id && $missing_url && ! $this->is_in_use( $meta_value, $post_id, $global_metadata ) ) {
+						$this->delete( $meta_value );
+						delete_post_meta( $post_id, $meta_key );
+						delete_post_meta( $post_id, $meta_key . '_url' );
 					}
 				}
 			}
