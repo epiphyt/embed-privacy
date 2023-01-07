@@ -173,7 +173,7 @@ class Thumbnails {
 		$thumbnail_path = '';
 		$thumbnail_url = '';
 		
-        if ( strpos( $url, 'slideshare.net' ) !== false ) {
+		if ( strpos( $url, 'slideshare.net' ) !== false ) {
 			$id = preg_replace( '/.*\/embed_code\/key\//', '', $url );
 			
 			if ( strpos( $id, '?' ) !== false ) {
@@ -221,7 +221,7 @@ class Thumbnails {
 	 * @return	string The returned oEmbed HTML
 	 */
 	public function get_from_provider( $return, $data, $url ) {
-        if ( strpos( $url, 'slideshare.net' ) !== false ) {
+		if ( strpos( $url, 'slideshare.net' ) !== false ) {
 			// the thumbnail URL contains sizing parameters in the query string
 			// remove this to get the maximum resolution
 			$thumbnail_url = preg_replace( '/\?.*/', '', $data->thumbnail_url );
