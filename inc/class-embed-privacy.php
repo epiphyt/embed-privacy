@@ -1838,7 +1838,7 @@ class Embed_Privacy {
 	/**
 	 * Replace oembed embeds with a container and hide the embed with an HTML comment.
 	 * 
-	 * @since		1.2.0
+	 * @since	1.2.0
 	 * 
 	 * @param	string	$output The original output
 	 * @param	string	$url The URL to the embed
