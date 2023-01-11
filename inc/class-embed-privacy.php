@@ -165,6 +165,7 @@ class Embed_Privacy {
 	 * @var		string[] List of ignored shortcodes
 	 */
 	private $ignored_shortcodes = [
+		'embed_privacy_opt_out',
 		'grw',
 	];
 	
@@ -1226,7 +1227,8 @@ class Embed_Privacy {
 				// get overlay template as DOM element
 				$template_dom->loadHTML(
 					mb_convert_encoding(
-						$this->get_output_template( $embed_provider, $embed_provider_lowercase, $dom->saveHTML( $element ), $args ),
+						// replace any % to make sure they won't get recognized as encoded content later
+						str_replace( '%', '%_epi_', $this->get_output_template( $embed_provider, $embed_provider_lowercase, $dom->saveHTML( $element ), $args ) ),
 						'HTML-ENTITIES',
 						'UTF-8'
 					),
