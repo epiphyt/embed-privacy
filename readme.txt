@@ -2,7 +2,7 @@
 Contributors: epiphyt, kittmedia, krafit
 Tags: oembed, privacy, gutenberg
 Requires at least: 5.0
-Stable tag: 1.6.4
+Stable tag: 1.6.5
 Tested up to: 6.1
 Requires PHP: 5.6
 License: GPL2
@@ -132,6 +132,10 @@ We are [Epiphyt](https://epiph.yt/), your friendly neighborhood WordPress plugin
 
 
 == Changelog ==
+
+= 1.6.5 =
+* Fixed aspect ratio for non-default content width themes
+* Fixed handling of the % character
 
 = 1.6.4 =
 * Fixed aspect ratio for many oEmbeds

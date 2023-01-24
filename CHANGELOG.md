@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.5
+* Fixed aspect ratio for non-default content width themes
+* Fixed handling of the % character
+
 ## 1.6.4
 * Fixed aspect ratio for many oEmbeds
 
