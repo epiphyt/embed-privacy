@@ -1,10 +1,11 @@
 <?php
 /** @noinspection CssUnusedSymbol */
 namespace epiphyt\Embed_Privacy;
+
 use Automattic\Jetpack\Assets;
+use DOMDocument;
 use DOMXPath;
 use Elementor\Plugin;
-use DOMDocument;
 use Jetpack;
 use WP_Post;
 use function __;
@@ -1909,7 +1910,7 @@ class Embed_Privacy {
 		// the default dimensions are useless
 		if (
 			! empty( $args['height'] ) && $args['height'] === 1000
-			&& ! empty( $args['width'] ) && $args['width'] === 750
+			&& ! empty( $args['width'] ) && ( $args['width'] === 750 || $args['width'] === $GLOBALS['content_width'] )
 		) {
 			unset( $args['height'], $args['width'] );
 			
