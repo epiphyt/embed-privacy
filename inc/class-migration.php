@@ -999,7 +999,7 @@ class Migration {
 				'meta_input' => [
 					'is_system' => 'yes',
 					'privacy_policy_url' => __( 'https://policies.google.com/privacy?hl=en', 'embed-privacy' ),
-					'regex_default' => '/https?:\\\/\\\/(?:.+?.)?youtu(?:.be|be.com)/',
+					'regex_default' => '/https?:\/\/(?:.+?.)?youtu(?:.be|be-nocookie.com|be.com)/',
 				],
 				/* translators: embed provider */
 				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'YouTube', 'embed provider', 'embed-privacy' ) ),
