@@ -272,7 +272,7 @@ class Embed_Privacy {
 		add_filter( 'et_builder_get_oembed', [ $this, 'replace_embeds_divi' ], 10, 2 );
 		add_filter( 'pll_get_post_types', [ $this, 'register_polylang_post_type' ], 10, 2 );
 		add_filter( 'the_content', [ $this, 'replace_embeds' ] );
-		add_filter( 'wp_video_shortcode', [ $this, 'replace_video_shortcode' ], 10, 5 );
+		add_filter( 'wp_video_shortcode', [ $this, 'replace_video_shortcode' ], 10, 2 );
 		
 		add_shortcode( 'embed_privacy_opt_out', [ $this, 'shortcode_opt_out' ] );
 		
@@ -2047,12 +2047,8 @@ class Embed_Privacy {
 	 * 
 	 * @param	string	$output Video shortcode HTML output
 	 * @param	array	$atts Array of video shortcode attributes
-	 * @param	string	$video Video file
-	 * @param	int		$post_id Post ID
-	 * @param	string	$library Media library used for the video shortcode
-	 * @return	string Updated video shortcode output
 	 */
-	public function replace_video_shortcode( $output, $atts, $video, $post_id, $library ) {
+	public function replace_video_shortcode( $output, $atts ) {
 		return $this->replace_embeds_oembed( $output, $atts['src'], $atts );
 	}
 	
