@@ -75,6 +75,7 @@ class Thumbnails {
 		$global_metadata = $this->get_metadata();
 		$metadata = get_post_meta( $post_id );
 		$supported_providers = [
+			'slideshare',
 			'vimeo',
 			'youtube',
 		];
@@ -92,12 +93,22 @@ class Thumbnails {
 				if ( strpos( $meta_key, '_' . $provider . '_' ) !== false && strpos( $meta_key, '_url' ) === false ) {
 					$id = str_replace( 'embed_privacy_thumbnail_' . $provider . '_', '', $meta_key );
 					
-					if ( strpos( $post->post_content, $id ) === false ) {
-						if ( ! $this->is_in_use( $meta_value, $post_id, $global_metadata ) ) {
-							$this->delete( $meta_value );
-							delete_post_meta( $post_id, $meta_key );
-							delete_post_meta( $post_id, $meta_key . '_url' );
+					$missing_id = strpos( $post->post_content, $id ) === false;
+					$missing_url = true;
+
+					if ( $missing_id && isset( $metadata[ $meta_key . '_url' ] ) ) {
+						$url = $metadata[ $meta_key . '_url' ];
+
+						if ( is_array( $url ) ) {
+							$url = reset( $url );
 						}
+
+						$missing_url = strpos( $post->post_content, $url ) === false;
+					}
+					if ( $missing_id && $missing_url && ! $this->is_in_use( $meta_value, $post_id, $global_metadata ) ) {
+						$this->delete( $meta_value );
+						delete_post_meta( $post_id, $meta_key );
+						delete_post_meta( $post_id, $meta_key . '_url' );
 					}
 				}
 			}
@@ -160,7 +171,16 @@ class Thumbnails {
 		$thumbnail_path = '';
 		$thumbnail_url = '';
 		
-		if ( strpos( $url, 'vimeo.com' ) !== false ) {
+		if ( strpos( $url, 'slideshare.net' ) !== false ) {
+			$id = preg_replace( '/.*\/embed_code\/key\//', '', $url );
+			
+			if ( strpos( $id, '?' ) !== false ) {
+				$id = substr( $id, 0, strpos( $id, '?' ) );
+			}
+			
+			$thumbnail = get_post_meta( $post->ID, 'embed_privacy_thumbnail_slideshare_' . $id, true );
+		}
+		else if ( strpos( $url, 'vimeo.com' ) !== false ) {
 			$id = str_replace( [ 'https://vimeo.com/', 'https://player.vimeo.com/video/' ], '', $url );
 			
 			if ( strpos( $id, '?' ) !== false ) {
@@ -199,7 +219,19 @@ class Thumbnails {
 	 * @return	string The returned oEmbed HTML
 	 */
 	public function get_from_provider( $return, $data, $url ) {
-		if ( strpos( $url, 'vimeo.com' ) !== false ) {
+		if ( strpos( $url, 'slideshare.net' ) !== false ) {
+			// the thumbnail URL contains sizing parameters in the query string
+			// remove this to get the maximum resolution
+			$thumbnail_url = preg_replace( '/\?.*/', '', $data->thumbnail_url );
+			$extracted = preg_replace( '/.*\/embed_code\/key\//', '', $data->html );
+			$parts = explode( '"', $extracted );
+			$id = isset( $parts[0] ) ? $parts[0] : false;
+			
+			if ( $id ) {
+				$this->set_slideshare_thumbnail( $id, $url, $thumbnail_url );
+			}
+		}
+		else if ( strpos( $url, 'vimeo.com' ) !== false ) {
 			// the thumbnail URL has usually something like _295x166 in the end
 			// remove this to get the maximum resolution
 			$thumbnail_url = substr( $data->thumbnail_url, 0, strrpos( $data->thumbnail_url, '_' ) );
@@ -271,6 +303,7 @@ class Thumbnails {
 	 */
 	public function get_supported_providers() {
 		return [
+			_x( 'Slideshare', 'embed provider', 'embed-privacy' ),
 			_x( 'Vimeo', 'embed provider', 'embed-privacy' ),
 			_x( 'YouTube', 'embed provider', 'embed-privacy' ),
 		];
@@ -364,5 +397,33 @@ class Thumbnails {
 			update_post_meta( $post->ID, 'embed_privacy_thumbnail_youtube_' . $id . '_url', $url );
 			break;
 		}
+	}
+
+	/**
+	 * Download and save a Slideshare thumbnail.
+	 * 
+	 * @param	string	$id Slideshare embed ID
+	 * @param	string	$url Slideshare deck URL
+	 * @param	string	$thumbnail_url Slideshare thumbnail URL
+	 */
+	public function set_slideshare_thumbnail( $id, $url, $thumbnail_url ) {
+		$post = get_post();
+		
+		if ( ! $post ) {
+			return;
+		}
+		
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+		
+		$file = download_url( $thumbnail_url );
+		
+		if ( is_wp_error( $file ) ) {
+			return;
+		}
+		
+		$filename = 'slideshare-' . $id . '.jpg' ;
+		rename( $file, self::DIRECTORY . '/' . $filename );
+		update_post_meta( $post->ID, 'embed_privacy_thumbnail_slideshare_' . $id, $filename );
+		update_post_meta( $post->ID, 'embed_privacy_thumbnail_slideshare_' . $id . '_url', $url );
 	}
 }
