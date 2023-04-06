@@ -66,7 +66,7 @@ class Migration {
 	 * @var		string Current migration version
 	 * @since	1.2.2
 	 */
-	private $version = '1.6.0';
+	private $version = '1.7.0';
 	
 	/**
 	 * Post Type constructor.
@@ -227,30 +227,39 @@ class Migration {
 			case $this->version:
 				// most recent version, do nothing
 				break;
+			case '1.6.0':
+				$this->migrate_1_7_0();
+				break;
 			case '1.5.0':
+				$this->migrate_1_7_0();
 				$this->migrate_1_6_0();
 				break;
 			case '1.4.7':
+				$this->migrate_1_7_0();
 				$this->migrate_1_6_0();
 				$this->migrate_1_5_0();
 				break;
 			case '1.4.0':
+				$this->migrate_1_7_0();
 				$this->migrate_1_6_0();
 				$this->migrate_1_5_0();
 				$this->migrate_1_4_7();
 				break;
 			case '1.3.0':
+				$this->migrate_1_7_0();
 				$this->migrate_1_6_0();
 				$this->migrate_1_5_0();
 				$this->migrate_1_4_0();
 				break;
 			case '1.2.2':
+				$this->migrate_1_7_0();
 				$this->migrate_1_6_0();
 				$this->migrate_1_5_0();
 				$this->migrate_1_4_0();
 				$this->migrate_1_3_0();
 				break;
 			case '1.2.1':
+				$this->migrate_1_7_0();
 				$this->migrate_1_6_0();
 				$this->migrate_1_5_0();
 				$this->migrate_1_4_0();
@@ -258,6 +267,7 @@ class Migration {
 				$this->migrate_1_2_2();
 				break;
 			case '1.2.0':
+				$this->migrate_1_7_0();
 				$this->migrate_1_6_0();
 				$this->migrate_1_5_0();
 				$this->migrate_1_4_0();
@@ -525,6 +535,28 @@ class Migration {
 	}
 	
 	/**
+	 * Migrations for version 1.7.0.
+	 * 
+	 * @see		https://github.com/epiphyt/embed-privacy/issues/163
+	 * @since	1.7.0
+	 * 
+	 * - Update Google Maps regex
+	 */
+	private function migrate_1_7_0() {
+		$crowdsignal_provider = get_posts( [
+			'meta_key' => 'is_system',
+			'meta_value' => 'yes',
+			'name' => 'crowdsignal',
+			'post_type' => 'epi_embed',
+		] );
+		$crowdsignal_provider = reset( $crowdsignal_provider );
+		
+		if ( $crowdsignal_provider instanceof WP_Post ) {
+			update_post_meta( $crowdsignal_provider->ID, 'regex_default', '/((poll(\\\.fm|daddy\\\.com))|crowdsignal\\\.(com|net)|survey\\\.fm)/' );
+		}
+	}
+	
+	/**
 	 * Migrations for version 1.6.0.
 	 * 
 	 * @see		https://github.com/epiphyt/embed-privacy/issues/124
@@ -591,7 +623,7 @@ class Migration {
 				'meta_input' => [
 					'is_system' => 'yes',
 					'privacy_policy_url' => __( 'https://automattic.com/privacy/', 'embed-privacy' ),
-					'regex_default' => '/((poll(\\\.fm|daddy\\\.com))|croudsignal\\\.com|survey\\\.fm)/',
+					'regex_default' => '/((poll(\\\.fm|daddy\\\.com))|crowdsignal\\\.(com|net)|survey\\\.fm)/',
 				],
 				/* translators: embed provider */
 				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Crowdsignal', 'embed provider', 'embed-privacy' ) ),
