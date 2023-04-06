@@ -2040,6 +2040,18 @@ class Embed_Privacy {
 		return $this->get_output_template( $embed_provider->post_title, $embed_provider->post_name, $output );
 	}
 	
+	/**
+	 * Replace video shortcode embeds.
+	 * 
+	 * @since	1.7.0
+	 * 
+	 * @param	string	$output Video shortcode HTML output
+	 * @param	array	$atts Array of video shortcode attributes
+	 * @param	string	$video Video file
+	 * @param	int		$post_id Post ID
+	 * @param	string	$library Media library used for the video shortcode
+	 * @return	string Updated video shortcode output
+	 */
 	public function replace_video_shortcode( $output, $atts, $video, $post_id, $library ) {
 		return $this->replace_embeds_oembed( $output, $atts['src'], $atts );
 	}
