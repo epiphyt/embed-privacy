@@ -1,9 +1,9 @@
 <?php
-/** @noinspection CssUnusedSymbol */
 namespace epiphyt\Embed_Privacy;
-
 use Automattic\Jetpack\Assets;
 use DOMDocument;
+use DOMElement;
+use DOMNode;
 use DOMXPath;
 use Elementor\Plugin;
 use Jetpack;
@@ -430,7 +430,7 @@ class Embed_Privacy {
 			}
 			
 			// store the elements to replace (see regressive loop down below)
-			if ( is_a( $overlay, 'DOMNode' ) || is_a( $overlay, 'DOMElement' ) ) {
+			if ( $overlay instanceof DOMNode || $overlay instanceof DOMElement ) {
 				$replacements[] = [
 					'element' => $element,
 					'replace' => $dom->importNode( $overlay, true ),
@@ -482,7 +482,7 @@ class Embed_Privacy {
 		
 		$embed_providers = $this->get_embeds();
 		$embed = null;
-		$pattern = '/^' . preg_quote( $name ) . '\-\d+/';
+		$pattern = '/^' . preg_quote( $name, '/' ) . '\-\d+/';
 		
 		foreach ( $embed_providers as $embed_provider ) {
 			if ( $embed_provider->post_name !== $name && ! preg_match( $pattern, $embed_provider->post_name ) ) {
@@ -1165,7 +1165,7 @@ class Embed_Privacy {
 					continue;
 				}
 				
-				if ( ! empty ( $args['regex'] ) && ! preg_match( $args['regex'], $element->getAttribute( $args['element_attribute'] ) ) ) {
+				if ( ! empty( $args['regex'] ) && ! preg_match( $args['regex'], $element->getAttribute( $args['element_attribute'] ) ) ) {
 					continue;
 				}
 				
@@ -1245,7 +1245,7 @@ class Embed_Privacy {
 				}
 				
 				// store the elements to replace (see regressive loop down below)
-				if ( is_a( $overlay, 'DOMNode' ) || is_a( $overlay, 'DOMElement' ) ) {
+				if ( $overlay instanceof DOMNode || $overlay instanceof DOMElement ) {
 					$replacements[] = [
 						'element' => $element,
 						'replace' => $dom->importNode( $overlay, true ),
@@ -1326,7 +1326,7 @@ class Embed_Privacy {
 					$allowed_tags = apply_filters( 'embed_privacy_matcher_elements', $allowed_tags, $embed_provider_lowercase );
 					
 					$tags_regex = '(' . implode( '|', array_filter( $allowed_tags, function( $tag ) {
-						return preg_quote( $tag );
+						return preg_quote( $tag, '/' );
 					} ) ) . ')';
 					$args['regex'] = '/<' . $tags_regex . '([^"]*)"([^<]*)' . trim( $args['regex'], '/' ) . '([^"]*)"([^>]*)(>(.*)<\/' . $tags_regex . ')?>/';
 				}
@@ -1341,9 +1341,8 @@ class Embed_Privacy {
 			$content = rawurldecode( $content );
 		}
 		
-		return 
-			// remove root element, see https://github.com/epiphyt/embed-privacy/issues/22
-			str_replace(
+		// remove root element, see https://github.com/epiphyt/embed-privacy/issues/22
+		return str_replace(
 			[
 				'<html>',
 				'</html>',
@@ -1458,7 +1457,7 @@ class Embed_Privacy {
 	 */
 	public function is_elementor() {
 		if ( ! function_exists( 'is_plugin_active' ) ) {
-			include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+			include_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 		
 		if (
