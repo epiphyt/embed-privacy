@@ -426,6 +426,36 @@ class Thumbnails {
 		
 		return $is_in_use;
 	}
+
+	/**
+	 * Download and save a Slideshare thumbnail.
+	 * 
+	 * @since	1.7.0
+	 * 
+	 * @param	string	$id Slideshare embed ID
+	 * @param	string	$url Slideshare deck URL
+	 * @param	string	$thumbnail_url Slideshare thumbnail URL
+	 */
+	public function set_slideshare_thumbnail( $id, $url, $thumbnail_url ) {
+		$post = get_post();
+		
+		if ( ! $post ) {
+			return;
+		}
+		
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+		
+		$file = download_url( $thumbnail_url );
+		
+		if ( is_wp_error( $file ) ) {
+			return;
+		}
+		
+		$filename = 'slideshare-' . $id . '.jpg' ;
+		rename( $file, self::DIRECTORY . '/' . $filename );
+		update_post_meta( $post->ID, 'embed_privacy_thumbnail_slideshare_' . $id, $filename );
+		update_post_meta( $post->ID, 'embed_privacy_thumbnail_slideshare_' . $id . '_url', $url );
+	}
 	
 	/**
 	 * Download and save a Vimeo thumbnail.
@@ -490,33 +520,5 @@ class Thumbnails {
 			update_post_meta( $post->ID, 'embed_privacy_thumbnail_youtube_' . $id . '_url', $url );
 			break;
 		}
-	}
-
-	/**
-	 * Download and save a Slideshare thumbnail.
-	 * 
-	 * @param	string	$id Slideshare embed ID
-	 * @param	string	$url Slideshare deck URL
-	 * @param	string	$thumbnail_url Slideshare thumbnail URL
-	 */
-	public function set_slideshare_thumbnail( $id, $url, $thumbnail_url ) {
-		$post = get_post();
-		
-		if ( ! $post ) {
-			return;
-		}
-		
-		require_once ABSPATH . 'wp-admin/includes/file.php';
-		
-		$file = download_url( $thumbnail_url );
-		
-		if ( is_wp_error( $file ) ) {
-			return;
-		}
-		
-		$filename = 'slideshare-' . $id . '.jpg' ;
-		rename( $file, self::DIRECTORY . '/' . $filename );
-		update_post_meta( $post->ID, 'embed_privacy_thumbnail_slideshare_' . $id, $filename );
-		update_post_meta( $post->ID, 'embed_privacy_thumbnail_slideshare_' . $id . '_url', $url );
 	}
 }
