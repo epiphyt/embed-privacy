@@ -272,6 +272,7 @@ class Embed_Privacy {
 		add_filter( 'et_builder_get_oembed', [ $this, 'replace_embeds_divi' ], 10, 2 );
 		add_filter( 'pll_get_post_types', [ $this, 'register_polylang_post_type' ], 10, 2 );
 		add_filter( 'the_content', [ $this, 'replace_embeds' ] );
+		add_filter( 'wp_video_shortcode', [ $this, 'replace_video_shortcode' ], 10, 5 );
 		
 		add_shortcode( 'embed_privacy_opt_out', [ $this, 'shortcode_opt_out' ] );
 		
@@ -2037,6 +2038,10 @@ class Embed_Privacy {
 		}
 		
 		return $this->get_output_template( $embed_provider->post_title, $embed_provider->post_name, $output );
+	}
+	
+	public function replace_video_shortcode( $output, $atts, $video, $post_id, $library ) {
+		return $this->replace_embeds_oembed( $output, $atts['src'], $atts );
 	}
 	
 	/**

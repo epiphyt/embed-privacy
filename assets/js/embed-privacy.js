@@ -253,6 +253,12 @@ document.addEventListener( 'DOMContentLoaded', function() {
 			// append it to body
 			embedContent.appendChild( element );
 		}
+		
+		const videoShortcode = jQuery( '.wp-video-shortcode' );
+		
+		if ( videoShortcode.length ) {
+			videoShortcode.mediaelementplayer();
+		}
 	}
 	
 	/**
