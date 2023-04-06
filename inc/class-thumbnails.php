@@ -80,6 +80,15 @@ class Thumbnails {
 			'youtube',
 		];
 		
+		/**
+		 * Filter the supported provider names.
+		 * 
+		 * @since	1.7.0
+		 * 
+		 * @param	array	$supported_providers Current supported provider names
+		 */
+		$supported_providers = apply_filters( 'embed_privacy_thumbnail_supported_provider_names', $supported_providers );
+		
 		foreach ( $metadata as $meta_key => $meta_value ) {
 			if ( strpos( $meta_key, 'embed_privacy_thumbnail_' ) === false ) {
 				continue;
@@ -105,11 +114,29 @@ class Thumbnails {
 
 						$missing_url = strpos( $post->post_content, $url ) === false;
 					}
+					
 					if ( $missing_id && $missing_url && ! $this->is_in_use( $meta_value, $post_id, $global_metadata ) ) {
 						$this->delete( $meta_value );
 						delete_post_meta( $post_id, $meta_key );
 						delete_post_meta( $post_id, $meta_key . '_url' );
 					}
+					
+					/**
+					 * Fires after orphaned data have been checked.
+					 * 
+					 * @since	1.7.0
+					 * 
+					 * @param	string	$provider Provider name
+					 * @param	string	$id The ID of the embedded content
+					 * @param	string	$url The embed URL
+					 * @param	bool	$missin_id Whether the ID is missing
+					 * @param	bool	$missing_url Whether the URL is missing
+					 * @param	string	$meta_value The thumbnail filename
+					 * @param	string	$meta_key The thumbnail meta key
+					 * @param	WP_Post	$post The post object
+					 * @param	int		$post_id The post ID
+					 */
+					do_action( 'embed_privacy_thumbnails_checked_orphaned', $provider, $id, $url, $missing_id, $missing_url, $meta_value, $meta_key, $post, $post_id );
 				}
 			}
 		}
@@ -195,6 +222,28 @@ class Thumbnails {
 			$thumbnail = get_post_meta( $post->ID, 'embed_privacy_thumbnail_youtube_' . $id, true );
 		}
 		
+		/**
+		 * Filter the thumbnail ID.
+		 * 
+		 * @since	1.7.0
+		 * 
+		 * @param	string	$id The thumbnail ID
+		 * @param	WP_Post	$post The post object
+		 * @param	string	$url The embed URL
+		 */
+		$id = apply_filters( 'embed_privacy_thumbnail_id', $id, $post, $url );
+		
+		/**
+		 * Filter the thumbnail filename.
+		 * 
+		 * @since	1.7.0
+		 * 
+		 * @param	string	$thumbnail The thumbnail filename
+		 * @param	WP_Post	$post The post object
+		 * @param	string	$url The embed URL
+		 */
+		$thumbnail = apply_filters( 'embed_privacy_thumbnail_filename', $thumbnail, $post, $url );
+		
 		if ( $thumbnail ) {
 			$thumbnail_path = self::DIRECTORY . '/' . $thumbnail;
 			
@@ -203,6 +252,28 @@ class Thumbnails {
 				$thumbnail_url = home_url( $relative_path );
 			}
 		}
+		
+		/**
+		 * Filter the thumbnail path.
+		 * 
+		 * @since	1.7.0
+		 * 
+		 * @param	string	$thumbnail The thumbnail path
+		 * @param	WP_Post	$post The post object
+		 * @param	string	$url The embed URL
+		 */
+		$thumbnail_path = apply_filters( 'embed_privacy_thumbnail_path', $thumbnail_path, $post, $url );
+		
+		/**
+		 * Filter the thumbnail URL.
+		 * 
+		 * @since	1.7.0
+		 * 
+		 * @param	string	$thumbnail The thumbnail URL
+		 * @param	WP_Post	$post The post object
+		 * @param	string	$url The embed URL
+		 */
+		$thumbnail_url = apply_filters( 'embed_privacy_thumbnail_url', $thumbnail_url, $post, $url );
 		
 		return [
 			'thumbnail_path' => $thumbnail_path,
@@ -258,6 +329,17 @@ class Thumbnails {
 			}
 		}
 		
+		/**
+		 * Fires after getting data from provider.
+		 * 
+		 * @since	1.7.0
+		 * 
+		 * @param	string	$return The returned oEmbed HTML
+		 * @param	object	$data A data object result from an oEmbed provider
+		 * @param	string	$url The URL of the content to be embedded
+		 */
+		do_action( 'embed_privacy_get_from_provider', $return, $data, $url );
+		
 		return $return;
 	}
 	
@@ -302,11 +384,22 @@ class Thumbnails {
 	 * @return	array A list of supported embed providers
 	 */
 	public function get_supported_providers() {
-		return [
+		$providers = [
 			_x( 'Slideshare', 'embed provider', 'embed-privacy' ),
 			_x( 'Vimeo', 'embed provider', 'embed-privacy' ),
 			_x( 'YouTube', 'embed provider', 'embed-privacy' ),
 		];
+		
+		/**
+		 * Filter the supported providers.
+		 * 
+		 * @since	1.7.0
+		 * 
+		 * @param	array	$supported_providers Current supported providers
+		 */
+		$providers = apply_filters( 'embed_privacy_thumbnail_supported_providers', $providers );
+		
+		return $providers;
 	}
 	
 	/**
