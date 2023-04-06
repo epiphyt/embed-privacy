@@ -20,6 +20,10 @@
 		}
 	}
 	
+	&.is-enabled {
+		background-image: none !important;
+	}
+	
 	&:last-child {
 		margin-bottom: 0;
 	}
