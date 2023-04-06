@@ -1908,9 +1908,12 @@ class Embed_Privacy {
 		$args['strip_newlines'] = true;
 		
 		// the default dimensions are useless
+		// so ignore them if recognized as such
+		$defaults = wp_embed_defaults( $url );
+		
 		if (
-			! empty( $args['height'] ) && $args['height'] === 1000
-			&& ! empty( $args['width'] ) && ( $args['width'] === 750 || $args['width'] === $GLOBALS['content_width'] )
+			! empty( $args['height'] ) && $args['height'] === $defaults['height']
+			&& ! empty( $args['width'] ) && $args['width'] === $defaults['width']
 		) {
 			unset( $args['height'], $args['width'] );
 			
