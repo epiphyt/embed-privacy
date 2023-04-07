@@ -136,7 +136,7 @@ class Thumbnails {
 					 * @param	WP_Post	$post The post object
 					 * @param	int		$post_id The post ID
 					 */
-					do_action( 'embed_privacy_thumbnails_checked_orphaned', $provider, $id, $url, $missing_id, $missing_url, $meta_value, $meta_key, $post, $post_id );
+					do_action( 'embed_privacy_thumbnail_checked_orphaned', $provider, $id, $url, $missing_id, $missing_url, $meta_value, $meta_key, $post, $post_id );
 				}
 			}
 		}
@@ -231,7 +231,7 @@ class Thumbnails {
 		 * @param	WP_Post	$post The post object
 		 * @param	string	$url The embed URL
 		 */
-		$id = apply_filters( 'embed_privacy_thumbnail_id', $id, $post, $url );
+		$id = apply_filters( 'embed_privacy_thumbnail_data_id', $id, $post, $url );
 		
 		/**
 		 * Filter the thumbnail filename.
@@ -242,7 +242,7 @@ class Thumbnails {
 		 * @param	WP_Post	$post The post object
 		 * @param	string	$url The embed URL
 		 */
-		$thumbnail = apply_filters( 'embed_privacy_thumbnail_filename', $thumbnail, $post, $url );
+		$thumbnail = apply_filters( 'embed_privacy_thumbnail_data_filename', $thumbnail, $post, $url );
 		
 		if ( $thumbnail ) {
 			$thumbnail_path = self::DIRECTORY . '/' . $thumbnail;
@@ -262,7 +262,7 @@ class Thumbnails {
 		 * @param	WP_Post	$post The post object
 		 * @param	string	$url The embed URL
 		 */
-		$thumbnail_path = apply_filters( 'embed_privacy_thumbnail_path', $thumbnail_path, $post, $url );
+		$thumbnail_path = apply_filters( 'embed_privacy_thumbnail_data_path', $thumbnail_path, $post, $url );
 		
 		/**
 		 * Filter the thumbnail URL.
@@ -273,7 +273,7 @@ class Thumbnails {
 		 * @param	WP_Post	$post The post object
 		 * @param	string	$url The embed URL
 		 */
-		$thumbnail_url = apply_filters( 'embed_privacy_thumbnail_url', $thumbnail_url, $post, $url );
+		$thumbnail_url = apply_filters( 'embed_privacy_thumbnail_data_url', $thumbnail_url, $post, $url );
 		
 		return [
 			'thumbnail_path' => $thumbnail_path,
@@ -338,7 +338,7 @@ class Thumbnails {
 		 * @param	object	$data A data object result from an oEmbed provider
 		 * @param	string	$url The URL of the content to be embedded
 		 */
-		do_action( 'embed_privacy_get_from_provider', $return, $data, $url );
+		do_action( 'embed_privacy_thumbnail_get_from_provider', $return, $data, $url );
 		
 		return $return;
 	}
