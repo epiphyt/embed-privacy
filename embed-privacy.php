@@ -1,6 +1,5 @@
 <?php
 namespace epiphyt\Embed_Privacy;
-
 use function array_pop;
 use function define;
 use function defined;
@@ -15,7 +14,7 @@ use const WP_PLUGIN_DIR;
 /*
 Plugin Name:	Embed Privacy
 Description:	Embed Privacy prevents from loading external embeds directly and lets the user control which one should be loaded.
-Version:		1.6.5
+Version:		1.7.0
 Author:			Epiphyt
 Author URI:		https://epiph.yt
 License:		GPL2

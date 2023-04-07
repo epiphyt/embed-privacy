@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.7.0
+* Added support for crowdsignal.net
+* Added support for classic video shortcode/widget
+* Added support for Slideshare thumbnails (thanks to [@Lazza](https://github.com/Lazza))
+* Added support for custom thumbnail generation via filter
+* Fixed hiding thumbnails after embedded content has been enabled
+* Fixed aspect ratio for embeds without proper dimension information
+
 ## 1.6.5
 * Fixed aspect ratio for non-default content width themes
 * Fixed handling of the % character

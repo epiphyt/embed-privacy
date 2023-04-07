@@ -2,8 +2,8 @@
 Contributors: epiphyt, kittmedia, krafit
 Tags: oembed, privacy, gutenberg
 Requires at least: 5.0
-Stable tag: 1.6.5
-Tested up to: 6.1
+Stable tag: 1.7.0
+Tested up to: 6.2
 Requires PHP: 5.6
 License: GPL2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -132,6 +132,14 @@ We are [Epiphyt](https://epiph.yt/), your friendly neighborhood WordPress plugin
 
 
 == Changelog ==
+
+= 1.7.0 =
+* Added support for crowdsignal.net
+* Added support for classic video shortcode/widget
+* Added support for Slideshare thumbnails (thanks to [@Lazza](https://github.com/Lazza))
+* Added support for custom thumbnail generation via filter
+* Fixed hiding thumbnails after embedded content has been enabled
+* Fixed aspect ratio for embeds without proper dimension information
 
 = 1.6.5 =
 * Fixed aspect ratio for non-default content width themes
