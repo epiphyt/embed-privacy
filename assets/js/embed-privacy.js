@@ -254,10 +254,12 @@ document.addEventListener( 'DOMContentLoaded', function() {
 			embedContent.appendChild( element );
 		}
 		
-		const videoShortcode = jQuery( '.wp-video-shortcode' );
-		
-		if ( videoShortcode.length ) {
-			videoShortcode.mediaelementplayer();
+		if ( typeof jQuery !== 'undefined' ) {
+			const videoShortcode = jQuery( '.wp-video-shortcode' );
+			
+			if ( videoShortcode.length ) {
+				videoShortcode.mediaelementplayer();
+			}
 		}
 	}
 	
