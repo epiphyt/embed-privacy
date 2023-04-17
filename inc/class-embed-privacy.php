@@ -1879,7 +1879,8 @@ class Embed_Privacy {
 		
 		// see https://github.com/epiphyt/embed-privacy/issues/89
 		if ( empty( $embed_provider ) ) {
-			$embed_provider = wp_parse_url( $url )['host'];
+			$parsed_url = wp_parse_url( $url );
+			$embed_provider = isset( $parsed_url['host'] ) ? $parsed_url['host'] : '';
 		}
 		
 		// make sure to only run once
