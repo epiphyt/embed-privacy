@@ -1546,6 +1546,10 @@ class Embed_Privacy {
 			require_once ABSPATH . WPINC . '/plugin.php';
 		}
 		
+		if ( is_plugin_active( 'kadence-blocks/kadence-blocks.php' ) ) {
+			wp_enqueue_style( 'embed-privacy-kadence-blocks' );
+		}
+		
 		if ( is_plugin_active( 'shortcodes-ultimate/shortcodes-ultimate.php' ) ) {
 			wp_enqueue_style( 'embed-privacy-shortcodes-ultimate' );
 		}
@@ -1648,6 +1652,11 @@ class Embed_Privacy {
 		$file_version = $is_debug ? filemtime( EPI_EMBED_PRIVACY_BASE . 'assets/style/elementor' . $suffix . '.css' ) : EMBED_PRIVACY_VERSION;
 		
 		wp_register_style( 'embed-privacy-elementor', $css_file_url, [], $file_version );
+		
+		$css_file_url = EPI_EMBED_PRIVACY_URL . 'assets/style/kadence-blocks' . $suffix . '.css';
+		$file_version = $is_debug ? filemtime( EPI_EMBED_PRIVACY_BASE . 'assets/style/kadence-blocks' . $suffix . '.css' ) : EMBED_PRIVACY_VERSION;
+		
+		wp_register_style( 'embed-privacy-kadence-blocks', $css_file_url, [], $file_version );
 		
 		$css_file_url = EPI_EMBED_PRIVACY_URL . 'assets/style/shortcodes-ultimate' . $suffix . '.css';
 		$file_version = $is_debug ? filemtime( EPI_EMBED_PRIVACY_BASE . 'assets/style/shortcodes-ultimate' . $suffix . '.css' ) : EMBED_PRIVACY_VERSION;
