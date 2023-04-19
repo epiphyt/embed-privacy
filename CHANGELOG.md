@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.7.1
+* Improved Google Maps height in Kadence Blocks
+* Fixed a JavaScript error if jQuery is not initialized
+* Fixed potential PHP warning regarding an undefined variable
+* Fixed potential PHP warning regarding an undefined hostname while retrieving the embed URL
+
 ## 1.7.0
 * Added support for crowdsignal.net
 * Added support for classic video shortcode/widget

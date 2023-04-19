@@ -14,7 +14,7 @@ use const WP_PLUGIN_DIR;
 /*
 Plugin Name:	Embed Privacy
 Description:	Embed Privacy prevents from loading external embeds directly and lets the user control which one should be loaded.
-Version:		1.7.0
+Version:		1.7.1
 Author:			Epiphyt
 Author URI:		https://epiph.yt
 License:		GPL2

@@ -2,7 +2,7 @@
 Contributors: epiphyt, kittmedia, krafit
 Tags: oembed, privacy, gutenberg
 Requires at least: 5.0
-Stable tag: 1.7.0
+Stable tag: 1.7.1
 Tested up to: 6.2
 Requires PHP: 5.6
 License: GPL2
@@ -132,6 +132,12 @@ We are [Epiphyt](https://epiph.yt/), your friendly neighborhood WordPress plugin
 
 
 == Changelog ==
+
+= 1.7.1 =
+* Improved Google Maps height in Kadence Blocks
+* Fixed a JavaScript error if jQuery is not initialized
+* Fixed potential PHP warning regarding an undefined variable
+* Fixed potential PHP warning regarding an undefined hostname while retrieving the embed URL
 
 = 1.7.0 =
 * Added support for crowdsignal.net
