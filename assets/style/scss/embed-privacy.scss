@@ -57,8 +57,8 @@
 	cursor: pointer;
 	display: table;
 	height: 100%;
-	min-height: 200px;
 	max-width: 100%;
+	min-height: 200px;
 	padding: 20px;
 	position: relative;
 	transition: background-color .25s ease-in-out, color .25s ease-in-out;
@@ -156,6 +156,7 @@
 		display: none;
 	}
 }
+
 .is-enabled {
 	+ .embed-privacy-opt-out-label > .embed-privacy-provider-is-disabled {
 		display: none;
