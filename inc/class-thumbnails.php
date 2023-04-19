@@ -194,6 +194,7 @@ class Thumbnails {
 			];
 		}
 		
+		$id = '';
 		$thumbnail = '';
 		$thumbnail_path = '';
 		$thumbnail_url = '';
