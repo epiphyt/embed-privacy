@@ -2,7 +2,7 @@
 Contributors: epiphyt, kittmedia, krafit
 Tags: oembed, privacy, gutenberg
 Requires at least: 5.0
-Stable tag: 1.7.1
+Stable tag: 1.7.2
 Tested up to: 6.2
 Requires PHP: 5.6
 License: GPL2
@@ -132,6 +132,9 @@ We are [Epiphyt](https://epiph.yt/), your friendly neighborhood WordPress plugin
 
 
 == Changelog ==
+
+= 1.7.2 =
+* Fixed getting the URL of video shortcodes properly to not block content from the same (sub)domain
 
 = 1.7.1 =
 * Improved Google Maps height in Kadence Blocks

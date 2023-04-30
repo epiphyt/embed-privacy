@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.7.2
+* Fixed getting the URL of video shortcodes properly to not block content from the same (sub)domain
+
 ## 1.7.1
 * Improved Google Maps height in Kadence Blocks
 * Fixed a JavaScript error if jQuery is not initialized
