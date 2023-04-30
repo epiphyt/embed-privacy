@@ -2059,7 +2059,34 @@ class Embed_Privacy {
 	 * @param	array	$atts Array of video shortcode attributes
 	 */
 	public function replace_video_shortcode( $output, $atts ) {
-		return $this->replace_embeds_oembed( $output, $atts['src'], $atts );
+		$url = isset( $atts['src'] ) ? $atts['src'] : '';
+		
+		if ( empty( $url ) && ! empty( $atts['mp4'] ) ) {
+			$url = $atts['mp4'];
+		}
+		else if ( empty( $url ) && ! empty( $atts['m4v'] ) ) {
+			$url = $atts['m4v'];
+		}
+		else if ( empty( $url ) && ! empty( $atts['webm'] ) ) {
+			$url = $atts['webm'];
+		}
+		else if ( empty( $url ) && ! empty( $atts['ogv'] ) ) {
+			$url = $atts['ogv'];
+		}
+		else if ( empty( $url ) && ! empty( $atts['flv'] ) ) {
+			$url = $atts['flv'];
+		}
+		
+		// add host to relative URL
+		if ( empty( wp_parse_url( $url, PHP_URL_HOST ) ) ) {
+			$url_parts = wp_parse_url( home_url() );
+			
+			if ( ! empty( $url_parts['scheme'] ) && ! empty( $url_parts['host'] ) ) {
+				$url = $url_parts['scheme'] . '://' . $url_parts['host'] . $url;
+			}
+		}
+		
+		return $this->replace_embeds_oembed( $output, $url, $atts );
 	}
 	
 	/**
