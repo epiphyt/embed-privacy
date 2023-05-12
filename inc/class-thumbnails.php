@@ -101,17 +101,17 @@ class Thumbnails {
 			foreach ( $supported_providers as $provider ) {
 				if ( strpos( $meta_key, '_' . $provider . '_' ) !== false && strpos( $meta_key, '_url' ) === false ) {
 					$id = str_replace( 'embed_privacy_thumbnail_' . $provider . '_', '', $meta_key );
-					
 					$missing_id = strpos( $post->post_content, $id ) === false;
 					$missing_url = true;
-
+					$url = '';
+					
 					if ( $missing_id && isset( $metadata[ $meta_key . '_url' ] ) ) {
 						$url = $metadata[ $meta_key . '_url' ];
-
+						
 						if ( is_array( $url ) ) {
 							$url = reset( $url );
 						}
-
+						
 						$missing_url = strpos( $post->post_content, $url ) === false;
 					}
 					
