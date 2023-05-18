@@ -2271,7 +2271,7 @@ class Embed_Privacy {
 			$output .= '</span>' . PHP_EOL;
 		}
 		
-		$output .= '</p>' . PHP_EOL . '</div>' . PHP_EOL;
+		$output .= '</div>' . PHP_EOL;
 		
 		return $output;
 	}
