@@ -219,13 +219,10 @@ class Migration {
 		// start the migration
 		$this->update_option( 'is_migrating', time() );
 		$this->update_option( 'migration_count', (int) $this->get_option( 'migration_count' ) + 1 );
-		
 		// load textdomain early for migrations
 		load_plugin_textdomain( 'embed-privacy', false, dirname( plugin_basename( Embed_Privacy::get_instance()->plugin_file ) ) . '/languages' );
-		
-		if ( $version !== $this->version ) {
-			$this->register_default_embed_providers();
-		}
+		// make sure all default embed providers are avalable and translated
+		$this->register_default_embed_providers();
 		
 		switch ( $version ) {
 			case $this->version:
