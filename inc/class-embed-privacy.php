@@ -1302,7 +1302,6 @@ class Embed_Privacy {
 				$provider instanceof WP_Post
 				&& ! get_post_meta( $provider->ID, 'is_system', true )
 				&& get_post_meta( $provider->ID, 'is_disabled', true ) !== 'yes'
-				&& preg_match( $args['regex'], $content, $matches )
 			) {
 				// extend regular expression to match the full element
 				if ( strpos( $args['regex'], '<' ) === false || strpos( $args['regex'], '>' ) === false ) {
@@ -1332,7 +1331,9 @@ class Embed_Privacy {
 					$args['regex'] = '/<' . $tags_regex . '([^"]*)"([^<]*)' . trim( $args['regex'], '/' ) . '([^"]*)"([^>]*)(>(.*)<\/' . $tags_regex . ')?>/';
 				}
 				
-				$content = preg_replace( $args['regex'], $this->get_output_template( $embed_provider, $embed_provider_lowercase, $matches[0], $args ), $content );
+				while ( preg_match( $args['regex'], $content, $matches ) ) {
+					$content = preg_replace( $args['regex'], $this->get_output_template( $embed_provider, $embed_provider_lowercase, $matches[0], $args ), $content, 1 );
+				}
 			}
 		}
 		
