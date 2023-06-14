@@ -1,5 +1,8 @@
 <?php
 namespace epiphyt\Embed_Privacy;
+
+use WP_Post;
+
 use function __;
 use function add_action;
 use function add_filter;
@@ -108,7 +111,7 @@ class Admin {
 		if ( $post_id ) {
 			$post = get_post( $post_id );
 			
-			if ( $post->post_type === 'epi_embed' && get_post_meta( $post->ID, 'is_system', true ) === 'yes' ) {
+			if ( $post instanceof WP_Post && $post->post_type === 'epi_embed' && get_post_meta( $post->ID, 'is_system', true ) === 'yes' ) {
 				$caps[] = 'do_not_allow';
 				
 				return $caps;
