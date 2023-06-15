@@ -62,7 +62,6 @@ use function is_string;
 use function json_decode;
 use function libxml_use_internal_errors;
 use function load_plugin_textdomain;
-use function mb_convert_encoding;
 use function md5;
 use function microtime;
 use function ob_get_clean;
@@ -390,12 +389,7 @@ class Embed_Privacy {
 		libxml_use_internal_errors( true );
 		$dom = new DOMDocument();
 		$dom->loadHTML(
-			mb_convert_encoding(
-				// adding root element, see https://github.com/epiphyt/embed-privacy/issues/22
-				'<html>' . $content . '</html>',
-				'HTML-ENTITIES',
-				'UTF-8'
-			),
+			'<html><meta charset="utf-8">' . $content . '</html>',
 			LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
 		);
 		$template_dom = new DOMDocument();
@@ -414,11 +408,7 @@ class Embed_Privacy {
 			
 			// get overlay template as DOM element
 			$template_dom->loadHTML(
-				mb_convert_encoding(
-					$this->get_output_template( $embed_provider->post_title, $embed_provider->post_name, $dom->saveHTML( $element ), $args ),
-					'HTML-ENTITIES',
-					'UTF-8'
-				),
+				'<html><meta charset="utf-8">' . $this->get_output_template( $embed_provider->post_title, $embed_provider->post_name, $dom->saveHTML( $element ), $args ) . '</html>',
 				LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
 			);
 			$overlay = null;
@@ -459,7 +449,7 @@ class Embed_Privacy {
 				$i--;
 			}
 			
-			$content = $dom->saveHTML( $dom->documentElement );
+			$content = str_replace( [ '<html><meta charset="utf-8">', '</html>' ], '', $dom->saveHTML( $dom->documentElement ) );
 		}
 		
 		libxml_use_internal_errors( false );
@@ -654,11 +644,7 @@ class Embed_Privacy {
 		libxml_use_internal_errors( true );
 		$dom = new DOMDocument();
 		$dom->loadHTML(
-			mb_convert_encoding(
-				'<html>' . $html . '</html>',
-				'HTML-ENTITIES',
-				'UTF-8'
-			),
+			'<html><meta charset="utf-8">' . $html . '</html>',
 			LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
 		);
 		
@@ -714,7 +700,7 @@ class Embed_Privacy {
 		$content = $dom->saveHTML( $dom->documentElement );
 		// phpcs:enable
 		
-		return str_replace( [ '<html>', '</html>' ], [ '<div class="embed-privacy-local-tweet">', '</div>' ], $content );
+		return str_replace( [ '<html><meta charset="utf-8">', '</html>' ], [ '<div class="embed-privacy-local-tweet">', '</div>' ], $content );
 	}
 	
 	/**
@@ -729,12 +715,7 @@ class Embed_Privacy {
 		libxml_use_internal_errors( true );
 		$dom = new DOMDocument();
 		$dom->loadHTML(
-			mb_convert_encoding(
-				// adding root element, see https://github.com/epiphyt/embed-privacy/issues/22
-				'<html>' . $content . '</html>',
-				'HTML-ENTITIES',
-				'UTF-8'
-			),
+			'<html><meta charset="utf-8">' . $content . '</html>',
 			LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
 		);
 		libxml_use_internal_errors( false );
@@ -768,12 +749,7 @@ class Embed_Privacy {
 		libxml_use_internal_errors( true );
 		$dom = new DOMDocument();
 		$dom->loadHTML(
-			mb_convert_encoding(
-				// adding root element, see https://github.com/epiphyt/embed-privacy/issues/22
-				'<html>' . $content . '</html>',
-				'HTML-ENTITIES',
-				'UTF-8'
-			),
+			'<html><meta charset="utf-8">' . $content . '</html>',
 			LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
 		);
 		libxml_use_internal_errors( false );
@@ -1117,13 +1093,7 @@ class Embed_Privacy {
 		libxml_use_internal_errors( true );
 		$dom = new DOMDocument();
 		$dom->loadHTML(
-			mb_convert_encoding(
-				// adding root element, see https://github.com/epiphyt/embed-privacy/issues/22
-				// replace any % to make sure they won't get recognized as encoded content later
-				'<html>' . str_replace( '%', '%_epi_', $content ) . '</html>',
-				'HTML-ENTITIES',
-				'UTF-8'
-			),
+			'<html><meta charset="utf-8">' . str_replace( '%', '%_epi_', $content ) . '</html>',
 			LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
 		);
 		$is_empty_provider = empty( $embed_provider );
@@ -1228,12 +1198,7 @@ class Embed_Privacy {
 				
 				// get overlay template as DOM element
 				$template_dom->loadHTML(
-					mb_convert_encoding(
-						// replace any % to make sure they won't get recognized as encoded content later
-						str_replace( '%', '%_epi_', $this->get_output_template( $embed_provider, $embed_provider_lowercase, $dom->saveHTML( $element ), $args ) ),
-						'HTML-ENTITIES',
-						'UTF-8'
-					),
+					'<html><meta charset="utf-8">' . str_replace( '%', '%_epi_', $this->get_output_template( $embed_provider, $embed_provider_lowercase, $dom->saveHTML( $element ), $args ) ) . '</html>',
 					LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
 				);
 				$overlay = null;
@@ -1346,7 +1311,7 @@ class Embed_Privacy {
 		// remove root element, see https://github.com/epiphyt/embed-privacy/issues/22
 		return str_replace(
 			[
-				'<html>',
+				'<html><meta charset="utf-8">',
 				'</html>',
 				'%_epi_',
 			],
