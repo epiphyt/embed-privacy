@@ -40,7 +40,7 @@ Basically we use the default WordPress coding style with some small adjustments.
 
 ### Testing
 
-Please make sure that your code is tested in a clean environment. A huge plus will be th know the code is tested in both a single and a multisite installation.
+Please make sure that your code is tested in a clean environment. A huge plus will be to know the code is tested in both a single and a multisite installation.
 
 ### Commit message
 
