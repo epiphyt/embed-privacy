@@ -36,6 +36,7 @@ class Thumbnails {
 	const DIRECTORY = WP_CONTENT_DIR . '/uploads/embed-privacy/thumbnails';
 	
 	/**
+	 * @since	1.7.3
 	 * @var		string The thumbnails directory path
 	 */
 	public static $directory;
