@@ -71,14 +71,19 @@ function delete_data() {
 	}
 	
 	// delete posts of custom post type
-	$embeds = get_posts( [
-		'numberposts' => -1,
+	$post_args = [
+		'fields' => 'ids',
 		'post_status' => 'any',
 		'post_type' => 'epi_embed',
-	] );
+	];
+	$embeds = \get_posts( $post_args );
 	
-	foreach ( $embeds as $embed ) {
-		wp_delete_post( $embed->ID, true );
+	while ( \count( $embeds ) ) {
+		foreach ( $embeds as $embed_id ) {
+			\wp_delete_post( $embed_id, true );
+		}
+		
+		$embeds = \get_posts( $post_args );
 	}
 	
 	require_once __DIR__ . '/inc/class-thumbnails.php';
