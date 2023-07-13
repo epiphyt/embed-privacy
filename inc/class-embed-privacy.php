@@ -1630,10 +1630,9 @@ class Embed_Privacy {
 		wp_register_style( 'embed-privacy-shortcodes-ultimate', $css_file_url, [], $file_version );
 		
 		$current_url = sprintf(
-			'http%1$s://%2$s%3$s%4$s',
-			! empty( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] === 'on' ? 's' : '',
+			'http%1$s://%2$s%3$s',
+			\is_ssl() ? 's' : '',
 			! empty( $_SERVER['HTTP_HOST'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ) ) : '',
-			! empty( $_SERVER['SERVER_PORT'] ) && (int) $_SERVER['SERVER_PORT'] !== 80 && (int) $_SERVER['SERVER_PORT'] !== 443 ? ':' . (int) $_SERVER['SERVER_PORT'] : '',
 			! empty( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : ''
 		);
 		
