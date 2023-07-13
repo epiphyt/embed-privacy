@@ -72,6 +72,12 @@ class Thumbnails {
 	 * @param	\WP_Post	$post The post object
 	 */
 	public function check_orphaned( $post_id, $post ) {
+		// don't check for orphaned if it's not a proper post update
+		// e.g. via REST API, where not all fields are updated
+		if ( empty( $_POST ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			return;
+		}
+		
 		$global_metadata = $this->get_metadata();
 		$metadata = get_post_meta( $post_id );
 		$supported_providers = [
@@ -105,6 +111,10 @@ class Thumbnails {
 					$missing_url = true;
 					$url = '';
 					
+					if ( $missing_id && $this->is_in_acf_fields( $post_id, $id ) ) {
+						$missing_id = false;
+					}
+					
 					if ( $missing_id && isset( $metadata[ $meta_key . '_url' ] ) ) {
 						$url = $metadata[ $meta_key . '_url' ];
 						
@@ -113,6 +123,10 @@ class Thumbnails {
 						}
 						
 						$missing_url = strpos( $post->post_content, $url ) === false;
+						
+						if ( $missing_url && $this->is_in_acf_fields( $post_id, $url ) ) {
+							$missing_url = false;
+						}
 					}
 					
 					if ( $missing_id && $missing_url && ! $this->is_in_use( $meta_value, $post_id, $global_metadata ) ) {
@@ -401,6 +415,51 @@ class Thumbnails {
 		$providers = apply_filters( 'embed_privacy_thumbnail_supported_providers', $providers );
 		
 		return $providers;
+	}
+	
+	/**
+	 * Check whether a thumbnail is in use in ACF fields.
+	 * 
+	 * @since	1.7.3
+	 * 
+	 * @param	int		$post_id Current post ID
+	 * @param	string	$content Content to search for
+	 * @param	array	$fields List of ACF fields
+	 * @return	bool Whether thumbnail is in use in ACF fields
+	 */
+	private function is_in_acf_fields( $post_id, $content, array $fields = [] ) {
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
+		if ( ! \function_exists( 'get_fields' ) ) {
+			return false;
+		}
+		
+		if ( empty( $_POST['acf'] ) ) {
+			return false;
+		}
+		
+		if ( empty( $fields ) ) {
+			// we need to use the post fields since get_fields() doesn't contain
+			// the actual value since it will be stored after the post is saved
+			$fields = \wp_unslash( $_POST['acf'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		}
+		// phpcs:enable
+		
+		$is_in_fields = false;
+		
+		foreach ( $fields as $field ) {
+			if ( \is_array( $field ) || \is_object( $field ) ) {
+				if ( $this->is_in_acf_fields( $post_id, $content, (array) $field ) ) {
+					$is_in_fields = true;
+					break;
+				}
+			}
+			else if ( \str_contains( (string) $field, $content ) ) {
+				$is_in_fields = true;
+				break;
+			}
+		}
+		
+		return $is_in_fields;
 	}
 	
 	/**
