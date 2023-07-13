@@ -32,7 +32,13 @@ use const ARRAY_A;
  * @package	epiphyt\Embed_Privacy
  */
 class Thumbnails {
+	// @deprecated: use Thumbnails::$directory instead
 	const DIRECTORY = WP_CONTENT_DIR . '/uploads/embed-privacy/thumbnails';
+	
+	/**
+	 * @var		string The thumbnails directory path
+	 */
+	public static $directory;
 	
 	/**
 	 * @var		array Fields to output
@@ -49,6 +55,7 @@ class Thumbnails {
 	 */
 	public function __construct() {
 		self::$instance = $this;
+		self::$directory = $this->get_directory();
 	}
 	
 	/**
@@ -162,11 +169,11 @@ class Thumbnails {
 	 * @param	string	$filename The thumbnail filename
 	 */
 	private function delete( $filename ) {
-		if ( ! file_exists( self::DIRECTORY . '/' . $filename ) ) {
+		if ( ! file_exists( self::$directory['base_dir'] . '/' . $filename ) ) {
 			return;
 		}
 		
-		unlink( self::DIRECTORY . '/' . $filename );
+		unlink( self::$directory['base_dir'] . '/' . $filename );
 	}
 	
 	/**
@@ -260,11 +267,10 @@ class Thumbnails {
 		$thumbnail = apply_filters( 'embed_privacy_thumbnail_data_filename', $thumbnail, $post, $url );
 		
 		if ( $thumbnail ) {
-			$thumbnail_path = self::DIRECTORY . '/' . $thumbnail;
+			$thumbnail_path = self::$directory['base_dir'] . '/' . $thumbnail;
 			
 			if ( file_exists( $thumbnail_path ) ) {
-				$relative_path = str_replace( ABSPATH, '', $thumbnail_path );
-				$thumbnail_url = home_url( $relative_path );
+				$thumbnail_url = self::$directory['base_url'] . '/' . $thumbnail;
 			}
 		}
 		
@@ -293,6 +299,31 @@ class Thumbnails {
 		return [
 			'thumbnail_path' => $thumbnail_path,
 			'thumbnail_url' => $thumbnail_url,
+		];
+	}
+	
+	/**
+	 * Get the thumbnail directory and URL.
+	 * Since we don't want to have a directory per site in a network, we need to
+	 * get rid of the site ID in the path.
+	 * 
+	 * @since	1.7.3
+	 * 
+	 * @return	string[] Thumbnail directory and URL
+	 */
+	public function get_directory() {
+		$upload_dir = \wp_get_upload_dir();
+		
+		if ( ! $upload_dir || $upload_dir['error'] !== false ) {
+			return [
+				'base_dir' => '',
+				'base_url' => '',
+			];
+		}
+		
+		return [
+			'base_dir' => $upload_dir['basedir'] . '/embed-privacy/thumbnails',
+			'base_url' => $upload_dir['baseurl'] . '/embed-privacy/thumbnails',
 		];
 	}
 	
@@ -433,11 +464,11 @@ class Thumbnails {
 			return false;
 		}
 		
-		if ( empty( $_POST['acf'] ) ) {
-			return false;
-		}
-		
 		if ( empty( $fields ) ) {
+			if ( empty( $_POST['acf'] ) ) {
+				return false;
+			}
+			
 			// we need to use the post fields since get_fields() doesn't contain
 			// the actual value since it will be stored after the post is saved
 			$fields = \wp_unslash( $_POST['acf'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
@@ -512,7 +543,7 @@ class Thumbnails {
 		}
 		
 		$filename = 'slideshare-' . $id . '.jpg' ;
-		rename( $file, self::DIRECTORY . '/' . $filename );
+		rename( $file, self::$directory['base_dir'] . '/' . $filename );
 		update_post_meta( $post->ID, 'embed_privacy_thumbnail_slideshare_' . $id, $filename );
 		update_post_meta( $post->ID, 'embed_privacy_thumbnail_slideshare_' . $id . '_url', $url );
 	}
@@ -539,7 +570,7 @@ class Thumbnails {
 			return;
 		}
 		
-		rename( $file, self::DIRECTORY . '/vimeo-' . $id . '.jpg' );
+		rename( $file, self::$directory['base_dir'] . '/vimeo-' . $id . '.jpg' );
 		update_post_meta( $post->ID, 'embed_privacy_thumbnail_vimeo_' . $id, 'vimeo-' . $id . '.jpg' );
 		update_post_meta( $post->ID, 'embed_privacy_thumbnail_vimeo_' . $id . '_url', $url );
 	}
@@ -575,7 +606,7 @@ class Thumbnails {
 				continue;
 			}
 			
-			rename( $file, self::DIRECTORY . '/youtube-' . $id . '-' . $image . '.jpg' );
+			rename( $file, self::$directory['base_dir'] . '/youtube-' . $id . '-' . $image . '.jpg' );
 			update_post_meta( $post->ID, 'embed_privacy_thumbnail_youtube_' . $id, 'youtube-' . $id . '-' . $image . '.jpg' );
 			update_post_meta( $post->ID, 'embed_privacy_thumbnail_youtube_' . $id . '_url', $url );
 			break;

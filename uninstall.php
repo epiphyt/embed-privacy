@@ -49,7 +49,7 @@ if ( is_multisite() ) {
 	}
 	
 	// delete site options
-	foreach ( $options as $option ) {
+	foreach ( $GLOBALS['options'] as $option ) {
 		delete_site_option( $option );
 	}
 }
@@ -81,22 +81,37 @@ function delete_data() {
 		wp_delete_post( $embed->ID, true );
 	}
 	
-	// delete thumbnail directory
-	$directory = WP_CONTENT_DIR . '/uploads/embed-privacy';
+	require_once __DIR__ . '/inc/class-thumbnails.php';
 	
-	if ( file_exists( $directory ) ) {
-		$iterator = new RecursiveDirectoryIterator( $directory, RecursiveDirectoryIterator::SKIP_DOTS );
-		$files = new RecursiveIteratorIterator( $iterator, RecursiveIteratorIterator::CHILD_FIRST );
-		
-		foreach ( $files as $file ) {
-			if ( $file->isDir() ) {
-				rmdir( $file->getRealPath() );
-			}
-			else {
-				unlink( $file->getRealPath() );
-			}
-		}
-		
-		rmdir( $directory );
+	// delete thumbnail directory
+	delete_directory( Thumbnails::get_instance()->get_directory()['base_dir'] );
+	// delete old thumbnail directory
+	delete_directory( WP_CONTENT_DIR . '/uploads/embed-privacy' );
+}
+
+/**
+ * Delete a directory recursively.
+ * 
+ * @since	1.7.3
+ * 
+ * @param	string	$directory The directory to delete
+ */
+function delete_directory( $directory ) {
+	if ( ! file_exists( $directory ) ) {
+		return;
 	}
+	
+	$iterator = new RecursiveDirectoryIterator( $directory, RecursiveDirectoryIterator::SKIP_DOTS );
+	$files = new RecursiveIteratorIterator( $iterator, RecursiveIteratorIterator::CHILD_FIRST );
+	
+	foreach ( $files as $file ) {
+		if ( $file->isDir() ) {
+			rmdir( $file->getRealPath() );
+		}
+		else {
+			unlink( $file->getRealPath() );
+		}
+	}
+	
+	rmdir( $directory );
 }

@@ -1,5 +1,7 @@
 <?php
 namespace epiphyt\Embed_Privacy;
+
+use FilesystemIterator;
 use WP_Post;
 use function __;
 use function _doing_it_wrong;
@@ -66,7 +68,7 @@ class Migration {
 	 * @var		string Current migration version
 	 * @since	1.2.2
 	 */
-	private $version = '1.7.0';
+	private $version = '1.7.3';
 	
 	/**
 	 * Post Type constructor.
@@ -117,12 +119,14 @@ class Migration {
 	 * @since	1.5.0
 	 */
 	private function create_thumbnails_dir() {
-		if ( file_exists( Thumbnails::DIRECTORY ) && ! is_dir( Thumbnails::DIRECTORY ) ) {
+		$directory = Thumbnails::get_instance()->get_directory();
+		
+		if ( file_exists( $directory['base_dir'] ) && ! is_dir( $directory['base_dir'] ) ) {
 			return;
 		}
 		
-		if ( ! is_dir( Thumbnails::DIRECTORY ) ) {
-			mkdir( Thumbnails::DIRECTORY, 0777, true );
+		if ( ! is_dir( $directory['base_dir'] ) ) {
+			mkdir( $directory['base_dir'], 0777, true );
 		}
 	}
 	
@@ -228,10 +232,15 @@ class Migration {
 			case $this->version:
 				// most recent version, do nothing
 				break;
+			case '1.7.0':
+				$this->migrate_1_7_3();
+				break;
 			case '1.6.0':
+				$this->migrate_1_7_3();
 				$this->migrate_1_7_0();
 				break;
 			case '1.5.0':
+				$this->migrate_1_7_3();
 				$this->migrate_1_7_0();
 				$this->migrate_1_6_0();
 				break;
@@ -576,6 +585,77 @@ class Migration {
 		
 		if ( $google_provider instanceof WP_Post ) {
 			update_post_meta( $google_provider->ID, 'regex_default', '/(google\\\.com\\\/maps\\\/embed|maps\\\.google\\\.com\\\/(maps)?)/' );
+		}
+	}
+	
+	/**
+	 * Migrations for version 1.7.3.
+	 * @since	1.7.3
+	 * 
+	 * - Copy thumbnails to different directory
+	 */
+	private function migrate_1_7_3() {
+		$this->create_thumbnails_dir();
+		
+		$new_dir = Thumbnails::get_instance()->get_directory()['base_dir'];
+		$old_dir = \WP_CONTENT_DIR . '/uploads/embed-privacy/thumbnails';
+		
+		// directories are identical, don't do anything
+		if ( $new_dir === $old_dir ) {
+			return;
+		}
+		
+		if ( file_exists( $old_dir ) ) {
+			$post_args = [
+				'fields' => 'ids',
+				'meta_query' => [ // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+					[
+						'compare' => '!=',
+						'compare_key' => 'LIKE',
+						'key' => 'embed_privacy_thumbnail_',
+						'value' => '',
+					],
+				],
+				'offset' => 0,
+				'post_type' => 'any',
+			];
+			$posts = \get_posts( $post_args );
+			
+			// iterate through posts to get metadata
+			while ( \count( $posts ) ) {
+				foreach ( $posts as $post_id ) {
+					$metadata = \get_post_meta( $post_id );
+					
+					foreach ( $metadata as $meta_key => $meta_value ) {
+						if ( ! \str_contains( $meta_key, 'embed_privacy_thumbnail_' ) ) {
+							continue;
+						}
+						
+						if ( \str_contains( $meta_key, '_url' ) ) {
+							continue;
+						}
+						
+						$filename = \reset( $meta_value );
+						
+						// move thumbnail
+						if ( \file_exists( $old_dir . '/' . $filename ) ) {
+							\rename( $old_dir . '/' . $filename, $new_dir . '/' . $filename );
+						}
+					}
+				}
+				
+				$post_args['offset'] += 5;
+				$posts = \get_posts( $post_args );
+			}
+			
+			// remove old directory if it's empty
+			if ( ! ( new FilesystemIterator( $old_dir ) )->valid() ) {
+				\rmdir( $old_dir );
+				
+				if ( ! ( new FilesystemIterator( \dirname( $old_dir ) ) )->valid() ) {
+					\rmdir( \dirname( $old_dir ) );
+				}
+			}
 		}
 	}
 	
