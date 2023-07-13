@@ -264,6 +264,7 @@ class Embed_Privacy {
 			add_filter( 'oembed_ttl', '__return_zero' );
 		}
 		
+		add_filter( 'acf_the_content', [ $this, 'replace_embeds' ] );
 		add_filter( 'do_shortcode_tag', [ $this, 'replace_embeds' ], 10, 2 );
 		add_filter( 'do_shortcode_tag', [ $this, 'replace_maps_marker' ], 10, 2 );
 		add_filter( 'embed_oembed_html', [ $this, 'replace_embeds_oembed' ], 10, 3 );
