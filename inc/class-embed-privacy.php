@@ -1012,7 +1012,19 @@ class Embed_Privacy {
 			
 			<style>
 				<?php
+				// if height is in percentage, we cannot determine the aspect ratio
+				if ( \str_contains( $args['height'], '%' ) ) {
+					$args['ignore_aspect_ratio'] = true;
+				}
+				
 				if ( ! empty( $args['height'] ) && ! empty( $args['width'] ) && empty( $args['ignore_aspect_ratio'] ) ) :
+				// if width is in percentage, we need to use the content width
+				// since we cannot determine the actual width
+				if ( \str_contains( $args['width'], '%' ) ) {
+					global $content_width;
+					
+					$args['width'] = $content_width;
+				}
 				?>
 				[data-embed-id="oembed_<?php echo esc_attr( $embed_md5 ); ?>"] {
 					aspect-ratio: <?php echo esc_html( $args['width'] . '/' . $args['height'] ); ?>;
@@ -1246,7 +1258,7 @@ class Embed_Privacy {
 					$i--;
 				}
 				
-				$content = $dom->saveHTML( $dom->documentElement );
+				$content = \str_replace( '%_epi_', '%', $dom->saveHTML( $dom->documentElement ) );
 				// phpcs:enable
 			}
 		}
