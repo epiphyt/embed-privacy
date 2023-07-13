@@ -534,16 +534,21 @@ class Thumbnails {
 			return;
 		}
 		
-		require_once ABSPATH . 'wp-admin/includes/file.php';
+		$filename = 'slideshare-' . $id . '.jpg' ;
+		$thumbnail_path = self::$directory['base_dir'] . '/' . $filename;
 		
-		$file = download_url( $thumbnail_url );
-		
-		if ( is_wp_error( $file ) ) {
-			return;
+		if ( ! \file_exists( $thumbnail_path ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+			
+			$file = download_url( $thumbnail_url );
+			
+			if ( is_wp_error( $file ) ) {
+				return;
+			}
+			
+			rename( $file, $thumbnail_path );
 		}
 		
-		$filename = 'slideshare-' . $id . '.jpg' ;
-		rename( $file, self::$directory['base_dir'] . '/' . $filename );
 		update_post_meta( $post->ID, 'embed_privacy_thumbnail_slideshare_' . $id, $filename );
 		update_post_meta( $post->ID, 'embed_privacy_thumbnail_slideshare_' . $id . '_url', $url );
 	}
@@ -562,15 +567,20 @@ class Thumbnails {
 			return;
 		}
 		
-		require_once ABSPATH . 'wp-admin/includes/file.php';
+		$thumbnail_path = self::$directory['base_dir'] . '/vimeo-' . $id . '.jpg';
 		
-		$file = download_url( $thumbnail_url );
-		
-		if ( is_wp_error( $file ) ) {
-			return;
+		if ( ! \file_exists( $thumbnail_path ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+			
+			$file = download_url( $thumbnail_url );
+			
+			if ( is_wp_error( $file ) ) {
+				return;
+			}
+			
+			rename( $file, $thumbnail_path );
 		}
 		
-		rename( $file, self::$directory['base_dir'] . '/vimeo-' . $id . '.jpg' );
 		update_post_meta( $post->ID, 'embed_privacy_thumbnail_vimeo_' . $id, 'vimeo-' . $id . '.jpg' );
 		update_post_meta( $post->ID, 'embed_privacy_thumbnail_vimeo_' . $id . '_url', $url );
 	}
@@ -600,13 +610,18 @@ class Thumbnails {
 		$thumbnail_url = 'https://img.youtube.com/vi/%1$s/%2$s.jpg';
 		
 		foreach ( $images as $image ) {
-			$file = download_url( sprintf( $thumbnail_url, $id, $image ) );
+			$thumbnail_path = self::$directory['base_dir'] . '/youtube-' . $id . '-' . $image . '.jpg';
 			
-			if ( is_wp_error( $file ) ) {
-				continue;
+			if ( ! \file_exists( $thumbnail_path ) ) {
+				$file = download_url( sprintf( $thumbnail_url, $id, $image ) );
+				
+				if ( is_wp_error( $file ) ) {
+					continue;
+				}
+				
+				rename( $file, $thumbnail_path );
 			}
 			
-			rename( $file, self::$directory['base_dir'] . '/youtube-' . $id . '-' . $image . '.jpg' );
 			update_post_meta( $post->ID, 'embed_privacy_thumbnail_youtube_' . $id, 'youtube-' . $id . '-' . $image . '.jpg' );
 			update_post_meta( $post->ID, 'embed_privacy_thumbnail_youtube_' . $id . '_url', $url );
 			break;
