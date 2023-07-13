@@ -86,6 +86,38 @@ function delete_data() {
 		$embeds = \get_posts( $post_args );
 	}
 	
+	$post_args = [
+		'fields' => 'ids',
+		'meta_query' => [ // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+			[
+				'compare' => '!=',
+				'compare_key' => 'LIKE',
+				'key' => 'embed_privacy_thumbnail_',
+				'value' => '',
+			],
+		],
+		'offset' => 0,
+		'post_type' => 'any',
+	];
+	$posts = \get_posts( $post_args );
+	
+	while ( \count( $posts ) ) {
+		foreach ( $posts as $post_id ) {
+			$metadata = \get_post_meta( $post_id );
+			
+			foreach ( $metadata as $meta_key => $meta_value ) {
+				if ( ! \str_contains( $meta_key, 'embed_privacy_thumbnail_' ) ) {
+					continue;
+				}
+				
+				\delete_post_meta( $post_id, $meta_key );
+			}
+		}
+		
+		$post_args['offset'] += 5;
+		$posts = \get_posts( $post_args );
+	}
+	
 	require_once __DIR__ . '/inc/class-thumbnails.php';
 	
 	// delete thumbnail directory
