@@ -121,6 +121,10 @@ class Migration {
 	private function create_thumbnails_dir() {
 		$directory = Thumbnails::get_instance()->get_directory();
 		
+		if ( empty( $directory['base_dir'] ) ) {
+			return;
+		}
+		
 		if ( file_exists( $directory['base_dir'] ) && ! is_dir( $directory['base_dir'] ) ) {
 			return;
 		}
