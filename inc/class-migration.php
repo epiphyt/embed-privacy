@@ -545,28 +545,6 @@ class Migration {
 	}
 	
 	/**
-	 * Migrations for version 1.7.0.
-	 * 
-	 * @see		https://github.com/epiphyt/embed-privacy/issues/163
-	 * @since	1.7.0
-	 * 
-	 * - Update Google Maps regex
-	 */
-	private function migrate_1_7_0() {
-		$crowdsignal_provider = get_posts( [
-			'meta_key' => 'is_system',
-			'meta_value' => 'yes',
-			'name' => 'crowdsignal',
-			'post_type' => 'epi_embed',
-		] );
-		$crowdsignal_provider = reset( $crowdsignal_provider );
-		
-		if ( $crowdsignal_provider instanceof WP_Post ) {
-			update_post_meta( $crowdsignal_provider->ID, 'regex_default', '/((poll(\\\.fm|daddy\\\.com))|crowdsignal\\\.(com|net)|survey\\\.fm)/' );
-		}
-	}
-	
-	/**
 	 * Migrations for version 1.6.0.
 	 * 
 	 * @see		https://github.com/epiphyt/embed-privacy/issues/124
@@ -585,6 +563,28 @@ class Migration {
 		
 		if ( $google_provider instanceof WP_Post ) {
 			update_post_meta( $google_provider->ID, 'regex_default', '/(google\\\.com\\\/maps\\\/embed|maps\\\.google\\\.com\\\/(maps)?)/' );
+		}
+	}
+	
+	/**
+	 * Migrations for version 1.7.0.
+	 * 
+	 * @see		https://github.com/epiphyt/embed-privacy/issues/163
+	 * @since	1.7.0
+	 * 
+	 * - Update Google Maps regex
+	 */
+	private function migrate_1_7_0() {
+		$crowdsignal_provider = get_posts( [
+			'meta_key' => 'is_system',
+			'meta_value' => 'yes',
+			'name' => 'crowdsignal',
+			'post_type' => 'epi_embed',
+		] );
+		$crowdsignal_provider = reset( $crowdsignal_provider );
+		
+		if ( $crowdsignal_provider instanceof WP_Post ) {
+			update_post_meta( $crowdsignal_provider->ID, 'regex_default', '/((poll(\\\.fm|daddy\\\.com))|crowdsignal\\\.(com|net)|survey\\\.fm)/' );
 		}
 	}
 	
