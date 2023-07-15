@@ -1,54 +1,7 @@
 <?php
 namespace epiphyt\Embed_Privacy;
+
 use WP_Error;
-use function __;
-use function add_action;
-use function add_meta_box;
-use function apply_filters;
-use function array_merge;
-use function check_admin_referer;
-use function checked;
-use function current_action;
-use function current_user_can;
-use function defined;
-use function delete_post_meta;
-use function esc_attr;
-use function esc_html;
-use function esc_html__;
-use function esc_html_e;
-use function esc_url;
-use function filemtime;
-use function get_current_screen;
-use function get_option;
-use function get_post_meta;
-use function in_array;
-use function is_array;
-use function is_wp_error;
-use function ob_get_clean;
-use function ob_start;
-use function plugin_dir_path;
-use function plugin_dir_url;
-use function remove_meta_box;
-use function sanitize_text_field;
-use function sanitize_title;
-use function sprintf;
-use function strpos;
-use function trim;
-use function update_post_meta;
-use function wp_die;
-use function wp_enqueue_script;
-use function wp_enqueue_style;
-use function WP_Filesystem;
-use function wp_generate_attachment_metadata;
-use function wp_get_attachment_image;
-use function wp_insert_attachment;
-use function wp_kses;
-use function wp_parse_args;
-use function wp_unslash;
-use function wp_update_attachment_metadata;
-use function wp_upload_bits;
-use const EMBED_PRIVACY_VERSION;
-use const WP_CLI;
 
 /**
  * Custom fields for Embed Privacy.
@@ -81,18 +34,18 @@ class Fields {
 	 * Initialize functions.
 	 */
 	public function init() {
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
-		add_action( 'add_meta_boxes', [ $this, 'add_meta_boxes' ] );
-		add_action( 'do_meta_boxes', [ $this, 'remove_default_fields' ] );
-		add_action( 'init', [ $this, 'register_default_fields' ] );
-		add_action( 'save_post', [ $this, 'save_fields' ], 10, 2 );
+		\add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
+		\add_action( 'add_meta_boxes', [ $this, 'add_meta_boxes' ] );
+		\add_action( 'do_meta_boxes', [ $this, 'remove_default_fields' ] );
+		\add_action( 'init', [ $this, 'register_default_fields' ] );
+		\add_action( 'save_post', [ $this, 'save_fields' ], 10, 2 );
 	}
 	
 	/**
 	 * Add meta boxes.
 	 */
 	public function add_meta_boxes() {
-		add_meta_box( 'embed-privacy-custom-fields', __( 'Embed Fields', 'embed-privacy' ), [ $this, 'get_the_fields_html' ], 'epi_embed', 'normal', 'high' );
+		\add_meta_box( 'embed-privacy-custom-fields', \__( 'Embed Fields', 'embed-privacy' ), [ $this, 'get_the_fields_html' ], 'epi_embed', 'normal', 'high' );
 	}
 	
 	/**
@@ -102,20 +55,20 @@ class Fields {
 	 */
 	public function enqueue_admin_assets( $hook ) {
 		// we need it just on the post page
-		if ( ( $hook !== 'post.php' && $hook !== 'post-new.php' ) || get_current_screen()->id !== 'epi_embed' ) {
+		if ( ( $hook !== 'post.php' && $hook !== 'post-new.php' ) || \get_current_screen()->id !== 'epi_embed' ) {
 			return;
 		}
 		
-		$suffix = ( defined( 'WP_DEBUG' ) && WP_DEBUG ? '' : '.min' );
-		$script_path = plugin_dir_path( Embed_Privacy::get_instance()->plugin_file ) . 'assets/js/admin/image-upload' . $suffix . '.js';
-		$script_url = plugin_dir_url( Embed_Privacy::get_instance()->plugin_file ) . 'assets/js/admin/image-upload' . $suffix . '.js';
+		$suffix = ( \defined( 'WP_DEBUG' ) && WP_DEBUG ? '' : '.min' );
+		$script_path = \plugin_dir_path( Embed_Privacy::get_instance()->plugin_file ) . 'assets/js/admin/image-upload' . $suffix . '.js';
+		$script_url = \plugin_dir_url( Embed_Privacy::get_instance()->plugin_file ) . 'assets/js/admin/image-upload' . $suffix . '.js';
 		
-		wp_enqueue_script( 'embed-privacy-admin-image-upload', $script_url, [ 'jquery' ], filemtime( $script_path ), true );
+		\wp_enqueue_script( 'embed-privacy-admin-image-upload', $script_url, [ 'jquery' ], \filemtime( $script_path ), true );
 		
-		$style_path = plugin_dir_path( Embed_Privacy::get_instance()->plugin_file ) . 'assets/style/embed-privacy-admin' . $suffix . '.css';
-		$style_url = plugin_dir_url( Embed_Privacy::get_instance()->plugin_file ) . 'assets/style/embed-privacy-admin' . $suffix . '.css';
+		$style_path = \plugin_dir_path( Embed_Privacy::get_instance()->plugin_file ) . 'assets/style/embed-privacy-admin' . $suffix . '.css';
+		$style_url = \plugin_dir_url( Embed_Privacy::get_instance()->plugin_file ) . 'assets/style/embed-privacy-admin' . $suffix . '.css';
 		
-		wp_enqueue_style( 'embed-privacy-admin-style', $style_url, [], filemtime( $style_path ) );
+		\wp_enqueue_style( 'embed-privacy-admin-style', $style_url, [], \filemtime( $style_path ) );
 	}
 	
 	/**
@@ -142,9 +95,9 @@ class Fields {
 				continue;
 			}
 			
-			$field['value'] = (string) get_post_meta( $post->ID, $field['name'], true );
+			$field['value'] = (string) \get_post_meta( $post->ID, $field['name'], true );
 			?>
-			<input type="hidden" name="<?php echo esc_attr( $field['name'] ); ?>" value="<?php echo esc_attr( $field['value'] ); ?>">
+			<input type="hidden" name="<?php echo \esc_attr( $field['name'] ); ?>" value="<?php echo \esc_attr( $field['value'] ); ?>">
 			<?php
 		}
 		?>
@@ -173,7 +126,7 @@ class Fields {
 				 * 
 				 * @param	int		$post_id The current post ID
 				 */
-				$fields = apply_filters( 'embed_privacy_editor_fields', $post->ID );
+				$fields = \apply_filters( 'embed_privacy_editor_fields', $post->ID );
 				
 				if ( $fields !== $post->ID ) {
 					echo $fields; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
@@ -191,7 +144,7 @@ class Fields {
 	 * @param	array	$attributes An array with attributes
 	 */
 	public function get_the_image_field_html( $post_id, array $attributes ) {
-		$attributes = wp_parse_args( $attributes, [
+		$attributes = \wp_parse_args( $attributes, [
 			'classes' => '',
 			'description' => '',
 			'name' => '',
@@ -203,18 +156,18 @@ class Fields {
 			return;
 		}
 		
-		$attributes['value'] = (string) get_post_meta( $post_id, $attributes['name'], $attributes['single'] );
-		$image = wp_get_attachment_image( (int) $attributes['value'] );
+		$attributes['value'] = (string) \get_post_meta( $post_id, $attributes['name'], $attributes['single'] );
+		$image = \wp_get_attachment_image( (int) $attributes['value'] );
 		?>
 		<tr>
 			<th scope="row">
-				<label for="<?php echo esc_attr( $attributes['name'] ); ?>"><?php echo esc_html( $attributes['title'] ); ?></label>
+				<label for="<?php echo \esc_attr( $attributes['name'] ); ?>"><?php echo \esc_html( $attributes['title'] ); ?></label>
 			</th>
 			<td class="embed-privacy-image-item">
-				<input type="hidden" name="<?php echo esc_attr( $attributes['name'] ); ?>" value="<?php echo esc_attr( $attributes['value'] ); ?>" class="embed-privacy-image-input">
+				<input type="hidden" name="<?php echo \esc_attr( $attributes['name'] ); ?>" value="<?php echo \esc_attr( $attributes['value'] ); ?>" class="embed-privacy-image-input">
 				
 				<div class="embed-privacy-image-input-container<?php echo ( ! empty( $attributes['value'] ) ? ' embed-privacy-hidden' : '' ); ?>">
-					<button type="button" class="button button-secondary embed-privacy-image-upload"><?php esc_html_e( 'Upload or choose file', 'embed-privacy' ); ?></button>
+					<button type="button" class="button button-secondary embed-privacy-image-upload"><?php \esc_html_e( 'Upload or choose file', 'embed-privacy' ); ?></button>
 				</div>
 				
 				<div class="embed-privacy-image-container<?php echo ( empty( $attributes['value'] ) ? ' embed-privacy-hidden' : '' ); ?>">
@@ -223,7 +176,7 @@ class Fields {
 				</div>
 				
 				<?php if ( ! empty( $attributes['description'] ) ) : ?>
-				<p><?php echo esc_html( $attributes['description'] ); ?></p>
+				<p><?php echo \esc_html( $attributes['description'] ); ?></p>
 				<?php endif; ?>
 			</td>
 		</tr>
@@ -237,7 +190,7 @@ class Fields {
 	 * @param	array	$attributes An array with attribues
 	 */
 	public function get_the_input_field_html( $post_id, array $attributes ) {
-		$attributes = wp_parse_args( $attributes, [
+		$attributes = \wp_parse_args( $attributes, [
 			'classes' => 'regular-text',
 			'description' => '',
 			'name' => '',
@@ -253,24 +206,24 @@ class Fields {
 		}
 		
 		if ( $attributes['option_type'] === 'meta' ) {
-			$current_value = (string) get_post_meta( $post_id, $attributes['name'], $attributes['single'] );
+			$current_value = (string) \get_post_meta( $post_id, $attributes['name'], $attributes['single'] );
 		}
 		else {
-			$current_value = (string) get_option( $attributes['name'] );
+			$current_value = (string) \get_option( $attributes['name'] );
 		}
 		
-		if ( ! in_array( $attributes['type'], [ 'checkbox', 'hidden', 'radio' ], true ) ) :
-		ob_start();
+		if ( ! \in_array( $attributes['type'], [ 'checkbox', 'hidden', 'radio' ], true ) ) :
+		\ob_start();
 		?>
-		<input type="<?php echo esc_attr( $attributes['type'] ); ?>" name="<?php echo esc_attr( $attributes['name'] ); ?>" id="<?php echo esc_attr( $attributes['name'] ); ?>" value="<?php echo esc_attr( $current_value ); ?>" class="<?php echo esc_attr( $attributes['classes'] ); ?>">
+		<input type="<?php echo \esc_attr( $attributes['type'] ); ?>" name="<?php echo \esc_attr( $attributes['name'] ); ?>" id="<?php echo \esc_attr( $attributes['name'] ); ?>" value="<?php echo esc_attr( $current_value ); ?>" class="<?php echo esc_attr( $attributes['classes'] ); ?>">
 		<?php if ( ! empty( $attributes['description'] ) ) : ?>
 		<p>
 			<?php
 			if ( empty( $attributes['validation'] ) ) {
-				echo esc_html( $attributes['description'] );
+				echo \esc_html( $attributes['description'] );
 			}
 			else if ( $attributes['validation'] === 'allow-links' ) {
-				echo wp_kses( $attributes['description'], [
+				echo \wp_kses( $attributes['description'], [
 					'a' => [
 						'href' => true,
 						'rel' => true,
@@ -282,7 +235,7 @@ class Fields {
 		</p>
 		<?php
 		endif;
-		$input = ob_get_clean();
+		$input = \ob_get_clean();
 		
 		if ( $attributes['option_type'] === 'option' ) {
 			echo $input; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
@@ -292,7 +245,7 @@ class Fields {
 		?>
 		<tr>
 			<th scope="row">
-				<label for="<?php echo esc_attr( $attributes['name'] ); ?>"><?php echo esc_html( $attributes['title'] ); ?></label>
+				<label for="<?php echo \esc_attr( $attributes['name'] ); ?>"><?php echo \esc_html( $attributes['title'] ); ?></label>
 			</th>
 			<td>
 				<?php echo $input; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
@@ -305,17 +258,17 @@ class Fields {
 			$attributes['value'] = 'yes';
 		}
 		
-		ob_start();
+		\ob_start();
 		?>
-		<label for="<?php echo esc_attr( $attributes['name'] ); ?>"><input type="<?php echo esc_attr( $attributes['type'] ); ?>" name="<?php echo esc_attr( $attributes['name'] ); ?>" id="<?php echo esc_attr( $attributes['name'] ); ?>" value="<?php echo esc_attr( $attributes['value'] ); ?>" class="<?php echo esc_attr( $attributes['classes'] ); ?>"<?php checked( $current_value, $attributes['value'] ); ?>> <?php echo esc_html( $attributes['title'] ); ?></label>
+		<label for="<?php echo \esc_attr( $attributes['name'] ); ?>"><input type="<?php echo \esc_attr( $attributes['type'] ); ?>" name="<?php echo \esc_attr( $attributes['name'] ); ?>" id="<?php echo \esc_attr( $attributes['name'] ); ?>" value="<?php echo \esc_attr( $attributes['value'] ); ?>" class="<?php echo \esc_attr( $attributes['classes'] ); ?>"<?php \checked( $current_value, $attributes['value'] ); ?>> <?php echo \esc_html( $attributes['title'] ); ?></label>
 		<?php if ( ! empty( $attributes['description'] ) ) : ?>
 		<p>
 			<?php
 			if ( empty( $attributes['validation'] ) ) {
-				echo esc_html( $attributes['description'] );
+				echo \esc_html( $attributes['description'] );
 			}
 			else if ( $attributes['validation'] === 'allow-links' ) {
-				echo wp_kses( $attributes['description'], [
+				echo \wp_kses( $attributes['description'], [
 					'a' => [
 						'href' => true,
 						'rel' => true,
@@ -327,7 +280,7 @@ class Fields {
 		</p>
 		<?php
 		endif;
-		$input = ob_get_clean();
+		$input = \ob_get_clean();
 		
 		if ( $attributes['option_type'] === 'option' ) {
 			echo $input; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
@@ -358,21 +311,21 @@ class Fields {
 		 * 
 		 * @param	array	$fields Additional fields
 		 */
-		$additional_fields = apply_filters( 'embed_privacy_register_fields', [] );
+		$additional_fields = \apply_filters( 'embed_privacy_register_fields', [] );
 		
-		if ( ! is_array( $additional_fields ) ) {
-			wp_die( new WP_Error( 'invalid_fields', esc_html__( 'Invalid value for additional Embed Privacy fields provided.', 'embed-privacy' ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		if ( ! \is_array( $additional_fields ) ) {
+			\wp_die( new WP_Error( 'invalid_fields', \esc_html__( 'Invalid value for additional Embed Privacy fields provided.', 'embed-privacy' ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		}
 		
 		// merge fields
-		$this->fields = array_merge( $this->fields, $fields, $additional_fields );
+		$this->fields = \array_merge( $this->fields, $fields, $additional_fields );
 		
 		/**
 		 * Filter all registered fields.
 		 * 
 		 * @param	array	$fields Registered fields
 		 */
-		$this->fields = apply_filters( 'embed_privacy_fields', $this->fields );
+		$this->fields = \apply_filters( 'embed_privacy_fields', $this->fields );
 	}
 	
 	/**
@@ -381,38 +334,38 @@ class Fields {
 	public function register_default_fields() {
 		$this->register( [
 			'privacy_policy_url' => [
-				'description' => __( 'Link to the embed provider’s privacy policy URL.', 'embed-privacy' ),
+				'description' => \__( 'Link to the embed provider’s privacy policy URL.', 'embed-privacy' ),
 				'field_type' => 'input',
 				'name' => 'privacy_policy_url',
-				'title' => __( 'Privacy Policy URL', 'embed-privacy' ),
+				'title' => \__( 'Privacy Policy URL', 'embed-privacy' ),
 				'type' => 'url',
 			],
 			'background_image' => [
 				'field_type' => 'image',
 				'name' => 'background_image',
-				'title' => __( 'Background Image', 'embed-privacy' ),
+				'title' => \__( 'Background Image', 'embed-privacy' ),
 			],
 			'regex_default' => [
-				'description' => sprintf(
+				'description' => \sprintf(
 					/* translators: link to documentation */
 					__( 'Regular expression that will be searched for in the content. See the %s for more information.', 'embed-privacy' ),
-					'<a href="' . esc_url(
-						sprintf(
+					'<a href="' . \esc_url(
+						\sprintf(
 							/* translators: plugin version */
 							__( 'https://epiph.yt/en/embed-privacy/documentation/?version=%s#regex-pattern', 'embed-privacy' ),
-							EMBED_PRIVACY_VERSION
+							\EMBED_PRIVACY_VERSION
 						)
-					) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'documentation', 'embed-privacy' ) . '</a>'
+					) . '" target="_blank" rel="noopener noreferrer">' . \esc_html__( 'documentation', 'embed-privacy' ) . '</a>'
 				),
 				'field_type' => 'input',
 				'name' => 'regex_default',
-				'title' => __( 'Regex Pattern', 'embed-privacy' ),
+				'title' => \__( 'Regex Pattern', 'embed-privacy' ),
 				'validation' => 'allow-links',
 			],
 			'is_disabled' => [
 				'field_type' => 'input',
 				'name' => 'is_disabled',
-				'title' => __( 'Disable embed provider', 'embed-privacy' ),
+				'title' => \__( 'Disable embed provider', 'embed-privacy' ),
 				'type' => 'checkbox',
 			],
 			'is_system' => [
@@ -429,7 +382,7 @@ class Fields {
 	 */
 	public function remove_default_fields() {
 		foreach ( [ 'normal', 'advanced', 'side' ] as $context ) {
-			remove_meta_box( 'postcustom', 'epi_embed', $context );
+			\remove_meta_box( 'postcustom', 'epi_embed', $context );
 		}
 	}
 	
@@ -440,12 +393,12 @@ class Fields {
 	 * @return	array The sanitized array
 	 */
 	private function sanitize_array( array $array ) {
-		foreach ( $array as $key => &$value ) {
-			if ( is_array( $value ) ) {
+		foreach ( $array as &$value ) {
+			if ( \is_array( $value ) ) {
 				$value = $this->sanitize_array( $value );
 			}
 			else {
-				$value = trim( sanitize_text_field( wp_unslash( $value ) ) );
+				$value = \trim( \sanitize_text_field( \wp_unslash( $value ) ) );
 			}
 		}
 		
@@ -473,55 +426,57 @@ class Fields {
 				)
 				// manual post update
 				|| (
-					! get_current_screen()
-					|| empty( get_current_screen()->action )
+					! \get_current_screen()
+					|| empty( \get_current_screen()->action )
 					|| (
-						get_current_screen()->action !== 'add'
-						&& ! check_admin_referer( 'update-post_' . $post_id )
+						\get_current_screen()->action !== 'add'
+						&& ! \check_admin_referer( 'update-post_' . $post_id )
 					)
 				)
 			)
-			&& current_action() !== 'save_post'
+			&& \current_action() !== 'save_post'
 		) {
 			return;
 		}
 		
 		// ignore actions to trash the post
-		if ( ! empty( $_GET['action'] ) && in_array( sanitize_text_field( wp_unslash( $_GET['action'] ) ), [ 'trash', 'untrash' ], true ) ) {
+		if ( ! empty( $_GET['action'] ) && \in_array( \sanitize_text_field( \wp_unslash( $_GET['action'] ) ), [ 'trash', 'untrash' ], true ) ) {
 			return;
 		}
 		
 		// verify capability
 		if (
-			! defined( 'WP_CLI' ) && ! current_user_can( 'edit_posts', $post_id )
-			|| defined( 'WP_CLI' ) && ! WP_CLI
+			! \defined( 'WP_CLI' ) && ! \current_user_can( 'edit_posts', $post_id )
+			|| \defined( 'WP_CLI' ) && ! \WP_CLI
 		) {
-			wp_die( new WP_Error( 403, esc_html__( 'You are not allowed to edit an embed.', 'embed-privacy' ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			\wp_die( new WP_Error( 403, \esc_html__( 'You are not allowed to edit an embed.', 'embed-privacy' ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		}
 		
-		if ( defined( 'WP_CLI' ) && WP_CLI ) {
+		if ( \defined( 'WP_CLI' ) && \WP_CLI ) {
 			return;
 		}
 		
 		foreach ( $this->fields as $field ) {
 			if ( empty( $_POST[ $field['name'] ] ) ) {
-				delete_post_meta( $post_id, $field['name'] );
+				\delete_post_meta( $post_id, $field['name'] );
 				
 				continue;
 			}
 			
 			// sanitizing
-			if ( is_array( $_POST[ $field['name'] ] ) ) {
-				$value = $this->sanitize_array( $_POST[ $field['name'] ] );
+			// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			if ( \is_array( $_POST[ $field['name'] ] ) ) {
+				$value = $this->sanitize_array( \wp_unslash( $_POST[ $field['name'] ] ) );
 			}
-			else if ( strpos( $field['name'], 'regex') === false ) {
-				$value = sanitize_text_field( wp_unslash( $_POST[ $field['name'] ] ) );
+			else if ( \strpos( $field['name'], 'regex' ) === false ) {
+				$value = \sanitize_text_field( \wp_unslash( $_POST[ $field['name'] ] ) );
 			}
 			else {
-				$value = (string) wp_unslash( $_POST[ $field['name'] ] );
+				$value = (string) \wp_unslash( $_POST[ $field['name'] ] );
 			}
+			// phpcs:enable
 			
-			update_post_meta( $post_id, $field['name'], $value );
+			\update_post_meta( $post_id, $field['name'], $value );
 		}
 		
 		$files = $this->validate_files();
@@ -542,7 +497,7 @@ class Fields {
 				// second execution of save_post
 				$_POST[ $field_name ] = $attachment_ids;
 				
-				update_post_meta( $post_id, $field_name, $attachment_ids );
+				\update_post_meta( $post_id, $field_name, $attachment_ids );
 			}
 		}
 	}
@@ -555,7 +510,7 @@ class Fields {
 	 */
 	public function upload_file( array $file ) {
 		// store file in the uploads folder
-		$upload_file = wp_upload_bits( $file['name'], null, $file['content'] );
+		$upload_file = \wp_upload_bits( $file['name'], null, $file['content'] );
 		
 		if ( isset( $upload_file['error'] ) && $upload_file['error'] ) {
 			return 0;
@@ -564,12 +519,12 @@ class Fields {
 		// get attachment data
 		$attachment = [
 			'post_mime_type' => $upload_file['type'],
-			'post_title' => sanitize_title( $file['name'] ),
+			'post_title' => \sanitize_title( $file['name'] ),
 			'post_content' => '',
 			'post_status' => 'inherit',
 		];
 		// save the file as attachment
-		$attachment_id = wp_insert_attachment( $attachment, $upload_file['file'] );
+		$attachment_id = \wp_insert_attachment( $attachment, $upload_file['file'] );
 		
 		if ( is_wp_error( $attachment_id ) ) {
 			return 0;
@@ -577,9 +532,9 @@ class Fields {
 		
 		// make wp_generate_attachment_metadata() available
 		// see https://wordpress.stackexchange.com/a/261262
-		include_once( ABSPATH . 'wp-admin/includes/image.php' );
+		include_once ABSPATH . 'wp-admin/includes/image.php';
 		// generate meta data
-		wp_update_attachment_metadata( $attachment_id, wp_generate_attachment_metadata( $attachment_id, $upload_file['file'] ) );
+		\wp_update_attachment_metadata( $attachment_id, \wp_generate_attachment_metadata( $attachment_id, $upload_file['file'] ) );
 		
 		return $attachment_id;
 	}
@@ -594,8 +549,8 @@ class Fields {
 		
 		// initialize the WP filesystem if not exists
 		if ( empty( $wp_filesystem ) ) {
-			require_once( ABSPATH . 'wp-admin/includes/file.php' );
-			WP_Filesystem();
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+			\WP_Filesystem();
 		}
 		
 		/**
@@ -603,14 +558,14 @@ class Fields {
 		 * 
 		 * @param	array	The default name list
 		 */
-		$valid_files = apply_filters( 'embed_privacy_valid_files', [ 'background_image' ] );
+		$valid_files = \apply_filters( 'embed_privacy_valid_files', [ 'background_image' ] );
 		$validated = [];
 		
 		if ( empty( $_FILES ) ) return $validated;
 		
 		foreach ( $_FILES as $key => $files ) {
 			// check valid files
-			if ( ! in_array( $key, $valid_files, true ) ) {
+			if ( ! \in_array( $key, $valid_files, true ) ) {
 				continue;
 			}
 			

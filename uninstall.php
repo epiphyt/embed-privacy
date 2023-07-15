@@ -1,24 +1,11 @@
 <?php
 namespace epiphyt\Embed_Privacy;
+
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
-use function defined;
-use function delete_option;
-use function delete_site_option;
-use function file_exists;
-use function get_option;
-use function get_posts;
-use function get_sites;
-use function is_multisite;
-use function restore_current_blog;
-use function rmdir;
-use function switch_to_blog;
-use function unlink;
-use function wp_delete_post;
-use const WP_CONTENT_DIR;
 
 // if uninstall.php is not called by WordPress, die
-if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
+if ( ! \defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 
@@ -33,27 +20,30 @@ $GLOBALS['options'] = [
 	'embed_privacy_preserve_data_on_uninstall',
 ];
 
-if ( is_multisite() ) {
-	$sites = get_sites( [ 'number' => 99999 ] );
+if ( \is_multisite() ) {
+	$sites = \get_sites( [
+		'fields' => 'ids',
+		'number' => 99999,
+	] );
 	
-	foreach ( $sites as $site ) {
-		switch_to_blog( $site->blog_id );
+	foreach ( $sites as $site_blog_id ) {
+		\switch_to_blog( $site_blog_id );
 		
 		// do nothing if option says so
-		if ( get_option( 'embed_privacy_preserve_data_on_uninstall' ) ) {
+		if ( \get_option( 'embed_privacy_preserve_data_on_uninstall' ) ) {
 			continue;
 		}
 		
 		delete_data();
-		restore_current_blog();
+		\restore_current_blog();
 	}
 	
 	// delete site options
 	foreach ( $GLOBALS['options'] as $option ) {
-		delete_site_option( $option );
+		\delete_site_option( $option );
 	}
 }
-else if ( ! get_option( 'embed_privacy_preserve_data_on_uninstall' ) ) {
+else if ( ! \get_option( 'embed_privacy_preserve_data_on_uninstall' ) ) {
 	delete_data();
 }
 
@@ -67,7 +57,7 @@ function delete_data() {
 	
 	// delete options
 	foreach ( $options as $option ) {
-		delete_option( $option );
+		\delete_option( $option );
 	}
 	
 	// delete posts of custom post type
@@ -106,7 +96,7 @@ function delete_data() {
 			$metadata = \get_post_meta( $post_id );
 			
 			foreach ( $metadata as $meta_key => $meta_value ) {
-				if ( ! \str_contains( $meta_key, 'embed_privacy_thumbnail_' ) ) {
+				if ( \strpos( $meta_key, 'embed_privacy_thumbnail_' ) === false ) {
 					continue;
 				}
 				
@@ -134,7 +124,7 @@ function delete_data() {
  * @param	string	$directory The directory to delete
  */
 function delete_directory( $directory ) {
-	if ( ! file_exists( $directory ) ) {
+	if ( ! \file_exists( $directory ) ) {
 		return;
 	}
 	
@@ -143,12 +133,12 @@ function delete_directory( $directory ) {
 	
 	foreach ( $files as $file ) {
 		if ( $file->isDir() ) {
-			rmdir( $file->getRealPath() );
+			\rmdir( $file->getRealPath() );
 		}
 		else {
-			unlink( $file->getRealPath() );
+			\unlink( $file->getRealPath() );
 		}
 	}
 	
-	rmdir( $directory );
+	\rmdir( $directory );
 }

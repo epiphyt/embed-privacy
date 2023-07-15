@@ -1,10 +1,5 @@
 <?php
 namespace epiphyt\Embed_Privacy;
-use function call_user_func_array;
-use function func_get_args;
-use function is_callable;
-use function ob_get_clean;
-use function ob_start;
 
 /**
  * Filter the output of widgets.
@@ -75,7 +70,7 @@ class Embed_Privacy_Widget_Output_Filter {
 	 */
 	private function __construct() {
 		// priority of 9 to run before the Widget Logic plugin.
-		add_filter( 'dynamic_sidebar_params', [ $this, 'filter_dynamic_sidebar_params' ], 9 );
+		\add_filter( 'dynamic_sidebar_params', [ $this, 'filter_dynamic_sidebar_params' ], 9 );
 	}
 	
 	/**
@@ -86,7 +81,7 @@ class Embed_Privacy_Widget_Output_Filter {
 	 * @return	array The sidebar parameters
 	 */
 	public function filter_dynamic_sidebar_params( $sidebar_params ) {
-		if ( is_admin() ) {
+		if ( \is_admin() ) {
 			return $sidebar_params;
 		}
 		
@@ -106,7 +101,7 @@ class Embed_Privacy_Widget_Output_Filter {
 	 */
 	public function display_widget() {
 		global $wp_registered_widgets;
-		$original_callback_params = func_get_args();
+		$original_callback_params = \func_get_args();
 		
 		$widget_id = isset( $original_callback_params[0]['widget_id'] ) ? $original_callback_params[0]['widget_id'] : null;
 		$original_callback = $wp_registered_widgets[ $widget_id ]['original_callback'];
@@ -115,10 +110,10 @@ class Embed_Privacy_Widget_Output_Filter {
 		
 		$sidebar_id = isset( $original_callback_params[0]['id'] ) ? $original_callback_params[0]['id'] : null;
 		
-		if ( is_callable( $original_callback ) ) {
-			ob_start();
-			call_user_func_array( $original_callback, $original_callback_params );
-			$widget_output = ob_get_clean();
+		if ( \is_callable( $original_callback ) ) {
+			\ob_start();
+			\call_user_func_array( $original_callback, $original_callback_params );
+			$widget_output = \ob_get_clean();
 			
 			/**
 			 * Filter the widget's output.
@@ -127,7 +122,7 @@ class Embed_Privacy_Widget_Output_Filter {
 			 * @param	string	$widget_id The widget's full ID
 			 * @param	string	$sidebar_id The current sidebar ID
 			 */
-			echo apply_filters( 'embed_privacy_widget_output', $widget_output, $widget_id, $sidebar_id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			echo \apply_filters( 'embed_privacy_widget_output', $widget_output, $widget_id, $sidebar_id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		}
 	}
 }

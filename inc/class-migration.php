@@ -3,52 +3,12 @@ namespace epiphyt\Embed_Privacy;
 
 use FilesystemIterator;
 use WP_Post;
-use function __;
-use function _doing_it_wrong;
-use function _x;
-use function add_action;
-use function add_post_meta;
-use function array_column;
-use function array_merge;
-use function array_search;
-use function delete_option;
-use function delete_post_thumbnail;
-use function dirname;
-use function esc_html;
-use function esc_html__;
-use function esc_url;
-use function file_exists;
-use function get_option;
-use function get_post_meta;
-use function get_post_thumbnail_id;
-use function get_posts;
-use function get_site_option;
-use function in_array;
-use function is_dir;
-use function is_int;
-use function is_multisite;
-use function is_numeric;
-use function load_plugin_textdomain;
-use function mkdir;
-use function plugin_basename;
-use function printf;
-use function reset;
-use function sprintf;
-use function time;
-use function update_option;
-use function update_post_meta;
-use function wp_delete_attachment;
-use function wp_delete_post;
-use function wp_doing_ajax;
-use function WP_Filesystem;
-use function wp_insert_post;
-use const MINUTE_IN_SECONDS;
 
 /**
  * Migration class to update data in the database on upgrades.
  * 
  * @since	1.2.0
- *
+ * 
  * @author	Epiphyt
  * @license	GPL2
  * @package	epiphyt\Embed_Privacy
@@ -85,8 +45,8 @@ class Migration {
 		// it is useless for real migrations, unfortunately
 		// thus, we need to check on every page load in the admin if there are
 		// new migrations
-		add_action( 'admin_init', [ $this, 'migrate' ], 10, 0 );
-		add_action( 'admin_notices', [ $this, 'register_migration_failed_notice' ] );
+		\add_action( 'admin_init', [ $this, 'migrate' ], 10, 0 );
+		\add_action( 'admin_notices', [ $this, 'register_migration_failed_notice' ] );
 	}
 	
 	/**
@@ -103,12 +63,12 @@ class Migration {
 			unset( $embed['meta_input'] );
 		}
 		
-		$post_id = wp_insert_post( $embed );
+		$post_id = \wp_insert_post( $embed );
 		
 		// add meta data
-		if ( is_int( $post_id ) && isset( $meta_data ) ) {
+		if ( \is_int( $post_id ) && isset( $meta_data ) ) {
 			foreach ( $meta_data as $meta_key => $meta_value ) {
-				add_post_meta( $post_id, $meta_key, $meta_value );
+				\add_post_meta( $post_id, $meta_key, $meta_value );
 			}
 		}
 	}
@@ -125,12 +85,12 @@ class Migration {
 			return;
 		}
 		
-		if ( file_exists( $directory['base_dir'] ) && ! is_dir( $directory['base_dir'] ) ) {
+		if ( \file_exists( $directory['base_dir'] ) && ! \is_dir( $directory['base_dir'] ) ) {
 			return;
 		}
 		
-		if ( ! is_dir( $directory['base_dir'] ) ) {
-			mkdir( $directory['base_dir'], 0777, true );
+		if ( ! \is_dir( $directory['base_dir'] ) ) {
+			\mkdir( $directory['base_dir'], 0777, true );
 		}
 	}
 	
@@ -142,7 +102,7 @@ class Migration {
 	 * @noinspection PhpReturnValueOfMethodIsNeverUsedInspection
 	 */
 	private function delete_option( $option ) {
-		return delete_option( 'embed_privacy_' . $option );
+		return \delete_option( 'embed_privacy_' . $option );
 	}
 	
 	/**
@@ -166,7 +126,7 @@ class Migration {
 	 * @return	mixed Value set for the option
 	 */
 	private function get_option( $option, $default = false ) {
-		return get_option( 'embed_privacy_' . $option, $default );
+		return \get_option( 'embed_privacy_' . $option, $default );
 	}
 	
 	/**
@@ -177,11 +137,11 @@ class Migration {
 	 */
 	public function migrate( $deprecated = null, $deprecated2 = null ) {
 		if ( $deprecated !== null ) {
-			_doing_it_wrong(
+			\_doing_it_wrong(
 				__METHOD__,
-				sprintf(
+				\sprintf(
 					/* translators: parameter */
-					esc_html__( 'The function does not support the parameter "%s" anymore.', 'embed-privacy' ),
+					\esc_html__( 'The function does not support the parameter "%s" anymore.', 'embed-privacy' ),
 					'$plugin'
 				),
 				'1.4.0'
@@ -189,26 +149,26 @@ class Migration {
 		}
 		
 		if ( $deprecated2 !== null ) {
-			_doing_it_wrong(
+			\_doing_it_wrong(
 				__METHOD__,
-				sprintf(
+				\sprintf(
 					/* translators: parameter */
-					esc_html__( 'The function does not support the parameter "%s" anymore.', 'embed-privacy' ),
+					\esc_html__( 'The function does not support the parameter "%s" anymore.', 'embed-privacy' ),
 					'$network_wide'
 				),
 				'1.4.0'
 			);
 		}
 		
-		if ( wp_doing_ajax() ) {
+		if ( \wp_doing_ajax() ) {
 			return;
 		}
 		
 		// check for active migration
 		if (
-			is_numeric( $this->get_option( 'is_migrating' ) )
+			\is_numeric( $this->get_option( 'is_migrating' ) )
 			&& $this->get_option( 'is_migrating' ) !== '1' // possible legacy value
-			&& (int) $this->get_option( 'is_migrating' ) > time() - MINUTE_IN_SECONDS
+			&& (int) $this->get_option( 'is_migrating' ) > \time() - \MINUTE_IN_SECONDS
 		) {
 			return;
 		}
@@ -216,8 +176,8 @@ class Migration {
 		$version = $this->get_option( 'migrate_version', 'initial' );
 		
 		// get legacy network option
-		if ( $version === 'initial' && is_multisite() ) {
-			$version = get_site_option( 'embed_privacy_migrate_version', 'initial' );
+		if ( $version === 'initial' && \is_multisite() ) {
+			$version = \get_site_option( 'embed_privacy_migrate_version', 'initial' );
 		}
 		
 		if ( $version === $this->version ) {
@@ -228,7 +188,7 @@ class Migration {
 		$this->update_option( 'is_migrating', time() );
 		$this->update_option( 'migration_count', (int) $this->get_option( 'migration_count' ) + 1 );
 		// load textdomain early for migrations
-		load_plugin_textdomain( 'embed-privacy', false, dirname( plugin_basename( Embed_Privacy::get_instance()->plugin_file ) ) . '/languages' );
+		\load_plugin_textdomain( 'embed-privacy', false, \dirname( \plugin_basename( Embed_Privacy::get_instance()->plugin_file ) ) . '/languages' );
 		// make sure all default embed providers are avalable and translated
 		$this->register_default_embed_providers();
 		
@@ -332,17 +292,17 @@ class Migration {
 		// initialize the WP filesystem if not exists
 		if ( empty( $wp_filesystem ) ) {
 			require_once ABSPATH . 'wp-admin/includes/file.php';
-			WP_Filesystem();
+			\WP_Filesystem();
 		}
 		
-		$available_providers = get_posts( [
+		$available_providers = \get_posts( [
 			'numberposts' => -1,
 			'post_type' => 'epi_embed',
 		] );
 		
 		foreach ( $available_providers as $provider ) {
 			// get according default provider
-			$key = array_search( $provider->post_title, array_column( $this->providers, 'post_title' ), true );
+			$key = \array_search( $provider->post_title, \array_column( $this->providers, 'post_title' ), true );
 			
 			// if no default provider, continue with next available provider
 			if ( $key === false ) {
@@ -351,8 +311,8 @@ class Migration {
 			
 			// update default meta data, if missing
 			foreach ( [ 'is_system', 'privacy_policy_url', 'regex_default' ] as $meta_key ) {
-				if ( ! get_post_meta( $provider->ID, $meta_key, true ) ) {
-					update_post_meta( $provider->ID, $meta_key, $this->providers[ $key ]['meta_input'][ $meta_key ] );
+				if ( ! \get_post_meta( $provider->ID, $meta_key, true ) ) {
+					\update_post_meta( $provider->ID, $meta_key, $this->providers[ $key ]['meta_input'][ $meta_key ] );
 				}
 			}
 		}
@@ -374,14 +334,14 @@ class Migration {
 		] );
 		
 		if ( ! empty( $amazon_provider ) ) {
-			$amazon_provider = reset( $amazon_provider );
+			$amazon_provider = \reset( $amazon_provider );
 		}
 		
 		if ( ! $amazon_provider instanceof WP_Post ) {
 			return;
 		}
 		
-		update_post_meta( $amazon_provider->ID, 'regex_default', '/\\\.?(ama?zo?n\\\.|a\\\.co\\\/|z\\\.cn\\\/)/' );
+		\update_post_meta( $amazon_provider->ID, 'regex_default', '/\\\.?(ama?zo?n\\\.|a\\\.co\\\/|z\\\.cn\\\/)/' );
 	}
 	
 	/**
@@ -394,13 +354,13 @@ class Migration {
 	 */
 	private function migrate_1_3_0() {
 		$providers = Embed_Privacy::get_instance()->get_embeds( 'oembed' );
-		$google_provider = get_posts( [
+		$google_provider = \get_posts( [
 			'meta_key' => 'is_system',
 			'meta_value' => 'yes',
 			'name' => 'google-maps',
 			'post_type' => 'epi_embed',
 		] );
-		$providers = array_merge( $providers, $google_provider );
+		$providers = \array_merge( $providers, $google_provider );
 		
 		foreach ( $providers as $provider ) {
 			if ( ! $provider instanceof WP_Post ) {
@@ -409,17 +369,17 @@ class Migration {
 			
 			// delete post thumbnails
 			// see https://github.com/epiphyt/embed-privacy/issues/32
-			$thumbnail_id = get_post_thumbnail_id( $provider->ID );
+			$thumbnail_id = \get_post_thumbnail_id( $provider->ID );
 			
 			if ( $thumbnail_id ) {
-				delete_post_thumbnail( $provider );
-				wp_delete_attachment( $thumbnail_id, true );
+				\delete_post_thumbnail( $provider );
+				\wp_delete_attachment( $thumbnail_id, true );
 			}
 			
 			// make regex ungreedy
 			// see https://github.com/epiphyt/embed-privacy/issues/31
 			if ( $provider->post_name === 'google-maps' ) {
-				update_post_meta( $provider->ID, 'regex_default', '/google\\\.com\\\/maps\\\/embed/' );
+				\update_post_meta( $provider->ID, 'regex_default', '/google\\\.com\\\/maps\\\/embed/' );
 			}
 		}
 	}
@@ -443,14 +403,14 @@ class Migration {
 			}
 			
 			// check only system providers
-			if ( get_post_meta( $provider->ID, 'is_system', true ) !== 'yes' ) {
+			if ( \get_post_meta( $provider->ID, 'is_system', true ) !== 'yes' ) {
 				continue;
 			}
 			
 			// since post name differs, use post title to get duplicates
-			if ( in_array( $provider->post_title, $processed_providers, true ) ) {
+			if ( \in_array( $provider->post_title, $processed_providers, true ) ) {
 				// delete duplicate providers
-				wp_delete_post( $provider->ID, true );
+				\wp_delete_post( $provider->ID, true );
 			}
 			else {
 				$processed_providers[] = $provider->post_title;
@@ -486,15 +446,15 @@ class Migration {
 	 * - Update regex for Google Maps
 	 */
 	private function migrate_1_4_7() {
-		$google_provider = get_posts( [
+		$google_provider = \get_posts( [
 			'meta_key' => 'is_system',
 			'meta_value' => 'yes',
 			'name' => 'google-maps',
 			'post_type' => 'epi_embed',
 		] );
-		$google_provider = reset( $google_provider );
+		$google_provider = \reset( $google_provider );
 		
-		update_post_meta( $google_provider->ID, 'regex_default', '/google\\\.com\\\/maps\\\/(d\\\/)?embed/' );
+		\update_post_meta( $google_provider->ID, 'regex_default', '/google\\\.com\\\/maps\\\/(d\\\/)?embed/' );
 	}
 	
 	/**
@@ -512,13 +472,13 @@ class Migration {
 		$this->add_embed( [
 			'meta_input' => [
 				'is_system' => 'yes',
-				'privacy_policy_url' => __( 'https://support.pocketcasts.com/article/privacy-policy/', 'embed-privacy' ),
+				'privacy_policy_url' => \__( 'https://support.pocketcasts.com/article/privacy-policy/', 'embed-privacy' ),
 				'regex_default' => '/pca\\\.st/',
 			],
 			/* translators: embed provider */
-			'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Pocket Casts', 'embed provider', 'embed-privacy' ) ),
+			'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Pocket Casts', 'embed provider', 'embed-privacy' ) ),
 			'post_status' => 'publish',
-			'post_title' => _x( 'Pocket Casts', 'embed provider', 'embed-privacy' ),
+			'post_title' => \_x( 'Pocket Casts', 'embed provider', 'embed-privacy' ),
 			'post_type' => 'epi_embed',
 		] );
 		$this->add_embed( [
@@ -528,9 +488,9 @@ class Migration {
 				'regex_default' => '',
 			],
 			/* translators: embed provider */
-			'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Maps Marker', 'embed provider', 'embed-privacy' ) ),
+			'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Maps Marker', 'embed provider', 'embed-privacy' ) ),
 			'post_status' => 'publish',
-			'post_title' => _x( 'Maps Marker', 'embed provider', 'embed-privacy' ),
+			'post_title' => \_x( 'Maps Marker', 'embed provider', 'embed-privacy' ),
 			'post_type' => 'epi_embed',
 		] );
 		$this->create_thumbnails_dir();
@@ -541,10 +501,10 @@ class Migration {
 			'name' => 'google-maps',
 			'post_type' => 'epi_embed',
 		] );
-		$google_provider = reset( $google_provider );
+		$google_provider = \reset( $google_provider );
 		
 		if ( $google_provider instanceof WP_Post ) {
-			update_post_meta( $google_provider->ID, 'regex_default', '/(google\\\.com\\\/maps\\\/embed|maps\\\.google\\\.com\\\/(maps)?)/' );
+			\update_post_meta( $google_provider->ID, 'regex_default', '/(google\\\.com\\\/maps\\\/embed|maps\\\.google\\\.com\\\/(maps)?)/' );
 		}
 	}
 	
@@ -557,16 +517,16 @@ class Migration {
 	 * - Update Google Maps regex
 	 */
 	private function migrate_1_6_0() {
-		$google_provider = get_posts( [
+		$google_provider = \get_posts( [
 			'meta_key' => 'is_system',
 			'meta_value' => 'yes',
 			'name' => 'google-maps',
 			'post_type' => 'epi_embed',
 		] );
-		$google_provider = reset( $google_provider );
+		$google_provider = \reset( $google_provider );
 		
 		if ( $google_provider instanceof WP_Post ) {
-			update_post_meta( $google_provider->ID, 'regex_default', '/(google\\\.com\\\/maps\\\/embed|maps\\\.google\\\.com\\\/(maps)?)/' );
+			\update_post_meta( $google_provider->ID, 'regex_default', '/(google\\\.com\\\/maps\\\/embed|maps\\\.google\\\.com\\\/(maps)?)/' );
 		}
 	}
 	
@@ -579,16 +539,16 @@ class Migration {
 	 * - Update Google Maps regex
 	 */
 	private function migrate_1_7_0() {
-		$crowdsignal_provider = get_posts( [
+		$crowdsignal_provider = \get_posts( [
 			'meta_key' => 'is_system',
 			'meta_value' => 'yes',
 			'name' => 'crowdsignal',
 			'post_type' => 'epi_embed',
 		] );
-		$crowdsignal_provider = reset( $crowdsignal_provider );
+		$crowdsignal_provider = \reset( $crowdsignal_provider );
 		
 		if ( $crowdsignal_provider instanceof WP_Post ) {
-			update_post_meta( $crowdsignal_provider->ID, 'regex_default', '/((poll(\\\.fm|daddy\\\.com))|crowdsignal\\\.(com|net)|survey\\\.fm)/' );
+			\update_post_meta( $crowdsignal_provider->ID, 'regex_default', '/((poll(\\\.fm|daddy\\\.com))|crowdsignal\\\.(com|net)|survey\\\.fm)/' );
 		}
 	}
 	
@@ -609,7 +569,7 @@ class Migration {
 			return;
 		}
 		
-		if ( file_exists( $old_dir ) ) {
+		if ( \file_exists( $old_dir ) ) {
 			$post_args = [
 				'fields' => 'ids',
 				'meta_query' => [ // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
@@ -631,11 +591,11 @@ class Migration {
 					$metadata = \get_post_meta( $post_id );
 					
 					foreach ( $metadata as $meta_key => $meta_value ) {
-						if ( ! \str_contains( $meta_key, 'embed_privacy_thumbnail_' ) ) {
+						if ( \strpos( $meta_key, 'embed_privacy_thumbnail_' ) === false ) {
 							continue;
 						}
 						
-						if ( \str_contains( $meta_key, '_url' ) ) {
+						if ( \strpos( $meta_key, '_url' ) !== false ) {
 							continue;
 						}
 						
@@ -671,157 +631,157 @@ class Migration {
 			[
 				'meta_input' => [
 					'is_system' => 'yes',
-					'privacy_policy_url' => __( 'https://www.amazon.com/gp/help/customer/display.html?nodeId=GX7NJQ4ZB8MHFRNJ', 'embed-privacy' ),
+					'privacy_policy_url' => \__( 'https://www.amazon.com/gp/help/customer/display.html?nodeId=GX7NJQ4ZB8MHFRNJ', 'embed-privacy' ),
 					'regex_default' => '/\\\.?(ama?zo?n\\\.|a\\\.co\\\/|z\\\.cn\\\/)/',
 				],
 				/* translators: embed provider */
-				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Amazon Kindle', 'embed provider', 'embed-privacy' ) ),
+				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Amazon Kindle', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
-				'post_title' => _x( 'Amazon Kindle', 'embed provider', 'embed-privacy' ),
+				'post_title' => \_x( 'Amazon Kindle', 'embed provider', 'embed-privacy' ),
 				'post_type' => 'epi_embed',
 			],
 			[
 				'meta_input' => [
 					'is_system' => 'yes',
-					'privacy_policy_url' => __( 'https://animoto.com/legal/privacy_policy', 'embed-privacy' ),
+					'privacy_policy_url' => \__( 'https://animoto.com/legal/privacy_policy', 'embed-privacy' ),
 					'regex_default' => '/animoto\\\.com/',
 				],
 				/* translators: embed provider */
-				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Animoto', 'embed provider', 'embed-privacy' ) ),
+				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Animoto', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
-				'post_title' => _x( 'Animoto', 'embed provider', 'embed-privacy' ),
+				'post_title' => \_x( 'Animoto', 'embed provider', 'embed-privacy' ),
 				'post_type' => 'epi_embed',
 			],
 			[
 				'meta_input' => [
 					'is_system' => 'yes',
-					'privacy_policy_url' => __( 'https://automattic.com/privacy/', 'embed-privacy' ),
+					'privacy_policy_url' => \__( 'https://automattic.com/privacy/', 'embed-privacy' ),
 					'regex_default' => '/cloudup\\\.com/',
 				],
 				/* translators: embed provider */
-				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Cloudup', 'embed provider', 'embed-privacy' ) ),
+				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Cloudup', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
-				'post_title' => _x( 'Cloudup', 'embed provider', 'embed-privacy' ),
+				'post_title' => \_x( 'Cloudup', 'embed provider', 'embed-privacy' ),
 				'post_type' => 'epi_embed',
 			],
 			[
 				'meta_input' => [
 					'is_system' => 'yes',
-					'privacy_policy_url' => __( 'https://automattic.com/privacy/', 'embed-privacy' ),
+					'privacy_policy_url' => \__( 'https://automattic.com/privacy/', 'embed-privacy' ),
 					'regex_default' => '/((poll(\\\.fm|daddy\\\.com))|crowdsignal\\\.(com|net)|survey\\\.fm)/',
 				],
 				/* translators: embed provider */
-				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Crowdsignal', 'embed provider', 'embed-privacy' ) ),
+				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Crowdsignal', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
-				'post_title' => _x( 'Crowdsignal', 'embed provider', 'embed-privacy' ),
+				'post_title' => \_x( 'Crowdsignal', 'embed provider', 'embed-privacy' ),
 				'post_type' => 'epi_embed',
 			],
 			[
 				'meta_input' => [
 					'is_system' => 'yes',
-					'privacy_policy_url' => __( 'https://www.dailymotion.com/legal/privacy?localization=en', 'embed-privacy' ),
+					'privacy_policy_url' => \__( 'https://www.dailymotion.com/legal/privacy?localization=en', 'embed-privacy' ),
 					'regex_default' => '/dailymotion\\\.com/',
 				],
 				/* translators: embed provider */
-				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'DailyMotion', 'embed provider', 'embed-privacy' ) ),
+				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'DailyMotion', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
-				'post_title' => _x( 'DailyMotion', 'embed provider', 'embed-privacy' ),
+				'post_title' => \_x( 'DailyMotion', 'embed provider', 'embed-privacy' ),
 				'post_type' => 'epi_embed',
 			],
 			[
 				'meta_input' => [
 					'is_system' => 'yes',
-					'privacy_policy_url' => __( 'https://www.facebook.com/privacy/explanation', 'embed-privacy' ),
+					'privacy_policy_url' => \__( 'https://www.facebook.com/privacy/explanation', 'embed-privacy' ),
 					'regex_default' => '/facebook\\\.com/',
 				],
 				/* translators: embed provider */
-				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Facebook', 'embed provider', 'embed-privacy' ) ),
+				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Facebook', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
-				'post_title' => _x( 'Facebook', 'embed provider', 'embed-privacy' ),
+				'post_title' => \_x( 'Facebook', 'embed provider', 'embed-privacy' ),
 				'post_type' => 'epi_embed',
 			],
 			[
 				'meta_input' => [
 					'is_system' => 'yes',
-					'privacy_policy_url' => __( 'https://www.flickr.com/help/privacy', 'embed-privacy' ),
+					'privacy_policy_url' => \__( 'https://www.flickr.com/help/privacy', 'embed-privacy' ),
 					'regex_default' => '/flickr\\\.com/',
 				],
 				/* translators: embed provider */
-				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Flickr', 'embed provider', 'embed-privacy' ) ),
+				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Flickr', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
-				'post_title' => _x( 'Flickr', 'embed provider', 'embed-privacy' ),
+				'post_title' => \_x( 'Flickr', 'embed provider', 'embed-privacy' ),
 				'post_type' => 'epi_embed',
 			],
 			[
 				'meta_input' => [
 					'is_system' => 'yes',
-					'privacy_policy_url' => __( 'https://www.funnyordie.com/legal/privacy-notice', 'embed-privacy' ),
+					'privacy_policy_url' => \__( 'https://www.funnyordie.com/legal/privacy-notice', 'embed-privacy' ),
 					'regex_default' => '/funnyordie\\\.com/',
 				],
 				/* translators: embed provider */
-				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Funny Or Die', 'embed provider', 'embed-privacy' ) ),
+				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Funny Or Die', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
-				'post_title' => _x( 'Funny Or Die', 'embed provider', 'embed-privacy' ),
+				'post_title' => \_x( 'Funny Or Die', 'embed provider', 'embed-privacy' ),
 				'post_type' => 'epi_embed',
 			],
 			[
 				'meta_input' => [
 					'is_system' => 'yes',
-					'privacy_policy_url' => __( 'https://policies.google.com/privacy?hl=en', 'embed-privacy' ),
+					'privacy_policy_url' => \__( 'https://policies.google.com/privacy?hl=en', 'embed-privacy' ),
 					'regex_default' => '/(google\\\.com\\\/maps\\\/embed|maps\\\.google\\\.com\\\/(maps)?)/',
 				],
 				/* translators: embed provider */
-				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Google Maps', 'embed provider', 'embed-privacy' ) ),
+				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Google Maps', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
-				'post_title' => _x( 'Google Maps', 'embed provider', 'embed-privacy' ),
+				'post_title' => \_x( 'Google Maps', 'embed provider', 'embed-privacy' ),
 				'post_type' => 'epi_embed',
 			],
 			[
 				'meta_input' => [
 					'is_system' => 'yes',
-					'privacy_policy_url' => __( 'https://imgur.com/privacy', 'embed-privacy' ),
+					'privacy_policy_url' => \__( 'https://imgur.com/privacy', 'embed-privacy' ),
 					'regex_default' => '/imgur\\\.com/',
 				],
 				/* translators: embed provider */
-				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Imgur', 'embed provider', 'embed-privacy' ) ),
+				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Imgur', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
-				'post_title' => _x( 'Imgur', 'embed provider', 'embed-privacy' ),
+				'post_title' => \_x( 'Imgur', 'embed provider', 'embed-privacy' ),
 				'post_type' => 'epi_embed',
 			],
 			[
 				'meta_input' => [
 					'is_system' => 'yes',
-					'privacy_policy_url' => __( 'https://www.instagram.com/legal/privacy/', 'embed-privacy' ),
+					'privacy_policy_url' => \__( 'https://www.instagram.com/legal/privacy/', 'embed-privacy' ),
 					'regex_default' => '/instagram\\\.com/',
 				],
 				/* translators: embed provider */
-				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Instagram', 'embed provider', 'embed-privacy' ) ),
+				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Instagram', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
-				'post_title' => _x( 'Instagram', 'embed provider', 'embed-privacy' ),
+				'post_title' => \_x( 'Instagram', 'embed provider', 'embed-privacy' ),
 				'post_type' => 'epi_embed',
 			],
 			[
 				'meta_input' => [
 					'is_system' => 'yes',
-					'privacy_policy_url' => __( 'https://issuu.com/legal/privacy', 'embed-privacy' ),
+					'privacy_policy_url' => \__( 'https://issuu.com/legal/privacy', 'embed-privacy' ),
 					'regex_default' => '/issuu\\\.com/',
 				],
 				/* translators: embed provider */
-				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Issuu', 'embed provider', 'embed-privacy' ) ),
+				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Issuu', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
-				'post_title' => _x( 'Issuu', 'embed provider', 'embed-privacy' ),
+				'post_title' => \_x( 'Issuu', 'embed provider', 'embed-privacy' ),
 				'post_type' => 'epi_embed',
 			],
 			[
 				'meta_input' => [
 					'is_system' => 'yes',
-					'privacy_policy_url' => __( 'https://www.kickstarter.com/privacy', 'embed-privacy' ),
+					'privacy_policy_url' => \__( 'https://www.kickstarter.com/privacy', 'embed-privacy' ),
 					'regex_default' => '/kickstarter\\\.com/',
 				],
 				/* translators: embed provider */
-				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Kickstarter', 'embed provider', 'embed-privacy' ) ),
+				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Kickstarter', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
-				'post_title' => _x( 'Kickstarter', 'embed provider', 'embed-privacy' ),
+				'post_title' => \_x( 'Kickstarter', 'embed provider', 'embed-privacy' ),
 				'post_type' => 'epi_embed',
 			],
 			[
@@ -831,297 +791,297 @@ class Migration {
 					'regex_default' => '',
 				],
 				/* translators: embed provider */
-				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Maps Marker', 'embed provider', 'embed-privacy' ) ),
+				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Maps Marker', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
-				'post_title' => _x( 'Maps Marker', 'embed provider', 'embed-privacy' ),
+				'post_title' => \_x( 'Maps Marker', 'embed provider', 'embed-privacy' ),
 				'post_type' => 'epi_embed',
 			],
 			[
 				'meta_input' => [
 					'is_system' => 'yes',
-					'privacy_policy_url' => __( 'https://www.meetup.com/privacy/', 'embed-privacy' ),
+					'privacy_policy_url' => \__( 'https://www.meetup.com/privacy/', 'embed-privacy' ),
 					'regex_default' => '/meetup\\\.com/',
 				],
 				/* translators: embed provider */
-				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Meetup', 'embed provider', 'embed-privacy' ) ),
+				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Meetup', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
-				'post_title' => _x( 'Meetup', 'embed provider', 'embed-privacy' ),
+				'post_title' => \_x( 'Meetup', 'embed provider', 'embed-privacy' ),
 				'post_type' => 'epi_embed',
 			],
 			[
 				'meta_input' => [
 					'is_system' => 'yes',
-					'privacy_policy_url' => __( 'https://www.mixcloud.com/privacy/', 'embed-privacy' ),
+					'privacy_policy_url' => \__( 'https://www.mixcloud.com/privacy/', 'embed-privacy' ),
 					'regex_default' => '/mixcloud\\\.com/',
 				],
 				/* translators: embed provider */
-				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Mixcloud', 'embed provider', 'embed-privacy' ) ),
+				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Mixcloud', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
-				'post_title' => _x( 'Mixcloud', 'embed provider', 'embed-privacy' ),
+				'post_title' => \_x( 'Mixcloud', 'embed provider', 'embed-privacy' ),
 				'post_type' => 'epi_embed',
 			],
 			[
 				'meta_input' => [
 					'is_system' => 'yes',
-					'privacy_policy_url' => __( 'https://app.photobucket.com/privacy', 'embed-privacy' ),
+					'privacy_policy_url' => \__( 'https://app.photobucket.com/privacy', 'embed-privacy' ),
 					'regex_default' => '/photobucket\\\.com/',
 				],
 				/* translators: embed provider */
-				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Photobucket', 'embed provider', 'embed-privacy' ) ),
+				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Photobucket', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
-				'post_title' => _x( 'Photobucket', 'embed provider', 'embed-privacy' ),
+				'post_title' => \_x( 'Photobucket', 'embed provider', 'embed-privacy' ),
 				'post_type' => 'epi_embed',
 			],
 			[
 				'meta_input' => [
 					'is_system' => 'yes',
-					'privacy_policy_url' => __( 'https://policy.pinterest.com/en/privacy-policy', 'embed-privacy' ),
+					'privacy_policy_url' => \__( 'https://policy.pinterest.com/en/privacy-policy', 'embed-privacy' ),
 					'regex_default' => '/pinterest\\\./',
 				],
 				/* translators: embed provider */
-				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Pinterest', 'embed provider', 'embed-privacy' ) ),
+				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Pinterest', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
-				'post_title' => _x( 'Pinterest', 'embed provider', 'embed-privacy' ),
+				'post_title' => \_x( 'Pinterest', 'embed provider', 'embed-privacy' ),
 				'post_type' => 'epi_embed',
 			],
 			[
 				'meta_input' => [
 					'is_system' => 'yes',
-					'privacy_policy_url' => __( 'https://support.pocketcasts.com/article/privacy-policy/', 'embed-privacy' ),
+					'privacy_policy_url' => \__( 'https://support.pocketcasts.com/article/privacy-policy/', 'embed-privacy' ),
 					'regex_default' => '/pca\\\.st/',
 				],
 				/* translators: embed provider */
-				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Pocket Casts', 'embed provider', 'embed-privacy' ) ),
+				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Pocket Casts', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
-				'post_title' => _x( 'Pocket Casts', 'embed provider', 'embed-privacy' ),
+				'post_title' => \_x( 'Pocket Casts', 'embed provider', 'embed-privacy' ),
 				'post_type' => 'epi_embed',
 			],
 			[
 				'meta_input' => [
 					'is_system' => 'yes',
-					'privacy_policy_url' => __( 'https://www.reddit.com/help/privacypolicy', 'embed-privacy' ),
+					'privacy_policy_url' => \__( 'https://www.reddit.com/help/privacypolicy', 'embed-privacy' ),
 					'regex_default' => '/reddit\\\.com/',
 				],
 				/* translators: embed provider */
-				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Reddit', 'embed provider', 'embed-privacy' ) ),
+				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Reddit', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
-				'post_title' => _x( 'Reddit', 'embed provider', 'embed-privacy' ),
+				'post_title' => \_x( 'Reddit', 'embed provider', 'embed-privacy' ),
 				'post_type' => 'epi_embed',
 			],
 			[
 				'meta_input' => [
 					'is_system' => 'yes',
-					'privacy_policy_url' => __( 'https://www.reverbnation.com/privacy', 'embed-privacy' ),
+					'privacy_policy_url' => \__( 'https://www.reverbnation.com/privacy', 'embed-privacy' ),
 					'regex_default' => '/reverbnation\\\.com/',
 				],
 				/* translators: embed provider */
-				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'ReverbNation', 'embed provider', 'embed-privacy' ) ),
+				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'ReverbNation', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
-				'post_title' => _x( 'ReverbNation', 'embed provider', 'embed-privacy' ),
+				'post_title' => \_x( 'ReverbNation', 'embed provider', 'embed-privacy' ),
 				'post_type' => 'epi_embed',
 			],
 			[
 				'meta_input' => [
 					'is_system' => 'yes',
-					'privacy_policy_url' => __( 'https://scribd.com/privacy', 'embed-privacy' ),
+					'privacy_policy_url' => \__( 'https://scribd.com/privacy', 'embed-privacy' ),
 					'regex_default' => '/scribd\\\.com/',
 				],
 				/* translators: embed provider */
-				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Scribd', 'embed provider', 'embed-privacy' ) ),
+				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Scribd', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
-				'post_title' => _x( 'Scribd', 'embed provider', 'embed-privacy' ),
+				'post_title' => \_x( 'Scribd', 'embed provider', 'embed-privacy' ),
 				'post_type' => 'epi_embed',
 			],
 			[
 				'meta_input' => [
 					'is_system' => 'yes',
-					'privacy_policy_url' => __( 'https://sketchfab.com/privacy', 'embed-privacy' ),
+					'privacy_policy_url' => \__( 'https://sketchfab.com/privacy', 'embed-privacy' ),
 					'regex_default' => '/sketchfab\\\.com/',
 				],
 				/* translators: embed provider */
-				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Sketchfab', 'embed provider', 'embed-privacy' ) ),
+				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Sketchfab', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
-				'post_title' => _x( 'Sketchfab', 'embed provider', 'embed-privacy' ),
+				'post_title' => \_x( 'Sketchfab', 'embed provider', 'embed-privacy' ),
 				'post_type' => 'epi_embed',
 			],
 			[
 				'meta_input' => [
 					'is_system' => 'yes',
-					'privacy_policy_url' => __( 'https://www.slideshare.net/privacy', 'embed-privacy' ),
+					'privacy_policy_url' => \__( 'https://www.slideshare.net/privacy', 'embed-privacy' ),
 					'regex_default' => '/slideshare\\\.net/',
 				],
 				/* translators: embed provider */
-				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'SlideShare', 'embed provider', 'embed-privacy' ) ),
+				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'SlideShare', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
-				'post_title' => _x( 'SlideShare', 'embed provider', 'embed-privacy' ),
+				'post_title' => \_x( 'SlideShare', 'embed provider', 'embed-privacy' ),
 				'post_type' => 'epi_embed',
 			],
 			[
 				'meta_input' => [
 					'is_system' => 'yes',
-					'privacy_policy_url' => __( 'https://www.smugmug.com/about/privacy', 'embed-privacy' ),
+					'privacy_policy_url' => \__( 'https://www.smugmug.com/about/privacy', 'embed-privacy' ),
 					'regex_default' => '/smugmug\\\.com/',
 				],
 				/* translators: embed provider */
-				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'SmugMug', 'embed provider', 'embed-privacy' ) ),
+				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'SmugMug', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
-				'post_title' => _x( 'SmugMug', 'embed provider', 'embed-privacy' ),
+				'post_title' => \_x( 'SmugMug', 'embed provider', 'embed-privacy' ),
 				'post_type' => 'epi_embed',
 			],
 			[
 				'meta_input' => [
 					'is_system' => 'yes',
-					'privacy_policy_url' => __( 'https://soundcloud.com/pages/privacy', 'embed-privacy' ),
+					'privacy_policy_url' => \__( 'https://soundcloud.com/pages/privacy', 'embed-privacy' ),
 					'regex_default' => '/soundcloud\\\.com/',
 				],
 				/* translators: embed provider */
-				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'SoundCloud', 'embed provider', 'embed-privacy' ) ),
+				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'SoundCloud', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
-				'post_title' => _x( 'SoundCloud', 'embed provider', 'embed-privacy' ),
+				'post_title' => \_x( 'SoundCloud', 'embed provider', 'embed-privacy' ),
 				'post_type' => 'epi_embed',
 			],
 			[
 				'meta_input' => [
 					'is_system' => 'yes',
-					'privacy_policy_url' => __( 'https://speakerdeck.com/privacy', 'embed-privacy' ),
+					'privacy_policy_url' => \__( 'https://speakerdeck.com/privacy', 'embed-privacy' ),
 					'regex_default' => '/speakerdeck\\\.com/',
 				],
 				/* translators: embed provider */
-				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Speaker Deck', 'embed provider', 'embed-privacy' ) ),
+				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Speaker Deck', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
-				'post_title' => _x( 'Speaker Deck', 'embed provider', 'embed-privacy' ),
+				'post_title' => \_x( 'Speaker Deck', 'embed provider', 'embed-privacy' ),
 				'post_type' => 'epi_embed',
 			],
 			[
 				'meta_input' => [
 					'is_system' => 'yes',
-					'privacy_policy_url' => __( 'https://www.spotify.com/privacy/', 'embed-privacy' ),
+					'privacy_policy_url' => \__( 'https://www.spotify.com/privacy/', 'embed-privacy' ),
 					'regex_default' => '/spotify\\\.com/',
 				],
 				/* translators: embed provider */
-				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Spotify', 'embed provider', 'embed-privacy' ) ),
+				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Spotify', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
-				'post_title' => _x( 'Spotify', 'embed provider', 'embed-privacy' ),
+				'post_title' => \_x( 'Spotify', 'embed provider', 'embed-privacy' ),
 				'post_type' => 'epi_embed',
 			],
 			[
 				'meta_input' => [
 					'is_system' => 'yes',
-					'privacy_policy_url' => __( 'https://www.tiktok.com/legal/privacy-policy?lang=en-US', 'embed-privacy' ),
+					'privacy_policy_url' => \__( 'https://www.tiktok.com/legal/privacy-policy?lang=en-US', 'embed-privacy' ),
 					'regex_default' => '/tiktok\\\.com/',
 				],
 				/* translators: embed provider */
-				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'TikTok', 'embed provider', 'embed-privacy' ) ),
+				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'TikTok', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
-				'post_title' => _x( 'TikTok', 'embed provider', 'embed-privacy' ),
+				'post_title' => \_x( 'TikTok', 'embed provider', 'embed-privacy' ),
 				'post_type' => 'epi_embed',
 			],
 			[
 				'meta_input' => [
 					'is_system' => 'yes',
-					'privacy_policy_url' => __( 'https://www.ted.com/about/our-organization/our-policies-terms/privacy-policy', 'embed-privacy' ),
+					'privacy_policy_url' => \__( 'https://www.ted.com/about/our-organization/our-policies-terms/privacy-policy', 'embed-privacy' ),
 					'regex_default' => '/ted\\\.com/',
 				],
 				/* translators: embed provider */
-				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'TED', 'embed provider', 'embed-privacy' ) ),
+				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'TED', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
-				'post_title' => _x( 'TED', 'embed provider', 'embed-privacy' ),
+				'post_title' => \_x( 'TED', 'embed provider', 'embed-privacy' ),
 				'post_type' => 'epi_embed',
 			],
 			[
 				'meta_input' => [
 					'is_system' => 'yes',
-					'privacy_policy_url' => __( 'https://www.tumblr.com/privacy_policy', 'embed-privacy' ),
+					'privacy_policy_url' => \__( 'https://www.tumblr.com/privacy_policy', 'embed-privacy' ),
 					'regex_default' => '/tumblr\\\.com/',
 				],
 				/* translators: embed provider */
-				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Tumblr', 'embed provider', 'embed-privacy' ) ),
+				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Tumblr', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
-				'post_title' => _x( 'Tumblr', 'embed provider', 'embed-privacy' ),
+				'post_title' => \_x( 'Tumblr', 'embed provider', 'embed-privacy' ),
 				'post_type' => 'epi_embed',
 			],
 			[
 				'meta_input' => [
 					'is_system' => 'yes',
-					'privacy_policy_url' => __( 'https://twitter.com/privacy', 'embed-privacy' ),
+					'privacy_policy_url' => \__( 'https://twitter.com/privacy', 'embed-privacy' ),
 					'regex_default' => '/twitter\\\.com/',
 				],
 				/* translators: embed provider */
-				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Twitter', 'embed provider', 'embed-privacy' ) ),
+				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Twitter', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
-				'post_title' => _x( 'Twitter', 'embed provider', 'embed-privacy' ),
+				'post_title' => \_x( 'Twitter', 'embed provider', 'embed-privacy' ),
 				'post_type' => 'epi_embed',
 			],
 			[
 				'meta_input' => [
 					'is_system' => 'yes',
-					'privacy_policy_url' => __( 'https://automattic.com/privacy/', 'embed-privacy' ),
+					'privacy_policy_url' => \__( 'https://automattic.com/privacy/', 'embed-privacy' ),
 					'regex_default' => '/videopress\\\.com/',
 				],
 				/* translators: embed provider */
-				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'VideoPress', 'embed provider', 'embed-privacy' ) ),
+				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'VideoPress', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
-				'post_title' => _x( 'VideoPress', 'embed provider', 'embed-privacy' ),
+				'post_title' => \_x( 'VideoPress', 'embed provider', 'embed-privacy' ),
 				'post_type' => 'epi_embed',
 			],
 			[
 				'meta_input' => [
 					'is_system' => 'yes',
-					'privacy_policy_url' => __( 'https://vimeo.com/privacy', 'embed-privacy' ),
+					'privacy_policy_url' => \__( 'https://vimeo.com/privacy', 'embed-privacy' ),
 					'regex_default' => '/vimeo\\\.com/',
 				],
 				/* translators: embed provider */
-				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Vimeo', 'embed provider', 'embed-privacy' ) ),
+				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Vimeo', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
-				'post_title' => _x( 'Vimeo', 'embed provider', 'embed-privacy' ),
+				'post_title' => \_x( 'Vimeo', 'embed provider', 'embed-privacy' ),
 				'post_type' => 'epi_embed',
 			],
 			[
 				'meta_input' => [
 					'is_system' => 'yes',
-					'privacy_policy_url' => __( 'https://www.wolfram.com/legal/privacy/wolfram/', 'embed-privacy' ),
+					'privacy_policy_url' => \__( 'https://www.wolfram.com/legal/privacy/wolfram/', 'embed-privacy' ),
 					'regex_default' => '/wolframcloud\\\.com/',
 				],
 				/* translators: embed provider */
-				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'Wolfram Cloud', 'embed provider', 'embed-privacy' ) ),
+				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Wolfram Cloud', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
-				'post_title' => _x( 'Wolfram Cloud', 'embed provider', 'embed-privacy' ),
+				'post_title' => \_x( 'Wolfram Cloud', 'embed provider', 'embed-privacy' ),
 				'post_type' => 'epi_embed',
 			],
 			[
 				'meta_input' => [
 					'is_system' => 'yes',
-					'privacy_policy_url' => __( 'https://wordpress.org/about/privacy/', 'embed-privacy' ),
+					'privacy_policy_url' => \__( 'https://wordpress.org/about/privacy/', 'embed-privacy' ),
 					'regex_default' => '/wordpress\\\.org\\\/plugins/',
 				],
 				/* translators: embed provider */
-				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'WordPress.org', 'embed provider', 'embed-privacy' ) ),
+				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'WordPress.org', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
-				'post_title' => _x( 'WordPress.org', 'embed provider', 'embed-privacy' ),
+				'post_title' => \_x( 'WordPress.org', 'embed provider', 'embed-privacy' ),
 				'post_type' => 'epi_embed',
 			],
 			[
 				'meta_input' => [
 					'is_system' => 'yes',
-					'privacy_policy_url' => __( 'https://wordpress.org/about/privacy/', 'embed-privacy' ),
+					'privacy_policy_url' => \__( 'https://wordpress.org/about/privacy/', 'embed-privacy' ),
 					'regex_default' => '/wordpress\\\.tv\/',
 				],
 				/* translators: embed provider */
-				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'WordPress.tv', 'embed provider', 'embed-privacy' ) ),
+				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'WordPress.tv', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
-				'post_title' => _x( 'WordPress.tv', 'embed provider', 'embed-privacy' ),
+				'post_title' => \_x( 'WordPress.tv', 'embed provider', 'embed-privacy' ),
 				'post_type' => 'epi_embed',
 			],
 			[
 				'meta_input' => [
 					'is_system' => 'yes',
-					'privacy_policy_url' => __( 'https://policies.google.com/privacy?hl=en', 'embed-privacy' ),
+					'privacy_policy_url' => \__( 'https://policies.google.com/privacy?hl=en', 'embed-privacy' ),
 					'regex_default' => '/https?:\\\/\\\/(?:.+?.)?youtu(?:.be|be.com)/',
 				],
 				/* translators: embed provider */
-				'post_content' => sprintf( __( 'Click here to display content from %s.', 'embed-privacy' ), _x( 'YouTube', 'embed provider', 'embed-privacy' ) ),
+				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'YouTube', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
-				'post_title' => _x( 'YouTube', 'embed provider', 'embed-privacy' ),
+				'post_title' => \_x( 'YouTube', 'embed provider', 'embed-privacy' ),
 				'post_type' => 'epi_embed',
 			],
 		];
@@ -1142,10 +1102,10 @@ class Migration {
 				<?php
 				printf(
 					/* translators: 1: current migration version, 2: target migration version, 3: starting HTML anchor, 4: ending HTML anchor */
-					esc_html__( 'Embed Privacy migration from version %1$s to %2$s failed. Please contact the %3$ssupport%4$s for further assistance.', 'embed-privacy' ),
-					esc_html( $this->get_option( 'migrate_version' ) ),
-					esc_html( $this->version ),
-					'<a href="' . esc_url( __( 'https://wordpress.org/support/plugin/embed-privacy/#new-topic-0', 'embed-privacy' ) ) . '">',
+					\esc_html__( 'Embed Privacy migration from version %1$s to %2$s failed. Please contact the %3$ssupport%4$s for further assistance.', 'embed-privacy' ),
+					\esc_html( $this->get_option( 'migrate_version' ) ),
+					\esc_html( $this->version ),
+					'<a href="' . \esc_url( \__( 'https://wordpress.org/support/plugin/embed-privacy/#new-topic-0', 'embed-privacy' ) ) . '">',
 					'</a>'
 				); ?>
 			</p>
@@ -1162,6 +1122,6 @@ class Migration {
 	 * @noinspection PhpReturnValueOfMethodIsNeverUsedInspection
 	 */
 	private function update_option( $option, $value ) {
-		return update_option( 'embed_privacy_' . $option, $value );
+		return \update_option( 'embed_privacy_' . $option, $value );
 	}
 }

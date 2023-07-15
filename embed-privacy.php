@@ -1,15 +1,5 @@
 <?php
 namespace epiphyt\Embed_Privacy;
-use function array_pop;
-use function define;
-use function defined;
-use function explode;
-use function file_exists;
-use function plugin_dir_url;
-use function spl_autoload_register;
-use function str_replace;
-use function strtolower;
-use const WP_PLUGIN_DIR;
 
 /*
 Plugin Name:	Embed Privacy
@@ -37,30 +27,35 @@ along with Embed Privacy. If not, see https://www.gnu.org/licenses/gpl-2.0.html.
 */
 
 // exit if ABSPATH is not defined
-defined( 'ABSPATH' ) || exit;
+\defined( 'ABSPATH' ) || exit;
 
-define( 'EMBED_PRIVACY_VERSION', '1.7.2' );
+\define( 'EMBED_PRIVACY_VERSION', '1.7.3' );
 
-if ( ! defined( 'EPI_EMBED_PRIVACY_BASE' ) ) define( 'EPI_EMBED_PRIVACY_BASE', WP_PLUGIN_DIR . '/embed-privacy/' );
-if ( ! defined( 'EPI_EMBED_PRIVACY_URL' ) ) define( 'EPI_EMBED_PRIVACY_URL', plugin_dir_url( EPI_EMBED_PRIVACY_BASE . 'embed-privacy.php' ) );
+if ( ! \defined( 'EPI_EMBED_PRIVACY_BASE' ) ) {
+	\define( 'EPI_EMBED_PRIVACY_BASE', \WP_PLUGIN_DIR . '/embed-privacy/' );
+}
+
+if ( ! \defined( 'EPI_EMBED_PRIVACY_URL' ) ) {
+	\define( 'EPI_EMBED_PRIVACY_URL', \plugin_dir_url( \EPI_EMBED_PRIVACY_BASE . 'embed-privacy.php' ) );
+}
 
 /**
  * Autoload all necessary classes.
  * 
  * @param	string		$class The class name of the autoloaded class
  */
-spl_autoload_register( function( $class ) {
-	$path = explode( '\\', $class );
-	$filename = str_replace( '_', '-', strtolower( array_pop( $path ) ) );
-	$class = str_replace(
+\spl_autoload_register( function( $class ) {
+	$path = \explode( '\\', $class );
+	$filename = \str_replace( '_', '-', \strtolower( \array_pop( $path ) ) );
+	$class = \str_replace(
 		[ 'epiphyt\embed_privacy\\', '\\', '_' ],
 		[ '', '/', '-' ],
-		strtolower( $class )
+		\strtolower( $class )
 	);
-	$class = str_replace( $filename, 'class-' . $filename, $class );
+	$class = \str_replace( $filename, 'class-' . $filename, $class );
 	$maybe_file = __DIR__ . '/inc/' . $class . '.php';
 	
-	if ( file_exists( $maybe_file ) ) {
+	if ( \file_exists( $maybe_file ) ) {
 		require_once $maybe_file;
 	}
 } );
