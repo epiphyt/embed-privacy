@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.7.3
+* Improved compatibility with Advanced Custom Fields
+* Fixed compatibility with PHP 8.2
+* Fixed a potential PHP warning if a post does not exist while checking permissions
+* Fixed functionality of the opt-out shortcode if the current website uses a non-standard port
+* Fixed replacing only the necessary part of embedded contents for custom embeds
+* Fixed replacing all occurrences of a custom embed in the current content
+* Fixed multiple unnecessary database queries in migration before the actual check whether a migration is necessary
+* Fixed downloading the thumbnail multiple times when the same embed is embedded multiple times
+* Fixed deleted thumbnails if they are only in content of Advanced Custom Fields
+* Fixed a potential security issue regarding disclosing absolute paths in thumbnail URLs (special thanks to [@kraftner](https://profiles.wordpress.org/kraftner/))
+* Fixed aspect ratio generation if width or height contains a percentage sign
+* Fixed thumbnail positioning (it's now horizontally and vertically centered)
+* Fixed HTML output of the opt-out shortcode
+* General code improvements
+
 ## 1.7.2
 * Fixed getting the URL of video shortcodes properly to not block content from the same (sub)domain
 
