@@ -5,7 +5,7 @@
 		"start": "wp-scripts start",
 		"build": "wp-scripts build"
 	},
-	"author": "RegioHelden",
+	"author": "Epiphyt",
 	"license": "GPL-2.0",
 	"devDependencies": {
 		"@wordpress/scripts": "^22.0",
