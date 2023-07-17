@@ -90,7 +90,7 @@ class Migration {
 		}
 		
 		if ( ! \is_dir( $directory['base_dir'] ) ) {
-			\mkdir( $directory['base_dir'], 0777, true );
+			\wp_mkdir_p( $directory['base_dir'] );
 		}
 	}
 	
