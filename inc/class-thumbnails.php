@@ -17,12 +17,6 @@ class Thumbnails {
 	const DIRECTORY = \WP_CONTENT_DIR . '/uploads/embed-privacy/thumbnails';
 	
 	/**
-	 * @since	1.7.3
-	 * @var		string The thumbnails directory path
-	 */
-	public static $directory;
-	
-	/**
 	 * @var		array Fields to output
 	 */
 	public $fields = [];
@@ -37,7 +31,6 @@ class Thumbnails {
 	 */
 	public function __construct() {
 		self::$instance = $this;
-		self::$directory = $this->get_directory();
 	}
 	
 	/**
@@ -150,11 +143,13 @@ class Thumbnails {
 	 * @param	string	$filename The thumbnail filename
 	 */
 	private function delete( $filename ) {
-		if ( ! \file_exists( self::$directory['base_dir'] . '/' . $filename ) ) {
+		$directory = $this->get_directory();
+		
+		if ( ! \file_exists( $directory['base_dir'] . '/' . $filename ) ) {
 			return;
 		}
 		
-		\unlink( self::$directory['base_dir'] . '/' . $filename );
+		\unlink( $directory['base_dir'] . '/' . $filename );
 	}
 	
 	/**
@@ -248,10 +243,11 @@ class Thumbnails {
 		$thumbnail = \apply_filters( 'embed_privacy_thumbnail_data_filename', $thumbnail, $post, $url );
 		
 		if ( $thumbnail ) {
-			$thumbnail_path = self::$directory['base_dir'] . '/' . $thumbnail;
+			$directory = $this->get_directory();
+			$thumbnail_path = $directory['base_dir'] . '/' . $thumbnail;
 			
 			if ( \file_exists( $thumbnail_path ) ) {
-				$thumbnail_url = self::$directory['base_url'] . '/' . $thumbnail;
+				$thumbnail_url = $directory['base_url'] . '/' . $thumbnail;
 			}
 		}
 		
@@ -516,7 +512,7 @@ class Thumbnails {
 		}
 		
 		$filename = 'slideshare-' . $id . '.jpg' ;
-		$thumbnail_path = self::$directory['base_dir'] . '/' . $filename;
+		$thumbnail_path = $this->get_directory()['base_dir'] . '/' . $filename;
 		
 		if ( ! \file_exists( $thumbnail_path ) ) {
 			require_once ABSPATH . 'wp-admin/includes/file.php';
@@ -548,7 +544,7 @@ class Thumbnails {
 			return;
 		}
 		
-		$thumbnail_path = self::$directory['base_dir'] . '/vimeo-' . $id . '.jpg';
+		$thumbnail_path = $this->get_directory()['base_dir'] . '/vimeo-' . $id . '.jpg';
 		
 		if ( ! \file_exists( $thumbnail_path ) ) {
 			require_once ABSPATH . 'wp-admin/includes/file.php';
@@ -581,6 +577,7 @@ class Thumbnails {
 		
 		require_once ABSPATH . 'wp-admin/includes/file.php';
 		
+		$directory = $this->get_directory();
 		// list of images we try to retrieve
 		// see: https://stackoverflow.com/a/2068371
 		$images = [
@@ -591,7 +588,7 @@ class Thumbnails {
 		$thumbnail_url = 'https://img.youtube.com/vi/%1$s/%2$s.jpg';
 		
 		foreach ( $images as $image ) {
-			$thumbnail_path = self::$directory['base_dir'] . '/youtube-' . $id . '-' . $image . '.jpg';
+			$thumbnail_path = $directory['base_dir'] . '/youtube-' . $id . '-' . $image . '.jpg';
 			
 			if ( ! \file_exists( $thumbnail_path ) ) {
 				$file = \download_url( \sprintf( $thumbnail_url, $id, $image ) );
