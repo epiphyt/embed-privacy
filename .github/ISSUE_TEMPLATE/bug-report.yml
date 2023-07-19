@@ -1,5 +1,7 @@
 name: Bug report
 description: Report a bug or provide information about problems you have with Embed Privacy
+labels:
+  - "bug"
 body:
   - type: textarea
     attributes:
