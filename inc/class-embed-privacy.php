@@ -901,12 +901,11 @@ class Embed_Privacy {
 			
 			<style>
 				<?php
+				if ( ! empty( $args['height'] ) && ! empty( $args['width'] ) && empty( $args['ignore_aspect_ratio'] ) ) :
 				// if height is in percentage, we cannot determine the aspect ratio
 				if ( \strpos( $args['height'], '%' ) !== false ) {
 					$args['ignore_aspect_ratio'] = true;
 				}
-				
-				if ( ! empty( $args['height'] ) && ! empty( $args['width'] ) && empty( $args['ignore_aspect_ratio'] ) ) :
 				// if width is in percentage, we need to use the content width
 				// since we cannot determine the actual width
 				if ( \strpos( $args['width'], '%' ) !== false ) {
