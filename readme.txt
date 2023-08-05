@@ -19,6 +19,7 @@ All embeds will be replaced by placeholders, ready for you to apply style as you
 
 By clicking on the placeholder the respective content will be reloaded.
 
+**Note: This plugins requires the PHP extension ["Document Object Model" (php-dom)](https://www.php.net/manual/en/book.dom.php).**
 
 == Installation ==
 
