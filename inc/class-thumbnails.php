@@ -111,9 +111,23 @@ class Thumbnails {
 					}
 					
 					if ( $missing_id && $missing_url && ! $this->is_in_use( $meta_value, $post_id, $global_metadata ) ) {
-						$this->delete( $meta_value );
-						\delete_post_meta( $post_id, $meta_key );
-						\delete_post_meta( $post_id, $meta_key . '_url' );
+						/**
+						 * Fires before orphaned data are deleted.
+						 * 
+						 * @since	1.8.0
+						 * 
+						 * @param	string	$id The thumbnail ID
+						 * @param	string	$url The thumbnail URL
+						 * @param	int		$post_id The post ID
+						 * @param	string	$provider The provider name
+						 */
+						\do_action( 'embed_privacy_pre_thumbnail_check_orphaned_delete', $id, $url, $post_id, $provider );
+						
+						if ( ! \has_action( 'embed_privacy_pre_thumbnail_check_orphaned_delete' ) ) {
+							$this->delete( $meta_value );
+							\delete_post_meta( $post_id, $meta_key );
+							\delete_post_meta( $post_id, $meta_key . '_url' );
+						}
 					}
 					
 					/**
