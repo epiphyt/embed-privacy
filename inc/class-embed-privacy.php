@@ -435,6 +435,10 @@ class Embed_Privacy {
 			return $this->embeds[ $type ];
 		}
 		
+		if ( ! empty( $args ) ) {
+			$hash = \md5( \wp_json_encode( $args ) );
+		}
+		
 		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 		switch ( $type ) {
 			case 'custom':
@@ -463,7 +467,13 @@ class Embed_Privacy {
 					'name' => 'google-maps',
 					'post_type' => 'epi_embed',
 				], $args ) );
-				$this->embeds['custom'] = \array_merge( $custom_providers, $google_provider );
+				
+				if ( ! empty( $hash ) ) {
+					$this->embeds[ $hash ] = \array_merge( $custom_providers, $google_provider );
+				}
+				else {
+					$this->embeds[ $type ] = \array_merge( $custom_providers, $google_provider );
+				}
 				break;
 			case 'oembed':
 				$embed_providers = \get_posts( \array_merge( [
@@ -474,19 +484,36 @@ class Embed_Privacy {
 					'orderby' => 'post_title',
 					'post_type' => 'epi_embed',
 				], $args ) );
-				$this->embeds['oembed'] = $embed_providers;
+				
+				if ( ! empty( $hash ) ) {
+					$this->embeds[ $hash ] = $embed_providers;
+				}
+				else {
+					$this->embeds[ $type ] = $embed_providers;
+				}
 				break;
 			case 'all':
 			default:
-				$this->embeds['all'] = \get_posts( \array_merge( [
+				$embed_providers = \get_posts( \array_merge( [
 					'numberposts' => -1,
 					'order' => 'ASC',
 					'orderby' => 'post_title',
 					'post_type' => 'epi_embed',
 				], $args ) );
+				
+				if ( ! empty( $hash ) ) {
+					$this->embeds[ $hash ] = $embed_providers;
+				}
+				else {
+					$this->embeds['all'] = $embed_providers;
+				}
 				break;
 		}
 		// phpcs:enable
+		
+		if ( ! empty( $hash ) ) {
+			return $this->embeds[ $hash ];
+		}
 		
 		return $this->embeds[ $type ];
 	}
