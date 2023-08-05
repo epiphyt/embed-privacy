@@ -28,7 +28,7 @@ class Migration {
 	 * @var		string Current migration version
 	 * @since	1.2.2
 	 */
-	private $version = '1.7.3';
+	private $version = '1.8.0';
 	
 	/**
 	 * Post Type constructor.
@@ -196,36 +196,46 @@ class Migration {
 			case $this->version:
 				// most recent version, do nothing
 				break;
+			case '1.7.3':
+				$this->migrate_1_8_0();
+				break;
 			case '1.7.0':
+				$this->migrate_1_8_0();
 				$this->migrate_1_7_3();
 				break;
 			case '1.6.0':
+				$this->migrate_1_8_0();
 				$this->migrate_1_7_3();
 				$this->migrate_1_7_0();
 				break;
 			case '1.5.0':
+				$this->migrate_1_8_0();
 				$this->migrate_1_7_3();
 				$this->migrate_1_7_0();
 				$this->migrate_1_6_0();
 				break;
 			case '1.4.7':
+				$this->migrate_1_8_0();
 				$this->migrate_1_7_0();
 				$this->migrate_1_6_0();
 				$this->migrate_1_5_0();
 				break;
 			case '1.4.0':
+				$this->migrate_1_8_0();
 				$this->migrate_1_7_0();
 				$this->migrate_1_6_0();
 				$this->migrate_1_5_0();
 				$this->migrate_1_4_7();
 				break;
 			case '1.3.0':
+				$this->migrate_1_8_0();
 				$this->migrate_1_7_0();
 				$this->migrate_1_6_0();
 				$this->migrate_1_5_0();
 				$this->migrate_1_4_0();
 				break;
 			case '1.2.2':
+				$this->migrate_1_8_0();
 				$this->migrate_1_7_0();
 				$this->migrate_1_6_0();
 				$this->migrate_1_5_0();
@@ -233,6 +243,7 @@ class Migration {
 				$this->migrate_1_3_0();
 				break;
 			case '1.2.1':
+				$this->migrate_1_8_0();
 				$this->migrate_1_7_0();
 				$this->migrate_1_6_0();
 				$this->migrate_1_5_0();
@@ -241,6 +252,7 @@ class Migration {
 				$this->migrate_1_2_2();
 				break;
 			case '1.2.0':
+				$this->migrate_1_8_0();
 				$this->migrate_1_7_0();
 				$this->migrate_1_6_0();
 				$this->migrate_1_5_0();
@@ -624,6 +636,27 @@ class Migration {
 	}
 	
 	/**
+	 * Migrations for version 1.8.0.
+	 * @since	1.8.0
+	 * 
+	 * - Add new embed provider Anghami
+	 */
+	private function migrate_1_8_0() {
+		$this->add_embed( [
+			'meta_input' => [
+				'is_system' => 'yes',
+				'privacy_policy_url' => \__( 'https://www.anghami.com/legal', 'embed-privacy' ),
+				'regex_default' => '/anghami\\\.com/',
+			],
+			/* translators: embed provider */
+			'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Anghami', 'embed provider', 'embed-privacy' ) ),
+			'post_status' => 'publish',
+			'post_title' => \_x( 'Anghami', 'embed provider', 'embed-privacy' ),
+			'post_type' => 'epi_embed',
+		] );
+	}
+	
+	/**
 	 * Register default embed providers.
 	 */
 	public function register_default_embed_providers() {
@@ -638,6 +671,18 @@ class Migration {
 				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Amazon Kindle', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
 				'post_title' => \_x( 'Amazon Kindle', 'embed provider', 'embed-privacy' ),
+				'post_type' => 'epi_embed',
+			],
+			[
+				'meta_input' => [
+					'is_system' => 'yes',
+					'privacy_policy_url' => \__( 'https://www.anghami.com/legal', 'embed-privacy' ),
+					'regex_default' => '/anghami\\\.com/',
+				],
+				/* translators: embed provider */
+				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Anghami', 'embed provider', 'embed-privacy' ) ),
+				'post_status' => 'publish',
+				'post_title' => \_x( 'Anghami', 'embed provider', 'embed-privacy' ),
 				'post_type' => 'epi_embed',
 			],
 			[
