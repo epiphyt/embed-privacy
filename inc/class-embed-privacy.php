@@ -413,12 +413,18 @@ class Embed_Privacy {
 	/**
 	 * Get a specific type of embeds.
 	 * 
+	 * For more information on the accepted arguments in $args, see the
+	 * {@link https://developer.wordpress.org/reference/classes/wp_query/
+	 * WP_Query} documentation in the Developer Handbook.
+	 * 
 	 * @since	1.3.0
+	 * @since	1.8.0 Added the $args parameter
 	 * 
 	 * @param	string	$type The embed type
+	 * @param	array	$args Additional arguments
 	 * @return	array A list of embeds
 	 */
-	public function get_embeds( $type = 'all' ) {
+	public function get_embeds( $type = 'all', $args = [] ) {
 		if ( ! empty( $this->embeds ) && isset( $this->embeds[ $type ] ) ) {
 			return $this->embeds[ $type ];
 		}
@@ -427,12 +433,12 @@ class Embed_Privacy {
 			$this->embeds[ $type ] = \array_merge( $this->embeds['custom'], $this->embeds['oembed'] );
 			
 			return $this->embeds[ $type ];
-		} 
+		}
 		
 		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 		switch ( $type ) {
 			case 'custom':
-				$custom_providers = \get_posts( [
+				$custom_providers = \get_posts( \array_merge( [
 					'meta_query' => [
 						'relation' => 'OR',
 						[
@@ -450,40 +456,39 @@ class Embed_Privacy {
 					'order' => 'ASC',
 					'orderby' => 'post_title',
 					'post_type' => 'epi_embed',
-				] );
-				$google_provider = \get_posts( [
+				], $args ) );
+				$google_provider = \get_posts( \array_merge( [
 					'meta_key' => 'is_system',
 					'meta_value' => 'yes',
 					'name' => 'google-maps',
 					'post_type' => 'epi_embed',
-				] );
+				], $args ) );
 				$this->embeds['custom'] = \array_merge( $custom_providers, $google_provider );
-				
-				return $this->embeds['custom'];
+				break;
 			case 'oembed':
-				$embed_providers = \get_posts( [
+				$embed_providers = \get_posts( \array_merge( [
 					'meta_key' => 'is_system',
 					'meta_value' => 'yes',
 					'numberposts' => -1,
 					'order' => 'ASC',
 					'orderby' => 'post_title',
 					'post_type' => 'epi_embed',
-				] );
+				], $args ) );
 				$this->embeds['oembed'] = $embed_providers;
-				
-				return $this->embeds['oembed'];
+				break;
 			case 'all':
 			default:
-				$this->embeds['all'] = \get_posts( [
+				$this->embeds['all'] = \get_posts( \array_merge( [
 					'numberposts' => -1,
 					'order' => 'ASC',
 					'orderby' => 'post_title',
 					'post_type' => 'epi_embed',
-				] );
-				
-				return $this->embeds['all'];
+				], $args ) );
+				break;
 		}
 		// phpcs:enable
+		
+		return $this->embeds[ $type ];
 	}
 	
 	/**
