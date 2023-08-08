@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.8.0
+* Added support for Anghami
+* Added filter to prevent thumbnail orphan deletion
+* Added check for PHP DOM extension
+* Improved loading embed providers
+
 ## 1.7.3
 * Improved compatibility with Advanced Custom Fields
 * Fixed compatibility with PHP 8.2
