@@ -63,8 +63,11 @@ function delete_data() {
 	// delete posts of custom post type
 	$post_args = [
 		'fields' => 'ids',
+		'no_found_rows' => true,
 		'post_status' => 'any',
 		'post_type' => 'epi_embed',
+		'update_post_meta_cache' => false,
+		'update_post_term_cache' => false,
 	];
 	$embeds = \get_posts( $post_args );
 	
@@ -86,8 +89,10 @@ function delete_data() {
 				'value' => '',
 			],
 		],
+		'no_found_rows' => true,
 		'offset' => 0,
 		'post_type' => 'any',
+		'update_post_term_cache' => false,
 	];
 	$posts = \get_posts( $post_args );
 	

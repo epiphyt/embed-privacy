@@ -308,8 +308,10 @@ class Migration {
 		}
 		
 		$available_providers = \get_posts( [
+			'no_found_rows' => true,
 			'numberposts' => -1,
 			'post_type' => 'epi_embed',
+			'update_post_term_cache' => false,
 		] );
 		
 		foreach ( $available_providers as $provider ) {
@@ -342,7 +344,9 @@ class Migration {
 			'meta_key' => 'is_system',
 			'meta_value' => 'yes',
 			'name' => 'amazon-kindle',
+			'no_found_rows' => true,
 			'post_type' => 'epi_embed',
+			'update_post_term_cache' => false,
 		] );
 		
 		if ( ! empty( $amazon_provider ) ) {
@@ -370,7 +374,9 @@ class Migration {
 			'meta_key' => 'is_system',
 			'meta_value' => 'yes',
 			'name' => 'google-maps',
+			'no_found_rows' => true,
 			'post_type' => 'epi_embed',
+			'update_post_term_cache' => false,
 		] );
 		$providers = \array_merge( $providers, $google_provider );
 		
@@ -462,7 +468,9 @@ class Migration {
 			'meta_key' => 'is_system',
 			'meta_value' => 'yes',
 			'name' => 'google-maps',
+			'no_found_rows' => true,
 			'post_type' => 'epi_embed',
+			'update_post_term_cache' => false,
 		] );
 		$google_provider = \reset( $google_provider );
 		
@@ -507,11 +515,13 @@ class Migration {
 		] );
 		$this->create_thumbnails_dir();
 		
-		$google_provider = get_posts( [
+		$google_provider = \get_posts( [
 			'meta_key' => 'is_system',
 			'meta_value' => 'yes',
 			'name' => 'google-maps',
+			'no_found_rows' => true,
 			'post_type' => 'epi_embed',
+			'update_post_term_cache' => false,
 		] );
 		$google_provider = \reset( $google_provider );
 		
@@ -533,7 +543,9 @@ class Migration {
 			'meta_key' => 'is_system',
 			'meta_value' => 'yes',
 			'name' => 'google-maps',
+			'no_found_rows' => true,
 			'post_type' => 'epi_embed',
+			'update_post_term_cache' => false,
 		] );
 		$google_provider = \reset( $google_provider );
 		
@@ -555,7 +567,9 @@ class Migration {
 			'meta_key' => 'is_system',
 			'meta_value' => 'yes',
 			'name' => 'crowdsignal',
+			'no_found_rows' => true,
 			'post_type' => 'epi_embed',
+			'update_post_term_cache' => false,
 		] );
 		$crowdsignal_provider = \reset( $crowdsignal_provider );
 		
@@ -592,8 +606,10 @@ class Migration {
 						'value' => '',
 					],
 				],
+				'no_found_rows' => true,
 				'offset' => 0,
 				'post_type' => 'any',
+				'update_post_term_cache' => false,
 			];
 			$posts = \get_posts( $post_args );
 			

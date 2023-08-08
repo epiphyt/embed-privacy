@@ -456,16 +456,20 @@ class Embed_Privacy {
 							'value' => 'yes',
 						],
 					],
+					'no_found_rows' => true,
 					'numberposts' => -1,
 					'order' => 'ASC',
 					'orderby' => 'post_title',
 					'post_type' => 'epi_embed',
+					'update_post_term_cache' => false,
 				], $args ) );
 				$google_provider = \get_posts( \array_merge( [
 					'meta_key' => 'is_system',
 					'meta_value' => 'yes',
 					'name' => 'google-maps',
+					'no_found_rows' => true,
 					'post_type' => 'epi_embed',
+					'update_post_term_cache' => false,
 				], $args ) );
 				
 				if ( ! empty( $hash ) ) {
@@ -479,10 +483,12 @@ class Embed_Privacy {
 				$embed_providers = \get_posts( \array_merge( [
 					'meta_key' => 'is_system',
 					'meta_value' => 'yes',
+					'no_found_rows' => true,
 					'numberposts' => -1,
 					'order' => 'ASC',
 					'orderby' => 'post_title',
 					'post_type' => 'epi_embed',
+					'update_post_term_cache' => false,
 				], $args ) );
 				
 				if ( ! empty( $hash ) ) {
@@ -495,10 +501,12 @@ class Embed_Privacy {
 			case 'all':
 			default:
 				$embed_providers = \get_posts( \array_merge( [
+					'no_found_rows' => true,
 					'numberposts' => -1,
 					'order' => 'ASC',
 					'orderby' => 'post_title',
 					'post_type' => 'epi_embed',
+					'update_post_term_cache' => false,
 				], $args ) );
 				
 				if ( ! empty( $hash ) ) {
