@@ -1044,8 +1044,7 @@ class Embed_Privacy {
 		}
 		
 		// detect domain if WordPress is installed on a sub domain
-		$parsed_url = \wp_parse_url( \home_url() );
-		$host = $parsed_url['host'];
+		$host = \wp_parse_url( \home_url(), PHP_URL_HOST );
 		
 		if ( ! \filter_var( $host, \FILTER_VALIDATE_IP ) ) {
 			$host_array = \explode( '.', \str_replace( 'www.', '', $host ) );
@@ -1091,17 +1090,17 @@ class Embed_Privacy {
 				}
 				
 				if ( $is_empty_provider ) {
-					$parsed_url = wp_parse_url( $element->getAttribute( $args['element_attribute'] ) );
+					$embedded_host = \wp_parse_url( $element->getAttribute( $args['element_attribute'] ), \PHP_URL_HOST );
 					
 					// embeds with relative paths have no host
 					// and they are local by definition, so do nothing
 					// see https://github.com/epiphyt/embed-privacy/issues/27
-					if ( empty( $parsed_url['host'] ) ) {
+					if ( empty( $host ) ) {
 						return $content;
 					}
 					
-					$embed_provider = $parsed_url['host'];
-					$embed_provider_lowercase = \sanitize_title( $parsed_url['host'] );
+					$embed_provider = $embedded_host;
+					$embed_provider_lowercase = \sanitize_title( $embedded_host );
 					
 					// unknown providers need to be explicitly checked if they're always active
 					// see https://github.com/epiphyt/embed-privacy/issues/115
@@ -1487,7 +1486,7 @@ class Embed_Privacy {
 					continue;
 				}
 				
-				$output = '<script src="' . \esc_url( $asset['src'] ) . ( ! empty( $asset['version'] ) ? '?ver=' . \esc_attr( \rawurlencode( $asset['version'] ) ) : '' ) . '" id="' . \esc_attr( $asset['handle'] ) . '"></script>' . \PHP_EOL . $output; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+				$output = '<script src="' . \esc_url( $asset['src'] ) . ( ! empty( $asset['version'] ) ? '?ver=' . \esc_attr( \rawurlencode( $asset['version'] ) ) : '' ) . '" id="' . \esc_attr( $asset['handle'] ) . '"></script>' . PHP_EOL . $output; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 			}
 			else if ( $asset['type'] === 'inline' ) {
 				if ( empty( $asset['data'] ) || empty( $asset['object_name'] ) ) {
@@ -1766,9 +1765,14 @@ class Embed_Privacy {
 			return $output;
 		}
 		
-		// check the current domain
+		// ignore embeds without host (ie. relative URLs)
+		if ( empty( \wp_parse_url( $url, \PHP_URL_HOST ) ) ) {
+			return $output;
+		}
+		
+		// check the current host
 		// see: https://github.com/epiphyt/embed-privacy/issues/24
-		if ( \strpos( $url, \wp_parse_url( \home_url(), PHP_URL_HOST ) ) !== false ) {
+		if ( \strpos( $url, \wp_parse_url( \home_url(), \PHP_URL_HOST ) ) !== false ) {
 			return $output;
 		}
 		
@@ -1982,13 +1986,9 @@ class Embed_Privacy {
 			$url = $atts['flv'];
 		}
 		
-		// add host to relative URL
-		if ( empty( \wp_parse_url( $url, PHP_URL_HOST ) ) ) {
-			$url_parts = \wp_parse_url( \home_url() );
-			
-			if ( ! empty( $url_parts['scheme'] ) && ! empty( $url_parts['host'] ) ) {
-				$url = $url_parts['scheme'] . '://' . $url_parts['host'] . $url;
-			}
+		// ignore relative URLs
+		if ( empty( \wp_parse_url( $url, \PHP_URL_HOST ) ) ) {
+			return $output;
 		}
 		
 		return $this->replace_embeds_oembed( $output, $url, $atts );
