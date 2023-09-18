@@ -1095,7 +1095,7 @@ class Embed_Privacy {
 					// embeds with relative paths have no host
 					// and they are local by definition, so do nothing
 					// see https://github.com/epiphyt/embed-privacy/issues/27
-					if ( empty( $host ) ) {
+					if ( empty( $embedded_host ) ) {
 						return $content;
 					}
 					
