@@ -561,9 +561,11 @@ class Fields {
 		$valid_files = \apply_filters( 'embed_privacy_valid_files', [ 'background_image' ] );
 		$validated = [];
 		
-		if ( empty( $_FILES ) ) return $validated;
+		if ( empty( $_FILES ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			return $validated;
+		}
 		
-		foreach ( $_FILES as $key => $files ) {
+		foreach ( $_FILES as $key => $files ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			// check valid files
 			if ( ! \in_array( $key, $valid_files, true ) ) {
 				continue;

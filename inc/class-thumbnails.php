@@ -163,7 +163,7 @@ class Thumbnails {
 			return;
 		}
 		
-		\unlink( $directory['base_dir'] . '/' . $filename );
+		\wp_delete_file( $directory['base_dir'] . '/' . $filename );
 	}
 	
 	/**
@@ -537,7 +537,14 @@ class Thumbnails {
 				return;
 			}
 			
-			\rename( $file, $thumbnail_path );
+			global $wp_filesystem;
+			
+			// initialize the WP filesystem if not exists
+			if ( empty( $wp_filesystem ) ) {
+				\WP_Filesystem();
+			}
+			
+			$wp_filesystem->move( $file, $thumbnail_path );
 		}
 		
 		\update_post_meta( $post->ID, 'embed_privacy_thumbnail_slideshare_' . $id, $filename );
@@ -569,7 +576,14 @@ class Thumbnails {
 				return;
 			}
 			
-			\rename( $file, $thumbnail_path );
+			global $wp_filesystem;
+			
+			// initialize the WP filesystem if not exists
+			if ( empty( $wp_filesystem ) ) {
+				\WP_Filesystem();
+			}
+			
+			$wp_filesystem->move( $file, $thumbnail_path );
 		}
 		
 		\update_post_meta( $post->ID, 'embed_privacy_thumbnail_vimeo_' . $id, 'vimeo-' . $id . '.jpg' );
@@ -611,7 +625,14 @@ class Thumbnails {
 					continue;
 				}
 				
-				\rename( $file, $thumbnail_path );
+				global $wp_filesystem;
+				
+				// initialize the WP filesystem if not exists
+				if ( empty( $wp_filesystem ) ) {
+					\WP_Filesystem();
+				}
+				
+				$wp_filesystem->move( $file, $thumbnail_path );
 			}
 			
 			\update_post_meta( $post->ID, 'embed_privacy_thumbnail_youtube_' . $id, 'youtube-' . $id . '-' . $image . '.jpg' );
