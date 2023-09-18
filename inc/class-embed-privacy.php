@@ -941,45 +941,58 @@ class Embed_Privacy {
 			
 			<style>
 				<?php
-				if ( ! empty( $args['height'] ) && ! empty( $args['width'] ) && empty( $args['ignore_aspect_ratio'] ) ) :
-				// if height is in percentage, we cannot determine the aspect ratio
-				if ( \strpos( $args['height'], '%' ) !== false ) {
-					$args['ignore_aspect_ratio'] = true;
-				}
-				// if width is in percentage, we need to use the content width
-				// since we cannot determine the actual width
-				if ( \strpos( $args['width'], '%' ) !== false ) {
-					global $content_width;
+				if ( ! empty( $args['height'] ) && ! empty( $args['width'] ) && empty( $args['ignore_aspect_ratio'] ) ) {
+					// if height is in percentage, we cannot determine the aspect ratio
+					if ( \strpos( $args['height'], '%' ) !== false ) {
+						$args['ignore_aspect_ratio'] = true;
+					}
+					// if width is in percentage, we need to use the content width
+					// since we cannot determine the actual width
+					if ( \strpos( $args['width'], '%' ) !== false ) {
+						global $content_width;
+						
+						$args['width'] = $content_width;
+					}
 					
-					$args['width'] = $content_width;
+					\printf(
+						'[data-embed-id="oembed_%1$s"] {
+							aspect-ratio: %2$s;
+						}',
+						\esc_attr( $embed_md5 ),
+						\esc_html( $args['width'] . '/' . $args['height'] )
+					);
 				}
-				?>
-				[data-embed-id="oembed_<?php echo \esc_attr( $embed_md5 ); ?>"] {
-					aspect-ratio: <?php echo \esc_html( $args['width'] . '/' . $args['height'] ); ?>;
-				}
-				<?php
-				endif;
 				
 				$is_debug = \defined( 'WP_DEBUG' ) && WP_DEBUG;
 				
 				// display only if file exists
-				if ( \file_exists( $background_path ) ) :
-				$version = $is_debug ? \filemtime( $background_path ) : EMBED_PRIVACY_VERSION;
-				?>
-				.<?php echo $embed_class; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> {
-					background-image: url(<?php echo $background_url; ?>?v=<?php echo $version; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>);
+				if ( \file_exists( $background_path ) ) {
+					$version = $is_debug ? \filemtime( $background_path ) : EMBED_PRIVACY_VERSION;
+					
+					\printf(
+						'.%1$s {
+							background-image: url(%2$s?v=%3$s);
+						}',
+						\esc_html( $embed_class ),
+						\esc_url( $background_url ),
+						\esc_html( $version )
+					);
 				}
-				<?php
-				endif;
 				
 				// display only if file exists
-				if ( \file_exists( $logo_path ) ) :
-				$version = $is_debug ? \filemtime( $logo_path ) : EMBED_PRIVACY_VERSION;
-				?>
-				.<?php echo $embed_class; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> .embed-privacy-logo {
-					background-image: url(<?php echo $logo_url; ?>?v=<?php echo $version; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>);
+				if ( \file_exists( $logo_path ) ) {
+					$version = $is_debug ? \filemtime( $logo_path ) : EMBED_PRIVACY_VERSION;
+					
+					\printf(
+						'.%1$s {
+							background-image: url(%2$s?v=%3$s);
+						}',
+						\esc_html( $embed_class . ' .embed-privacy-logo' ),
+						\esc_url( $logo_url ),
+						\esc_html( $version )
+					);
 				}
-				<?php endif; ?>
+				?>
 			</style>
 		</div>
 		<?php
