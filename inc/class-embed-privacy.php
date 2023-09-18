@@ -845,7 +845,7 @@ class Embed_Privacy {
 							'target',
 						],
 					];
-					echo $embed_post->post_content . PHP_EOL; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					echo $embed_post->post_content . \PHP_EOL; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 					$privacy_policy = \get_post_meta( $embed_post->ID, 'privacy_policy_url', true );
 					
 					if ( $privacy_policy ) {
@@ -910,7 +910,7 @@ class Embed_Privacy {
 				$footer_content .= '</a></span>';
 			}
 			
-			$footer_content .= '</div>' . PHP_EOL;
+			$footer_content .= '</div>' . \PHP_EOL;
 			
 			/**
 			 * Filter the overlay footer.
@@ -927,8 +927,8 @@ class Embed_Privacy {
 			<div class="embed-privacy-overlay">
 				<div class="embed-privacy-inner">
 					<?php
-					echo ( \file_exists( $logo_path ) ? '<div class="embed-privacy-logo"></div>' . PHP_EOL : '' );
-					echo $content . PHP_EOL; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					echo ( \file_exists( $logo_path ) ? '<div class="embed-privacy-logo"></div>' . \PHP_EOL : '' );
+					echo $content . \PHP_EOL; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 					?>
 				</div>
 				
@@ -996,7 +996,7 @@ class Embed_Privacy {
 		$this->has_embed = true;
 		
 		if ( ! empty( $args['strip_newlines'] ) ) {
-			$markup = \str_replace( PHP_EOL, '', $markup );
+			$markup = \str_replace( \PHP_EOL, '', $markup );
 		}
 		
 		return $markup;
@@ -1044,7 +1044,7 @@ class Embed_Privacy {
 		}
 		
 		// detect domain if WordPress is installed on a sub domain
-		$host = \wp_parse_url( \home_url(), PHP_URL_HOST );
+		$host = \wp_parse_url( \home_url(), \PHP_URL_HOST );
 		
 		if ( ! \filter_var( $host, \FILTER_VALIDATE_IP ) ) {
 			$host_array = \explode( '.', \str_replace( 'www.', '', $host ) );
@@ -1486,7 +1486,7 @@ class Embed_Privacy {
 					continue;
 				}
 				
-				$output = '<script src="' . \esc_url( $asset['src'] ) . ( ! empty( $asset['version'] ) ? '?ver=' . \esc_attr( \rawurlencode( $asset['version'] ) ) : '' ) . '" id="' . \esc_attr( $asset['handle'] ) . '"></script>' . PHP_EOL . $output; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+				$output = '<script src="' . \esc_url( $asset['src'] ) . ( ! empty( $asset['version'] ) ? '?ver=' . \esc_attr( \rawurlencode( $asset['version'] ) ) : '' ) . '" id="' . \esc_attr( $asset['handle'] ) . '"></script>' . \PHP_EOL . $output; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 			}
 			else if ( $asset['type'] === 'inline' ) {
 				if ( empty( $asset['data'] ) || empty( $asset['object_name'] ) ) {
@@ -1505,7 +1505,7 @@ class Embed_Privacy {
 						$data[ $key ] = \html_entity_decode( (string) $value, \ENT_QUOTES, 'UTF-8' );
 					}
 				}
-				$output = '<script>var ' . esc_js( $asset['object_name'] ) . ' = ' . \wp_json_encode( $data ) . ';</script>' . PHP_EOL . $output;
+				$output = '<script>var ' . esc_js( $asset['object_name'] ) . ' = ' . \wp_json_encode( $data ) . ';</script>' . \PHP_EOL . $output;
 			}
 		}
 		
@@ -2132,7 +2132,7 @@ class Embed_Privacy {
 			return '';
 		}
 		
-		$headline = '<h3>' . \esc_html( $attributes['headline'] ) . '</h3>' . PHP_EOL;
+		$headline = '<h3>' . \esc_html( $attributes['headline'] ) . '</h3>' . \PHP_EOL;
 		
 		/**
 		 * Filter the opt-out headline.
@@ -2148,9 +2148,9 @@ class Embed_Privacy {
 		 * @param	string	$subline Current subline HTML
 		 * @param	array	$attributes Shortcode attributes
 		 */
-		$subline = \apply_filters( 'embed_privacy_opt_out_subline', '<p>' . \esc_html( $attributes['subline'] ) . '</p>' . PHP_EOL, $attributes );
+		$subline = \apply_filters( 'embed_privacy_opt_out_subline', '<p>' . \esc_html( $attributes['subline'] ) . '</p>' . \PHP_EOL, $attributes );
 		
-		$output = '<div class="embed-privacy-opt-out" data-show-all="' . $attributes['show_all'] . '">' . PHP_EOL . $headline . $subline;
+		$output = '<div class="embed-privacy-opt-out" data-show-all="' . $attributes['show_all'] . '">' . \PHP_EOL . $headline . $subline;
 		
 		foreach ( $embed_providers as $provider ) {
 			if ( $is_javascript_detection ) {
@@ -2165,17 +2165,17 @@ class Embed_Privacy {
 			
 			$is_hidden = ! $is_javascript_detection && ! $attributes['show_all'] && ! \in_array( $provider->post_name, $enabled_providers, true );
 			$microtime = \str_replace( '.', '', \microtime( true ) );
-			$output .= '<span class="embed-privacy-provider' . ( $is_hidden ? ' is-hidden' : '' ) . '">' . PHP_EOL;
+			$output .= '<span class="embed-privacy-provider' . ( $is_hidden ? ' is-hidden' : '' ) . '">' . \PHP_EOL;
 			$output .= '<input type="checkbox" id="embed-privacy-provider-' . \esc_attr( $provider->post_name ) . '-' . $microtime . '" ' . \checked( $is_checked, true, false ) . ' class="embed-privacy-opt-out-input ' . ( $is_checked ? 'is-enabled' : 'is-disabled' ) . '" data-embed-provider="' . \esc_attr( $provider->post_name ) . '">';
 			$output .= '<label class="embed-privacy-opt-out-label" for="embed-privacy-provider-' . \esc_attr( $provider->post_name ) . '-' . $microtime . '" data-embed-provider="' . \esc_attr( $provider->post_name ) . '">';
 			$enable_disable = '<span class="embed-privacy-provider-is-enabled">' . \esc_html_x( 'Disable', 'complete string: Disable <embed name>', 'embed-privacy' ) . '</span><span class="embed-privacy-provider-is-disabled">' . \esc_html_x( 'Enable', 'complete string: Disable <embed name>', 'embed-privacy' ) . '</span>';
 			/* translators: 1: Enable/Disable, 2: embed provider title */
 			$output .= \wp_kses( \sprintf( \__( '%1$s %2$s', 'embed-privacy' ), $enable_disable, \esc_html( $provider->post_title ) ), [ 'span' => [ 'class' => true ] ] );
-			$output .= '</label><br>' . PHP_EOL;
-			$output .= '</span>' . PHP_EOL;
+			$output .= '</label><br>' . \PHP_EOL;
+			$output .= '</span>' . \PHP_EOL;
 		}
 		
-		$output .= '</div>' . PHP_EOL;
+		$output .= '</div>' . \PHP_EOL;
 		
 		return $output;
 	}
