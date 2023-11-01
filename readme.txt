@@ -169,6 +169,9 @@ We are [Epiphyt](https://epiph.yt/), your friendly neighborhood WordPress plugin
 
 == Changelog ==
 
+= 1.8.1 =
+* Fixed the output of the opt-out shortcode
+
 = 1.8.0 =
 * Added support for Anghami
 * Added filter to prevent thumbnail orphan deletion
