@@ -78,7 +78,8 @@ We currently support all oEmbed providers known to WordPress core by default. Wa
 * Tumblr
 * Twitter
 * VideoPress
-* Vimeo, WordPress.org
+* Vimeo
+* WordPress.org
 * WordPress.tv
 * YouTube
 
