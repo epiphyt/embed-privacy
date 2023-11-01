@@ -2,7 +2,7 @@
 Contributors: epiphyt, kittmedia, krafit
 Tags: oembed, privacy, gutenberg
 Requires at least: 5.9
-Stable tag: 1.8.0
+Stable tag: 1.8.1
 Tested up to: 6.3
 Requires PHP: 5.6
 License: GPL2
@@ -170,7 +170,7 @@ We are [Epiphyt](https://epiph.yt/), your friendly neighborhood WordPress plugin
 == Changelog ==
 
 = 1.8.1 =
-* Fixed the output of the opt-out shortcode
+* Fixed the output of the opt-out shortcode (thanks wpdabh for reporting)
 
 = 1.8.0 =
 * Added support for Anghami
