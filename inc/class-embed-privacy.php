@@ -1198,7 +1198,7 @@ class Embed_Privacy {
 					$i--;
 				}
 				
-				$content = \str_replace( '%_epi_', '%', $dom->saveHTML( $dom->documentElement ) );
+				$content = $dom->saveHTML( $dom->documentElement );
 				// phpcs:enable
 			}
 		}
@@ -1256,7 +1256,8 @@ class Embed_Privacy {
 		
 		// decode to make sure there is nothing left encoded if replacements have been made
 		// otherwise, content is untouched by DOMDocument, and we don't need a decoding
-		if ( ! empty( $this->did_replacements ) ) {
+		// only required for WPBakery Page Builder
+		if ( ! empty( $this->did_replacements ) && \str_contains( 'vc_row', $content ) ) {
 			$content = \rawurldecode( $content );
 		}
 		
