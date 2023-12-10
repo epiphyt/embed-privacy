@@ -708,8 +708,8 @@ class Embed_Privacy {
 	 * @return	string The overlay template
 	 */
 	public function get_output_template( $embed_provider, $embed_provider_lowercase, $output, $args = [] ) {
-		$disable_provider = apply_filters("embed_privacy_disable_provider", $embed_provider, $embed_provider_lowercase, $output, $args);
-		if ($disable_provider === true) {
+		$disable_provider = apply_filters( "embed_privacy_disable_provider", $embed_provider, $embed_provider_lowercase, $output, $args );
+		if ( $disable_provider === true ) {
 			return $output;
 		}
 		
