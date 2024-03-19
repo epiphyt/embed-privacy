@@ -444,6 +444,11 @@ class Fields {
 			return;
 		}
 		
+		// ignore inline saves
+		if ( ! empty( $_POST['action'] ) && \sanitize_text_field( \wp_unslash( $_POST['action'] ) ) === 'inline-save' ) {
+			return;
+		}
+		
 		// verify capability
 		if (
 			! \defined( 'WP_CLI' ) && ! \current_user_can( 'edit_posts', $post_id )
