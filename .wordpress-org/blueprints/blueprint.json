@@ -1,0 +1,17 @@
+{
+	"$schema": "https://playground.wordpress.net/blueprint-schema.json",
+	"features": {
+		"networking": true
+	},
+	"landingPage": "/wp-admin/admin.php?page=embed_privacy",
+	"phpExtensionBundles": [
+		"kitchen-sink"
+	],
+	"steps": [
+		{
+			"step": "login",
+			"username": "admin",
+			"password": "password"
+		}
+	]
+}
