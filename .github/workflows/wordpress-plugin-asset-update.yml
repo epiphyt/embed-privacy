@@ -10,7 +10,7 @@ jobs:
     name: Asset update
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     # Run npm build
     - uses: bahmutov/npm-install@v1
     - name: npm build
