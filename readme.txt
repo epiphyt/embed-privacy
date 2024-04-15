@@ -3,7 +3,7 @@ Contributors: epiphyt, kittmedia, krafit
 Tags: oembed, privacy, gutenberg
 Requires at least: 5.9
 Stable tag: 1.8.1
-Tested up to: 6.3
+Tested up to: 6.5
 Requires PHP: 5.6
 License: GPL2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
