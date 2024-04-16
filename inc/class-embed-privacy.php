@@ -716,6 +716,18 @@ class Embed_Privacy {
 	 * @return	string The overlay template
 	 */
 	public function get_output_template( $embed_provider, $embed_provider_lowercase, $output, $args = [] ) {
+		/**
+		 * Filter the overlay arguments.
+		 * 
+		 * @since	1.9.0
+		 * 
+		 * @param	array	$args template arguments
+		 * @param	string	$embed_provider The embed provider
+		 * @param	string	$embed_provider_lowercase The embed provider without spaces and in lowercase
+		 * @param	string	$output The output before replacing it
+		 */
+		$args = (array) \apply_filters( 'embed_privacy_overlay_args', $args, $embed_provider, $embed_provider_lowercase, $output );
+		
 		if ( ! empty( $args['post_id'] ) ) {
 			$embed_post = \get_post( $args['post_id'] );
 			
