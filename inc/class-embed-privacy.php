@@ -75,6 +75,14 @@ class Embed_Privacy {
 	public $plugin_file = '';
 	
 	/**
+	 * @var		array Style properties
+	 */
+	public $style = [
+		'container' => [],
+		'global' => [],
+	];
+	
+	/**
 	 * @var		\epiphyt\Embed_Privacy\thumbnail\Thumbnail
 	 */
 	public $thumbnail;
@@ -152,6 +160,7 @@ class Embed_Privacy {
 		\add_action( 'init', [ $this, 'set_post_type' ], 5 );
 		\add_action( 'save_post_epi_embed', [ $this, 'preserve_backslashes' ] );
 		\add_action( 'wp_enqueue_scripts', [ $this, 'deregister_assets' ], 100 );
+		\add_action( 'wp_head', [ $this, 'start_output_buffer' ] );
 		
 		// filters
 		if ( ! $this->usecache ) {
@@ -853,6 +862,50 @@ class Embed_Privacy {
 		
 		$embed_md5 = \md5( $output . \wp_generate_uuid4() );
 		
+		if ( empty( $this->style['container'][ $embed_md5 ] ) ) {
+			$this->style['container'][ $embed_md5 ] = [
+				'background-image' => ! empty( $embed_thumbnail['thumbnail_path'] ) && \file_exists( $embed_thumbnail['thumbnail_path'] ) ? 'url("' . \esc_url( $embed_thumbnail['thumbnail_url'] ) . '")' : '',
+			];
+		}
+		
+		if ( ! empty( $args['height'] ) && ! empty( $args['width'] ) && empty( $args['ignore_aspect_ratio'] ) ) {
+			// if height is in percentage, we cannot determine the aspect ratio
+			if ( \strpos( $args['height'], '%' ) !== false ) {
+				$args['ignore_aspect_ratio'] = true;
+			}
+			// if width is in percentage, we need to use the content width
+			// since we cannot determine the actual width
+			if ( \strpos( $args['width'], '%' ) !== false ) {
+				global $content_width;
+				
+				$args['width'] = $content_width;
+			}
+			
+			$this->style['container'][ $embed_md5 ]['aspect-ratio'] = $args['width'] . '/' . $args['height'];
+		}
+		
+		$is_debug = \defined( 'WP_DEBUG' ) && WP_DEBUG;
+		
+		// display only if file exists
+		if ( \file_exists( $background_path ) && empty( $this->style['global']['container']['background-image'] ) ) {
+			$version = $is_debug ? \filemtime( $background_path ) : EMBED_PRIVACY_VERSION;
+			$this->style['global'][ $embed_provider_lowercase ]['container']['background-image'] = \sprintf(
+				'url(%1$s?v=%2$s)',
+				\esc_url( $background_url ),
+				\esc_html( $version )
+			);
+		}
+		
+		// display only if file exists
+		if ( \file_exists( $logo_path ) && empty( $this->style['global']['logo']['background-image'] ) ) {
+			$version = $is_debug ? \filemtime( $logo_path ) : EMBED_PRIVACY_VERSION;
+			$this->style['global'][ $embed_provider_lowercase ]['logo']['background-image'] = \sprintf(
+				'url(%1$s?v=%2$s)',
+				\esc_url( $logo_url ),
+				\esc_html( $version )
+			);
+		}
+		
 		\ob_start();
 		?>
 		<p>
@@ -961,61 +1014,6 @@ class Embed_Privacy {
 		</div>
 		<?php
 		$markup = \ob_get_clean();
-		$style = '';
-		
-		if ( ! empty( $args['height'] ) && ! empty( $args['width'] ) && empty( $args['ignore_aspect_ratio'] ) ) {
-			// if height is in percentage, we cannot determine the aspect ratio
-			if ( \strpos( $args['height'], '%' ) !== false ) {
-				$args['ignore_aspect_ratio'] = true;
-			}
-			// if width is in percentage, we need to use the content width
-			// since we cannot determine the actual width
-			if ( \strpos( $args['width'], '%' ) !== false ) {
-				global $content_width;
-				
-				$args['width'] = $content_width;
-			}
-			
-			$style .= \sprintf(
-				'[data-embed-id="oembed_%1$s"] {
-					aspect-ratio: %2$s;
-				}' . \PHP_EOL,
-				\esc_attr( $embed_md5 ),
-				\esc_html( $args['width'] . '/' . $args['height'] )
-			);
-		}
-		
-		$is_debug = \defined( 'WP_DEBUG' ) && WP_DEBUG;
-		
-		// display only if file exists
-		if ( \file_exists( $background_path ) ) {
-			$version = $is_debug ? \filemtime( $background_path ) : EMBED_PRIVACY_VERSION;
-			
-			$style .= \sprintf(
-				'.%1$s {
-					background-image: url(%2$s?v=%3$s);
-				}' . \PHP_EOL,
-				\esc_html( $embed_class ),
-				\esc_url( $background_url ),
-				\esc_html( $version )
-			);
-		}
-		
-		// display only if file exists
-		if ( \file_exists( $logo_path ) ) {
-			$version = $is_debug ? \filemtime( $logo_path ) : EMBED_PRIVACY_VERSION;
-			
-			$style .= \sprintf(
-				'.%1$s {
-					background-image: url(%2$s?v=%3$s);
-				}' . \PHP_EOL,
-				\esc_html( $embed_class . ' .embed-privacy-logo' ),
-				\esc_url( $logo_url ),
-				\esc_html( $version )
-			);
-		}
-		
-		\wp_add_inline_style( 'embed-privacy', $style );
 		
 		/**
 		 * Filter the complete markup of the embed.
@@ -1314,6 +1312,91 @@ class Embed_Privacy {
 	}
 	
 	/**
+	 * Get dynamically generated style.
+	 * 
+	 * @return	string Dynamically generated style
+	 */
+	public function get_style() {
+		$style = '';
+		
+		/**
+		 * Filter the style properties before generating dynamic styles.
+		 * 
+		 * @since	1.9.0
+		 * 
+		 * @param	array $style_properties Style properties array
+		 */
+		$this->style = (array) \apply_filters( 'embed_privacy_dynamic_style_properties', $this->style );
+		
+		foreach ( $this->style as $identifier => $styling ) {
+			if ( $identifier === 'container' ) {
+				foreach ( $styling as $oembed_id => $styles ) {
+					$properties = '';
+					
+					foreach ( $styles as $property => $value ) {
+						if ( empty( $value ) ) {
+							continue;
+						}
+						
+						$properties .= $property . ': ' . $value . '; ';
+					}
+					
+					if ( empty( $properties ) ) {
+						continue;
+					}
+					
+					$style .= \sprintf(
+						'[data-embed-id="oembed_%1$s"] { %2$s }' . \PHP_EOL,
+						\esc_html( $oembed_id ),
+						\esc_html( \trim( $properties ) )
+					);
+				}
+			}
+			else if ( $identifier === 'global' ) {
+				foreach ( $styling as $provider => $types ) {
+					foreach ( $types as $type => $styles ) {
+						$properties = '';
+						
+						foreach ( $styles as $property => $value ) {
+							if ( empty( $value ) ) {
+								continue;
+							}
+							
+							$properties .= $property . ': ' . $value . '; ';
+						}
+						
+						if ( empty( $properties ) ) {
+							continue;
+						}
+						
+						switch ( $type ) {
+							case 'logo': {
+								$style .= \sprintf(
+									'.embed-%1$s .embed-privacy-logo { %2$s }' . \PHP_EOL,
+									\esc_html( $provider ),
+									\esc_html( \trim( $properties ) )
+								);
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		/**
+		 * Filter dynamic generated style.
+		 * 
+		 * @since	1.9.0
+		 * 
+		 * @param	string	$style Generated style
+		 * @param	array	$style_properties Style properties array
+		 */
+		$style = \apply_filters( 'embed_privacy_dynamic_style', \trim( $style ), $this->style );
+		
+		return $style;
+	}
+	
+	/**
 	 * Check if a post contains an embed.
 	 * 
 	 * @since	1.3.0
@@ -1450,6 +1533,26 @@ class Embed_Privacy {
 	 */
 	public function load_textdomain() {
 		\load_plugin_textdomain( 'embed-privacy', false, \dirname( \plugin_basename( $this->plugin_file ) ) . '/languages' );
+	}
+	
+	/**
+	 * Callback for the page output buffer.
+	 * 
+	 * @param	string	$buffer Current buffer
+	 * @return	string Updated buffer
+	 */
+	public function output_buffer_callback( $buffer ) {
+		$style = $this->get_style();
+		
+		if ( ! empty( $style ) ) {
+			$buffer = \str_replace(
+				'</head>',
+				'<style id="embed-privacy-inline-css">' . \PHP_EOL . $style . \PHP_EOL . '</style>' . \PHP_EOL . '</head>',
+				$buffer
+			);
+		}
+		
+		return $buffer;
 	}
 	
 	/**
@@ -2229,5 +2332,12 @@ class Embed_Privacy {
 		$output .= '</div>' . \PHP_EOL;
 		
 		return $output;
+	}
+	
+	/**
+	 * Start an output buffer.
+	 */
+	public function start_output_buffer() {
+		\ob_start( [ $this, 'output_buffer_callback' ] );
 	}
 }
