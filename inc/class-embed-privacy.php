@@ -1038,6 +1038,23 @@ class Embed_Privacy {
 			return $content;
 		}
 		
+		/**
+		 * Filter whether to ignore this embed.
+		 * 
+		 * @since	1.9.0
+		 * 
+		 * @param	bool	$ignore_embed Whether to ignore this embed
+		 * @param	string	$content The original content
+		 * @param	string	$embed_provider The embed provider
+		 * @param	string	$embed_provider_lowercase The embed provider without spaces and in lowercase
+		 * @param	array	$args Additional arguments
+		 */
+		$ignore_embed = (bool) \apply_filters( 'embed_privacy_ignore_embed', false, $content, $embed_provider, $embed_provider_lowercase, $args );
+		
+		if ( $ignore_embed ) {
+			return $content;
+		}
+		
 		$args = \wp_parse_args( $args, [
 			'additional_checks' => [],
 			'check_always_active' => false,
