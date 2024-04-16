@@ -1583,7 +1583,7 @@ class Embed_Privacy {
 			$js_file_url = \EPI_EMBED_PRIVACY_URL . 'assets/js/embed-privacy' . $suffix . '.js';
 			$file_version = $is_debug ? \filemtime( \EPI_EMBED_PRIVACY_BASE . 'assets/js/embed-privacy' . $suffix . '.js' ) : \EMBED_PRIVACY_VERSION;
 			
-			\wp_register_script( 'embed-privacy', $js_file_url, [], $file_version );
+			\wp_register_script( 'embed-privacy', $js_file_url, [], $file_version, [ 'strategy' => 'defer' ] );
 		}
 		
 		// Astra is too greedy at its CSS selectors
@@ -1601,7 +1601,7 @@ class Embed_Privacy {
 		$js_file_url = \EPI_EMBED_PRIVACY_URL . 'assets/js/elementor-video' . $suffix . '.js';
 		$file_version = $is_debug ? \filemtime( \EPI_EMBED_PRIVACY_BASE . 'assets/js/elementor-video' . $suffix . '.js' ) : \EMBED_PRIVACY_VERSION;
 		
-		\wp_register_script( 'embed-privacy-elementor-video', $js_file_url, [], $file_version );
+		\wp_register_script( 'embed-privacy-elementor-video', $js_file_url, [], $file_version, [ 'strategy' => 'defer' ] );
 		
 		$css_file_url = \EPI_EMBED_PRIVACY_URL . 'assets/style/elementor' . $suffix . '.css';
 		$file_version = $is_debug ? \filemtime( \EPI_EMBED_PRIVACY_BASE . 'assets/style/elementor' . $suffix . '.css' ) : \EMBED_PRIVACY_VERSION;
