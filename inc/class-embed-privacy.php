@@ -7,6 +7,7 @@ use DOMElement;
 use DOMNode;
 use DOMXPath;
 use Elementor\Plugin;
+use epiphyt\Embed_Privacy\thumbnail\Thumbnail;
 use Jetpack;
 use WP_Post;
 
@@ -74,6 +75,11 @@ class Embed_Privacy {
 	public $plugin_file = '';
 	
 	/**
+	 * @var		\epiphyt\Embed_Privacy\thumbnail\Thumbnail
+	 */
+	public $thumbnail;
+	
+	/**
 	 * @var		bool Determine if we use the cache
 	 */
 	private $usecache;
@@ -130,6 +136,7 @@ class Embed_Privacy {
 	 */
 	public function __construct() {
 		// assign variables
+		$this->thumbnail = new Thumbnail();
 		$this->usecache = ! \is_admin();
 	}
 	
@@ -169,6 +176,7 @@ class Embed_Privacy {
 		Fields::get_instance()->init();
 		Migration::get_instance()->init();
 		Thumbnails::get_instance()->init();
+		$this->thumbnail->init();
 	}
 	
 	/**
@@ -766,7 +774,7 @@ class Embed_Privacy {
 		}
 		
 		if ( ! empty( $args['embed_url'] ) && \get_option( 'embed_privacy_download_thumbnails' ) ) {
-			$embed_thumbnail = Thumbnails::get_instance()->get_data( \get_post(), $args['embed_url'] );
+			$embed_thumbnail = Embed_Privacy::get_instance()->thumbnail->get_data( \get_post(), $args['embed_url'] );
 		}
 		
 		if ( ! empty( $args['assets'] ) && \is_array( $args['assets'] ) ) {
@@ -1339,7 +1347,7 @@ class Embed_Privacy {
 	 * @return	bool True if the current page is an AMP page, false otherwise
 	 */
 	private function is_amp() {
-		/** @noinspection PhpUndefinedFunctionInspection */
+		/** @disregard P1010 */
 		return \function_exists( 'is_amp_endpoint' ) && \is_amp_endpoint();
 	}
 	
@@ -1722,6 +1730,7 @@ class Embed_Privacy {
 			
 			// register jetpack script if available
 			if ( \class_exists( '\Automattic\Jetpack\Assets' ) && \defined( 'JETPACK__VERSION' ) ) {
+				/** @disregard P1009 */
 				$jetpack = Jetpack::init();
 				
 				$args['assets'][] = [

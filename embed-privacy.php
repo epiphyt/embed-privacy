@@ -68,7 +68,12 @@ if ( ! \class_exists( 'DOMDocument' ) ) {
 		[ '', '/', '-' ],
 		\strtolower( $class )
 	);
-	$class = \str_replace( $filename, 'class-' . $filename, $class );
+	$name_pos = \strrpos( $class, $filename );
+	
+	if ( $name_pos !== false ) {
+		$class = \substr_replace( $class, 'class-' . $filename, $name_pos, \strlen( $filename ) );
+	}
+	
 	$maybe_file = __DIR__ . '/inc/' . $class . '.php';
 	
 	if ( \file_exists( $maybe_file ) ) {
