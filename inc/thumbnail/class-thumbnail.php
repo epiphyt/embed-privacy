@@ -4,6 +4,7 @@ namespace epiphyt\Embed_Privacy\thumbnail;
 use epiphyt\Embed_Privacy\thumbnail\provider\SlideShare;
 use epiphyt\Embed_Privacy\thumbnail\provider\Thumbnail_Provider;
 use epiphyt\Embed_Privacy\thumbnail\provider\Vimeo;
+use epiphyt\Embed_Privacy\thumbnail\provider\WordPress_TV;
 use epiphyt\Embed_Privacy\thumbnail\provider\YouTube;
 use WP_Post;
 
@@ -23,6 +24,7 @@ final class Thumbnail {
 	public $providers = [
 		SlideShare::class,
 		Vimeo::class,
+		WordPress_TV::class,
 		YouTube::class,
 	];
 	
