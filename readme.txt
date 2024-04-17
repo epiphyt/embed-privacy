@@ -2,7 +2,7 @@
 Contributors: epiphyt, kittmedia, krafit
 Tags: oembed, privacy, gutenberg
 Requires at least: 5.9
-Stable tag: 1.8.1
+Stable tag: 1.9.0
 Tested up to: 6.5
 Requires PHP: 5.6
 License: GPL2
@@ -17,7 +17,7 @@ But Embed Privacy not only protects your visitor's privacy but also makes your s
 
 All embeds will be replaced by placeholders, ready for you to apply style as you wish. With only a couple of lines of CSS. 
 
-By clicking on the placeholder the respective content will be reloaded.
+By clicking on the placeholder the respective content will then be loaded.
 
 **Note: This plugins requires the PHP extension ["Document Object Model" (php-dom)](https://www.php.net/manual/en/book.dom.php).**
 
@@ -169,6 +169,15 @@ We are [Epiphyt](https://epiph.yt/), your friendly neighborhood WordPress plugin
 
 
 == Changelog ==
+
+= 1.9.0 =
+* Added support for thumbnails for WordPress.tv
+* Added filter to filter embed arguments
+* Added filter to ignore certain embeds
+* Improved style generation the improve performance and fix HTML validation
+* Improved script loading by using `defer` attributes
+* Fixed certain fields deleted after changing embed provider to draft
+* Fixed URL encoding after replacements
 
 = 1.8.1 =
 * Fixed the output of the opt-out shortcode (thanks wpdabh for reporting)
