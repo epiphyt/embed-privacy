@@ -180,7 +180,10 @@ class Admin {
 			'embed_privacy_general',
 			[
 				/* translators: list of supported embed providers */
-				'description' => \wp_sprintf( \__( 'Try to automatically download thumbnails of the embedded content and use them as background image of the overlay. Currently supported: %l.', 'embed-privacy' ), Thumbnails::get_instance()->get_supported_providers() ),
+				'description' => \wp_sprintf(
+					\__( 'Try to automatically download thumbnails of the embedded content and use them as background image of the overlay. Currently supported: %l.', 'embed-privacy' ),
+					Embed_Privacy::get_instance()->thumbnail->get_provider_titles()
+				),
 				'name' => 'embed_privacy_download_thumbnails',
 				'option_type' => 'option',
 				'title' => \__( 'Download thumbnails', 'embed-privacy' ),

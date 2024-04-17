@@ -1,6 +1,7 @@
 <?php
 namespace epiphyt\Embed_Privacy;
 
+use epiphyt\Embed_Privacy\thumbnail\Thumbnail;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
@@ -116,7 +117,7 @@ function delete_data() {
 	require_once __DIR__ . '/inc/class-thumbnails.php';
 	
 	// delete thumbnail directory
-	delete_directory( Thumbnails::get_instance()->get_directory()['base_dir'] );
+	delete_directory( Thumbnail::get_directory()['base_dir'] );
 	// delete old thumbnail directory
 	delete_directory( WP_CONTENT_DIR . '/uploads/embed-privacy' );
 }

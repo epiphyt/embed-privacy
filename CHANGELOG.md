@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.9.0
+* Added support for thumbnails for WordPress.tv
+* Added filter to filter embed arguments
+* Added filter to ignore certain embeds
+* Improved style generation the improve performance and fix HTML validation
+* Improved script loading by using `defer` attributes
+* Fixed certain fields deleted after changing embed provider to draft
+* Fixed URL encoding after replacements
+
 ## 1.8.1
 * Fixed the output of the opt-out shortcode (thanks wpdabh for reporting)
 
