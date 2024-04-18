@@ -6,7 +6,7 @@ namespace epiphyt\Embed_Privacy\thumbnail\provider;
  */
 interface Thumbnail_Provider_Interface {
 	/**
-	 * Get the thumbnail ID from a source string.
+	 * Get the thumbnail from a source string.
 	 * 
 	 * @param	object	$data A data object result from an oEmbed provider
 	 * @param	string	$url The URL of the content to be embedded
