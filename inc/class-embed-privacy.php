@@ -730,7 +730,7 @@ class Embed_Privacy {
 		 * 
 		 * @since	1.9.0
 		 * 
-		 * @param	array	$args template arguments
+		 * @param	array	$args Template arguments
 		 * @param	string	$embed_provider The embed provider
 		 * @param	string	$embed_provider_lowercase The embed provider without spaces and in lowercase
 		 * @param	string	$output The output before replacing it
