@@ -1177,10 +1177,10 @@ class Embed_Privacy {
 				}
 				
 				/* translators: embed title */
-				$args['embed_title'] = ! empty( $element->getAttribute( 'title' ) ) ? \sprintf( \__( '"%s"', 'embed-privacy' ), $element->getAttribute( 'title' ) ) : '';
+				$args['embed_title'] = $element->hasAttribute( 'title' ) ? \sprintf( \__( '"%s"', 'embed-privacy' ), $element->getAttribute( 'title' ) ) : '';
 				$args['embed_url'] = $element->getAttribute( $args['element_attribute'] );
-				$args['height'] = ! empty( $element->getAttribute( 'height' ) ) ? $element->getAttribute( 'height' ) : 0;
-				$args['width'] = ! empty( $element->getAttribute( 'width' ) ) ? $element->getAttribute( 'width' ) : 0;
+				$args['height'] = $element->hasAttribute( 'height' ) ? $element->getAttribute( 'height' ) : 0;
+				$args['width'] = $element->hasAttribute( 'width' ) ? $element->getAttribute( 'width' ) : 0;
 				
 				// get overlay template as DOM element
 				$template_dom->loadHTML(
