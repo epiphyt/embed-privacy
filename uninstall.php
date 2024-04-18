@@ -114,7 +114,7 @@ function delete_data() {
 		$posts = \get_posts( $post_args );
 	}
 	
-	require_once __DIR__ . '/inc/class-thumbnails.php';
+	require_once __DIR__ . '/inc/thumbnail/class-thumbnail.php';
 	
 	// delete thumbnail directory
 	delete_directory( Thumbnail::get_directory()['base_dir'] );
