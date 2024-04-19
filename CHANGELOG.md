@@ -46,7 +46,7 @@
 ## 1.7.0
 * Added support for crowdsignal.net
 * Added support for classic video shortcode/widget
-* Added support for Slideshare thumbnails (thanks to [@Lazza](https://github.com/Lazza))
+* Added support for SlideShare thumbnails (thanks to [@Lazza](https://github.com/Lazza))
 * Added support for custom thumbnail generation via filter
 * Fixed hiding thumbnails after embedded content has been enabled
 * Fixed aspect ratio for embeds without proper dimension information
@@ -243,7 +243,7 @@
 ## 1.0.2
 * Improved compatibility with [Autoptimize](https://wordpress.org/plugins/autoptimize/)
 * Improved compatibility with [AMP](https://wordpress.org/plugins/amp/)
-* Fix issue with Slideshare causing wrong (generic) placeholders
+* Fix issue with SlideShare causing wrong (generic) placeholders
 
 ## 1.0.1
 * Fixed support for PHP 5.6

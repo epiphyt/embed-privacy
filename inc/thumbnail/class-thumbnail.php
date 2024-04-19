@@ -482,7 +482,7 @@ final class Thumbnail {
 		$this->providers = (array) \apply_filters( 'embed_privacy_thumbnail_providers', $this->providers );
 		
 		$providers = [
-			\_x( 'Slideshare', 'embed provider', 'embed-privacy' ),
+			\_x( 'SlideShare', 'embed provider', 'embed-privacy' ),
 			\_x( 'Vimeo', 'embed provider', 'embed-privacy' ),
 			\_x( 'YouTube', 'embed provider', 'embed-privacy' ),
 		];
