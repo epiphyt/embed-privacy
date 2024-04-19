@@ -730,7 +730,7 @@ class Embed_Privacy {
 		 * 
 		 * @since	1.9.0
 		 * 
-		 * @param	array	$args template arguments
+		 * @param	array	$args Template arguments
 		 * @param	string	$embed_provider The embed provider
 		 * @param	string	$embed_provider_lowercase The embed provider without spaces and in lowercase
 		 * @param	string	$output The output before replacing it
@@ -1177,10 +1177,10 @@ class Embed_Privacy {
 				}
 				
 				/* translators: embed title */
-				$args['embed_title'] = ! empty( $element->getAttribute( 'title' ) ) ? \sprintf( \__( '"%s"', 'embed-privacy' ), $element->getAttribute( 'title' ) ) : '';
+				$args['embed_title'] = $element->hasAttribute( 'title' ) ? \sprintf( \__( '"%s"', 'embed-privacy' ), $element->getAttribute( 'title' ) ) : '';
 				$args['embed_url'] = $element->getAttribute( $args['element_attribute'] );
-				$args['height'] = ! empty( $element->getAttribute( 'height' ) ) ? $element->getAttribute( 'height' ) : 0;
-				$args['width'] = ! empty( $element->getAttribute( 'width' ) ) ? $element->getAttribute( 'width' ) : 0;
+				$args['height'] = $element->hasAttribute( 'height' ) ? $element->getAttribute( 'height' ) : 0;
+				$args['width'] = $element->hasAttribute( 'width' ) ? $element->getAttribute( 'width' ) : 0;
 				
 				// get overlay template as DOM element
 				$template_dom->loadHTML(
@@ -2012,7 +2012,23 @@ class Embed_Privacy {
 	 * @return	string The updated embed code
 	 */
 	public function replace_embeds_divi( $item_embed, $url ) {
-		return $this->replace_embeds_oembed( $item_embed, $url, [] );
+		$attributes = [];
+		$use_internal_errors = \libxml_use_internal_errors( true );
+		$dom = new DOMDocument();
+		$dom->loadHTML(
+			'<html><meta charset="utf-8">' . $item_embed . '</html>',
+			\LIBXML_HTML_NOIMPLIED | \LIBXML_HTML_NODEFDTD
+		);
+		
+		/** @var \DOMElement $iframe */
+		foreach ( $dom->getElementsByTagName( 'iframe' ) as $iframe ) {
+			$attributes['height'] = $iframe->hasAttribute( 'height' ) ? $iframe->getAttribute( 'height' ) : 0;
+			$attributes['width'] = $iframe->hasAttribute( 'width' ) ? $iframe->getAttribute( 'width' ) : 0;
+		}
+		
+		\libxml_use_internal_errors( $use_internal_errors );
+		
+		return $this->replace_embeds_oembed( $item_embed, $url, $attributes );
 	}
 	
 	/**

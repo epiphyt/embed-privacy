@@ -2,7 +2,7 @@
 Contributors: epiphyt, kittmedia, krafit
 Tags: oembed, privacy, gutenberg
 Requires at least: 5.9
-Stable tag: 1.9.0
+Stable tag: 1.9.1
 Tested up to: 6.5
 Requires PHP: 5.6
 License: GPL2
@@ -170,11 +170,16 @@ We are [Epiphyt](https://epiph.yt/), your friendly neighborhood WordPress plugin
 
 == Changelog ==
 
+= 1.9.1 =
+* Fixed an error while uninstalling the plugin
+* Fixed aspect ratio of embeds embedded via Divi
+* Fixed spelling of "SlideShare"
+
 = 1.9.0 =
-* Added support for thumbnails for WordPress.tv
+* Added support for thumbnails for WordPress TV
 * Added filter to filter embed arguments
 * Added filter to ignore certain embeds
-* Improved style generation the improve performance and fix HTML validation
+* Improved style generation to improve performance and fix HTML validation
 * Improved script loading by using `defer` attributes
 * Fixed certain fields deleted after changing embed provider to draft
 * Fixed URL encoding after replacements
@@ -215,7 +220,7 @@ We are [Epiphyt](https://epiph.yt/), your friendly neighborhood WordPress plugin
 = 1.7.0 =
 * Added support for crowdsignal.net
 * Added support for classic video shortcode/widget
-* Added support for Slideshare thumbnails (thanks to [@Lazza](https://github.com/Lazza))
+* Added support for SlideShare thumbnails (thanks to [@Lazza](https://github.com/Lazza))
 * Added support for custom thumbnail generation via filter
 * Fixed hiding thumbnails after embedded content has been enabled
 * Fixed aspect ratio for embeds without proper dimension information
@@ -411,7 +416,7 @@ We are [Epiphyt](https://epiph.yt/), your friendly neighborhood WordPress plugin
 = 1.0.2 =
 * Improved compatibility with [Autoptimize](https://wordpress.org/plugins/autoptimize/)
 * Improved compatibility with [AMP](https://wordpress.org/plugins/amp/)
-* Fix issue with Slideshare causing wrong (generic) placeholders
+* Fix issue with SlideShare causing wrong (generic) placeholders
 
 = 1.0.1 =
 * Fixed support for PHP 5.6

@@ -475,14 +475,14 @@ final class Thumbnail {
 		/**
 		 * Filter the supported providers.
 		 * 
-		 * @since	1.7.0
+		 * @since	1.9.0
 		 * 
-		 * @param	array	$supported_providers Current supported providers
+		 * @param	Thumbnail_Provider[]	$supported_providers Current supported providers
 		 */
 		$this->providers = (array) \apply_filters( 'embed_privacy_thumbnail_providers', $this->providers );
 		
 		$providers = [
-			\_x( 'Slideshare', 'embed provider', 'embed-privacy' ),
+			\_x( 'SlideShare', 'embed provider', 'embed-privacy' ),
 			\_x( 'Vimeo', 'embed provider', 'embed-privacy' ),
 			\_x( 'YouTube', 'embed provider', 'embed-privacy' ),
 		];
