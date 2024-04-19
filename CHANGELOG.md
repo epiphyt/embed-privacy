@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.9.1
+* Fixed an error while uninstalling the plugin
+* Fixed aspect ratio of embeds embedded via Divi
+* Fixed spelling of "SlideShare"
+
 ## 1.9.0
 * Added support for thumbnails for WordPress TV
 * Added filter to filter embed arguments

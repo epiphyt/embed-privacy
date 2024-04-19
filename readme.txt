@@ -2,7 +2,7 @@
 Contributors: epiphyt, kittmedia, krafit
 Tags: oembed, privacy, gutenberg
 Requires at least: 5.9
-Stable tag: 1.9.0
+Stable tag: 1.9.1
 Tested up to: 6.5
 Requires PHP: 5.6
 License: GPL2
@@ -169,6 +169,11 @@ We are [Epiphyt](https://epiph.yt/), your friendly neighborhood WordPress plugin
 
 
 == Changelog ==
+
+= 1.9.1 =
+* Fixed an error while uninstalling the plugin
+* Fixed aspect ratio of embeds embedded via Divi
+* Fixed spelling of "SlideShare"
 
 = 1.9.0 =
 * Added support for thumbnails for WordPress TV
