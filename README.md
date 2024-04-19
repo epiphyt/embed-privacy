@@ -11,7 +11,7 @@ By clicking on the placeholder the respective content will then be loaded.
 
 ## Requirements
 
-PHP: 5.6<br>
+PHP: 5.6 including the `php-dom` extension<br>
 WordPress: 4.7
 
 ## Building
