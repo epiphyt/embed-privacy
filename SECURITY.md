@@ -9,11 +9,6 @@ We usually only support the latest major version.
 | 1.9.x   | :white_check_mark: |
 | < 1.9   | :x:                |
 
-## Reporting a Vulnerability
+## How can I report security bugs?
 
-Please report any vulnerability via <hey.security@epiph.yt>. You should receive
-an answer within 24 hours. You will be informed about if the vulnerability is
-accepted or declined. If accepted and fixed, we will thank you in the changelog.
-
-If desired, we can also mention you in any other channel we use to announce an
-update, e.g. in a blog post or via Mastodon/Twitter.
+You can report security bugs through the Patchstack Vulnerability Disclosure Program. The Patchstack team help validate, triage and handle any security vulnerabilities. [Report a security vulnerability.](https://patchstack.com/database/vdp/embed-privacy)
