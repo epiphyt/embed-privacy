@@ -1932,7 +1932,7 @@ class Embed_Privacy {
 		
 		$embed_provider = '';
 		$embed_provider_lowercase = '';
-		$embed_providers = $this->get_embeds( 'oembed' );
+		$embed_providers = $this->get_embeds();
 		
 		// get embed provider name
 		foreach ( $embed_providers as $provider ) {
