@@ -2,7 +2,7 @@
 Contributors: epiphyt, kittmedia, krafit
 Tags: oembed, privacy, gutenberg
 Requires at least: 5.9
-Stable tag: 1.9.1
+Stable tag: 1.9.2
 Tested up to: 6.5
 Requires PHP: 5.6
 License: GPL2
@@ -169,6 +169,11 @@ We are [Epiphyt](https://epiph.yt/), your friendly neighborhood WordPress plugin
 
 
 == Changelog ==
+
+= 1.9.2 =
+* Improve the text for screen readers upon activating the embedded content
+* Fixed compatibility with other widget plugins
+* Fixed handling of videos in Divi
 
 = 1.9.1 =
 * Fixed an error while uninstalling the plugin
