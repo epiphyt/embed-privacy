@@ -12,6 +12,7 @@ use epiphyt\Embed_Privacy\embed\Style;
 use epiphyt\Embed_Privacy\thumbnail\Thumbnail;
 use Jetpack;
 use WP_Post;
+use function Activitypub\is_activitypub_request;
 
 /**
  * Two click embed main class.
@@ -59,6 +60,12 @@ class Embed_Privacy {
 		'embed_privacy_opt_out',
 		'grw',
 	];
+	
+	/**
+	 * @since	1.10.0
+	 * @var		bool Whether the current request should be ignored
+	 */
+	public $is_ignored_request = false;
 	
 	/**
 	 * @since	1.4.8
@@ -160,6 +167,7 @@ class Embed_Privacy {
 		// actions
 		\add_action( 'init', [ $this, 'load_textdomain' ], 0 );
 		\add_action( 'init', [ $this, 'register_assets' ] );
+		\add_action( 'init', [ $this, 'set_ignored_request' ] );
 		\add_action( 'init', [ $this, 'set_post_type' ], 5 );
 		\add_action( 'save_post_epi_embed', [ $this, 'preserve_backslashes' ] );
 		\add_action( 'wp_enqueue_scripts', [ $this, 'deregister_assets' ], 100 );
@@ -1612,6 +1620,10 @@ class Embed_Privacy {
 			return $content;
 		}
 		
+		if ( $this->is_ignored_request ) {
+			return $content;
+		}
+		
 		// do nothing for ignored shortcodes
 		if ( ! empty( $tag ) && \in_array( $tag, $this->get_ignored_shortcodes(), true ) ) {
 			return $content;
@@ -1752,6 +1764,10 @@ class Embed_Privacy {
 			return $output;
 		}
 		
+		if ( $this->is_ignored_request ) {
+			return $output;
+		}
+		
 		// ignore embeds without host (ie. relative URLs)
 		if ( empty( \wp_parse_url( $url, \PHP_URL_HOST ) ) ) {
 			return $output;
@@ -1847,6 +1863,10 @@ class Embed_Privacy {
 	 * @return	string The updated embed code
 	 */
 	public function replace_embeds_divi( $item_embed, $url ) {
+		if ( $this->is_ignored_request ) {
+			return $item_embed;
+		}
+		
 		$attributes = [];
 		$use_internal_errors = \libxml_use_internal_errors( true );
 		$dom = new DOMDocument();
@@ -1970,6 +1990,10 @@ class Embed_Privacy {
 			return $output;
 		}
 		
+		if ( $this->is_ignored_request ) {
+			return $output;
+		}
+		
 		$embed_provider = $this->get_embed_by_name( 'maps-marker' );
 		
 		if ( \get_post_meta( $embed_provider->ID, 'is_disabled', true ) ) {
@@ -2072,6 +2096,15 @@ class Embed_Privacy {
 		}
 		
 		return true;
+	}
+	
+	/**
+	 * Check whether this request should be ignored by Embed Privacy.
+	 */
+	public function set_ignored_request() {
+		if ( \function_exists( 'Activitypub\is_activitypub_request' ) && is_activitypub_request() ) {
+			$this->is_ignored_request = true;
+		}
 	}
 	
 	/**
