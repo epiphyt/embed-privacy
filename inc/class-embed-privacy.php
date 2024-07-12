@@ -1,12 +1,14 @@
 <?php
 namespace epiphyt\Embed_Privacy;
 
-use Automattic\Jetpack\Assets;
+use Automattic\Jetpack\Assets as JetpackAssets;
 use DOMDocument;
 use DOMElement;
 use DOMNode;
 use DOMXPath;
 use Elementor\Plugin;
+use epiphyt\Embed_Privacy\embed\Assets;
+use epiphyt\Embed_Privacy\embed\Style;
 use epiphyt\Embed_Privacy\thumbnail\Thumbnail;
 use Jetpack;
 use WP_Post;
@@ -75,7 +77,8 @@ class Embed_Privacy {
 	public $plugin_file = '';
 	
 	/**
-	 * @var		array Style properties
+	 * @deprecated	1.10.0
+	 * @var			array Style properties
 	 */
 	public $style = [
 		'container' => [],
@@ -160,7 +163,6 @@ class Embed_Privacy {
 		\add_action( 'init', [ $this, 'set_post_type' ], 5 );
 		\add_action( 'save_post_epi_embed', [ $this, 'preserve_backslashes' ] );
 		\add_action( 'wp_enqueue_scripts', [ $this, 'deregister_assets' ], 100 );
-		\add_action( 'wp_head', [ $this, 'start_output_buffer' ] );
 		
 		// filters
 		if ( ! $this->usecache ) {
@@ -265,8 +267,8 @@ class Embed_Privacy {
 	/**
 	 * Get filters for Elementor.
 	 * 
-	 * @since		1.3.0
 	 * @deprecated	1.3.5
+	 * @since		1.3.0
 	 * @noinspection PhpUnused
 	 */
 	public function get_elementor_filters() {
@@ -756,155 +758,29 @@ class Embed_Privacy {
 		$embed_provider_lowercase = \sanitize_title( $embed_provider_lowercase );
 		$embed_class = 'embed-' . ( ! empty( $embed_provider_lowercase ) ? $embed_provider_lowercase : 'default' );
 		$embed_classes = $embed_class;
-		
-		$background_path = '';
-		$background_url = '';
-		$embed_thumbnail = [
-			'thumbnail_path' => '',
-			'thumbnail_url' => '',
-		];
-		$logo_path = '';
-		$logo_url = '';
+		$style = new Style( $embed_provider_lowercase, $embed_post, $args );
 		
 		if ( ! empty( $args['align'] ) ) {
 			$embed_classes .= ' align' . $args['align'];
 		}
 		
-		// display embed provider background image and logo
-		if ( $embed_post ) {
-			$background_image_id = \get_post_meta( $embed_post->ID, 'background_image', true );
-			$thumbnail_id = \get_post_thumbnail_id( $embed_post );
+		if ( ! empty( $args['assets'] ) ) {
+			$output = Assets::get_static( $args['assets'], $embed_provider_lowercase ) . $output;
 		}
-		else {
-			$background_image_id = null;
-			$thumbnail_id = null;
-		}
-		
-		if ( $background_image_id ) {
-			$background_path = \get_attached_file( $background_image_id );
-			$background_url = \wp_get_attachment_url( $background_image_id );
-		}
-		
-		if ( $thumbnail_id ) {
-			$logo_path = \get_attached_file( $thumbnail_id );
-			$logo_url = \get_the_post_thumbnail_url( $args['post_id'] );
-		}
-		else if ( \file_exists( \plugin_dir_path( $this->plugin_file ) . 'assets/images/embed-' . $embed_provider_lowercase . '.png' ) ) {
-			$logo_path = \plugin_dir_path( $this->plugin_file ) . 'assets/images/embed-' . $embed_provider_lowercase . '.png';
-			$logo_url = \plugin_dir_url( $this->plugin_file ) . 'assets/images/embed-' . $embed_provider_lowercase . '.png';
-		}
-		
-		if ( ! empty( $args['embed_url'] ) && \get_option( 'embed_privacy_download_thumbnails' ) ) {
-			$embed_thumbnail = Embed_Privacy::get_instance()->thumbnail->get_data( \get_post(), $args['embed_url'] );
-		}
-		
-		if ( ! empty( $args['assets'] ) && \is_array( $args['assets'] ) ) {
-			/**
-			 * Filter the additional assets of an embed provider.
-			 * 
-			 * @since	1.4.5
-			 * 
-			 * @param	array	$assets List of embed assets
-			 * @param	string	$embed_provider_lowercase The current embed provider in lowercase
-			 */
-			$args['assets'] = \apply_filters( "embed_privacy_assets_$embed_provider_lowercase", $args['assets'], $embed_provider_lowercase );
-			
-			$output = $this->print_embed_assets( $args['assets'], $output );
-		}
-		
-		/**
-		 * Filter the path to the background image.
-		 * 
-		 * @param	string	$background_path The default background path
-		 * @param	string	$embed_provider_lowercase The current embed provider in lowercase
-		 */
-		$background_path = \apply_filters( "embed_privacy_background_path_$embed_provider_lowercase", $background_path, $embed_provider_lowercase );
-		
-		/**
-		 * Filter the URL to the background image.
-		 * 
-		 * @param	string	$background_url The default background URL
-		 * @param	string	$embed_provider_lowercase The current embed provider in lowercase
-		 */
-		$background_url = \apply_filters( "embed_privacy_background_url_$embed_provider_lowercase", $background_url, $embed_provider_lowercase );
-		
-		/**
-		 * Filter the path to the thumbnail.
-		 * 
-		 * @param	string	$thumbnail_path The default thumbnail path
-		 * @param	string	$embed_provider_lowercase The current embed provider in lowercase
-		 */
-		$embed_thumbnail['thumbnail_path'] = \apply_filters( "embed_privacy_thumbnail_path_$embed_provider_lowercase", $embed_thumbnail['thumbnail_path'], $embed_provider_lowercase );
-		
-		/**
-		 * Filter the URL to the thumbnail.
-		 * 
-		 * @param	string	$thumbnail_url The default thumbnail URL
-		 * @param	string	$embed_provider_lowercase The current embed provider in lowercase
-		 */
-		$embed_thumbnail['thumbnail_url'] = \apply_filters( "embed_privacy_thumbnail_url_$embed_provider_lowercase", $embed_thumbnail['thumbnail_url'], $embed_provider_lowercase );
-		
-		/**
-		 * Filter the path to the logo.
-		 * 
-		 * @param	string	$logo_path The default logo path
-		 * @param	string	$embed_provider_lowercase The current embed provider in lowercase
-		 */
-		$logo_path = \apply_filters( "embed_privacy_logo_path_$embed_provider_lowercase", $logo_path, $embed_provider_lowercase );
-		
-		/**
-		 * Filter the URL to the logo.
-		 * 
-		 * @param	string	$logo_url The default logo URL
-		 * @param	string	$embed_provider_lowercase The current embed provider in lowercase
-		 */
-		$logo_url = \apply_filters( "embed_privacy_logo_url_$embed_provider_lowercase", $logo_url, $embed_provider_lowercase );
 		
 		$embed_md5 = \md5( $output . \wp_generate_uuid4() );
 		
-		if ( empty( $this->style['container'][ $embed_md5 ] ) ) {
-			$this->style['container'][ $embed_md5 ] = [
-				'background-image' => ! empty( $embed_thumbnail['thumbnail_path'] ) && \file_exists( $embed_thumbnail['thumbnail_path'] ) ? 'url("' . \esc_url( $embed_thumbnail['thumbnail_url'] ) . '")' : '',
-			];
-		}
-		
-		if ( ! empty( $args['height'] ) && ! empty( $args['width'] ) && empty( $args['ignore_aspect_ratio'] ) ) {
-			// if height is in percentage, we cannot determine the aspect ratio
-			if ( \strpos( $args['height'], '%' ) !== false ) {
-				$args['ignore_aspect_ratio'] = true;
-			}
-			// if width is in percentage, we need to use the content width
-			// since we cannot determine the actual width
-			if ( \strpos( $args['width'], '%' ) !== false ) {
-				global $content_width;
-				
-				$args['width'] = $content_width;
-			}
-			
-			$this->style['container'][ $embed_md5 ]['aspect-ratio'] = $args['width'] . '/' . $args['height'];
-		}
-		
-		$is_debug = \defined( 'WP_DEBUG' ) && WP_DEBUG;
-		
-		// display only if file exists
-		if ( \file_exists( $background_path ) && empty( $this->style['global']['container']['background-image'] ) ) {
-			$version = $is_debug ? \filemtime( $background_path ) : EMBED_PRIVACY_VERSION;
-			$this->style['global'][ $embed_provider_lowercase ]['container']['background-image'] = \sprintf(
-				'url(%1$s?v=%2$s)',
-				\esc_url( $background_url ),
-				\esc_html( $version )
-			);
-		}
-		
-		// display only if file exists
-		if ( \file_exists( $logo_path ) && empty( $this->style['global']['logo']['background-image'] ) ) {
-			$version = $is_debug ? \filemtime( $logo_path ) : EMBED_PRIVACY_VERSION;
-			$this->style['global'][ $embed_provider_lowercase ]['logo']['background-image'] = \sprintf(
-				'url(%1$s?v=%2$s)',
-				\esc_url( $logo_url ),
-				\esc_html( $version )
-			);
-		}
+		/**
+		 * Fires before the overlay output is generated.
+		 * 
+		 * @since	1.10.0
+		 * 
+		 * @param	string								$embed_provider The embed provider
+		 * @param	string								$embed_provider_lowercase The embed provider without spaces and in lowercase
+		 * @param	\epiphyt\Embed_Privacy\embed\Style	$style The overlay style object
+		 * @param	array								$args Additional arguments
+		 */
+		\do_action( 'embed_privacy_before_overlay_output', $embed_provider, $embed_provider_lowercase, $style, $args );
 		
 		\ob_start();
 		?>
@@ -992,8 +868,11 @@ class Embed_Privacy {
 			 */
 			$footer_content = \apply_filters( 'embed_privacy_overlay_footer', $footer_content );
 		}
+		
+		$container_style = $style->get( 'container' );
+		$logo_style = $style->get( 'logo' );
 		?>
-		<div class="embed-privacy-container is-disabled <?php echo \esc_attr( $embed_classes ); ?>" data-embed-id="oembed_<?php echo \esc_attr( $embed_md5 ); ?>" data-embed-provider="<?php echo \esc_attr( $embed_provider_lowercase ); ?>"<?php echo ( ! empty( $embed_thumbnail['thumbnail_path'] ) && \file_exists( $embed_thumbnail['thumbnail_path'] ) ? ' style="background-image: url(' . \esc_url( $embed_thumbnail['thumbnail_url'] ) . ');"' : '' ); ?>>
+		<div class="embed-privacy-container is-disabled <?php echo \esc_attr( $embed_classes ); ?>" data-embed-id="oembed_<?php echo \esc_attr( $embed_md5 ); ?>" data-embed-provider="<?php echo \esc_attr( $embed_provider_lowercase ); ?>"<?php echo ! empty( $container_style ) ? ' style="' . \esc_attr( $container_style ) . '"' : ''; ?>>
 			<?php
 			/* translators: embed provider */
 			$button_text = \sprintf( \__( 'Display content from %s', 'embed-privacy' ), \esc_html( $embed_provider ) );
@@ -1008,7 +887,7 @@ class Embed_Privacy {
 			<div class="embed-privacy-overlay">
 				<div class="embed-privacy-inner">
 					<?php
-					echo ( \file_exists( $logo_path ) ? '<div class="embed-privacy-logo"></div>' . \PHP_EOL : '' );
+					echo ( ! empty( $logo_style ) ? '<div class="embed-privacy-logo" style="' . \esc_attr( $logo_style ) . '"></div>' . \PHP_EOL : '' );
 					echo $content . \PHP_EOL; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 					?>
 				</div>
@@ -1322,84 +1201,37 @@ class Embed_Privacy {
 	/**
 	 * Get dynamically generated style.
 	 * 
+	 * @deprecated	1.10.0
+	 * 
 	 * @return	string Dynamically generated style
 	 */
 	public function get_style() {
-		$style = '';
+		\_doing_it_wrong(
+			__METHOD__,
+			\esc_html__( 'This method has no more functionality.', 'embed-privacy' ),
+			'1.10.0'
+		);
 		
 		/**
 		 * Filter the style properties before generating dynamic styles.
 		 * 
-		 * @since	1.9.0
+		 * @deprecated	1.10.0
+		 * @since		1.9.0
 		 * 
 		 * @param	array $style_properties Style properties array
 		 */
-		$this->style = (array) \apply_filters( 'embed_privacy_dynamic_style_properties', $this->style );
-		
-		foreach ( $this->style as $identifier => $styling ) {
-			if ( $identifier === 'container' ) {
-				foreach ( $styling as $oembed_id => $styles ) {
-					$properties = '';
-					
-					foreach ( $styles as $property => $value ) {
-						if ( empty( $value ) ) {
-							continue;
-						}
-						
-						$properties .= $property . ': ' . $value . '; ';
-					}
-					
-					if ( empty( $properties ) ) {
-						continue;
-					}
-					
-					$style .= \sprintf(
-						'[data-embed-id="oembed_%1$s"] { %2$s }' . \PHP_EOL,
-						\esc_html( $oembed_id ),
-						\esc_html( \trim( $properties ) )
-					);
-				}
-			}
-			else if ( $identifier === 'global' ) {
-				foreach ( $styling as $provider => $types ) {
-					foreach ( $types as $type => $styles ) {
-						$properties = '';
-						
-						foreach ( $styles as $property => $value ) {
-							if ( empty( $value ) ) {
-								continue;
-							}
-							
-							$properties .= $property . ': ' . $value . '; ';
-						}
-						
-						if ( empty( $properties ) ) {
-							continue;
-						}
-						
-						switch ( $type ) {
-							case 'logo': {
-								$style .= \sprintf(
-									'.embed-%1$s .embed-privacy-logo { %2$s }' . \PHP_EOL,
-									\esc_html( $provider ),
-									\esc_html( \trim( $properties ) )
-								);
-							}
-						}
-					}
-				}
-			}
-		}
+		$this->style = (array) \apply_filters_deprecated( 'embed_privacy_dynamic_style_properties', $this->style, '1.10.0' );
 		
 		/**
 		 * Filter dynamic generated style.
 		 * 
+		 * @deprecated	1.10.0
 		 * @since	1.9.0
 		 * 
 		 * @param	string	$style Generated style
 		 * @param	array	$style_properties Style properties array
 		 */
-		$style = \apply_filters( 'embed_privacy_dynamic_style', \trim( $style ), $this->style );
+		$style = \apply_filters_deprecated( 'embed_privacy_dynamic_style', '', $this->style, '1.10.0' );
 		
 		return $style;
 	}
@@ -1546,19 +1378,17 @@ class Embed_Privacy {
 	/**
 	 * Callback for the page output buffer.
 	 * 
+	 * @deprecated	1.10.0
+	 * 
 	 * @param	string	$buffer Current buffer
 	 * @return	string Updated buffer
 	 */
 	public function output_buffer_callback( $buffer ) {
-		$style = $this->get_style();
-		
-		if ( ! empty( $style ) ) {
-			$buffer = \str_replace(
-				'</head>',
-				'<style id="embed-privacy-inline-css">' . \PHP_EOL . $style . \PHP_EOL . '</style>' . \PHP_EOL . '</head>',
-				$buffer
-			);
-		}
+		\_doing_it_wrong(
+			__METHOD__,
+			\esc_html__( 'This method has no more functionality.', 'embed-privacy' ),
+			'1.10.0'
+		);
 		
 		return $buffer;
 	}
@@ -1627,51 +1457,25 @@ class Embed_Privacy {
 	/**
 	 * Print assets of an embed before the content.
 	 * 
-	 * @since	1.4.5
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\embed\Assets::get_static() instead
+	 * @since		1.4.5
 	 * 
 	 * @param	array	$assets List of assets
 	 * @param	string	$output The output
 	 * @return	string The updated output
 	 */
 	private function print_embed_assets( $assets, $output ) {
-		if ( empty( $assets ) ) {
-			return $output;
-		}
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\embed\Assets::get_static()',
+			),
+			'1.10.0'
+		);
 		
-		foreach ( array_reverse( $assets ) as $asset ) {
-			if ( empty( $asset['type'] ) ) {
-				continue;
-			}
-			
-			if ( $asset['type'] === 'script' ) {
-				if ( empty( $asset['handle'] ) || empty( $asset['src'] ) ) {
-					continue;
-				}
-				
-				$output = '<script src="' . \esc_url( $asset['src'] ) . ( ! empty( $asset['version'] ) ? '?ver=' . \esc_attr( \rawurlencode( $asset['version'] ) ) : '' ) . '" id="' . \esc_attr( $asset['handle'] ) . '"></script>' . \PHP_EOL . $output; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
-			}
-			else if ( $asset['type'] === 'inline' ) {
-				if ( empty( $asset['data'] ) || empty( $asset['object_name'] ) ) {
-					continue;
-				}
-				
-				if ( \is_string( $asset['data'] ) ) {
-					$data = \html_entity_decode( $asset['data'], \ENT_QUOTES, 'UTF-8' );
-				}
-				else {
-					foreach ( (array) $asset['data'] as $key => $value ) {
-						if ( ! \is_scalar( $value ) ) {
-							continue;
-						}
-						
-						$data[ $key ] = \html_entity_decode( (string) $value, \ENT_QUOTES, 'UTF-8' );
-					}
-				}
-				$output = '<script>var ' . esc_js( $asset['object_name'] ) . ' = ' . \wp_json_encode( $data ) . ';</script>' . \PHP_EOL . $output;
-			}
-		}
-		
-		return $output;
+		return Assets::get_static( $assets ) . $output;
 	}
 	
 	/**
@@ -1897,7 +1701,7 @@ class Embed_Privacy {
 				$args['assets'][] = [
 					'type' => 'script',
 					'handle' => 'jetpack-facebook-embed',
-					'src' => Assets::get_file_url_for_environment( '_inc/build/facebook-embed.min.js', '_inc/facebook-embed.js' ),
+					'src' => JetpackAssets::get_file_url_for_environment( '_inc/build/facebook-embed.min.js', '_inc/facebook-embed.js' ),
 					'version' => \JETPACK__VERSION,
 				];
 			}
@@ -2368,8 +2172,14 @@ class Embed_Privacy {
 	
 	/**
 	 * Start an output buffer.
+	 * 
+	 * @deprecated	1.10.0
 	 */
 	public function start_output_buffer() {
-		\ob_start( [ $this, 'output_buffer_callback' ] );
+		\_doing_it_wrong(
+			__METHOD__,
+			\esc_html__( 'This method has no more functionality.', 'embed-privacy' ),
+			'1.10.0'
+		);
 	}
 }
