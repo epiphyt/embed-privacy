@@ -2011,6 +2011,8 @@ class Embed_Privacy {
 			}
 		}
 		
+		$this->print_assets();
+		
 		// add two click to markup
 		return $this->get_output_template( $embed_provider, $embed_provider_lowercase, $output, $args );
 	}
