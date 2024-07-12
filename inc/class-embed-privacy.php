@@ -2100,6 +2100,8 @@ class Embed_Privacy {
 	
 	/**
 	 * Check whether this request should be ignored by Embed Privacy.
+	 * 
+	 * @since	1.10.0
 	 */
 	public function set_ignored_request() {
 		if ( \function_exists( 'Activitypub\is_activitypub_request' ) && is_activitypub_request() ) {
