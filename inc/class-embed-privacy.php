@@ -186,7 +186,6 @@ class Embed_Privacy {
 		Admin::get_instance()->init();
 		Fields::get_instance()->init();
 		Migration::get_instance()->init();
-		Thumbnails::get_instance()->init();
 		$this->thumbnail->init();
 	}
 	
@@ -243,7 +242,17 @@ class Embed_Privacy {
 	 * 
 	 * @deprecated	1.4.4 Use Embed_Privacy::print_assets() instead
 	 */
-	public function enqueue_assets() { }
+	public function enqueue_assets() {
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead.', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\Embed_Privacy::print_assets()',
+			),
+			'1.4.4'
+		);
+	}
 	
 	/**
 	 * Get the Embed Privacy cookie.
@@ -272,6 +281,12 @@ class Embed_Privacy {
 	 * @noinspection PhpUnused
 	 */
 	public function get_elementor_filters() {
+		\_doing_it_wrong(
+			__METHOD__,
+			\esc_html__( 'This method is outdated and will be removed in the future.', 'embed-privacy' ),
+			'1.3.5'
+		);
+		
 		if ( ! $this->is_elementor() ) {
 			return;
 		}
@@ -1469,7 +1484,7 @@ class Embed_Privacy {
 			__METHOD__,
 			\sprintf(
 				/* translators: alternative method */
-				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				\esc_html__( 'Use %s instead.', 'embed-privacy' ),
 				'epiphyt\Embed_Privacy\embed\Assets::get_static()',
 			),
 			'1.10.0'
@@ -1863,6 +1878,12 @@ class Embed_Privacy {
 	 * @return	string The updated embed code
 	 */
 	public function replace_embeds_twitter( $output, $url, $args ) {
+		\_doing_it_wrong(
+			__METHOD__,
+			\esc_html__( 'This method is outdated and will be removed in the future.', 'embed-privacy' ),
+			'1.6.3'
+		);
+		
 		// do nothing in admin
 		if ( ! $this->usecache ) {
 			return $output;
@@ -1900,6 +1921,15 @@ class Embed_Privacy {
 	 * @return	string The post content
 	 */
 	public function replace_google_maps( $content ) {
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead.', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\Embed_Privacy::get_embed_overlay()',
+			),
+			'1.2.0'
+		);
 		\preg_match_all( self::IFRAME_REGEX, $content, $matches );
 		
 		if ( empty( $matches ) || empty( $matches[0] ) ) {
