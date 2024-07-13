@@ -2221,11 +2221,13 @@ class Embed_Privacy {
 			$is_hidden = ! $is_javascript_detection && ! $attributes['show_all'] && ! \in_array( $provider->post_name, $enabled_providers, true );
 			$microtime = \str_replace( '.', '', \microtime( true ) );
 			$output .= '<span class="embed-privacy-provider' . ( $is_hidden ? ' is-hidden' : '' ) . '">' . \PHP_EOL;
-			$output .= '<input type="checkbox" id="embed-privacy-provider-' . \esc_attr( $provider->post_name ) . '-' . $microtime . '" ' . \checked( $is_checked, true, false ) . ' class="embed-privacy-opt-out-input ' . ( $is_checked ? 'is-enabled' : 'is-disabled' ) . '" data-embed-provider="' . \esc_attr( $provider->post_name ) . '">';
 			$output .= '<label class="embed-privacy-opt-out-label" for="embed-privacy-provider-' . \esc_attr( $provider->post_name ) . '-' . $microtime . '" data-embed-provider="' . \esc_attr( $provider->post_name ) . '">';
-			$enable_disable = '<span class="embed-privacy-provider-is-enabled">' . \esc_html_x( 'Disable', 'complete string: Disable <embed name>', 'embed-privacy' ) . '</span><span class="embed-privacy-provider-is-disabled">' . \esc_html_x( 'Enable', 'complete string: Disable <embed name>', 'embed-privacy' ) . '</span>';
-			/* translators: 1: Enable/Disable, 2: embed provider title */
-			$output .= \wp_kses( \sprintf( \__( '%1$s %2$s', 'embed-privacy' ), $enable_disable, \esc_html( $provider->post_title ) ), [ 'span' => [ 'class' => true ] ] );
+			$output .= '<input type="checkbox" id="embed-privacy-provider-' . \esc_attr( $provider->post_name ) . '-' . $microtime . '" ' . \checked( $is_checked, true, false ) . ' class="embed-privacy-opt-out-input" data-embed-provider="' . \esc_attr( $provider->post_name ) . '"> ';
+			$output .= \sprintf(
+				/* translators: embed provider title */
+				\esc_html__( 'Load all embeds from %s', 'embed-privacy' ),
+				\esc_html( $provider->post_title )
+			);
 			$output .= '</label><br>' . \PHP_EOL;
 			$output .= '</span>' . \PHP_EOL;
 		}
