@@ -109,7 +109,22 @@ final class Thumbnail {
 						}
 					}
 					
-					if ( $missing_id && $missing_url && ! self::is_in_use( $meta_value, $post_id, $global_metadata ) ) {
+					$should_delete = $missing_id && $missing_url && ! self::is_in_use( $meta_value, $post_id, $global_metadata );
+						
+					/**
+					 * Filters whether an thumbnail marked as orphaned should be deleted.
+					 * 
+					 * @since	1.10.0
+					 * 
+					 * @param	bool	$should_delete Whether the thumbnail should be deleted
+					 * @param	string	$id The thumbnail ID
+					 * @param	string	$url The thumbnail URL
+					 * @param	int		$post_id The post ID
+					 * @param	string	$provider The provider name
+					 */
+					$should_delete = \apply_filters( 'embed_privacy_thumbnail_delete_orphaned', $should_delete, $id, $url, $post_id, $provider );
+					
+					if ( $should_delete ) {
 						/**
 						 * Fires before orphaned data are deleted.
 						 * 
@@ -124,19 +139,6 @@ final class Thumbnail {
 						\do_action_deprecated( 'embed_privacy_pre_thumbnail_delete_orphaned_delete', [ $id, $url, $post_id, $provider ], '1.10.0', 'embed_privacy_pre_thumbnail_delete_orphaned_delete' );
 						
 						$should_delete = ! \has_action( 'embed_privacy_pre_thumbnail_delete_orphaned_delete' );
-						
-						/**
-						 * Filters whether an thumbnail marked as orphaned should be deleted.
-						 * 
-						 * @since	1.10.0
-						 * 
-						 * @param	bool	$should_delete Whether the thumbnail should be deleted
-						 * @param	string	$id The thumbnail ID
-						 * @param	string	$url The thumbnail URL
-						 * @param	int		$post_id The post ID
-						 * @param	string	$provider The provider name
-						 */
-						$should_delete = \apply_filters( 'embed_privacy_thumbnail_delete_orphaned', $should_delete, $id, $url, $post_id, $provider );
 						
 						if ( $should_delete ) {
 							self::delete( $meta_value );
