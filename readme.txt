@@ -439,4 +439,4 @@ We are [Epiphyt](https://epiph.yt/), your friendly neighborhood WordPress plugin
 1. Add embeds using the classic editor or the block editor's embed blocks.
 2. Embed Privacy will add an overlay to supported embeds automatically.
 3. You can customize the overlays for each service individually.
-4. Embed Privacy can deliver embedded Tweets locally without 3rd party scripts or tracking.
+4. Different settings allow you to adjust the functionality of Embed Privacy according to your needs.
