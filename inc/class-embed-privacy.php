@@ -750,6 +750,16 @@ class Embed_Privacy {
 	 * @return	string The overlay template
 	 */
 	public function get_output_template( $embed_provider, $embed_provider_lowercase, $output, $args = [] ) {
+		$embed_provider_lowercase = \preg_replace( '/-\d+$/', '', \sanitize_title( $embed_provider_lowercase ) );
+		
+		if (
+			\is_plugin_active( 'polylang/polylang.php' )
+			&& \function_exists( 'pll_current_language' )
+			&& \str_ends_with( $embed_provider_lowercase, '-' . \pll_current_language() )
+		) {
+			$embed_provider_lowercase = \preg_replace( '/-' . \preg_quote( \pll_current_language(), '/' ) . '$/', '', $embed_provider_lowercase );
+		}
+		
 		/**
 		 * Filter the overlay arguments.
 		 * 
@@ -778,7 +788,6 @@ class Embed_Privacy {
 			$output = \str_replace( 'youtube.com', 'youtube-nocookie.com', $output );
 		}
 		
-		$embed_provider_lowercase = \sanitize_title( $embed_provider_lowercase );
 		$embed_class = 'embed-' . ( ! empty( $embed_provider_lowercase ) ? $embed_provider_lowercase : 'default' );
 		$embed_classes = $embed_class;
 		$style = new Style( $embed_provider_lowercase, $embed_post, $args );
