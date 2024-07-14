@@ -7,6 +7,9 @@ use DOMElement;
 use DOMNode;
 use DOMXPath;
 use Elementor\Plugin;
+use epiphyt\Embed_Privacy\admin\Fields;
+use epiphyt\Embed_Privacy\admin\Settings;
+use epiphyt\Embed_Privacy\admin\User_Interface;
 use epiphyt\Embed_Privacy\embed\Assets;
 use epiphyt\Embed_Privacy\embed\Style;
 use epiphyt\Embed_Privacy\thumbnail\Thumbnail;
@@ -45,6 +48,12 @@ class Embed_Privacy {
 	 * @var		array An array of embed providers
 	 */
 	public $embeds = [];
+	
+	/**
+	 * @since	1.10.0
+	 * @var		\epiphyt\Embed_Privacy\admin\Fields
+	 */
+	public $fields;
 	
 	/**
 	 * @since	1.3.0
@@ -153,7 +162,7 @@ class Embed_Privacy {
 	 * Embed Privacy constructor.
 	 */
 	public function __construct() {
-		// assign variables
+		$this->fields = new Fields();
 		$this->thumbnail = new Thumbnail();
 		$this->usecache = ! \is_admin();
 	}
@@ -191,9 +200,10 @@ class Embed_Privacy {
 		\register_activation_hook( $this->plugin_file, [ $this, 'clear_embed_cache' ] );
 		\register_deactivation_hook( $this->plugin_file, [ $this, 'clear_embed_cache' ] );
 		
-		Admin::get_instance()->init();
-		Fields::get_instance()->init();
 		Migration::get_instance()->init();
+		Settings::init();
+		User_Interface::init();
+		$this->fields->init();
 		$this->thumbnail->init();
 	}
 	
