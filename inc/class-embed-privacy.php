@@ -14,6 +14,7 @@ use epiphyt\Embed_Privacy\embed\Assets;
 use epiphyt\Embed_Privacy\embed\Style;
 use epiphyt\Embed_Privacy\integration\Activitypub;
 use epiphyt\Embed_Privacy\integration\Amp;
+use epiphyt\Embed_Privacy\integration\Astra;
 use epiphyt\Embed_Privacy\thumbnail\Thumbnail;
 use ReflectionMethod;
 use WP_Post;
@@ -78,6 +79,7 @@ class Embed_Privacy {
 	private $integrations = [
 		Activitypub::class,
 		Amp::class,
+		Astra::class,
 	];
 	
 	/**
@@ -1496,10 +1498,6 @@ class Embed_Privacy {
 			'javascriptDetection' => \get_option( 'embed_privacy_javascript_detection' ),
 		] );
 		
-		if ( $this->is_theme( 'Astra' ) ) {
-			\wp_enqueue_style( 'embed-privacy-astra' );
-		}
-		
 		if ( $this->is_theme( 'Divi' ) ) {
 			\wp_enqueue_script( 'embed-privacy-divi' );
 			\wp_enqueue_style( 'embed-privacy-divi' );
@@ -1521,6 +1519,13 @@ class Embed_Privacy {
 		if ( \is_plugin_active( 'shortcodes-ultimate/shortcodes-ultimate.php' ) ) {
 			\wp_enqueue_style( 'embed-privacy-shortcodes-ultimate' );
 		}
+		
+		/**
+		 * Fires after assets are printed.
+		 * 
+		 * @since	1.10.0
+		 */
+		\do_action( 'embed_privacy_print_assets' );
 		
 		$this->is_printed = true;
 	}
@@ -1573,13 +1578,6 @@ class Embed_Privacy {
 			\wp_register_script( 'embed-privacy', $js_file_url, [], $file_version, [ 'strategy' => 'defer' ] );
 		}
 		
-		// Astra is too greedy at its CSS selectors
-		// see https://github.com/epiphyt/embed-privacy/issues/33
-		$css_file_url = \EPI_EMBED_PRIVACY_URL . 'assets/style/astra' . $suffix . '.css';
-		$file_version = $is_debug ? \filemtime( \EPI_EMBED_PRIVACY_BASE . 'assets/style/astra' . $suffix . '.css' ) : \EMBED_PRIVACY_VERSION;
-		
-		\wp_register_style( 'embed-privacy-astra', $css_file_url, [], $file_version );
-		
 		$js_file_url = \EPI_EMBED_PRIVACY_URL . 'assets/js/divi' . $suffix . '.js';
 		$file_version = $is_debug ? \filemtime( \EPI_EMBED_PRIVACY_BASE . 'assets/js/divi' . $suffix . '.js' ) : \EMBED_PRIVACY_VERSION;
 		
@@ -1609,6 +1607,16 @@ class Embed_Privacy {
 		$file_version = $is_debug ? \filemtime( \EPI_EMBED_PRIVACY_BASE . 'assets/style/shortcodes-ultimate' . $suffix . '.css' ) : \EMBED_PRIVACY_VERSION;
 		
 		\wp_register_style( 'embed-privacy-shortcodes-ultimate', $css_file_url, [], $file_version );
+		
+		/**
+		 * Fires after assets have been registered.
+		 * 
+		 * @since	1.10.0
+		 * 
+		 * @param	bool	$is_debug Whether debug mode is enabled
+		 * @param	string	$suffix A filename suffix
+		 */
+		\do_action( 'embed_privacy_register_assets', $is_debug, $suffix );
 		
 		$current_url = \sprintf(
 			'http%1$s://%2$s%3$s',
