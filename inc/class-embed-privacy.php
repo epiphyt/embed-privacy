@@ -12,10 +12,10 @@ use epiphyt\Embed_Privacy\admin\Settings;
 use epiphyt\Embed_Privacy\admin\User_Interface;
 use epiphyt\Embed_Privacy\embed\Assets;
 use epiphyt\Embed_Privacy\embed\Style;
+use epiphyt\Embed_Privacy\integration\Activitypub;
 use epiphyt\Embed_Privacy\thumbnail\Thumbnail;
-use Jetpack;
+use ReflectionMethod;
 use WP_Post;
-use function Activitypub\is_activitypub_request;
 
 /**
  * Two click embed main class.
@@ -68,6 +68,14 @@ class Embed_Privacy {
 	private $ignored_shortcodes = [
 		'embed_privacy_opt_out',
 		'grw',
+	];
+	
+	/**
+	 * @since	1.10.0
+	 * @var		array List of integrations
+	 */
+	private $integrations = [
+		Activitypub::class,
 	];
 	
 	/**
@@ -178,6 +186,7 @@ class Embed_Privacy {
 		\add_action( 'init', [ $this, 'register_assets' ] );
 		\add_action( 'init', [ $this, 'set_ignored_request' ] );
 		\add_action( 'init', [ $this, 'set_post_type' ], 5 );
+		\add_action( 'plugins_loaded', [ $this, 'init_integrations' ] );
 		\add_action( 'save_post_epi_embed', [ $this, 'preserve_backslashes' ] );
 		\add_action( 'wp_enqueue_scripts', [ $this, 'deregister_assets' ], 100 );
 		
@@ -205,6 +214,35 @@ class Embed_Privacy {
 		User_Interface::init();
 		$this->fields->init();
 		$this->thumbnail->init();
+	}
+	
+	/**
+	 * Initialize all integrations, if necessary.
+	 */
+	public function init_integrations() {
+		/**
+		 * Filter the integrations.
+		 * 
+		 * @since	1.10.0
+		 * 
+		 * @param	array	$integrations List of integrations
+		 */
+		$this->integrations = (array) \apply_filters( 'embed_privacy_integrations', $this->integrations );
+		
+		foreach ( $this->integrations as $integration ) {
+			if ( ! \method_exists( $integration, 'init' ) ) {
+				continue;
+			}
+			
+			$reflection = new ReflectionMethod( $integration, 'init' );
+			
+			if ( $reflection->isStatic() ) {
+				$integration::init();
+			}
+			else {
+				( new $integration() )->init();
+			}
+		}
 	}
 	
 	/**
@@ -2123,9 +2161,14 @@ class Embed_Privacy {
 	 * @since	1.10.0
 	 */
 	public function set_ignored_request() {
-		if ( \function_exists( 'Activitypub\is_activitypub_request' ) && is_activitypub_request() ) {
-			$this->is_ignored_request = true;
-		}
+		/**
+		 * Filter whether the current request should be ignored.
+		 * 
+		 * @since	1.10.0
+		 * 
+		 * @param	bool	$is_ignored_request Whether the current request should be ignored
+		 */
+		$this->is_ignored_request = (bool) \apply_filters( 'embed_privacy_is_ignored_request', $this->is_ignored_request );
 	}
 	
 	/**
