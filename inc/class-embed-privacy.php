@@ -19,6 +19,7 @@ use epiphyt\Embed_Privacy\integration\Kadence_Blocks;
 use epiphyt\Embed_Privacy\integration\Maps_Marker;
 use epiphyt\Embed_Privacy\integration\Polylang;
 use epiphyt\Embed_Privacy\integration\Shortcodes_Ultimate;
+use epiphyt\Embed_Privacy\integration\Twitter;
 use epiphyt\Embed_Privacy\thumbnail\Thumbnail;
 use ReflectionMethod;
 use WP_Post;
@@ -97,6 +98,7 @@ class Embed_Privacy {
 		Maps_Marker::class,
 		Polylang::class,
 		Shortcodes_Ultimate::class,
+		Twitter::class,
 	];
 	
 	/**
@@ -594,72 +596,24 @@ class Embed_Privacy {
 	/**
 	 * Transform a tweet into a local one.
 	 * 
-	 * @since	1.3.0
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\integration\Twitter::get_local_tweet() instead
+	 * @since		1.3.0
 	 * 
 	 * @param	string	$html Embed code
 	 * @return	string Local embed
 	 */
 	private function get_local_tweet( $html ) {
-		\libxml_use_internal_errors( true );
-		$dom = new DOMDocument();
-		$dom->loadHTML(
-			'<html><meta charset="utf-8">' . $html . '</html>',
-			\LIBXML_HTML_NOIMPLIED | \LIBXML_HTML_NODEFDTD
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\integration\Twitter::get_local_tweet()',
+			),
+			'1.10.0'
 		);
 		
-		// phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
-		// remove script tag
-		foreach ( $dom->getElementsByTagName( 'script' ) as $script ) {
-			$script->parentNode->removeChild( $script );
-		}
-		
-		$xpath = new DOMXPath( $dom );
-		
-		// get text node, which represents the author name
-		// and give it a span with class
-		foreach ( $xpath->query( '//blockquote/text()' ) as $node ) {
-			$author_node = $dom->createElement( 'span', $node->nodeValue );
-			$author_node->setAttribute( 'class', 'embed-privacy-author-meta' );
-			$node->parentNode->replaceChild( $author_node, $node );
-		}
-		
-		// wrap author name by a meta div
-		foreach ( $dom->getElementsByTagName( 'span' ) as $node ) {
-			if ( $node->getAttribute( 'class' ) !== 'embed-privacy-author-meta' ) {
-				continue;
-			}
-			
-			// create meta cite
-			$parent_node = $dom->createElement( 'cite' );
-			$parent_node->setAttribute( 'class', 'embed-privacy-tweet-meta' );
-			// append created cite to blockquote
-			$node->parentNode->appendChild( $parent_node );
-			// move author meta inside meta cite
-			$parent_node->appendChild( $node );
-		}
-		
-		foreach ( $dom->getElementsByTagName( 'a' ) as $link ) {
-			if ( ! \preg_match( '/https?:\/\/twitter.com\/([^\/]+)\/status\/(\d+)/', $link->getAttribute( 'href' ) ) ) {
-				continue;
-			}
-			
-			// modify date in link to tweet
-			$l10n_date = \wp_date( \get_option( 'date_format' ), \strtotime( $link->nodeValue ) );
-			
-			if ( \is_string( $l10n_date ) ) {
-				$link->nodeValue = $l10n_date;
-			}
-			
-			// move link inside meta div
-			if ( isset( $parent_node ) && $parent_node instanceof DOMElement ) {
-				$parent_node->appendChild( $link );
-			}
-		}
-		
-		$content = $dom->saveHTML( $dom->documentElement );
-		// phpcs:enable
-		
-		return \str_replace( [ '<html><meta charset="utf-8">', '</html>' ], [ '<div class="embed-privacy-local-tweet">', '</div>' ], $content );
+		return Twitter::get_local_tweet( $html );
 	}
 	
 	/**
@@ -1703,7 +1657,7 @@ class Embed_Privacy {
 		}
 		else if ( $embed_provider_lowercase === 'twitter' && \get_option( 'embed_privacy_local_tweets' ) ) {
 			// check for local tweets
-			return $this->get_local_tweet( $output );
+			return Twitter::get_local_tweet( $output );
 		}
 		
 		// check if cookie is set
