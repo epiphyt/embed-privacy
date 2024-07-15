@@ -27,7 +27,7 @@ class Admin {
 	private static $instance;
 	
 	/**
-	 * Post Type constructor.
+	 * Admin constructor.
 	 */
 	public function __construct() {
 		self::$instance = $this;

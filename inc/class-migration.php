@@ -31,7 +31,7 @@ class Migration {
 	private $version = '1.8.0';
 	
 	/**
-	 * Post Type constructor.
+	 * Migration constructor.
 	 */
 	public function __construct() {
 		self::$instance = $this;

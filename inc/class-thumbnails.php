@@ -32,7 +32,7 @@ class Thumbnails {
 	private static $instance;
 	
 	/**
-	 * Post Type constructor.
+	 * Thumbnails constructor.
 	 * 
 	 * @deprecated	1.9.0 Use the functionality of epiphyt\Embed_Privacy\thumbnail\Thumbnail instead
 	 */

@@ -27,7 +27,7 @@ class Fields {
 	private static $instance;
 	
 	/**
-	 * Post Type constructor.
+	 * Fields constructor.
 	 */
 	public function __construct() {
 		self::$instance = $this;
