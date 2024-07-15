@@ -1,7 +1,6 @@
 <?php
 namespace epiphyt\Embed_Privacy;
 
-use Automattic\Jetpack\Assets as JetpackAssets;
 use DOMDocument;
 use DOMElement;
 use DOMNode;
@@ -15,6 +14,7 @@ use epiphyt\Embed_Privacy\integration\Amp;
 use epiphyt\Embed_Privacy\integration\Astra;
 use epiphyt\Embed_Privacy\integration\Divi;
 use epiphyt\Embed_Privacy\integration\Elementor;
+use epiphyt\Embed_Privacy\integration\Jetpack;
 use epiphyt\Embed_Privacy\thumbnail\Thumbnail;
 use ReflectionMethod;
 use WP_Post;
@@ -83,6 +83,7 @@ class Embed_Privacy {
 		Astra::class,
 		Divi::class,
 		Elementor::class,
+		Jetpack::class,
 	];
 	
 	/**
@@ -195,7 +196,6 @@ class Embed_Privacy {
 		\add_action( 'init', [ $this, 'set_post_type' ], 5 );
 		\add_action( 'plugins_loaded', [ $this, 'init_integrations' ] );
 		\add_action( 'save_post_epi_embed', [ $this, 'preserve_backslashes' ] );
-		\add_action( 'wp_enqueue_scripts', [ $this, 'deregister_assets' ], 100 );
 		
 		// filters
 		if ( ! $this->usecache ) {
@@ -293,10 +293,15 @@ class Embed_Privacy {
 	/**
 	 * Deregister assets.
 	 * 
-	 * @since	1.4.6
+	 * @deprecated	1.10.0
+	 * @since		1.4.6
 	 */
 	public function deregister_assets() {
-		\wp_deregister_script( 'jetpack-facebook-embed' );
+		\_doing_it_wrong(
+			__METHOD__,
+			\esc_html__( 'This method is outdated and will be removed in the future.', 'embed-privacy' ),
+			'1.10.0'
+		);
 	}
 	
 	/**
@@ -1616,61 +1621,6 @@ class Embed_Privacy {
 			)
 		) {
 			$new_content = $this->get_single_overlay( $content, '', '', [ 'check_always_active' => true ] );
-			
-			if ( $new_content !== $content ) {
-				$this->has_embed = true;
-				$content = $new_content;
-			}
-		}
-		
-		if ( \strpos( $content, 'class="fb-post"' ) !== false ) {
-			$provider = $this->get_embed_by_name( 'facebook' );
-			$args = [
-				'additional_checks' => [
-					[
-						'attribute' => 'class',
-						'compare' => '===',
-						'type' => 'attribute',
-						'value' => 'fb-post',
-					],
-				],
-				'assets' => [],
-				'check_always_active' => true,
-				'element_attribute' => 'data-href',
-				'elements' => [
-					'div',
-				],
-			];
-			
-			// register jetpack script if available
-			if ( \class_exists( '\Automattic\Jetpack\Assets' ) && \defined( 'JETPACK__VERSION' ) ) {
-				/** @disregard P1009 */
-				$jetpack = Jetpack::init();
-				
-				$args['assets'][] = [
-					'type' => 'inline',
-					'object_name' => 'jpfbembed',
-					'data' => [
-						/**
-						 * Filter the Jetpack sharing Facebook app ID.
-						 * 
-						 * @since	1.4.5
-						 * 
-						 * @param	string	$app_id The current app ID
-						 */
-						'appid' => \apply_filters( 'jetpack_sharing_facebook_app_id', '249643311490' ),
-						'locale' => $jetpack->get_locale(),
-					],
-				];
-				$args['assets'][] = [
-					'type' => 'script',
-					'handle' => 'jetpack-facebook-embed',
-					'src' => JetpackAssets::get_file_url_for_environment( '_inc/build/facebook-embed.min.js', '_inc/facebook-embed.js' ),
-					'version' => \JETPACK__VERSION,
-				];
-			}
-			
-			$new_content = $this->get_single_overlay( $content, $provider->post_title, $provider->post_name, $args );
 			
 			if ( $new_content !== $content ) {
 				$this->has_embed = true;
