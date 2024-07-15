@@ -5,8 +5,6 @@ use Automattic\Jetpack\Assets as JetpackAssets;
 use DOMDocument;
 use DOMElement;
 use DOMNode;
-use DOMXPath;
-use Elementor\Plugin;
 use epiphyt\Embed_Privacy\admin\Fields;
 use epiphyt\Embed_Privacy\admin\Settings;
 use epiphyt\Embed_Privacy\admin\User_Interface;
@@ -16,6 +14,7 @@ use epiphyt\Embed_Privacy\integration\Activitypub;
 use epiphyt\Embed_Privacy\integration\Amp;
 use epiphyt\Embed_Privacy\integration\Astra;
 use epiphyt\Embed_Privacy\integration\Divi;
+use epiphyt\Embed_Privacy\integration\Elementor;
 use epiphyt\Embed_Privacy\thumbnail\Thumbnail;
 use ReflectionMethod;
 use WP_Post;
@@ -42,9 +41,10 @@ class Embed_Privacy {
 	
 	/**
 	 * @since	1.3.5
+	 * @since	1.10.0 Property is now public
 	 * @var		array Replacements that already have taken place.
 	 */
-	private $did_replacements = [];
+	public $did_replacements = [];
 	
 	/**
 	 * @since	1.3.0
@@ -82,6 +82,7 @@ class Embed_Privacy {
 		Amp::class,
 		Astra::class,
 		Divi::class,
+		Elementor::class,
 	];
 	
 	/**
@@ -348,98 +349,13 @@ class Embed_Privacy {
 			'1.3.5'
 		);
 		
-		if ( ! $this->is_elementor() ) {
+		if ( ! Elementor::is_used() ) {
 			return;
 		}
 		
 		// doesn't currently run with YouTube
 		// see https://github.com/elementor/elementor/issues/14276
 		\add_filter( 'oembed_result', [ $this, 'replace_embeds' ], 10, 3 );
-	}
-	
-	/**
-	 * Get an overlay for Elementor YouTube videos.
-	 * 
-	 * @since	1.3.5
-	 * 
-	 * @param	string	$content The content
-	 * @return	string The content with an embed overlay (if needed)
-	 */
-	private function get_elementor_youtube_overlay( $content ) {
-		$embed_provider = $this->get_embed_by_name( 'youtube' );
-		$replacements = [];
-		
-		// phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
-		\libxml_use_internal_errors( true );
-		$dom = new DOMDocument();
-		$dom->loadHTML(
-			'<html><meta charset="utf-8">' . $content . '</html>',
-			LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
-		);
-		$template_dom = new DOMDocument();
-		
-		foreach ( $dom->getElementsByTagName( 'div' ) as $element ) {
-			if ( \strpos( $element->getAttribute( 'data-settings' ), 'youtube_url' ) === false ) {
-				continue;
-			}
-			
-			$settings = \json_decode( $element->getAttribute( 'data-settings' ) );
-			$args = [];
-			
-			if ( ! empty( $settings->youtube_url ) ) {
-				$args['embed_url'] = $settings->youtube_url;
-			}
-			
-			// get overlay template as DOM element
-			$template_dom->loadHTML(
-				'<html><meta charset="utf-8">' . $this->get_output_template( $embed_provider->post_title, $embed_provider->post_name, $dom->saveHTML( $element ), $args ) . '</html>',
-				\LIBXML_HTML_NOIMPLIED | \LIBXML_HTML_NODEFDTD
-			);
-			$overlay = null;
-			
-			foreach ( $template_dom->getElementsByTagName( 'div' ) as $div ) {
-				if ( \stripos( $div->getAttribute( 'class' ), 'embed-privacy-container' ) !== false ) {
-					$overlay = $div;
-					break;
-				}
-			}
-			
-			// store the elements to replace (see regressive loop down below)
-			if ( $overlay instanceof DOMNode || $overlay instanceof DOMElement ) {
-				$replacements[] = [
-					'element' => $element,
-					'replace' => $dom->importNode( $overlay, true ),
-				];
-			}
-		}
-		
-		if ( ! empty( $replacements ) ) {
-			$this->did_replacements = \array_merge( $this->did_replacements, $replacements );
-			$this->has_embed = true;
-			$elements = $dom->getElementsByTagName( 'div' );
-			$i = $elements->length - 1;
-			
-			// use regressive loop for replaceChild()
-			// see: https://www.php.net/manual/en/domnode.replacechild.php#50500
-			while ( $i > -1 ) {
-				$element = $elements->item( $i );
-				
-				foreach ( $replacements as $replacement ) {
-					if ( $replacement['element'] === $element ) {
-						$element->parentNode->replaceChild( $replacement['replace'], $replacement['element'] );
-					}
-				}
-				
-				$i--;
-			}
-			
-			$content = \str_replace( [ '<html><meta charset="utf-8">', '</html>' ], '', $dom->saveHTML( $dom->documentElement ) );
-		}
-		
-		\libxml_use_internal_errors( false );
-		// phpcs:enable
-		
-		return $content;
 	}
 	
 	/**
@@ -475,12 +391,13 @@ class Embed_Privacy {
 	 * Get an embed provider overlay.
 	 * 
 	 * @since	1.3.5
+	 * @since	1.10.0 Method is now public
 	 * 
 	 * @param	\WP_Post	$provider An embed provider
 	 * @param	string		$content The content
 	 * @return	string The content with additional overlays of an embed provider
 	 */
-	private function get_embed_overlay( $provider, $content ) {
+	public function get_embed_overlay( $provider, $content ) {
 		// make sure to test every provider for its always active state
 		if ( $this->is_always_active_provider( $provider->post_name ) ) {
 			return $content;
@@ -1404,24 +1321,23 @@ class Embed_Privacy {
 	/**
 	 * Check if a post is written in Elementor.
 	 * 
-	 * @since	1.3.5
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\integration\Elementor::is_used() instead
+	 * @since		1.3.5
 	 * 
 	 * @return	bool True if Elementor is used, false otherwise
 	 */
 	public function is_elementor() {
-		if ( ! function_exists( 'is_plugin_active' ) ) {
-			include_once ABSPATH . 'wp-admin/includes/plugin.php';
-		}
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\integration\Elementor::is_used()',
+			),
+			'1.10.0'
+		);
 		
-		if (
-			! \is_plugin_active( 'elementor/elementor.php' )
-			|| ! \get_the_ID()
-			|| ! Plugin::$instance->documents->get( \get_the_ID() )->is_built_with_elementor()
-		) {
-			return false;
-		}
-		
-		return true;
+		return Elementor::is_used();
 	}
 	
 	/**
@@ -1499,11 +1415,6 @@ class Embed_Privacy {
 			'javascriptDetection' => \get_option( 'embed_privacy_javascript_detection' ),
 		] );
 		
-		if ( $this->is_elementor() ) {
-			\wp_enqueue_script( 'embed-privacy-elementor-video' );
-			\wp_enqueue_style( 'embed-privacy-elementor' );
-		}
-		
 		if ( ! \function_exists( 'is_plugin_active' ) ) {
 			require_once ABSPATH . WPINC . '/plugin.php';
 		}
@@ -1573,16 +1484,6 @@ class Embed_Privacy {
 			
 			\wp_register_script( 'embed-privacy', $js_file_url, [], $file_version, [ 'strategy' => 'defer' ] );
 		}
-		
-		$js_file_url = \EPI_EMBED_PRIVACY_URL . 'assets/js/elementor-video' . $suffix . '.js';
-		$file_version = $is_debug ? \filemtime( \EPI_EMBED_PRIVACY_BASE . 'assets/js/elementor-video' . $suffix . '.js' ) : \EMBED_PRIVACY_VERSION;
-		
-		\wp_register_script( 'embed-privacy-elementor-video', $js_file_url, [], $file_version, [ 'strategy' => 'defer' ] );
-		
-		$css_file_url = \EPI_EMBED_PRIVACY_URL . 'assets/style/elementor' . $suffix . '.css';
-		$file_version = $is_debug ? \filemtime( \EPI_EMBED_PRIVACY_BASE . 'assets/style/elementor' . $suffix . '.css' ) : \EMBED_PRIVACY_VERSION;
-		
-		\wp_register_style( 'embed-privacy-elementor', $css_file_url, [], $file_version );
 		
 		$css_file_url = \EPI_EMBED_PRIVACY_URL . 'assets/style/kadence-blocks' . $suffix . '.css';
 		$file_version = $is_debug ? \filemtime( \EPI_EMBED_PRIVACY_BASE . 'assets/style/kadence-blocks' . $suffix . '.css' ) : \EMBED_PRIVACY_VERSION;
@@ -1683,21 +1584,15 @@ class Embed_Privacy {
 			$content = $this->get_embed_overlay( $provider, $content );
 		}
 		
-		// Elementor video providers need special treatment
-		if ( $this->is_elementor() ) {
-			$embed_providers = [
-				$this->get_embed_by_name( 'dailymotion' ),
-				$this->get_embed_by_name( 'vimeo' ),
-			];
-			
-			foreach ( $embed_providers as $provider ) {
-				$content = $this->get_embed_overlay( $provider, $content );
-			}
-			
-			if ( strpos( $content, 'youtube.com\/watch' ) !== false ) {
-				$content = $this->get_elementor_youtube_overlay( $content );
-			}
-		}
+		/**
+		 * Filter the content after it has been replaced with an overlay.
+		 * 
+		 * @since	1.10.10
+		 * 
+		 * @param	string	$content Replaced content
+		 * @param	array	$embed_providers List of embed providers
+		 */
+		$content = (string) \apply_filters( 'embed_privacy_replaced_content', $content, $embed_providers );
 		
 		/**
 		 * If set to true, unknown providers are not handled via Embed Privacy.
