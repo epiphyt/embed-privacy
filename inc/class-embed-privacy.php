@@ -17,6 +17,7 @@ use epiphyt\Embed_Privacy\integration\Elementor;
 use epiphyt\Embed_Privacy\integration\Jetpack;
 use epiphyt\Embed_Privacy\integration\Kadence_Blocks;
 use epiphyt\Embed_Privacy\integration\Maps_Marker;
+use epiphyt\Embed_Privacy\integration\Polylang;
 use epiphyt\Embed_Privacy\thumbnail\Thumbnail;
 use ReflectionMethod;
 use WP_Post;
@@ -47,6 +48,11 @@ class Embed_Privacy {
 	 * @var		array Replacements that already have taken place.
 	 */
 	public $did_replacements = [];
+	
+	/**
+	 * @var		\epiphyt\Embed_Privacy\Embed
+	 */
+	private $embed;
 	
 	/**
 	 * @since	1.3.0
@@ -88,6 +94,7 @@ class Embed_Privacy {
 		Jetpack::class,
 		Kadence_Blocks::class,
 		Maps_Marker::class,
+		Polylang::class,
 	];
 	
 	/**
@@ -182,6 +189,7 @@ class Embed_Privacy {
 	 * Embed Privacy constructor.
 	 */
 	public function __construct() {
+		$this->embed = new Embed();
 		$this->fields = new Fields();
 		$this->thumbnail = new Thumbnail();
 		$this->usecache = ! \is_admin();
@@ -211,7 +219,6 @@ class Embed_Privacy {
 		\add_filter( 'do_shortcode_tag', [ $this, 'replace_embeds' ], 10, 2 );
 		\add_filter( 'embed_oembed_html', [ $this, 'replace_embeds_oembed' ], 10, 3 );
 		\add_filter( 'embed_privacy_widget_output', [ $this, 'replace_embeds' ] );
-		\add_filter( 'pll_get_post_types', [ $this, 'register_polylang_post_type' ], 10, 2 );
 		\add_filter( 'the_content', [ $this, 'replace_embeds' ] );
 		\add_filter( 'wp_video_shortcode', [ $this, 'replace_video_shortcode' ], 10, 2 );
 		\add_shortcode( 'embed_privacy_opt_out', [ $this, 'shortcode_opt_out' ] );
@@ -221,6 +228,7 @@ class Embed_Privacy {
 		Migration::get_instance()->init();
 		Settings::init();
 		User_Interface::init();
+		$this->embed->init();
 		$this->fields->init();
 		$this->thumbnail->init();
 	}
@@ -728,15 +736,17 @@ class Embed_Privacy {
 	 * @return	string The overlay template
 	 */
 	public function get_output_template( $embed_provider, $embed_provider_lowercase, $output, $args = [] ) {
-		$embed_provider_lowercase = \preg_replace( '/-\d+$/', '', \sanitize_title( $embed_provider_lowercase ) );
-		
-		if (
-			\is_plugin_active( 'polylang/polylang.php' )
-			&& \function_exists( 'pll_current_language' )
-			&& \str_ends_with( $embed_provider_lowercase, '-' . \pll_current_language() )
-		) {
-			$embed_provider_lowercase = \preg_replace( '/-' . \preg_quote( \pll_current_language(), '/' ) . '$/', '', $embed_provider_lowercase );
-		}
+		/**
+		 * Filter the embed provider name.
+		 * 
+		 * @since	1.10.0
+		 * 
+		 * @param	string	$provider_name Embed provider name
+		 * @param	string	$provider_title Embed provider title
+		 * @param	array	$args Additional arguments
+		 * @param	string	$output Output before replacing it
+		 */
+		$embed_provider_lowercase = \apply_filters( 'embed_privacy_provider_name', $embed_provider_lowercase, $embed_provider, $args, $output );
 		
 		/**
 		 * Filter the overlay arguments.
@@ -1529,21 +1539,25 @@ class Embed_Privacy {
 	/**
 	 * Register post type in Polylang to allow translation.
 	 * 
-	 * @since	1.5.0
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\integration\Polylang::register_post_type() instead
+	 * @since		1.5.0
 	 * 
 	 * @param	array	$post_types List of current translatable custom post types
 	 * @param	bool	$is_settings Whether the current page is the settings page
 	 * @return	array Updated list of translatable custom post types
 	 */
 	public function register_polylang_post_type( array $post_types, $is_settings ) {
-		if ( $is_settings ) {
-			unset( $post_types['epi_embed'] );
-		}
-		else {
-			$post_types['epi_embed'] = 'epi_embed';
-		}
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\integration\Polylang::register_post_type()',
+			),
+			'1.10.0'
+		);
 		
-		return $post_types;
+		return Polylang::register_post_type( $post_types, $is_settings );
 	}
 	
 	/**
