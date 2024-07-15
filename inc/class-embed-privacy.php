@@ -16,6 +16,7 @@ use epiphyt\Embed_Privacy\integration\Divi;
 use epiphyt\Embed_Privacy\integration\Elementor;
 use epiphyt\Embed_Privacy\integration\Jetpack;
 use epiphyt\Embed_Privacy\integration\Kadence_Blocks;
+use epiphyt\Embed_Privacy\integration\Maps_Marker;
 use epiphyt\Embed_Privacy\thumbnail\Thumbnail;
 use ReflectionMethod;
 use WP_Post;
@@ -86,6 +87,7 @@ class Embed_Privacy {
 		Elementor::class,
 		Jetpack::class,
 		Kadence_Blocks::class,
+		Maps_Marker::class,
 	];
 	
 	/**
@@ -207,7 +209,6 @@ class Embed_Privacy {
 		
 		\add_filter( 'acf_the_content', [ $this, 'replace_embeds' ] );
 		\add_filter( 'do_shortcode_tag', [ $this, 'replace_embeds' ], 10, 2 );
-		\add_filter( 'do_shortcode_tag', [ $this, 'replace_maps_marker' ], 10, 2 );
 		\add_filter( 'embed_oembed_html', [ $this, 'replace_embeds_oembed' ], 10, 3 );
 		\add_filter( 'embed_privacy_widget_output', [ $this, 'replace_embeds' ] );
 		\add_filter( 'pll_get_post_types', [ $this, 'register_polylang_post_type' ], 10, 2 );
@@ -1850,28 +1851,25 @@ class Embed_Privacy {
 	/**
 	 * Replace Maps Marker (Pro) shortcodes.
 	 * 
-	 * @since	1.5.0
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\integration\Maps_Marker::replace() instead
+	 * @since		1.5.0
 	 * 
 	 * @param	string	$output Shortcode output
 	 * @param	string	$tag Shortcode tag
 	 * @return	string Updated shortcode output
 	 */
 	public function replace_maps_marker( $output, $tag ) {
-		if ( $tag !== 'mapsmarker' ) {
-			return $output;
-		}
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\integration\Maps_Marker::replace()',
+			),
+			'1.10.0'
+		);
 		
-		if ( $this->is_ignored_request ) {
-			return $output;
-		}
-		
-		$embed_provider = $this->get_embed_by_name( 'maps-marker' );
-		
-		if ( \get_post_meta( $embed_provider->ID, 'is_disabled', true ) ) {
-			return $output;
-		}
-		
-		return $this->get_output_template( $embed_provider->post_title, $embed_provider->post_name, $output );
+		return Maps_Marker::replace( $output, $tag );
 	}
 	
 	/**
