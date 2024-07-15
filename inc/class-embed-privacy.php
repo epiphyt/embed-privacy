@@ -13,6 +13,7 @@ use epiphyt\Embed_Privacy\admin\User_Interface;
 use epiphyt\Embed_Privacy\embed\Assets;
 use epiphyt\Embed_Privacy\embed\Style;
 use epiphyt\Embed_Privacy\integration\Activitypub;
+use epiphyt\Embed_Privacy\integration\Amp;
 use epiphyt\Embed_Privacy\thumbnail\Thumbnail;
 use ReflectionMethod;
 use WP_Post;
@@ -76,6 +77,7 @@ class Embed_Privacy {
 	 */
 	private $integrations = [
 		Activitypub::class,
+		Amp::class,
 	];
 	
 	/**
@@ -1373,17 +1375,6 @@ class Embed_Privacy {
 	}
 	
 	/**
-	 * Determine whether this is an AMP response.
-	 * Note that this must only be called after the parse_query action.
-	 * 
-	 * @return	bool True if the current page is an AMP page, false otherwise
-	 */
-	private function is_amp() {
-		/** @disregard P1010 */
-		return \function_exists( 'is_amp_endpoint' ) && \is_amp_endpoint();
-	}
-	
-	/**
 	 * Check if a provider is always active.
 	 * 
 	 * @since	1.1.0
@@ -1575,7 +1566,7 @@ class Embed_Privacy {
 		
 		\wp_register_style( 'embed-privacy', $css_file_url, [], $file_version );
 		
-		if ( ! $this->is_amp() ) {
+		if ( ! Amp::is_amp() ) {
 			$js_file_url = \EPI_EMBED_PRIVACY_URL . 'assets/js/embed-privacy' . $suffix . '.js';
 			$file_version = $is_debug ? \filemtime( \EPI_EMBED_PRIVACY_BASE . 'assets/js/embed-privacy' . $suffix . '.js' ) : \EMBED_PRIVACY_VERSION;
 			
