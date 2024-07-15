@@ -18,6 +18,7 @@ use epiphyt\Embed_Privacy\integration\Jetpack;
 use epiphyt\Embed_Privacy\integration\Kadence_Blocks;
 use epiphyt\Embed_Privacy\integration\Maps_Marker;
 use epiphyt\Embed_Privacy\integration\Polylang;
+use epiphyt\Embed_Privacy\integration\Shortcodes_Ultimate;
 use epiphyt\Embed_Privacy\thumbnail\Thumbnail;
 use ReflectionMethod;
 use WP_Post;
@@ -95,6 +96,7 @@ class Embed_Privacy {
 		Kadence_Blocks::class,
 		Maps_Marker::class,
 		Polylang::class,
+		Shortcodes_Ultimate::class,
 	];
 	
 	/**
@@ -1437,10 +1439,6 @@ class Embed_Privacy {
 			require_once ABSPATH . WPINC . '/plugin.php';
 		}
 		
-		if ( \is_plugin_active( 'shortcodes-ultimate/shortcodes-ultimate.php' ) ) {
-			\wp_enqueue_style( 'embed-privacy-shortcodes-ultimate' );
-		}
-		
 		/**
 		 * Fires after assets are printed.
 		 * 
@@ -1498,11 +1496,6 @@ class Embed_Privacy {
 			
 			\wp_register_script( 'embed-privacy', $js_file_url, [], $file_version, [ 'strategy' => 'defer' ] );
 		}
-		
-		$css_file_url = \EPI_EMBED_PRIVACY_URL . 'assets/style/shortcodes-ultimate' . $suffix . '.css';
-		$file_version = $is_debug ? \filemtime( \EPI_EMBED_PRIVACY_BASE . 'assets/style/shortcodes-ultimate' . $suffix . '.css' ) : \EMBED_PRIVACY_VERSION;
-		
-		\wp_register_style( 'embed-privacy-shortcodes-ultimate', $css_file_url, [], $file_version );
 		
 		/**
 		 * Fires after assets have been registered.
