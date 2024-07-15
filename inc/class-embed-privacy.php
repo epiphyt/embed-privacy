@@ -15,6 +15,7 @@ use epiphyt\Embed_Privacy\embed\Style;
 use epiphyt\Embed_Privacy\integration\Activitypub;
 use epiphyt\Embed_Privacy\integration\Amp;
 use epiphyt\Embed_Privacy\integration\Astra;
+use epiphyt\Embed_Privacy\integration\Divi;
 use epiphyt\Embed_Privacy\thumbnail\Thumbnail;
 use ReflectionMethod;
 use WP_Post;
@@ -80,6 +81,7 @@ class Embed_Privacy {
 		Activitypub::class,
 		Amp::class,
 		Astra::class,
+		Divi::class,
 	];
 	
 	/**
@@ -205,7 +207,6 @@ class Embed_Privacy {
 		\add_filter( 'do_shortcode_tag', [ $this, 'replace_maps_marker' ], 10, 2 );
 		\add_filter( 'embed_oembed_html', [ $this, 'replace_embeds_oembed' ], 10, 3 );
 		\add_filter( 'embed_privacy_widget_output', [ $this, 'replace_embeds' ] );
-		\add_filter( 'et_builder_get_oembed', [ $this, 'replace_embeds_divi' ], 10, 2 );
 		\add_filter( 'pll_get_post_types', [ $this, 'register_polylang_post_type' ], 10, 2 );
 		\add_filter( 'the_content', [ $this, 'replace_embeds' ] );
 		\add_filter( 'wp_video_shortcode', [ $this, 'replace_video_shortcode' ], 10, 2 );
@@ -1498,11 +1499,6 @@ class Embed_Privacy {
 			'javascriptDetection' => \get_option( 'embed_privacy_javascript_detection' ),
 		] );
 		
-		if ( $this->is_theme( 'Divi' ) ) {
-			\wp_enqueue_script( 'embed-privacy-divi' );
-			\wp_enqueue_style( 'embed-privacy-divi' );
-		}
-		
 		if ( $this->is_elementor() ) {
 			\wp_enqueue_script( 'embed-privacy-elementor-video' );
 			\wp_enqueue_style( 'embed-privacy-elementor' );
@@ -1577,16 +1573,6 @@ class Embed_Privacy {
 			
 			\wp_register_script( 'embed-privacy', $js_file_url, [], $file_version, [ 'strategy' => 'defer' ] );
 		}
-		
-		$js_file_url = \EPI_EMBED_PRIVACY_URL . 'assets/js/divi' . $suffix . '.js';
-		$file_version = $is_debug ? \filemtime( \EPI_EMBED_PRIVACY_BASE . 'assets/js/divi' . $suffix . '.js' ) : \EMBED_PRIVACY_VERSION;
-		
-		\wp_register_script( 'embed-privacy-divi', $js_file_url, [], $file_version, [ 'strategy' => 'defer' ] );
-		
-		$css_file_url = \EPI_EMBED_PRIVACY_URL . 'assets/style/divi' . $suffix . '.css';
-		$file_version = $is_debug ? \filemtime( \EPI_EMBED_PRIVACY_BASE . 'assets/style/divi' . $suffix . '.css' ) : \EMBED_PRIVACY_VERSION;
-		
-		\wp_register_style( 'embed-privacy-divi', $css_file_url, [], $file_version );
 		
 		$js_file_url = \EPI_EMBED_PRIVACY_URL . 'assets/js/elementor-video' . $suffix . '.js';
 		$file_version = $is_debug ? \filemtime( \EPI_EMBED_PRIVACY_BASE . 'assets/js/elementor-video' . $suffix . '.js' ) : \EMBED_PRIVACY_VERSION;
@@ -1911,35 +1897,26 @@ class Embed_Privacy {
 	/**
 	 * Replace embeds in Divi Builder.
 	 * 
-	 * @since	1.2.0
-	 * @since	1.6.0 Deprecated second parameter
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\integration\Divi::replace() instead
+	 * @since		1.2.0
+	 * @since		1.6.0 Deprecated second parameter
 	 * 
 	 * @param	string	$item_embed The original output
 	 * @param	string	$url The URL of the embed
 	 * @return	string The updated embed code
 	 */
 	public function replace_embeds_divi( $item_embed, $url ) {
-		if ( $this->is_ignored_request ) {
-			return $item_embed;
-		}
-		
-		$attributes = [];
-		$use_internal_errors = \libxml_use_internal_errors( true );
-		$dom = new DOMDocument();
-		$dom->loadHTML(
-			'<html><meta charset="utf-8">' . $item_embed . '</html>',
-			\LIBXML_HTML_NOIMPLIED | \LIBXML_HTML_NODEFDTD
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\integration\Divi::replace()',
+			),
+			'1.10.0'
 		);
 		
-		/** @var \DOMElement $iframe */
-		foreach ( $dom->getElementsByTagName( 'iframe' ) as $iframe ) {
-			$attributes['height'] = $iframe->hasAttribute( 'height' ) ? $iframe->getAttribute( 'height' ) : 0;
-			$attributes['width'] = $iframe->hasAttribute( 'width' ) ? $iframe->getAttribute( 'width' ) : 0;
-		}
-		
-		\libxml_use_internal_errors( $use_internal_errors );
-		
-		return $this->replace_embeds_oembed( $item_embed, $url, $attributes );
+		return ( new Divi() )->replace( $item_embed, $url );
 	}
 	
 	/**
