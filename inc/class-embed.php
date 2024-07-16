@@ -15,7 +15,7 @@ final class Embed {
 	/**
 	 * @var		\epiphyt\Embed_Privacy\embed\Provider
 	 */
-	private $provider;
+	public $provider;
 	
 	/**
 	 * Embed constructor.

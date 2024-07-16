@@ -381,30 +381,24 @@ class Embed_Privacy {
 	/**
 	 * Get an embed provider by its name.
 	 * 
-	 * @since	1.3.5
+	 * @deprecated	Use epiphyt\Embed_Privacy\embed\Provider::get_by_name() instead
+	 * @since		1.3.5
 	 * 
 	 * @param	string	$name The name to search for
 	 * @return	\WP_Post|null The embed or null
 	 */
 	public function get_embed_by_name( $name ) {
-		if ( empty( $name ) ) {
-			return null;
-		}
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\embed\Provider::get_by_name()',
+			),
+			'1.10.0'
+		);
 		
-		$embed_providers = $this->get_embeds();
-		$embed = null;
-		$pattern = '/^' . \preg_quote( $name, '/' ) . '\-\d+/';
-		
-		foreach ( $embed_providers as $embed_provider ) {
-			if ( $embed_provider->post_name !== $name && ! \preg_match( $pattern, $embed_provider->post_name ) ) {
-				continue;
-			}
-			
-			$embed = $embed_provider;
-			break;
-		}
-		
-		return $embed;
+		return $this->embed->provider->get_by_name( $name );
 	}
 	
 	/**
@@ -449,113 +443,26 @@ class Embed_Privacy {
 	 * {@link https://developer.wordpress.org/reference/classes/wp_query/
 	 * WP_Query} documentation in the Developer Handbook.
 	 * 
-	 * @since	1.3.0
-	 * @since	1.8.0 Added the $args parameter
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\embed\Provider::get_list() instead
+	 * @since		1.3.0
+	 * @since		1.8.0 Added the $args parameter
 	 * 
 	 * @param	string	$type The embed type
 	 * @param	array	$args Additional arguments
 	 * @return	array A list of embeds
 	 */
 	public function get_embeds( $type = 'all', $args = [] ) {
-		if ( ! empty( $this->embeds ) && isset( $this->embeds[ $type ] ) ) {
-			return $this->embeds[ $type ];
-		}
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\embed\Provider::get_list()',
+			),
+			'1.10.0'
+		);
 		
-		if ( $type === 'all' && isset( $this->embeds['custom'] ) && isset( $this->embeds['oembed'] ) ) {
-			$this->embeds[ $type ] = \array_merge( $this->embeds['custom'], $this->embeds['oembed'] );
-			
-			return $this->embeds[ $type ];
-		}
-		
-		if ( ! empty( $args ) ) {
-			$hash = \md5( \wp_json_encode( $args ) );
-		}
-		
-		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-		switch ( $type ) {
-			case 'custom':
-				$custom_providers = \get_posts( \array_merge( [
-					'meta_query' => [
-						'relation' => 'OR',
-						[
-							'compare' => 'NOT EXISTS',
-							'key' => 'is_system',
-							'value' => 'yes',
-						],
-						[
-							'compare' => '!=',
-							'key' => 'is_system',
-							'value' => 'yes',
-						],
-					],
-					'no_found_rows' => true,
-					'numberposts' => -1,
-					'order' => 'ASC',
-					'orderby' => 'post_title',
-					'post_type' => 'epi_embed',
-					'update_post_term_cache' => false,
-				], $args ) );
-				$google_provider = \get_posts( \array_merge( [
-					'meta_key' => 'is_system',
-					'meta_value' => 'yes',
-					'name' => 'google-maps',
-					'no_found_rows' => true,
-					'post_type' => 'epi_embed',
-					'update_post_term_cache' => false,
-				], $args ) );
-				
-				if ( ! empty( $hash ) ) {
-					$this->embeds[ $hash ] = \array_merge( $custom_providers, $google_provider );
-				}
-				else {
-					$this->embeds[ $type ] = \array_merge( $custom_providers, $google_provider );
-				}
-				break;
-			case 'oembed':
-				$embed_providers = \get_posts( \array_merge( [
-					'meta_key' => 'is_system',
-					'meta_value' => 'yes',
-					'no_found_rows' => true,
-					'numberposts' => -1,
-					'order' => 'ASC',
-					'orderby' => 'post_title',
-					'post_type' => 'epi_embed',
-					'update_post_term_cache' => false,
-				], $args ) );
-				
-				if ( ! empty( $hash ) ) {
-					$this->embeds[ $hash ] = $embed_providers;
-				}
-				else {
-					$this->embeds[ $type ] = $embed_providers;
-				}
-				break;
-			case 'all':
-			default:
-				$embed_providers = \get_posts( \array_merge( [
-					'no_found_rows' => true,
-					'numberposts' => -1,
-					'order' => 'ASC',
-					'orderby' => 'post_title',
-					'post_type' => 'epi_embed',
-					'update_post_term_cache' => false,
-				], $args ) );
-				
-				if ( ! empty( $hash ) ) {
-					$this->embeds[ $hash ] = $embed_providers;
-				}
-				else {
-					$this->embeds['all'] = $embed_providers;
-				}
-				break;
-		}
-		// phpcs:enable
-		
-		if ( ! empty( $hash ) ) {
-			return $this->embeds[ $hash ];
-		}
-		
-		return $this->embeds[ $type ];
+		return $this->embed->provider->get_list( $type, $args );
 	}
 	
 	/**
@@ -1271,25 +1178,24 @@ class Embed_Privacy {
 	/**
 	 * Check if a provider is always active.
 	 * 
-	 * @since	1.1.0
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\embed\Provider::is_always_active() instead
+	 * @since		1.1.0
 	 * 
 	 * @param	string		$provider The embed provider in lowercase
 	 * @return	bool True if provider is always active, false otherwise
 	 */
 	public function is_always_active_provider( $provider ) {
-		$javascript_detection = \get_option( 'embed_privacy_javascript_detection' );
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\embed\Provider::is_always_active()',
+			),
+			'1.10.0'
+		);
 		
-		if ( $javascript_detection ) {
-			return false;
-		}
-		
-		$cookie = $this->get_cookie();
-		
-		if ( isset( $cookie->{$provider} ) && $cookie->{$provider} === true ) {
-			return true;
-		}
-		
-		return false;
+		return $this->embed->provider->is_always_active( $provider );
 	}
 	
 	/**
@@ -2010,7 +1916,7 @@ class Embed_Privacy {
 			'subline' => \__( 'Enable or disable embed providers globally. By enabling a provider, its embedded content will be displayed directly on every page without asking you anymore.', 'embed-privacy' ),
 		], $attributes );
 		$cookie = $this->get_cookie();
-		$embed_providers = $this->get_embeds();
+		$embed_providers = $this->embed->provider->get_list();
 		$enabled_providers = array_keys( (array) $cookie );
 		$is_javascript_detection = get_option( 'embed_privacy_javascript_detection' ) === 'yes';
 		
