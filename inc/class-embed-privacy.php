@@ -8,7 +8,6 @@ use epiphyt\Embed_Privacy\admin\Fields;
 use epiphyt\Embed_Privacy\admin\Settings;
 use epiphyt\Embed_Privacy\admin\User_Interface;
 use epiphyt\Embed_Privacy\embed\Assets;
-use epiphyt\Embed_Privacy\embed\Provider;
 use epiphyt\Embed_Privacy\embed\Template;
 use epiphyt\Embed_Privacy\integration\Activitypub;
 use epiphyt\Embed_Privacy\integration\Amp;
@@ -51,11 +50,6 @@ class Embed_Privacy {
 	 * @var		array Replacements that already have taken place.
 	 */
 	public $did_replacements = [];
-	
-	/**
-	 * @var		\epiphyt\Embed_Privacy\Embed
-	 */
-	private $embed;
 	
 	/**
 	 * @since	1.3.0
@@ -194,7 +188,6 @@ class Embed_Privacy {
 	 * Embed Privacy constructor.
 	 */
 	public function __construct() {
-		$this->embed = new Embed();
 		$this->fields = new Fields();
 		$this->thumbnail = new Thumbnail();
 		$this->usecache = ! \is_admin();
@@ -231,9 +224,9 @@ class Embed_Privacy {
 		\register_deactivation_hook( $this->plugin_file, [ $this, 'clear_embed_cache' ] );
 		
 		Migration::get_instance()->init();
+		Provider::get_instance()->init();
 		Settings::init();
 		User_Interface::init();
-		$this->embed->init();
 		$this->fields->init();
 		$this->thumbnail->init();
 	}
@@ -382,7 +375,7 @@ class Embed_Privacy {
 	/**
 	 * Get an embed provider by its name.
 	 * 
-	 * @deprecated	Use epiphyt\Embed_Privacy\embed\Provider::get_by_name() instead
+	 * @deprecated	Use epiphyt\Embed_Privacy\Provider::get_by_name() instead
 	 * @since		1.3.5
 	 * 
 	 * @param	string	$name The name to search for
@@ -394,12 +387,12 @@ class Embed_Privacy {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\embed\Provider::get_by_name()',
+				'epiphyt\Embed_Privacy\Provider::get_by_name()',
 			),
 			'1.10.0'
 		);
 		
-		return $this->embed->provider->get_by_name( $name );
+		return Provider::get_instance()->get_by_name( $name );
 	}
 	
 	/**
@@ -443,7 +436,7 @@ class Embed_Privacy {
 	 * {@link https://developer.wordpress.org/reference/classes/wp_query/
 	 * WP_Query} documentation in the Developer Handbook.
 	 * 
-	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\embed\Provider::get_list() instead
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\Provider::get_list() instead
 	 * @since		1.3.0
 	 * @since		1.8.0 Added the $args parameter
 	 * 
@@ -457,12 +450,12 @@ class Embed_Privacy {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\embed\Provider::get_list()',
+				'epiphyt\Embed_Privacy\Provider::get_list()',
 			),
 			'1.10.0'
 		);
 		
-		return $this->embed->provider->get_list( $type, $args );
+		return Provider::get_instance()->get_list( $type, $args );
 	}
 	
 	/**
@@ -668,7 +661,7 @@ class Embed_Privacy {
 		$template_dom = new DOMDocument();
 		
 		if ( $is_empty_provider ) {
-			$providers = $this->embed->provider->get_list();
+			$providers = Provider::get_instance()->get_list();
 		}
 		
 		// detect domain if WordPress is installed on a sub domain
@@ -828,7 +821,7 @@ class Embed_Privacy {
 			&& ! empty( $args['regex'] )
 			&& ! $is_empty_provider
 		) {
-			$provider = $this->embed->provider->get_by_name( $embed_provider_lowercase );
+			$provider = Provider::get_instance()->get_by_name( $embed_provider_lowercase );
 			
 			if (
 				$provider instanceof WP_Post
@@ -967,7 +960,7 @@ class Embed_Privacy {
 			return true;
 		}
 		
-		$embed_providers = $this->embed->provider->get_list();
+		$embed_providers = Provider::get_instance()->get_list();
 		
 		// check post content
 		foreach ( $embed_providers as $provider ) {
@@ -989,7 +982,7 @@ class Embed_Privacy {
 	/**
 	 * Check if a provider is always active.
 	 * 
-	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\embed\Provider::is_always_active() instead
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\Provider::is_always_active() instead
 	 * @since		1.1.0
 	 * 
 	 * @param	string		$provider The embed provider in lowercase
@@ -1001,12 +994,12 @@ class Embed_Privacy {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\embed\Provider::is_always_active()',
+				'epiphyt\Embed_Privacy\Provider::is_always_active()',
 			),
 			'1.10.0'
 		);
 		
-		return $this->embed->provider::is_always_active( $provider );
+		return Provider::get_instance()::is_always_active( $provider );
 	}
 	
 	/**
@@ -1255,7 +1248,7 @@ class Embed_Privacy {
 		}
 		
 		// get all embed providers
-		$embed_providers = $this->embed->provider->get_list();
+		$embed_providers = Provider::get_instance()->get_list();
 		
 		foreach ( $embed_providers as $provider ) {
 			$content = $this->get_embed_overlay( $provider, $content );
@@ -1340,7 +1333,7 @@ class Embed_Privacy {
 		
 		$embed_provider = '';
 		$embed_provider_lowercase = '';
-		$embed_providers = $this->embed->provider->get_list();
+		$embed_providers = Provider::get_instance()->get_list();
 		
 		// get embed provider name
 		foreach ( $embed_providers as $provider ) {
@@ -1459,7 +1452,7 @@ class Embed_Privacy {
 			return $output;
 		}
 		
-		$provider = $this->embed->provider->get_by_name( 'twitter' );
+		$provider = Provider::get_instance()->get_by_name( 'twitter' );
 		
 		if ( ! \preg_match( \get_post_meta( $provider->ID, 'regex_default', true ), $url ) ) {
 			return $output;
@@ -1727,7 +1720,7 @@ class Embed_Privacy {
 			'subline' => \__( 'Enable or disable embed providers globally. By enabling a provider, its embedded content will be displayed directly on every page without asking you anymore.', 'embed-privacy' ),
 		], $attributes );
 		$cookie = $this->get_cookie();
-		$embed_providers = $this->embed->provider->get_list();
+		$embed_providers = Provider::get_instance()->get_list();
 		$enabled_providers = array_keys( (array) $cookie );
 		$is_javascript_detection = get_option( 'embed_privacy_javascript_detection' ) === 'yes';
 		

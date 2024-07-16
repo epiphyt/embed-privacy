@@ -1,5 +1,5 @@
 <?php
-namespace epiphyt\Embed_Privacy\embed;
+namespace epiphyt\Embed_Privacy;
 
 use epiphyt\Embed_Privacy\Embed_Privacy;
 use WP_Post;
@@ -14,6 +14,11 @@ use WP_Post;
  */
 final class Provider {
 	/**
+	 * @var		\epiphyt\Embed_Privacy\Provider
+	 */
+	public static $instance;
+	
+	/**
 	 * @var		\WP_Post[] List of embed providers
 	 */
 	private $list = [];
@@ -21,7 +26,7 @@ final class Provider {
 	/**
 	 * Initialize functionality.
 	 */
-	public function init() {
+	public static function init() {
 		\add_filter( 'embed_privacy_provider_name', [ self::class, 'sanitize_title' ] );
 	}
 	
@@ -50,6 +55,19 @@ final class Provider {
 		}
 		
 		return $provider;
+	}
+	
+	/**
+	 * Get a unique instance of the class.
+	 * 
+	 * @return	\epiphyt\Embed_Privacy\Provider The single instance of this class
+	 */
+	public static function get_instance() {
+		if ( self::$instance === null ) {
+			self::$instance = new self();
+		}
+		
+		return self::$instance;
 	}
 	
 	/**

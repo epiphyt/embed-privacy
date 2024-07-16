@@ -2,6 +2,7 @@
 namespace epiphyt\Embed_Privacy\embed;
 
 use epiphyt\Embed_Privacy\Embed_Privacy;
+use epiphyt\Embed_Privacy\Provider;
 
 /**
  * Embed Privacy template related functionality.
