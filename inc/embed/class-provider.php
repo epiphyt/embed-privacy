@@ -2,6 +2,7 @@
 namespace epiphyt\Embed_Privacy\embed;
 
 use epiphyt\Embed_Privacy\Embed_Privacy;
+use WP_Post;
 
 /**
  * Embed provider related functionality.
@@ -170,7 +171,7 @@ final class Provider {
 	 * @param	string		$provider The embed provider in lowercase
 	 * @return	bool True if provider is always active, false otherwise
 	 */
-	public function is_always_active( $provider ) {
+	public static function is_always_active( $provider ) {
 		$javascript_detection = \get_option( 'embed_privacy_javascript_detection' );
 		$provider = self::sanitize_title( $provider );
 		
@@ -180,11 +181,26 @@ final class Provider {
 		
 		$cookie = Embed_Privacy::get_instance()->get_cookie();
 		
-		if ( isset( $cookie->{$provider} ) && $cookie->{$provider} === true ) {
-			return true;
+		return isset( $cookie->{$provider} ) && $cookie->{$provider} === true;
+	}
+	
+	/**
+	 * Whether the current provider is disabled.
+	 * 
+	 * @param	\WP_Post|null	$post Optional post object
+	 * @return	bool Whether the current provider is disabled
+	 */
+	public static function is_disabled( $post = null ) {
+		$post_id = null;
+		
+		if ( ! $post instanceof WP_Post ) {
+			$post_id = \get_the_ID();
+		}
+		else {
+			$post_id = $post->ID;
 		}
 		
-		return false;
+		return \get_post_meta( $post_id, 'is_disabled', true ) === 'yes';
 	}
 	
 	/**

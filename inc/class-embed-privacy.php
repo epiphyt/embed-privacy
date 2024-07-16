@@ -8,7 +8,7 @@ use epiphyt\Embed_Privacy\admin\Fields;
 use epiphyt\Embed_Privacy\admin\Settings;
 use epiphyt\Embed_Privacy\admin\User_Interface;
 use epiphyt\Embed_Privacy\embed\Assets;
-use epiphyt\Embed_Privacy\embed\Style;
+use epiphyt\Embed_Privacy\embed\Template;
 use epiphyt\Embed_Privacy\integration\Activitypub;
 use epiphyt\Embed_Privacy\integration\Amp;
 use epiphyt\Embed_Privacy\integration\Astra;
@@ -590,7 +590,8 @@ class Embed_Privacy {
 	/**
 	 * Output a complete template of the overlay.
 	 * 
-	 * @since	1.1.0
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\embed\Template::get() instead
+	 * @since		1.1.0
 	 * 
 	 * @param	string	$embed_provider The embed provider
 	 * @param	string	$embed_provider_lowercase The embed provider without spaces and in lowercase
@@ -599,207 +600,17 @@ class Embed_Privacy {
 	 * @return	string The overlay template
 	 */
 	public function get_output_template( $embed_provider, $embed_provider_lowercase, $output, $args = [] ) {
-		/**
-		 * Filter the embed provider name.
-		 * 
-		 * @since	1.10.0
-		 * 
-		 * @param	string	$provider_name Embed provider name
-		 * @param	string	$provider_title Embed provider title
-		 * @param	array	$args Additional arguments
-		 * @param	string	$output Output before replacing it
-		 */
-		$embed_provider_lowercase = \apply_filters( 'embed_privacy_provider_name', $embed_provider_lowercase, $embed_provider, $args, $output );
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\embed\Template::get()',
+			),
+			'1.10.0'
+		);
 		
-		/**
-		 * Filter the overlay arguments.
-		 * 
-		 * @since	1.9.0
-		 * 
-		 * @param	array	$args Template arguments
-		 * @param	string	$embed_provider The embed provider
-		 * @param	string	$embed_provider_lowercase The embed provider without spaces and in lowercase
-		 * @param	string	$output The output before replacing it
-		 */
-		$args = (array) \apply_filters( 'embed_privacy_overlay_args', $args, $embed_provider, $embed_provider_lowercase, $output );
-		
-		if ( ! empty( $args['post_id'] ) ) {
-			$embed_post = \get_post( $args['post_id'] );
-			
-			// if provider is disabled, to nothing
-			if ( \get_post_meta( $embed_post->ID, 'is_disabled', true ) === 'yes' ) {
-				return $output;
-			}
-		}
-		else {
-			$embed_post = null;
-		}
-		
-		if ( $embed_provider_lowercase === 'youtube' ) {
-			$output = \str_replace( 'youtube.com', 'youtube-nocookie.com', $output );
-		}
-		
-		$embed_class = 'embed-' . ( ! empty( $embed_provider_lowercase ) ? $embed_provider_lowercase : 'default' );
-		$embed_classes = $embed_class;
-		$style = new Style( $embed_provider_lowercase, $embed_post, $args );
-		
-		if ( ! empty( $args['align'] ) ) {
-			$embed_classes .= ' align' . $args['align'];
-		}
-		
-		if ( ! empty( $args['assets'] ) ) {
-			$output = Assets::get_static( $args['assets'], $embed_provider_lowercase ) . $output;
-		}
-		
-		$embed_md5 = \md5( $output . \wp_generate_uuid4() );
-		
-		/**
-		 * Fires before the overlay output is generated.
-		 * 
-		 * @since	1.10.0
-		 * 
-		 * @param	string								$embed_provider The embed provider
-		 * @param	string								$embed_provider_lowercase The embed provider without spaces and in lowercase
-		 * @param	\epiphyt\Embed_Privacy\embed\Style	$style The overlay style object
-		 * @param	array								$args Additional arguments
-		 */
-		\do_action( 'embed_privacy_before_overlay_output', $embed_provider, $embed_provider_lowercase, $style, $args );
-		
-		\ob_start();
-		?>
-		<p>
-		<?php
-			if ( ! empty( $embed_provider ) ) {
-				if ( $embed_post ) {
-					$allowed_tags = [
-						'a' => [
-							'href',
-							'target',
-						],
-					];
-					echo $embed_post->post_content . \PHP_EOL; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-					$privacy_policy = \get_post_meta( $embed_post->ID, 'privacy_policy_url', true );
-					
-					if ( $privacy_policy ) {
-						?>
-						<br>
-						<?php
-						/* translators: 1: the embed provider, 2: opening <a> tag to the privacy policy, 3: closing </a> */
-						\printf( \wp_kses( \__( 'Learn more in %1$s’s %2$sprivacy policy%3$s.', 'embed-privacy' ), $allowed_tags ), \esc_html( $embed_provider ), '<a href="' . \esc_url( $privacy_policy ) . '" target="_blank">', '</a>' );
-					}
-				}
-				else {
-					/* translators: the embed provider */
-					\printf( \esc_html__( 'Click here to display content from %s', 'embed-privacy' ), \esc_html( $embed_provider ) );
-				}
-			}
-			else {
-				\esc_html_e( 'Click here to display content from an external service.', 'embed-privacy' );
-			}
-		?>
-		</p>
-		<?php
-		$checkbox_id = 'embed-privacy-store-' . $embed_provider_lowercase . '-' . $embed_md5;
-		
-		if ( $embed_provider_lowercase !== 'default' ) {
-			?>
-			<p class="embed-privacy-input-wrapper">
-				<input id="<?php echo \esc_attr( $checkbox_id ); ?>" type="checkbox" value="1" class="embed-privacy-input" data-embed-provider="<?php echo \esc_attr( $embed_provider_lowercase ); ?>">
-				<label for="<?php echo \esc_attr( $checkbox_id ); ?>" class="embed-privacy-label" data-embed-provider="<?php echo \esc_attr( $embed_provider_lowercase ); ?>">
-					<?php
-					/* translators: the embed provider */
-					\printf( \esc_html__( 'Always display content from %s', 'embed-privacy' ), \esc_html( $embed_provider ) );
-					?>
-				</label>
-			</p>
-			<?php
-		}
-		
-		$content = \ob_get_clean();
-		
-		/**
-		 * Filter the content of the embed overlay.
-		 * 
-		 * @param	string		$content The content
-		 * @param	string		$embed_provider The embed provider of this embed
-		 */
-		$content = \apply_filters( 'embed_privacy_content', $content, $embed_provider );
-		
-		\ob_start();
-		
-		$footer_content = '';
-		
-		if ( ! empty( $args['embed_url'] ) ) {
-			$footer_content = '<div class="embed-privacy-footer">';
-			
-			if ( ! \get_option( 'embed_privacy_disable_link' ) ) {
-				$footer_content .= '<span class="embed-privacy-url"><a href="' . \esc_url( $args['embed_url'] ) . '">';
-				$footer_content .= \sprintf(
-				/* translators: content name or 'content' */
-					\esc_html__( 'Open "%s" directly', 'embed-privacy' ),
-					! empty( $args['embed_title'] ) ? $args['embed_title'] : \__( 'content', 'embed-privacy' )
-				);
-				$footer_content .= '</a></span>';
-			}
-			
-			$footer_content .= '</div>' . \PHP_EOL;
-			
-			/**
-			 * Filter the overlay footer.
-			 * 
-			 * @param	string	$footer_content The footer content
-			 */
-			$footer_content = \apply_filters( 'embed_privacy_overlay_footer', $footer_content );
-		}
-		
-		$container_style = $style->get( 'container' );
-		$logo_style = $style->get( 'logo' );
-		?>
-		<div class="embed-privacy-container is-disabled <?php echo \esc_attr( $embed_classes ); ?>" data-embed-id="oembed_<?php echo \esc_attr( $embed_md5 ); ?>" data-embed-provider="<?php echo \esc_attr( $embed_provider_lowercase ); ?>"<?php echo ! empty( $container_style ) ? ' style="' . \esc_attr( $container_style ) . '"' : ''; ?>>
-			<?php
-			/* translators: embed provider */
-			$button_text = \sprintf( \__( 'Display content from %s', 'embed-privacy' ), \esc_html( $embed_provider ) );
-			
-			if ( ! empty( $args['embed_title'] ) ) {
-				/* translators: 1: embed title, 2: embed provider */
-				$button_text = \sprintf( \__( 'Display "%1$s" from %2$s', 'embed-privacy' ), $args['embed_title'], \esc_html( $embed_provider ) );
-			}
-			?>
-			<button class="embed-privacy-enable screen-reader-text"><?php echo \esc_html( $button_text ); ?></button>
-			
-			<div class="embed-privacy-overlay">
-				<div class="embed-privacy-inner">
-					<?php
-					echo ( ! empty( $logo_style ) ? '<div class="embed-privacy-logo" style="' . \esc_attr( $logo_style ) . '"></div>' . \PHP_EOL : '' );
-					echo $content . \PHP_EOL; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-					?>
-				</div>
-				
-				<?php echo $footer_content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-			</div>
-			
-			<div class="embed-privacy-content">
-				<script>var _oembed_<?php echo $embed_md5; ?> = '<?php echo \addslashes( \wp_json_encode( [ 'embed' => \htmlentities( \preg_replace( '/\s+/S', ' ', $output ) ) ] ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>';</script>
-			</div>
-		</div>
-		<?php
-		$markup = \ob_get_clean();
-		
-		/**
-		 * Filter the complete markup of the embed.
-		 * 
-		 * @param	string	$markup The markup
-		 * @param	string	$embed_provider The embed provider of this embed
-		 */
-		$markup = \apply_filters( 'embed_privacy_markup', $markup, $embed_provider );
-		
-		$this->has_embed = true;
-		
-		if ( ! empty( $args['strip_newlines'] ) ) {
-			$markup = \str_replace( \PHP_EOL, '', $markup );
-		}
-		
-		return $markup;
+		return Template::get( $embed_provider, $embed_provider_lowercase, $output, $args );
 	}
 	
 	/**
@@ -954,7 +765,7 @@ class Embed_Privacy {
 				
 				// get overlay template as DOM element
 				$template_dom->loadHTML(
-					'<html><meta charset="utf-8">' . str_replace( '%', '%_epi_', $this->get_output_template( $embed_provider, $embed_provider_lowercase, $dom->saveHTML( $element ), $args ) ) . '</html>',
+					'<html><meta charset="utf-8">' . str_replace( '%', '%_epi_', Template::get( $embed_provider, $embed_provider_lowercase, $dom->saveHTML( $element ), $args ) ) . '</html>',
 					\LIBXML_HTML_NOIMPLIED | \LIBXML_HTML_NODEFDTD
 				);
 				$overlay = null;
@@ -1053,7 +864,7 @@ class Embed_Privacy {
 				}
 				
 				while ( \preg_match( $args['regex'], $content, $matches ) ) {
-					$content = \preg_replace( $args['regex'], $this->get_output_template( $embed_provider, $embed_provider_lowercase, $matches[0], $args ), $content, 1 );
+					$content = \preg_replace( $args['regex'], Template::get( $embed_provider, $embed_provider_lowercase, $matches[0], $args ), $content, 1 );
 				}
 			}
 		}
@@ -1195,7 +1006,7 @@ class Embed_Privacy {
 			'1.10.0'
 		);
 		
-		return $this->embed->provider->is_always_active( $provider );
+		return $this->embed->provider::is_always_active( $provider );
 	}
 	
 	/**
@@ -1597,7 +1408,7 @@ class Embed_Privacy {
 		$this->print_assets();
 		
 		// add two click to markup
-		return $this->get_output_template( $embed_provider, $embed_provider_lowercase, $output, $args );
+		return Template::get( $embed_provider, $embed_provider_lowercase, $output, $args );
 	}
 	
 	/**
@@ -1667,7 +1478,7 @@ class Embed_Privacy {
 		$args['ignore_aspect_ratio'] = true;
 		$args['strip_newlines'] = true;
 		
-		return $this->get_output_template( $provider->post_title, $provider->post_name, $output, $args );
+		return Template::get( $provider->post_title, $provider->post_name, $output, $args );
 	}
 	
 	/**
@@ -1708,7 +1519,7 @@ class Embed_Privacy {
 				continue;
 			}
 			
-			$overlay_output = $this->get_output_template( $embed_provider, $embed_provider_lowercase, $match );
+			$overlay_output = Template::get( $embed_provider, $embed_provider_lowercase, $match );
 			$content = \str_replace( $match, $overlay_output, $content );
 		}
 		
