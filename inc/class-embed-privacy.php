@@ -8,6 +8,7 @@ use epiphyt\Embed_Privacy\admin\Fields;
 use epiphyt\Embed_Privacy\admin\Settings;
 use epiphyt\Embed_Privacy\admin\User_Interface;
 use epiphyt\Embed_Privacy\embed\Assets;
+use epiphyt\Embed_Privacy\embed\Provider;
 use epiphyt\Embed_Privacy\embed\Template;
 use epiphyt\Embed_Privacy\integration\Activitypub;
 use epiphyt\Embed_Privacy\integration\Amp;
@@ -412,8 +413,7 @@ class Embed_Privacy {
 	 * @return	string The content with additional overlays of an embed provider
 	 */
 	public function get_embed_overlay( $provider, $content ) {
-		// make sure to test every provider for its always active state
-		if ( $this->is_always_active_provider( $provider->post_name ) ) {
+		if ( Provider::is_always_active( $provider->post_name ) ) {
 			return $content;
 		}
 		
@@ -668,7 +668,7 @@ class Embed_Privacy {
 		$template_dom = new DOMDocument();
 		
 		if ( $is_empty_provider ) {
-			$providers = $this->get_embeds();
+			$providers = $this->embed->provider->get_list();
 		}
 		
 		// detect domain if WordPress is installed on a sub domain
@@ -709,9 +709,9 @@ class Embed_Privacy {
 				
 				// providers need to be explicitly checked if they're always active
 				// see https://github.com/epiphyt/embed-privacy/issues/115
-				if ( $embed_provider_lowercase && $args['check_always_active'] && $this->is_always_active_provider( $embed_provider_lowercase ) ) {
+				if ( $embed_provider_lowercase && $args['check_always_active'] && Provider::is_always_active( $embed_provider_lowercase ) ) {
 					if ( ! empty( $args['assets'] ) ) {
-						$content = $this->print_embed_assets( $args['assets'], $content );
+						$content = Assets::get_static( $args['assets'], $content );
 					}
 					
 					return $content;
@@ -732,9 +732,9 @@ class Embed_Privacy {
 					
 					// unknown providers need to be explicitly checked if they're always active
 					// see https://github.com/epiphyt/embed-privacy/issues/115
-					if ( $args['check_always_active'] && $this->is_always_active_provider( $embed_provider_lowercase ) ) {
+					if ( $args['check_always_active'] && Provider::is_always_active( $embed_provider_lowercase ) ) {
 						if ( ! empty( $args['assets'] ) ) {
-							$content = $this->print_embed_assets( $args['assets'], $content );
+							$content = Assets::get_static( $args['assets'], $content );
 						}
 						
 						return $content;
@@ -828,7 +828,7 @@ class Embed_Privacy {
 			&& ! empty( $args['regex'] )
 			&& ! $is_empty_provider
 		) {
-			$provider = $this->get_embed_by_name( $embed_provider_lowercase );
+			$provider = $this->embed->provider->get_by_name( $embed_provider_lowercase );
 			
 			if (
 				$provider instanceof WP_Post
@@ -967,7 +967,7 @@ class Embed_Privacy {
 			return true;
 		}
 		
-		$embed_providers = $this->get_embeds();
+		$embed_providers = $this->embed->provider->get_list();
 		
 		// check post content
 		foreach ( $embed_providers as $provider ) {
@@ -1255,7 +1255,7 @@ class Embed_Privacy {
 		}
 		
 		// get all embed providers
-		$embed_providers = $this->get_embeds();
+		$embed_providers = $this->embed->provider->get_list();
 		
 		foreach ( $embed_providers as $provider ) {
 			$content = $this->get_embed_overlay( $provider, $content );
@@ -1289,7 +1289,7 @@ class Embed_Privacy {
 			! $ignore_unknown_providers
 			&& (
 				\strpos( $content, 'youtube-nocookie.com' ) === false
-				|| ! $this->is_always_active_provider( 'youtube' )
+				|| ! Provider::is_always_active( 'youtube' )
 			)
 		) {
 			$new_content = $this->get_single_overlay( $content, '', '', [ 'check_always_active' => true ] );
@@ -1340,7 +1340,7 @@ class Embed_Privacy {
 		
 		$embed_provider = '';
 		$embed_provider_lowercase = '';
-		$embed_providers = $this->get_embeds();
+		$embed_providers = $this->embed->provider->get_list();
 		
 		// get embed provider name
 		foreach ( $embed_providers as $provider ) {
@@ -1378,7 +1378,7 @@ class Embed_Privacy {
 		}
 		
 		// check if cookie is set
-		if ( $embed_provider_lowercase !== 'default' && $this->is_always_active_provider( $embed_provider_lowercase ) ) {
+		if ( $embed_provider_lowercase !== 'default' && Provider::is_always_active( $embed_provider_lowercase ) ) {
 			return $output;
 		}
 		
@@ -1459,19 +1459,19 @@ class Embed_Privacy {
 			return $output;
 		}
 		
-		$provider = $this->get_embed_by_name( 'twitter' );
+		$provider = $this->embed->provider->get_by_name( 'twitter' );
 		
 		if ( ! \preg_match( \get_post_meta( $provider->ID, 'regex_default', true ), $url ) ) {
 			return $output;
 		}
 		
-		if ( $this->is_always_active_provider( $provider->post_name ) ) {
+		if ( Provider::is_always_active( $provider->post_name ) ) {
 			return $output;
 		}
 		
 		if ( \get_option( 'embed_privacy_local_tweets' ) ) {
 			// check for local tweets
-			return $this->get_local_tweet( $output );
+			return Twitter::get_local_tweet( $output );
 		}
 		
 		$args['embed_url'] = $url;
@@ -1510,7 +1510,7 @@ class Embed_Privacy {
 		$embed_provider_lowercase = 'google-maps';
 		
 		// check if cookie is set
-		if ( $this->is_always_active_provider( $embed_provider_lowercase ) ) {
+		if ( Provider::is_always_active( $embed_provider_lowercase ) ) {
 			return $content;
 		}
 		
