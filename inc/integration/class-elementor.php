@@ -5,7 +5,9 @@ use DOMDocument;
 use DOMElement;
 use DOMNode;
 use Elementor\Plugin;
+use epiphyt\Embed_Privacy\embed\Template;
 use epiphyt\Embed_Privacy\Embed_Privacy;
+use epiphyt\Embed_Privacy\Provider;
 
 /**
  * Elementor integration for Embed Privacy.
@@ -42,7 +44,7 @@ final class Elementor {
 	 * @return	string The content with an embed overlay (if needed)
 	 */
 	private function get_youtube_overlay( $content ) {
-		$embed_provider = Embed_Privacy::get_instance()->get_embed_by_name( 'youtube' );
+		$provider = Provider::get_instance()->get_by_name( 'youtube' );
 		$replacements = [];
 		
 		// phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
@@ -68,7 +70,7 @@ final class Elementor {
 			
 			// get overlay template as DOM element
 			$template_dom->loadHTML(
-				'<html><meta charset="utf-8">' . Embed_Privacy::get_instance()->get_output_template( $embed_provider->post_title, $embed_provider->post_name, $dom->saveHTML( $element ), $args ) . '</html>',
+				'<html><meta charset="utf-8">' . Template::get( $provider, $dom->saveHTML( $element ), $args ) . '</html>',
 				\LIBXML_HTML_NOIMPLIED | \LIBXML_HTML_NODEFDTD
 			);
 			$overlay = null;
@@ -169,8 +171,8 @@ final class Elementor {
 		}
 		
 		$embed_providers = [
-			Embed_Privacy::get_instance()->get_embed_by_name( 'dailymotion' ),
-			Embed_Privacy::get_instance()->get_embed_by_name( 'vimeo' ),
+			Provider::get_instance()->get_by_name( 'dailymotion' ),
+			Provider::get_instance()->get_by_name( 'vimeo' ),
 		];
 		
 		foreach ( $embed_providers as $provider ) {

@@ -2,10 +2,7 @@
 namespace epiphyt\Embed_Privacy\integration;
 
 use Automattic\Jetpack\Assets;
-use DOMDocument;
-use DOMElement;
-use DOMNode;
-use Elementor\Plugin;
+use epiphyt\Embed_Privacy\embed\Overlay;
 use epiphyt\Embed_Privacy\Embed_Privacy;
 use Jetpack as JetpackBase;
 
@@ -60,7 +57,6 @@ final class Jetpack {
 				'div',
 			],
 		];
-		$provider = Embed_Privacy::get_instance()->get_embed_by_name( 'facebook' );
 		
 		// register jetpack script if available
 		if ( \class_exists( '\Automattic\Jetpack\Assets' ) && \defined( 'JETPACK__VERSION' ) ) {
@@ -89,7 +85,8 @@ final class Jetpack {
 			];
 		}
 		
-		$new_content = Embed_Privacy::get_instance()->get_single_overlay( $content, $provider->post_title, $provider->post_name, $attributes );
+		$overlay = new Overlay( $content );
+		$new_content = $overlay->get( $attributes );
 		
 		if ( $new_content !== $content ) {
 			Embed_Privacy::get_instance()->has_embed = true;

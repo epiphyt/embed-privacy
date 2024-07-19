@@ -400,7 +400,8 @@ class Embed_Privacy {
 	/**
 	 * Get an embed provider overlay.
 	 * 
-	 * @since	1.3.5
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\embed\Overlay::get() instead
+	 * @since		1.3.5
 	 * 
 	 * @param	\WP_Post	$provider An embed provider
 	 * @param	string		$content The content
@@ -708,7 +709,8 @@ class Embed_Privacy {
 	/**
 	 * Get a single overlay for all matching embeds.
 	 * 
-	 * @since	1.2.0
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\embed\Overlay::get() instead
+	 * @since		1.2.0
 	 * 
 	 * @param	string	$content The original content
 	 * @param	string	$embed_provider The embed provider
@@ -717,262 +719,19 @@ class Embed_Privacy {
 	 * @return	string The updated content
 	 */
 	public function get_single_overlay( $content, $embed_provider, $embed_provider_lowercase, $args ) {
-		if ( empty( $content ) ) {
-			return $content;
-		}
-		
-		/**
-		 * Filter whether to ignore this embed.
-		 * 
-		 * @since	1.9.0
-		 * 
-		 * @param	bool	$ignore_embed Whether to ignore this embed
-		 * @param	string	$content The original content
-		 * @param	string	$embed_provider The embed provider
-		 * @param	string	$embed_provider_lowercase The embed provider without spaces and in lowercase
-		 * @param	array	$args Additional arguments
-		 */
-		$ignore_embed = (bool) \apply_filters( 'embed_privacy_ignore_embed', false, $content, $embed_provider, $embed_provider_lowercase, $args );
-		
-		if ( $ignore_embed ) {
-			return $content;
-		}
-		
-		$args = \wp_parse_args( $args, [
-			'additional_checks' => [],
-			'check_always_active' => false,
-			'element_attribute' => 'src',
-			'elements' => [ 'embed', 'iframe', 'object' ],
-			'height' => 0,
-			'ignore_aspect_ratio' => false,
-			'regex' => '',
-			'strip_newlines' => ! \has_blocks( $content ),
-			'width' => 0,
-		] );
-		
-		\libxml_use_internal_errors( true );
-		$dom = new DOMDocument();
-		$dom->loadHTML(
-			'<html><meta charset="utf-8">' . \str_replace( '%', '%_epi_', $content ) . '</html>',
-			\LIBXML_HTML_NOIMPLIED | \LIBXML_HTML_NODEFDTD
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\embed\Overlay::get()',
+			),
+			'1.10.0'
 		);
-		$is_empty_provider = empty( $embed_provider );
-		$template_dom = new DOMDocument();
 		
-		if ( $is_empty_provider ) {
-			$providers = Provider_Functionality::get_instance()->get_list();
-		}
+		$overlay = new Overlay( $content );
 		
-		// detect domain if WordPress is installed on a sub domain
-		$host = \wp_parse_url( \home_url(), \PHP_URL_HOST );
-		
-		if ( ! \filter_var( $host, \FILTER_VALIDATE_IP ) ) {
-			$host_array = \explode( '.', \str_replace( 'www.', '', $host ) );
-			$tld_count = \count( $host_array );
-			
-			if ( $tld_count >= 3 && strlen( $host_array[ $tld_count - 2 ] ) === 2 ) {
-				$host = \implode( '.', \array_splice( $host_array, $tld_count - 3, 3 ) );
-			}
-			else if ( $tld_count >= 2 ) {
-				$host = \implode( '.', \array_splice( $host_array, $tld_count - 2, $tld_count ) );
-			}
-		}
-		
-		foreach ( $args['elements'] as $tag ) {
-			$replacements = [];
-			
-			if ( $tag === 'object' ) {
-				$args['element_attribute'] = 'data';
-			}
-			
-			foreach ( $dom->getElementsByTagName( $tag ) as $element ) {
-				if ( ! $this->run_checks( $args['additional_checks'], $element ) ) {
-					continue;
-				}
-				
-				// ignore embeds from the same (sub-)domain
-				if ( \preg_match( '/https?:\/\/(.*\.)?' . \preg_quote( $host, '/' ) . '/', $element->getAttribute( $args['element_attribute'] ) ) ) {
-					continue;
-				}
-				
-				if ( ! empty( $args['regex'] ) && ! \preg_match( $args['regex'], $element->getAttribute( $args['element_attribute'] ) ) ) {
-					continue;
-				}
-				
-				// providers need to be explicitly checked if they're always active
-				// see https://github.com/epiphyt/embed-privacy/issues/115
-				if ( $embed_provider_lowercase && $args['check_always_active'] && Provider_Functionality::is_always_active( $embed_provider_lowercase ) ) {
-					if ( ! empty( $args['assets'] ) ) {
-						$content = Assets::get_static( $args['assets'], $content );
-					}
-					
-					return $content;
-				}
-				
-				if ( $is_empty_provider ) {
-					$embedded_host = \wp_parse_url( $element->getAttribute( $args['element_attribute'] ), \PHP_URL_HOST );
-					
-					// embeds with relative paths have no host
-					// and they are local by definition, so do nothing
-					// see https://github.com/epiphyt/embed-privacy/issues/27
-					if ( empty( $embedded_host ) ) {
-						return $content;
-					}
-					
-					$embed_provider = $embedded_host;
-					$embed_provider_lowercase = \sanitize_title( $embedded_host );
-					
-					// unknown providers need to be explicitly checked if they're always active
-					// see https://github.com/epiphyt/embed-privacy/issues/115
-					if ( $args['check_always_active'] && Provider_Functionality::is_always_active( $embed_provider_lowercase ) ) {
-						if ( ! empty( $args['assets'] ) ) {
-							$content = Assets::get_static( $args['assets'], $content );
-						}
-						
-						return $content;
-					}
-					
-					// check URL for available provider
-					foreach ( $providers as $provider ) {
-						if ( $provider->is_matching( $element->getAttribute( $args['element_attribute'] ) ) && empty( $replacements ) ) {
-							continue 2;
-						}
-					}
-				}
-				
-				/* translators: embed title */
-				$args['embed_title'] = $element->hasAttribute( 'title' ) ? $element->getAttribute( 'title' ) : '';
-				$args['embed_url'] = $element->getAttribute( $args['element_attribute'] );
-				$args['height'] = $element->hasAttribute( 'height' ) ? $element->getAttribute( 'height' ) : 0;
-				$args['width'] = $element->hasAttribute( 'width' ) ? $element->getAttribute( 'width' ) : 0;
-				
-				// get overlay template as DOM element
-				$template_dom->loadHTML(
-					'<html><meta charset="utf-8">' . str_replace( '%', '%_epi_', Template::get( $embed_provider, $embed_provider_lowercase, $dom->saveHTML( $element ), $args ) ) . '</html>',
-					\LIBXML_HTML_NOIMPLIED | \LIBXML_HTML_NODEFDTD
-				);
-				$overlay = null;
-				
-				foreach ( $template_dom->getElementsByTagName( 'div' ) as $div ) {
-					if ( stripos( $div->getAttribute( 'class' ), 'embed-privacy-container' ) !== false ) {
-						$overlay = $div;
-						break;
-					}
-				}
-				
-				// store the elements to replace (see regressive loop down below)
-				if ( $overlay instanceof DOMNode || $overlay instanceof DOMElement ) {
-					$replacements[] = [
-						'element' => $element,
-						'replace' => $dom->importNode( $overlay, true ),
-					];
-				}
-				
-				// reset embed provider name
-				if ( $is_empty_provider ) {
-					$embed_provider = '';
-					$embed_provider_lowercase = '';
-				}
-			}
-			
-			if ( ! empty( $replacements ) ) {
-				$this->did_replacements = \array_merge( $this->did_replacements, $replacements );
-				$this->has_embed = true;
-				$elements = $dom->getElementsByTagName( $tag );
-				$i = $elements->length - 1;
-				
-				// phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
-				// use regressive loop for replaceChild()
-				// see: https://www.php.net/manual/en/domnode.replacechild.php#50500
-				while ( $i > -1 ) {
-					$element = $elements->item( $i );
-					
-					foreach ( $replacements as $replacement ) {
-						if ( $replacement['element'] === $element ) {
-							$element->parentNode->replaceChild( $replacement['replace'], $replacement['element'] );
-						}
-					}
-					
-					$i--;
-				}
-				
-				$content = $dom->saveHTML( $dom->documentElement );
-				// phpcs:enable
-			}
-		}
-		
-		\libxml_use_internal_errors( false );
-		
-		// embeds for other elements need to be handled manually
-		// make sure to test before if the regex matches
-		// see: https://github.com/epiphyt/embed-privacy/issues/26
-		if (
-			empty( $this->did_replacements )
-			&& ! empty( $args['regex'] )
-			&& ! $is_empty_provider
-		) {
-			$provider = Provider_Functionality::get_instance()->get_by_name( $embed_provider_lowercase );
-			
-			if (
-				$provider instanceof WP_Post
-				&& ! \get_post_meta( $provider->ID, 'is_system', true )
-				&& \get_post_meta( $provider->ID, 'is_disabled', true ) !== 'yes'
-			) {
-				// extend regular expression to match the full element
-				if ( \strpos( $args['regex'], '<' ) === false || \strpos( $args['regex'], '>' ) === false ) {
-					$allowed_tags = [
-						'blockquote',
-						'div',
-						'embed',
-						'iframe',
-						'object',
-					];
-					
-					/**
-					 * Filter allowed HTML tags in regular expressions.
-					 * Only elements matching these tags get processed.
-					 * 
-					 * @since	1.6.0
-					 * 
-					 * @param	string[]	$allowed_tags The allowed tags
-					 * @param	string		$embed_provider_lowercase The embed provider without spaces and in lowercase
-					 * @return	array A list of allowed tags
-					 */
-					$allowed_tags = \apply_filters( 'embed_privacy_matcher_elements', $allowed_tags, $embed_provider_lowercase );
-					
-					$tags_regex = '(' . \implode( '|', \array_filter( $allowed_tags, function( $tag ) {
-						return \preg_quote( $tag, '/' );
-					} ) ) . ')';
-					$args['regex'] = '/<' . $tags_regex . '([^"]*)"([^<]*)' . \trim( $args['regex'], '/' ) . '([^"]*)"([^>]*)(>(.*)<\/' . $tags_regex . ')?>/';
-				}
-				
-				while ( \preg_match( $args['regex'], $content, $matches ) ) {
-					$content = \preg_replace( $args['regex'], Template::get( $embed_provider, $embed_provider_lowercase, $matches[0], $args ), $content, 1 );
-				}
-			}
-		}
-		
-		// decode to make sure there is nothing left encoded if replacements have been made
-		// otherwise, content is untouched by DOMDocument, and we don't need a decoding
-		// only required for WPBakery Page Builder
-		if ( ! empty( $this->did_replacements ) && \str_contains( 'vc_row', $content ) ) {
-			$content = \rawurldecode( $content );
-		}
-		
-		// remove root element, see https://github.com/epiphyt/embed-privacy/issues/22
-		return \str_replace(
-			[
-				'<html><meta charset="utf-8">',
-				'</html>',
-				'%_epi_',
-			],
-			[
-				'',
-				'',
-				'%',
-			],
-			$content
-		);
+		return $overlay->get( $args );
 	}
 	
 	/**
@@ -1194,30 +953,6 @@ class Embed_Privacy {
 		\do_action( 'embed_privacy_print_assets' );
 		
 		$this->is_printed = true;
-	}
-	
-	/**
-	 * Print assets of an embed before the content.
-	 * 
-	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\embed\Assets::get_static() instead
-	 * @since		1.4.5
-	 * 
-	 * @param	array	$assets List of assets
-	 * @param	string	$output The output
-	 * @return	string The updated output
-	 */
-	private function print_embed_assets( $assets, $output ) {
-		\_doing_it_wrong(
-			__METHOD__,
-			\sprintf(
-				/* translators: alternative method */
-				\esc_html__( 'Use %s instead.', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\embed\Assets::get_static()',
-			),
-			'1.10.0'
-		);
-		
-		return Assets::get_static( $assets ) . $output;
 	}
 	
 	/**
@@ -1489,7 +1224,7 @@ class Embed_Privacy {
 	/**
 	 * Replace Google Maps iframes.
 	 * 
-	 * @deprecated	1.2.0 Use Embed_Privacy::get_embed_overlay() instead
+	 * @deprecated	1.2.0 Use epiphyt\Embed_Privacy\embed\Overlay::get() instead
 	 * @since		1.1.0
 	 * 
 	 * @param	string	$content The post content
@@ -1501,34 +1236,14 @@ class Embed_Privacy {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead.', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\Embed_Privacy::get_embed_overlay()',
+				'epiphyt\Embed_Privacy\embed\Overlay::get()',
 			),
 			'1.2.0'
 		);
-		\preg_match_all( self::IFRAME_REGEX, $content, $matches );
 		
-		if ( empty( $matches ) || empty( $matches[0] ) ) {
-			return $content;
-		}
+		$overlay = new Overlay( $content );
 		
-		$embed_provider = 'Google Maps';
-		$embed_provider_lowercase = 'google-maps';
-		
-		// check if cookie is set
-		if ( Provider_Functionality::is_always_active( $embed_provider_lowercase ) ) {
-			return $content;
-		}
-		
-		foreach ( $matches[0] as $match ) {
-			if ( \strpos( $match, 'google.com/maps' ) === false ) {
-				continue;
-			}
-			
-			$overlay_output = Template::get( $embed_provider, $embed_provider_lowercase, $match );
-			$content = \str_replace( $match, $overlay_output, $content );
-		}
-		
-		return $content;
+		return $overlay->get();
 	}
 	
 	/**

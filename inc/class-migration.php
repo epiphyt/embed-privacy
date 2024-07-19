@@ -1,6 +1,7 @@
 <?php
 namespace epiphyt\Embed_Privacy;
 
+use epiphyt\Embed_Privacy\thumbnail\Thumbnail;
 use FilesystemIterator;
 use WP_Post;
 
@@ -587,7 +588,7 @@ class Migration {
 	private function migrate_1_7_3() {
 		$this->create_thumbnails_dir();
 		
-		$new_dir = Thumbnails::get_instance()->get_directory()['base_dir'];
+		$new_dir = Thumbnail::get_directory()['base_dir'];
 		$old_dir = \WP_CONTENT_DIR . '/uploads/embed-privacy/thumbnails';
 		
 		// directories are identical, don't do anything

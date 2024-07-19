@@ -2,6 +2,7 @@
 namespace epiphyt\Embed_Privacy\integration;
 
 use DOMDocument;
+use epiphyt\Embed_Privacy\embed\Overlay;
 use epiphyt\Embed_Privacy\Embed_Privacy;
 
 /**
@@ -36,12 +37,8 @@ final class Maps_Marker {
 			return $output;
 		}
 		
-		$embed_provider = Embed_Privacy::get_instance()->get_embed_by_name( 'maps-marker' );
+		$overlay = new Overlay( $output );
 		
-		if ( \get_post_meta( $embed_provider->ID, 'is_disabled', true ) ) {
-			return $output;
-		}
-		
-		return Embed_Privacy::get_instance()->get_output_template( $embed_provider->post_title, $embed_provider->post_name, $output );
+		return $overlay->get();
 	}
 }
