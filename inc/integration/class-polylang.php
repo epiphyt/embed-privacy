@@ -14,7 +14,7 @@ final class Polylang {
 	 * Initialize functionality.
 	 */
 	public static function init() {
-		\add_filter( 'embed_privacy_provider_name', [ self::class, 'sanitize_title' ] );
+		\add_filter( 'embed_privacy_provider_name', [ self::class, 'sanitize_name' ] );
 		\add_filter( 'pll_get_post_types', [ self::class, 'register_post_type' ], 10, 2 );
 	}
 	
@@ -37,20 +37,20 @@ final class Polylang {
 	}
 	
 	/**
-	 * Sanitize the embed provider title.
+	 * Sanitize the embed provider name.
 	 * 
-	 * @param	string	$title Current provider title
-	 * @return	string Sanitized provider title
+	 * @param	string	$name Current provider name
+	 * @return	string Sanitized provider name
 	 */
-	public static function sanitize_title( $title ) {
+	public static function sanitize_name( $name ) {
 		if (
 			\is_plugin_active( 'polylang/polylang.php' )
 			&& \function_exists( 'pll_current_language' )
-			&& \str_ends_with( $title, '-' . \pll_current_language() )
+			&& \str_ends_with( $name, '-' . \pll_current_language() )
 		) {
-			$title = \preg_replace( '/-' . \preg_quote( \pll_current_language(), '/' ) . '$/', '', $title );
+			$name = \preg_replace( '/-' . \preg_quote( \pll_current_language(), '/' ) . '$/', '', $name );
 		}
 		
-		return $title;
+		return $name;
 	}
 }

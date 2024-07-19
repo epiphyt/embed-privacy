@@ -8,6 +8,8 @@ use epiphyt\Embed_Privacy\admin\Fields;
 use epiphyt\Embed_Privacy\admin\Settings;
 use epiphyt\Embed_Privacy\admin\User_Interface;
 use epiphyt\Embed_Privacy\embed\Assets;
+use epiphyt\Embed_Privacy\embed\Overlay;
+use epiphyt\Embed_Privacy\embed\Provider;
 use epiphyt\Embed_Privacy\embed\Template;
 use epiphyt\Embed_Privacy\integration\Activitypub;
 use epiphyt\Embed_Privacy\integration\Amp;
@@ -20,6 +22,7 @@ use epiphyt\Embed_Privacy\integration\Maps_Marker;
 use epiphyt\Embed_Privacy\integration\Polylang;
 use epiphyt\Embed_Privacy\integration\Shortcodes_Ultimate;
 use epiphyt\Embed_Privacy\integration\Twitter;
+use epiphyt\Embed_Privacy\Provider as Provider_Functionality;
 use epiphyt\Embed_Privacy\thumbnail\Thumbnail;
 use ReflectionMethod;
 use WP_Post;
@@ -46,7 +49,6 @@ class Embed_Privacy {
 	
 	/**
 	 * @since	1.3.5
-	 * @since	1.10.0 Property is now public
 	 * @var		array Replacements that already have taken place.
 	 */
 	public $did_replacements = [];
@@ -224,7 +226,7 @@ class Embed_Privacy {
 		\register_deactivation_hook( $this->plugin_file, [ $this, 'clear_embed_cache' ] );
 		
 		Migration::get_instance()->init();
-		Provider::get_instance()->init();
+		Provider_Functionality::get_instance()->init();
 		Settings::init();
 		User_Interface::init();
 		$this->fields->init();
@@ -392,38 +394,37 @@ class Embed_Privacy {
 			'1.10.0'
 		);
 		
-		return Provider::get_instance()->get_by_name( $name );
+		return Provider_Functionality::get_instance()->get_by_name( $name );
 	}
 	
 	/**
 	 * Get an embed provider overlay.
 	 * 
 	 * @since	1.3.5
-	 * @since	1.10.0 Method is now public
 	 * 
 	 * @param	\WP_Post	$provider An embed provider
 	 * @param	string		$content The content
 	 * @return	string The content with additional overlays of an embed provider
 	 */
 	public function get_embed_overlay( $provider, $content ) {
-		if ( Provider::is_always_active( $provider->post_name ) ) {
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\embed\Overlay::get()',
+			),
+			'1.10.0'
+		);
+		
+		if ( Provider_Functionality::is_always_active( $provider->post_name ) ) {
 			return $content;
 		}
 		
-		$regex = \trim( \get_post_meta( $provider->ID, 'regex_default', true ), '/' );
+		$overlay = new Overlay( $content );
 		
-		if ( ! empty( $regex ) ) {
-			$regex = '/' . $regex . '/';
-		}
-		
-		// get overlay for this provider
-		if ( ! empty( $regex ) && \preg_match( $regex, $content ) ) {
-			$this->has_embed = true;
-			$args['regex'] = $regex;
-			$args['post_id'] = $provider->ID;
-			$embed_provider = $provider->post_title;
-			$embed_provider_lowercase = $provider->post_name;
-			$content = $this->get_single_overlay( $content, $embed_provider, $embed_provider_lowercase, $args );
+		if ( $overlay->get_provider()->is_matching( $content ) ) {
+			$content = Template::get( $overlay->get_provider(), $overlay );
 		}
 		
 		return $content;
@@ -455,7 +456,105 @@ class Embed_Privacy {
 			'1.10.0'
 		);
 		
-		return Provider::get_instance()->get_list( $type, $args );
+		if ( ! empty( $this->embeds ) && isset( $this->embeds[ $type ] ) ) {
+			return $this->embeds[ $type ];
+		}
+		
+		if ( $type === 'all' && isset( $this->embeds['custom'] ) && isset( $this->embeds['oembed'] ) ) {
+			$this->embeds[ $type ] = \array_merge( $this->embeds['custom'], $this->embeds['oembed'] );
+			
+			return $this->embeds[ $type ];
+		}
+		
+		if ( ! empty( $args ) ) {
+			$hash = \md5( \wp_json_encode( $args ) );
+		}
+		
+		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+		switch ( $type ) {
+			case 'custom':
+				$custom_providers = \get_posts( \array_merge( [
+					'meta_query' => [
+						'relation' => 'OR',
+						[
+							'compare' => 'NOT EXISTS',
+							'key' => 'is_system',
+							'value' => 'yes',
+						],
+						[
+							'compare' => '!=',
+							'key' => 'is_system',
+							'value' => 'yes',
+						],
+					],
+					'no_found_rows' => true,
+					'numberposts' => -1,
+					'order' => 'ASC',
+					'orderby' => 'post_title',
+					'post_type' => 'epi_embed',
+					'update_post_term_cache' => false,
+				], $args ) );
+				$google_provider = \get_posts( \array_merge( [
+					'meta_key' => 'is_system',
+					'meta_value' => 'yes',
+					'name' => 'google-maps',
+					'no_found_rows' => true,
+					'post_type' => 'epi_embed',
+					'update_post_term_cache' => false,
+				], $args ) );
+				
+				if ( ! empty( $hash ) ) {
+					$this->embeds[ $hash ] = \array_merge( $custom_providers, $google_provider );
+				}
+				else {
+					$this->embeds[ $type ] = \array_merge( $custom_providers, $google_provider );
+				}
+				break;
+			case 'oembed':
+				$embed_providers = \get_posts( \array_merge( [
+					'meta_key' => 'is_system',
+					'meta_value' => 'yes',
+					'no_found_rows' => true,
+					'numberposts' => -1,
+					'order' => 'ASC',
+					'orderby' => 'post_title',
+					'post_type' => 'epi_embed',
+					'update_post_term_cache' => false,
+				], $args ) );
+				
+				if ( ! empty( $hash ) ) {
+					$this->embeds[ $hash ] = $embed_providers;
+				}
+				else {
+					$this->embeds[ $type ] = $embed_providers;
+				}
+				break;
+			case 'all':
+			default:
+				$embed_providers = \get_posts( \array_merge( [
+					'no_found_rows' => true,
+					'numberposts' => -1,
+					'order' => 'ASC',
+					'orderby' => 'post_title',
+					'post_type' => 'epi_embed',
+					'update_post_term_cache' => false,
+				], $args ) );
+				
+				if ( ! empty( $hash ) ) {
+					$this->embeds[ $hash ] = $embed_providers;
+				}
+				else {
+					$this->embeds['all'] = $embed_providers;
+				}
+				break;
+		}
+		// phpcs:enable
+		
+		if ( ! empty( $hash ) ) {
+			return $this->embeds[ $hash ];
+		}
+		
+		return $this->embeds[ $type ];
 	}
 	
 	/**
@@ -661,7 +760,7 @@ class Embed_Privacy {
 		$template_dom = new DOMDocument();
 		
 		if ( $is_empty_provider ) {
-			$providers = Provider::get_instance()->get_list();
+			$providers = Provider_Functionality::get_instance()->get_list();
 		}
 		
 		// detect domain if WordPress is installed on a sub domain
@@ -702,7 +801,7 @@ class Embed_Privacy {
 				
 				// providers need to be explicitly checked if they're always active
 				// see https://github.com/epiphyt/embed-privacy/issues/115
-				if ( $embed_provider_lowercase && $args['check_always_active'] && Provider::is_always_active( $embed_provider_lowercase ) ) {
+				if ( $embed_provider_lowercase && $args['check_always_active'] && Provider_Functionality::is_always_active( $embed_provider_lowercase ) ) {
 					if ( ! empty( $args['assets'] ) ) {
 						$content = Assets::get_static( $args['assets'], $content );
 					}
@@ -725,7 +824,7 @@ class Embed_Privacy {
 					
 					// unknown providers need to be explicitly checked if they're always active
 					// see https://github.com/epiphyt/embed-privacy/issues/115
-					if ( $args['check_always_active'] && Provider::is_always_active( $embed_provider_lowercase ) ) {
+					if ( $args['check_always_active'] && Provider_Functionality::is_always_active( $embed_provider_lowercase ) ) {
 						if ( ! empty( $args['assets'] ) ) {
 							$content = Assets::get_static( $args['assets'], $content );
 						}
@@ -735,16 +834,7 @@ class Embed_Privacy {
 					
 					// check URL for available provider
 					foreach ( $providers as $provider ) {
-						$regex = \trim( \get_post_meta( $provider->ID, 'regex_default', true ), '/' );
-						
-						if ( ! empty( $regex ) ) {
-							$regex = '/' . $regex . '/';
-						}
-						else {
-							continue;
-						}
-						
-						if ( \preg_match( $regex, $element->getAttribute( $args['element_attribute'] ) ) && empty( $replacements ) ) {
+						if ( $provider->is_matching( $element->getAttribute( $args['element_attribute'] ) ) && empty( $replacements ) ) {
 							continue 2;
 						}
 					}
@@ -821,7 +911,7 @@ class Embed_Privacy {
 			&& ! empty( $args['regex'] )
 			&& ! $is_empty_provider
 		) {
-			$provider = Provider::get_instance()->get_by_name( $embed_provider_lowercase );
+			$provider = Provider_Functionality::get_instance()->get_by_name( $embed_provider_lowercase );
 			
 			if (
 				$provider instanceof WP_Post
@@ -960,18 +1050,11 @@ class Embed_Privacy {
 			return true;
 		}
 		
-		$embed_providers = Provider::get_instance()->get_list();
+		$embed_providers = Provider_Functionality::get_instance()->get_list();
 		
 		// check post content
 		foreach ( $embed_providers as $provider ) {
-			$regex = \trim( \get_post_meta( $provider->ID, 'regex_default', true ), '/' );
-			
-			if ( empty( $regex ) ) {
-				continue;
-			}
-			
-			// get overlay for this provider
-			if ( \preg_match( '/' . $regex . '/', $post->post_content ) ) {
+			if ( $provider->is_matching( $post->post_content ) ) {
 				return true;
 			}
 		}
@@ -982,7 +1065,7 @@ class Embed_Privacy {
 	/**
 	 * Check if a provider is always active.
 	 * 
-	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\Provider::is_always_active() instead
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\Provider_Functionality::is_always_active() instead
 	 * @since		1.1.0
 	 * 
 	 * @param	string		$provider The embed provider in lowercase
@@ -994,12 +1077,12 @@ class Embed_Privacy {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\Provider::is_always_active()',
+				'epiphyt\Embed_Privacy\Provider_Functionality::is_always_active()',
 			),
 			'1.10.0'
 		);
 		
-		return Provider::get_instance()::is_always_active( $provider );
+		return Provider_Functionality::get_instance()::is_always_active( $provider );
 	}
 	
 	/**
@@ -1247,57 +1330,9 @@ class Embed_Privacy {
 			$this->has_embed = true;
 		}
 		
-		// get all embed providers
-		$embed_providers = Provider::get_instance()->get_list();
+		$overlay = new Overlay( $content );
 		
-		foreach ( $embed_providers as $provider ) {
-			$content = $this->get_embed_overlay( $provider, $content );
-		}
-		
-		/**
-		 * Filter the content after it has been replaced with an overlay.
-		 * 
-		 * @since	1.10.10
-		 * 
-		 * @param	string	$content Replaced content
-		 * @param	array	$embed_providers List of embed providers
-		 */
-		$content = (string) \apply_filters( 'embed_privacy_replaced_content', $content, $embed_providers );
-		
-		/**
-		 * If set to true, unknown providers are not handled via Embed Privacy.
-		 * 
-		 * @since	1.5.0
-		 * 
-		 * @param	bool	$ignore_unknown Whether unknown providers should be ignored
-		 * @param	string	$content The original content
-		 */
-		$ignore_unknown_providers = \apply_filters( 'embed_privacy_ignore_unknown_providers', false, $content );
-		
-		// get default external content
-		// special case for youtube-nocookie.com as it is part of YouTube provider
-		// and gets rewritten in Divi
-		// see: https://github.com/epiphyt/embed-privacy/issues/69
-		if (
-			! $ignore_unknown_providers
-			&& (
-				\strpos( $content, 'youtube-nocookie.com' ) === false
-				|| ! Provider::is_always_active( 'youtube' )
-			)
-		) {
-			$new_content = $this->get_single_overlay( $content, '', '', [ 'check_always_active' => true ] );
-			
-			if ( $new_content !== $content ) {
-				$this->has_embed = true;
-				$content = $new_content;
-			}
-		}
-		
-		if ( $this->has_embed ) {
-			$this->print_assets();
-		}
-		
-		return $content;
+		return $overlay->get();
 	}
 	
 	/**
@@ -1331,47 +1366,15 @@ class Embed_Privacy {
 			return $output;
 		}
 		
-		$embed_provider = '';
-		$embed_provider_lowercase = '';
-		$embed_providers = Provider::get_instance()->get_list();
-		
-		// get embed provider name
-		foreach ( $embed_providers as $provider ) {
-			$regex = \get_post_meta( $provider->ID, 'regex_default', true );
-			$regex = '/' . \trim( $regex, '/' ) . '/';
-			
-			// save name of provider and stop loop
-			if ( $regex !== '//' && \preg_match( $regex, $url ) ) {
-				$this->has_embed = true;
-				$args['post_id'] = $provider->ID;
-				$embed_provider = $provider->post_title;
-				$embed_provider_lowercase = $provider->post_name;
-				break;
-			}
-		}
-		
-		// see https://github.com/epiphyt/embed-privacy/issues/89
-		if ( empty( $embed_provider ) ) {
-			$parsed_url = \wp_parse_url( $url );
-			$embed_provider = isset( $parsed_url['host'] ) ? $parsed_url['host'] : '';
-		}
+		$overlay = new Overlay( $output, $url );
 		
 		// make sure to only run once
-		if ( \strpos( $output, 'data-embed-provider="' . $embed_provider_lowercase . '"' ) !== false ) {
+		if ( \str_contains( $output, 'data-embed-provider="' . $overlay->get_provider()->get_name() . '"' ) ) {
 			return $output;
 		}
 		
-		if ( $embed_provider_lowercase === 'youtube' ) {
-			// replace youtube.com to youtube-nocookie.com
-			$output = \str_replace( 'youtube.com', 'youtube-nocookie.com', $output );
-		}
-		else if ( $embed_provider_lowercase === 'twitter' && \get_option( 'embed_privacy_local_tweets' ) ) {
-			// check for local tweets
-			return Twitter::get_local_tweet( $output );
-		}
-		
 		// check if cookie is set
-		if ( $embed_provider_lowercase !== 'default' && Provider::is_always_active( $embed_provider_lowercase ) ) {
+		if ( Provider_Functionality::is_always_active( $overlay->get_provider()->get_name() ) ) {
 			return $output;
 		}
 		
@@ -1379,6 +1382,7 @@ class Embed_Privacy {
 		/* translators: embed title */
 		$args['embed_title'] = ! empty( $embed_title ) ? $embed_title : '';
 		$args['embed_url'] = $url;
+		$args['is_oembed'] = true;
 		$args['strip_newlines'] = true;
 		
 		// the default dimensions are useless
@@ -1398,10 +1402,18 @@ class Embed_Privacy {
 			}
 		}
 		
-		$this->print_assets();
+		$output = $overlay->get( $args );
 		
-		// add two click to markup
-		return Template::get( $embed_provider, $embed_provider_lowercase, $output, $args );
+		if ( $overlay->get_provider()->is( 'youtube' ) ) {
+			// replace youtube.com with youtube-nocookie.com
+			$output = \str_replace( 'youtube.com', 'youtube-nocookie.com', $output );
+		}
+		else if ( $overlay->get_provider()->is( 'twitter' ) && \get_option( 'embed_privacy_local_tweets' ) ) {
+			// check for local tweets
+			return Twitter::get_local_tweet( $output );
+		}
+		
+		return $output;
 	}
 	
 	/**
@@ -1452,13 +1464,13 @@ class Embed_Privacy {
 			return $output;
 		}
 		
-		$provider = Provider::get_instance()->get_by_name( 'twitter' );
+		$provider = Provider_Functionality::get_instance()->get_by_name( 'twitter' );
 		
-		if ( ! \preg_match( \get_post_meta( $provider->ID, 'regex_default', true ), $url ) ) {
+		if ( ! $provider->is_matching( $url ) ) {
 			return $output;
 		}
 		
-		if ( Provider::is_always_active( $provider->post_name ) ) {
+		if ( Provider_Functionality::is_always_active( $provider->get_name() ) ) {
 			return $output;
 		}
 		
@@ -1471,7 +1483,7 @@ class Embed_Privacy {
 		$args['ignore_aspect_ratio'] = true;
 		$args['strip_newlines'] = true;
 		
-		return Template::get( $provider->post_title, $provider->post_name, $output, $args );
+		return Template::get( $provider, $output, $args );
 	}
 	
 	/**
@@ -1503,7 +1515,7 @@ class Embed_Privacy {
 		$embed_provider_lowercase = 'google-maps';
 		
 		// check if cookie is set
-		if ( Provider::is_always_active( $embed_provider_lowercase ) ) {
+		if ( Provider_Functionality::is_always_active( $embed_provider_lowercase ) ) {
 			return $content;
 		}
 		
@@ -1615,12 +1627,13 @@ class Embed_Privacy {
 	 * Run additional for a DOM node checks.
 	 * 
 	 * @since	1.4.4
+	 * @since	1.10.0 Method is now public
 	 * 
 	 * @param	array		$checks A list of checks
 	 * @param	\DOMElement	$element The DOM Element
 	 * @return	bool Whether all checks are successful
 	 */
-	private function run_checks( $checks, $element ) {
+	public function run_checks( $checks, $element ) {
 		if ( empty( $checks ) ) {
 			return true;
 		}
@@ -1720,7 +1733,7 @@ class Embed_Privacy {
 			'subline' => \__( 'Enable or disable embed providers globally. By enabling a provider, its embedded content will be displayed directly on every page without asking you anymore.', 'embed-privacy' ),
 		], $attributes );
 		$cookie = $this->get_cookie();
-		$embed_providers = Provider::get_instance()->get_list();
+		$embed_providers = Provider_Functionality::get_instance()->get_list();
 		$enabled_providers = array_keys( (array) $cookie );
 		$is_javascript_detection = get_option( 'embed_privacy_javascript_detection' ) === 'yes';
 		
@@ -1757,21 +1770,21 @@ class Embed_Privacy {
 				$is_checked = false;
 			}
 			else if ( $attributes['show_all'] ) {
-				$is_checked = \in_array( $provider->post_name, $enabled_providers, true );
+				$is_checked = \in_array( $provider->get_name(), $enabled_providers, true );
 			}
 			else {
 				$is_checked = true;
 			}
 			
-			$is_hidden = ! $is_javascript_detection && ! $attributes['show_all'] && ! \in_array( $provider->post_name, $enabled_providers, true );
+			$is_hidden = ! $is_javascript_detection && ! $attributes['show_all'] && ! \in_array( $provider->get_name(), $enabled_providers, true );
 			$microtime = \str_replace( '.', '', \microtime( true ) );
 			$output .= '<span class="embed-privacy-provider' . ( $is_hidden ? ' is-hidden' : '' ) . '">' . \PHP_EOL;
-			$output .= '<label class="embed-privacy-opt-out-label" for="embed-privacy-provider-' . \esc_attr( $provider->post_name ) . '-' . $microtime . '" data-embed-provider="' . \esc_attr( $provider->post_name ) . '">';
-			$output .= '<input type="checkbox" id="embed-privacy-provider-' . \esc_attr( $provider->post_name ) . '-' . $microtime . '" ' . \checked( $is_checked, true, false ) . ' class="embed-privacy-opt-out-input" data-embed-provider="' . \esc_attr( $provider->post_name ) . '"> ';
+			$output .= '<label class="embed-privacy-opt-out-label" for="embed-privacy-provider-' . \esc_attr( $provider->get_name() ) . '-' . $microtime . '" data-embed-provider="' . \esc_attr( $provider->get_name() ) . '">';
+			$output .= '<input type="checkbox" id="embed-privacy-provider-' . \esc_attr( $provider->get_name() ) . '-' . $microtime . '" ' . \checked( $is_checked, true, false ) . ' class="embed-privacy-opt-out-input" data-embed-provider="' . \esc_attr( $provider->get_name() ) . '"> ';
 			$output .= \sprintf(
 				/* translators: embed provider title */
 				\esc_html__( 'Load all embeds from %s', 'embed-privacy' ),
-				\esc_html( $provider->post_title )
+				\esc_html( $provider->get_title() )
 			);
 			$output .= '</label><br>' . \PHP_EOL;
 			$output .= '</span>' . \PHP_EOL;

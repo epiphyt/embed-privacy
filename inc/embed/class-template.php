@@ -1,6 +1,7 @@
 <?php
 namespace epiphyt\Embed_Privacy\embed;
 
+use epiphyt\Embed_Privacy\embed\Provider as Embed_Provider;
 use epiphyt\Embed_Privacy\Embed_Privacy;
 use epiphyt\Embed_Privacy\Provider;
 
@@ -16,41 +17,60 @@ final class Template {
 	/**
 	 * Get an overlay template.
 	 * 
-	 * @param	string	$provider The embed provider
-	 * @param	string	$provider_name The embed provider without spaces and in lowercase
+	 * @param	\epiphyt\Embed_Privacy\embed\Provider|string	$provider The embed provider
 	 * @param	string	$output The output before replacing it
-	 * @param	array	$args Additional arguments
+	 * @param	array	$attributes Additional attributes
 	 * @return	string The overlay template
 	 */
-	public static function get( $provider, $provider_name, $output, $args = [] ) {
-		/**
-		 * Filter the embed provider name.
-		 * 
-		 * @since	1.10.0
-		 * 
-		 * @param	string	$provider_name Embed provider name
-		 * @param	string	$provider_title Embed provider title
-		 * @param	array	$args Additional arguments
-		 * @param	string	$output Output before replacing it
-		 */
-		$provider_name = \apply_filters( 'embed_privacy_provider_name', $provider_name, $provider, $args, $output );
+	public static function get( $provider, $output, $attributes = [] ) {
+		if ( \is_string( $provider ) ) {
+			\_doing_it_wrong(
+				__METHOD__,
+				\sprintf(
+					/* translators: alternative method */
+					\esc_html__( 'Providing a string as parameter %1$s is deprecated. Use an object of type %2$s instead.', 'embed-privacy' ),
+					'$provider',
+					'epiphyt\Embed_Privacy\embed\Provider',
+				),
+				'1.10.0'
+			);
+			
+			$provider = new Embed_Provider( Provider::get_instance()->get_by_name( Provider::sanitize_name( $provider ) ) );
+		}
 		
 		/**
 		 * Filter the overlay arguments.
 		 * 
-		 * @since	1.9.0
+		 * @deprecated	1.10.0 Use embed_privacy_template_arguments instead
+		 * @since		1.9.0
 		 * 
-		 * @param	array	$args Template arguments
+		 * @param	array	$attributes Template arguments
 		 * @param	string	$provider The embed provider
 		 * @param	string	$provider_name The embed provider without spaces and in lowercase
 		 * @param	string	$output The output before replacing it
 		 */
-		$args = (array) \apply_filters( 'embed_privacy_overlay_args', $args, $provider, $provider_name, $output );
+		$attributes = (array) \apply_filters_deprecated( 'embed_privacy_overlay_args', [ $attributes, $provider, $provider->get_name(), $output ], '1.10.0', 'embed_privacy_template_arguments' );
 		
-		if ( ! empty( $args['post_id'] ) ) {
-			$embed_post = \get_post( $args['post_id'] );
+		/**
+		 * Filter the template attributes.
+		 * 
+		 * @since	1.10.0
+		 * 
+		 * @param	array	$attributes Template attributes
+		 * @param	string	$provider The embed provider
+		 * @param	string	$output The output before replacing it
+		 */
+		$attributes = (array) \apply_filters( 'embed_privacy_template_attributes', $attributes, $provider, $output );
+		
+		if ( ! empty( $attributes['post_id'] ) ) {
+			$embed_post = \get_post( $attributes['post_id'] );
 			
 			if ( Provider::is_disabled( $embed_post ) ) {
+				return $output;
+			}
+		}
+		else if ( ! empty( $attributes['provider'] ) ) {
+			if ( $attributes['provider'] instanceof Embed_Provider && $attributes['provider']->is_disabled() ) {
 				return $output;
 			}
 		}
@@ -58,41 +78,41 @@ final class Template {
 			$embed_post = null;
 		}
 		
-		if ( $provider_name === 'youtube' ) {
+		if ( $provider->is( 'youtube' ) ) {
 			$output = \str_replace( 'youtube.com', 'youtube-nocookie.com', $output );
 		}
 		
-		$embed_class = 'embed-' . ( ! empty( $provider_name ) ? $provider_name : 'default' );
+		$embed_class = 'embed-' . ( ! empty( $provider->get_name() ) ? $provider->get_name() : 'default' );
 		$embed_classes = $embed_class;
-		$style = new Style( $provider_name, $embed_post, $args );
+		$style = new Style( $provider->get_name(), $embed_post, $attributes );
 		
-		if ( ! empty( $args['align'] ) ) {
-			$embed_classes .= ' align' . $args['align'];
+		if ( ! empty( $attributes['align'] ) ) {
+			$embed_classes .= ' align' . $attributes['align'];
 		}
 		
-		if ( ! empty( $args['assets'] ) ) {
-			$output = Assets::get_static( $args['assets'], $provider_name ) . $output;
+		if ( ! empty( $attributes['assets'] ) ) {
+			$output = Assets::get_static( $attributes['assets'], $provider->get_name() ) . $output;
 		}
 		
 		$embed_md5 = \md5( $output . \wp_generate_uuid4() );
+		$checkbox_id = 'embed-privacy-store-' . $provider->get_name() . '-' . $embed_md5;
 		
 		/**
-		 * Fires before the overlay output is generated.
+		 * Fires before the template output is generated.
 		 * 
 		 * @since	1.10.0
 		 * 
-		 * @param	string								$provider The embed provider
-		 * @param	string								$provider_name The embed provider without spaces and in lowercase
-		 * @param	\epiphyt\Embed_Privacy\embed\Style	$style The overlay style object
-		 * @param	array								$args Additional arguments
+		 * @param	\epiphyt\Embed_Privacy\embed\Provider	$provider The embed provider
+		 * @param	\epiphyt\Embed_Privacy\embed\Style		$style The overlay style object
+		 * @param	array									$attributes Additional attributes
 		 */
-		\do_action( 'embed_privacy_before_overlay_output', $provider, $provider_name, $style, $args );
+		\do_action( 'embed_privacy_before_template_output', $provider, $style, $attributes );
 		
 		\ob_start();
 		?>
 		<p>
 		<?php
-		if ( ! empty( $provider ) ) {
+		if ( ! empty( $provider->get_name() ) ) {
 			if ( $embed_post ) {
 				$allowed_tags = [
 					'a' => [
@@ -108,12 +128,12 @@ final class Template {
 					<br>
 					<?php
 					/* translators: 1: embed provider, 2: opening <a> tag to the privacy policy, 3: closing </a> */
-					\printf( \wp_kses( \__( 'Learn more in %1$s’s %2$sprivacy policy%3$s.', 'embed-privacy' ), $allowed_tags ), \esc_html( $provider ), '<a href="' . \esc_url( $privacy_policy ) . '" target="_blank">', '</a>' );
+					\printf( \wp_kses( \__( 'Learn more in %1$s’s %2$sprivacy policy%3$s.', 'embed-privacy' ), $allowed_tags ), \esc_html( $provider->get_title() ), '<a href="' . \esc_url( $privacy_policy ) . '" target="_blank">', '</a>' );
 				}
 			}
 			else {
 				/* translators: embed provider */
-				\printf( \esc_html__( 'Click here to display content from %s', 'embed-privacy' ), \esc_html( $provider ) );
+				\printf( \esc_html__( 'Click here to display content from %s', 'embed-privacy' ), \esc_html( $provider->get_title() ) );
 			}
 		}
 		else {
@@ -121,46 +141,51 @@ final class Template {
 		}
 		?>
 		</p>
-		<?php
-		$checkbox_id = 'embed-privacy-store-' . $provider_name . '-' . $embed_md5;
-		
-		if ( $provider_name !== 'default' ) :
-		?>
 		<p class="embed-privacy-input-wrapper">
-			<input id="<?php echo \esc_attr( $checkbox_id ); ?>" type="checkbox" value="1" class="embed-privacy-input" data-embed-provider="<?php echo \esc_attr( $provider_name ); ?>">
-			<label for="<?php echo \esc_attr( $checkbox_id ); ?>" class="embed-privacy-label" data-embed-provider="<?php echo \esc_attr( $provider_name ); ?>">
+			<input id="<?php echo \esc_attr( $checkbox_id ); ?>" type="checkbox" value="1" class="embed-privacy-input" data-embed-provider="<?php echo \esc_attr( $provider->get_name() ); ?>">
+			<label for="<?php echo \esc_attr( $checkbox_id ); ?>" class="embed-privacy-label" data-embed-provider="<?php echo \esc_attr( $provider->get_name() ); ?>">
 				<?php
 				/* translators: the embed provider */
-				\printf( \esc_html__( 'Always display content from %s', 'embed-privacy' ), \esc_html( $provider ) );
+				\printf( \esc_html__( 'Always display content from %s', 'embed-privacy' ), \esc_html( $provider->get_title() ) );
 				?>
 			</label>
 		</p>
 		<?php
-		endif;
-		
 		$content = \ob_get_clean();
 		
 		/**
 		 * Filter the content of the embed overlay.
 		 * 
+		 * @deprecated	1.10.0 Use embed_privacy_template_content instead
+		 * 
 		 * @param	string		$content The content
 		 * @param	string		$provider The embed provider of this embed
 		 */
-		$content = \apply_filters( 'embed_privacy_content', $content, $provider );
+		$content = \apply_filters_deprecated( 'embed_privacy_content', [ $content, $provider->get_title() ], '1.10.0', 'embed_privacy_template_content' );
+		
+		/**
+		 * Filter the content of the embed overlay.
+		 * 
+		 * @since	1.10.0
+		 * 
+		 * @param	string		$content The content
+		 * @param	string		$provider The embed provider of this embed
+		 */
+		$content = \apply_filters( 'embed_privacy_template_content', $content, $provider );
 		
 		\ob_start();
 		
 		$footer_content = '';
 		
-		if ( ! empty( $args['embed_url'] ) ) {
+		if ( ! empty( $attributes['embed_url'] ) ) {
 			$footer_content = '<div class="embed-privacy-footer">';
 			
 			if ( ! \get_option( 'embed_privacy_disable_link' ) ) {
-				$footer_content .= '<span class="embed-privacy-url"><a href="' . \esc_url( $args['embed_url'] ) . '">';
+				$footer_content .= '<span class="embed-privacy-url"><a href="' . \esc_url( $attributes['embed_url'] ) . '">';
 				$footer_content .= \sprintf(
 				/* translators: content name or 'content' */
 					\esc_html__( 'Open "%s" directly', 'embed-privacy' ),
-					! empty( $args['embed_title'] ) ? $args['embed_title'] : \__( 'content', 'embed-privacy' )
+					! empty( $attributes['embed_title'] ) ? $attributes['embed_title'] : \__( 'content', 'embed-privacy' )
 				);
 				$footer_content .= '</a></span>';
 			}
@@ -178,14 +203,14 @@ final class Template {
 		$container_style = $style->get( 'container' );
 		$logo_style = $style->get( 'logo' );
 		?>
-		<div class="embed-privacy-container is-disabled <?php echo \esc_attr( $embed_classes ); ?>" data-embed-id="oembed_<?php echo \esc_attr( $embed_md5 ); ?>" data-embed-provider="<?php echo \esc_attr( $provider_name ); ?>"<?php echo ! empty( $container_style ) ? ' style="' . \esc_attr( $container_style ) . '"' : ''; ?>>
+		<div class="embed-privacy-container is-disabled <?php echo \esc_attr( $embed_classes ); ?>" data-embed-id="oembed_<?php echo \esc_attr( $embed_md5 ); ?>" data-embed-provider="<?php echo \esc_attr( $provider->get_name() ); ?>"<?php echo ! empty( $container_style ) ? ' style="' . \esc_attr( $container_style ) . '"' : ''; ?>>
 			<?php
 			/* translators: embed provider */
-			$button_text = \sprintf( \__( 'Display content from %s', 'embed-privacy' ), \esc_html( $provider ) );
+			$button_text = \sprintf( \__( 'Display content from %s', 'embed-privacy' ), \esc_html( $provider->get_title() ) );
 			
-			if ( ! empty( $args['embed_title'] ) ) {
+			if ( ! empty( $attributes['embed_title'] ) ) {
 				/* translators: 1: embed title, 2: embed provider */
-				$button_text = \sprintf( \__( 'Display "%1$s" from %2$s', 'embed-privacy' ), $args['embed_title'], \esc_html( $provider ) );
+				$button_text = \sprintf( \__( 'Display "%1$s" from %2$s', 'embed-privacy' ), $attributes['embed_title'], \esc_html( $provider->get_title() ) );
 			}
 			?>
 			<button class="embed-privacy-enable screen-reader-text"><?php echo \esc_html( $button_text ); ?></button>
@@ -216,7 +241,7 @@ final class Template {
 		
 		Embed_Privacy::get_instance()->has_embed = true;
 		
-		if ( ! empty( $args['strip_newlines'] ) ) {
+		if ( ! empty( $attributes['strip_newlines'] ) ) {
 			$markup = \str_replace( \PHP_EOL, '', $markup );
 		}
 		

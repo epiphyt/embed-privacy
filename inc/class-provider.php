@@ -1,6 +1,7 @@
 <?php
 namespace epiphyt\Embed_Privacy;
 
+use epiphyt\Embed_Privacy\embed\Provider as Embed_Provider;
 use epiphyt\Embed_Privacy\Embed_Privacy;
 use WP_Post;
 
@@ -19,7 +20,7 @@ final class Provider {
 	public static $instance;
 	
 	/**
-	 * @var		\WP_Post[] List of embed providers
+	 * @var		\epiphyt\Embed_privacy\embed\Provider[][] List of embed providers
 	 */
 	private $list = [];
 	
@@ -27,14 +28,14 @@ final class Provider {
 	 * Initialize functionality.
 	 */
 	public static function init() {
-		\add_filter( 'embed_privacy_provider_name', [ self::class, 'sanitize_title' ] );
+		\add_filter( 'embed_privacy_provider_name', [ self::class, 'sanitize_name' ] );
 	}
 	
 	/**
 	 * Get an embed provider by its name.
 	 * 
 	 * @param	string	$name The name to search for
-	 * @return	\WP_Post|null The embed or null
+	 * @return	\epiphyt\Embed_privacy\embed\Provider|null The embed or null
 	 */
 	public function get_by_name( $name ) {
 		if ( empty( $name ) ) {
@@ -43,10 +44,10 @@ final class Provider {
 		
 		$embed_providers = $this->get_list();
 		$provider = null;
-		$name = self::sanitize_title( $name );
+		$name = self::sanitize_name( $name );
 		
 		foreach ( $embed_providers as $embed_provider ) {
-			if ( $embed_provider->post_name !== $name ) {
+			if ( $embed_provider->get_name() !== $name ) {
 				continue;
 			}
 			
@@ -55,6 +56,26 @@ final class Provider {
 		}
 		
 		return $provider;
+	}
+	
+	/**
+	 * Get a provider by its post object.
+	 * 
+	 * @param	\WP_Post	$post Post object
+	 * @return	\epiphyt\Embed_privacy\embed\Provider Embed provider instance
+	 */
+	public static function get_by_post( $post ) {
+		return new Embed_Provider( $post );
+	}
+	
+	/**
+	 * Get a list of providers by their post objects.
+	 * 
+	 * @param	\WP_Post[]	$post List of post objects
+	 * @return	\epiphyt\Embed_privacy\embed\Embed_Provider[] List of embed provider instances
+	 */
+	public static function get_by_posts( $posts ) {
+		return \array_map( [ self::class, 'get_by_post' ], $posts );
 	}
 	
 	/**
@@ -79,7 +100,7 @@ final class Provider {
 	 * 
 	 * @param	string	$type The embed type
 	 * @param	array	$args Additional arguments
-	 * @return	array A list of embeds
+	 * @return	\epiphyt\Embed_Privacy\embed\Provider[] A list of providers
 	 */
 	public function get_list( $type = 'all', $args = [] ) {
 		if ( ! empty( $this->list ) && isset( $this->list[ $type ] ) ) {
@@ -130,10 +151,10 @@ final class Provider {
 				], $args ) );
 				
 				if ( ! empty( $hash ) ) {
-					$this->list[ $hash ] = \array_merge( $custom_providers, $google_provider );
+					$this->list[ $hash ] = self::get_by_posts( \array_merge( $custom_providers, $google_provider ) );
 				}
 				else {
-					$this->list[ $type ] = \array_merge( $custom_providers, $google_provider );
+					$this->list[ $type ] = self::get_by_posts( \array_merge( $custom_providers, $google_provider ) );
 				}
 				break;
 			case 'oembed':
@@ -149,10 +170,10 @@ final class Provider {
 				], $args ) );
 				
 				if ( ! empty( $hash ) ) {
-					$this->list[ $hash ] = $embed_providers;
+					$this->list[ $hash ] = self::get_by_posts( $embed_providers );
 				}
 				else {
-					$this->list[ $type ] = $embed_providers;
+					$this->list[ $type ] = self::get_by_posts( $embed_providers );
 				}
 				break;
 			case 'all':
@@ -167,10 +188,10 @@ final class Provider {
 				], $args ) );
 				
 				if ( ! empty( $hash ) ) {
-					$this->list[ $hash ] = $embed_providers;
+					$this->list[ $hash ] = self::get_by_posts( $embed_providers );
 				}
 				else {
-					$this->list['all'] = $embed_providers;
+					$this->list['all'] = self::get_by_posts( $embed_providers );
 				}
 				break;
 		}
@@ -186,12 +207,12 @@ final class Provider {
 	/**
 	 * Check if a provider is always active.
 	 * 
-	 * @param	string		$provider The embed provider in lowercase
+	 * @param	string	$provider The embed provider in lowercase
 	 * @return	bool True if provider is always active, false otherwise
 	 */
 	public static function is_always_active( $provider ) {
 		$javascript_detection = \get_option( 'embed_privacy_javascript_detection' );
-		$provider = self::sanitize_title( $provider );
+		$provider = self::sanitize_name( $provider );
 		
 		if ( $javascript_detection ) {
 			return false;
@@ -222,12 +243,12 @@ final class Provider {
 	}
 	
 	/**
-	 * Sanitize the embed provider title.
+	 * Sanitize the embed provider name.
 	 * 
-	 * @param	string	$title Current provider title
-	 * @return	string Sanitized provider title
+	 * @param	string	$name Current provider name
+	 * @return	string Sanitized provider name
 	 */
-	public static function sanitize_title( $title ) {
+	public static function sanitize_name( $title ) {
 		return \preg_replace( '/-\d+$/', '', \sanitize_title( \strtolower( $title ) ) );
 	}
 }

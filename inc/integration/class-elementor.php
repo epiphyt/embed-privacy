@@ -22,7 +22,7 @@ final class Elementor {
 	public static function init() {
 		\add_action( 'embed_privacy_print_assets', [ self::class, 'enqueue_assets' ] );
 		\add_action( 'embed_privacy_register_assets', [ self::class, 'register_assets' ], 10, 2 );
-		\add_filter( 'embed_privacy_replaced_content', [ self::class, 'replace' ] );
+		\add_filter( 'embed_privacy_overlay_replaced_content', [ self::class, 'replace' ] );
 	}
 	
 	/**

@@ -23,7 +23,7 @@ final class Jetpack {
 	 */
 	public static function init() {
 		\add_action( 'wp_enqueue_scripts', [ self::class, 'deregister_assets' ], 100 );
-		\add_filter( 'embed_privacy_replaced_content', [ self::class, 'replace_facebook_posts' ] );
+		\add_filter( 'embed_privacy_overlay_replaced_content', [ self::class, 'replace_facebook_posts' ] );
 	}
 	
 	/**
