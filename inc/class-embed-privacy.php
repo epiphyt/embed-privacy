@@ -8,6 +8,7 @@ use epiphyt\Embed_Privacy\embed\Overlay;
 use epiphyt\Embed_Privacy\embed\Template;
 use epiphyt\Embed_Privacy\handler\Post;
 use epiphyt\Embed_Privacy\handler\Shortcode;
+use epiphyt\Embed_Privacy\handler\Theme;
 use epiphyt\Embed_Privacy\handler\Widget;
 use epiphyt\Embed_Privacy\integration\Activitypub;
 use epiphyt\Embed_Privacy\integration\Amp;
@@ -729,19 +730,24 @@ class Embed_Privacy {
 	/**
 	 * Check if the current theme is matching your name.
 	 * 
-	 * @since	1.3.5
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\handler\Theme::is() instead
+	 * @since		1.3.5
 	 * 
 	 * @param	string	$name The theme name to test
 	 * @return	bool True if the current theme is matching, false otherwise
 	 */
 	public function is_theme( $name ) {
-		$name = \strtolower( $name );
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\handler\Theme::is()',
+			),
+			'1.10.0'
+		);
 		
-		if ( \strtolower( \wp_get_theme()->get( 'Name' ) ) === $name || \strtolower( \wp_get_theme()->get( 'Template' ) ) === $name ) {
-			return true;
-		}
-		
-		return false;
+		return Theme::is( $name );
 	}
 	
 	/**

@@ -3,6 +3,7 @@ namespace epiphyt\Embed_Privacy\integration;
 
 use DOMDocument;
 use epiphyt\Embed_Privacy\Embed_Privacy;
+use epiphyt\Embed_Privacy\handler\Theme;
 
 /**
  * Divi integration for Embed Privacy.
@@ -26,7 +27,7 @@ final class Divi {
 	 * Enqueue assets.
 	 */
 	public static function enqueue_assets() {
-		if ( Embed_Privacy::get_instance()->is_theme( 'Divi' ) ) {
+		if ( Theme::is( 'Divi' ) ) {
 			\wp_enqueue_script( 'embed-privacy-divi' );
 			\wp_enqueue_style( 'embed-privacy-divi' );
 		}

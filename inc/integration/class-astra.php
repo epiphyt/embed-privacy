@@ -2,6 +2,7 @@
 namespace epiphyt\Embed_Privacy\integration;
 
 use epiphyt\Embed_Privacy\Embed_Privacy;
+use epiphyt\Embed_Privacy\handler\Theme;
 
 /**
  * Astra integration for Embed Privacy.
@@ -24,7 +25,7 @@ final class Astra {
 	 * Enqueue assets.
 	 */
 	public static function enqueue_assets() {
-		if ( Embed_Privacy::get_instance()->is_theme( 'Astra' ) ) {
+		if ( Theme::is( 'Astra' ) ) {
 			\wp_enqueue_style( 'embed-privacy-astra' );
 		}
 	}
