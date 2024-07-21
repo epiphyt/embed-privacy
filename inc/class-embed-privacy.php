@@ -107,6 +107,7 @@ class Embed_Privacy {
 	public static $instance;
 	
 	/**
+	 * @deprecated	1.10.0 Use \EPI_EMBED_PRIVACY_FILE instead
 	 * @var		string The full path to the main plugin file
 	 */
 	public $plugin_file = '';
@@ -1162,7 +1163,8 @@ class Embed_Privacy {
 	/**
 	 * Set the plugin file.
 	 * 
-	 * @since	1.1.0
+	 * @deprecated	1.10.0 Use \EPI_EMBED_PRIVACY_FILE instead
+	 * @since		1.1.0
 	 * 
 	 * @param	string	$file The path to the file
 	 */
