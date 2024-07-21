@@ -64,6 +64,12 @@ class Embed_Privacy {
 	public $fields;
 	
 	/**
+	 * @since	1.10.0
+	 * @var		\epiphyt\Embed_Privacy\Frontend
+	 */
+	public $frontend;
+	
+	/**
 	 * @since	1.3.0
 	 * @var		bool Whether the current request has any embed processed by Embed Privacy
 	 */
@@ -101,12 +107,6 @@ class Embed_Privacy {
 	 * @var		bool Whether the current request should be ignored
 	 */
 	public $is_ignored_request = false;
-	
-	/**
-	 * @since	1.4.8
-	 * @var		bool Whether the current request has printed Embed Privacy assets.
-	 */
-	private $is_printed = false;
 	
 	/**
 	 * @var		\epiphyt\Embed_Privacy\Embed_Privacy
@@ -189,6 +189,7 @@ class Embed_Privacy {
 	 */
 	public function __construct() {
 		$this->fields = new Fields();
+		$this->frontend = new Frontend();
 		$this->thumbnail = new Thumbnail();
 		$this->use_cache = ! \is_admin();
 	}
@@ -201,7 +202,6 @@ class Embed_Privacy {
 	public function init() {
 		// actions
 		\add_action( 'init', [ $this, 'load_textdomain' ], 0 );
-		\add_action( 'init', [ $this, 'register_assets' ] );
 		\add_action( 'init', [ $this, 'set_ignored_request' ] );
 		\add_action( 'init', [ $this, 'set_post_type' ], 5 );
 		\add_action( 'plugins_loaded', [ $this, 'init_integrations' ] );
@@ -222,6 +222,7 @@ class Embed_Privacy {
 		User_Interface::init();
 		Widget::init();
 		$this->fields->init();
+		$this->frontend->init();
 		$this->thumbnail->init();
 	}
 	
@@ -786,88 +787,39 @@ class Embed_Privacy {
 	/**
 	 * Handle printing assets.
 	 * 
-	 * @since	1.3.0
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\Frontend::print_assets() instead
+	 * @since		1.3.0
 	 */
 	public function print_assets() {
-		if ( $this->is_printed ) {
-			return;
-		}
-		
-		\wp_enqueue_script( 'embed-privacy' );
-		\wp_enqueue_style( 'embed-privacy' );
-		\wp_localize_script( 'embed-privacy', 'embedPrivacy', [
-			'alwaysActiveProviders' => \array_keys( (array) $this->get_cookie() ), // deprecated
-			'javascriptDetection' => \get_option( 'embed_privacy_javascript_detection' ),
-		] );
-		
-		if ( ! \function_exists( 'is_plugin_active' ) ) {
-			require_once ABSPATH . WPINC . '/plugin.php';
-		}
-		
-		/**
-		 * Fires after assets are printed.
-		 * 
-		 * @since	1.10.0
-		 */
-		\do_action( 'embed_privacy_print_assets' );
-		
-		$this->is_printed = true;
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\Frontend::print_assets()',
+			),
+			'1.10.0'
+		);
+		$this->frontend->print_assets();
 	}
 	
 	/**
 	 * Register our assets for the frontend.
 	 * 
-	 * @since	1.4.4
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\Frontend::register_assets() instead
+	 * @since		1.4.4
 	 */
 	public function register_assets() {
-		if ( \is_admin() || \wp_doing_ajax() || \wp_doing_cron() ) {
-			return;
-		}
-		
-		$is_debug = \defined( 'WP_DEBUG' ) && WP_DEBUG;
-		$suffix = ( $is_debug ? '' : '.min' );
-		$css_file_url = \EPI_EMBED_PRIVACY_URL . 'assets/style/embed-privacy' . $suffix . '.css';
-		$file_version = $is_debug ? \filemtime( \EPI_EMBED_PRIVACY_BASE . 'assets/style/embed-privacy' . $suffix . '.css' ) : \EMBED_PRIVACY_VERSION;
-		
-		\wp_register_style( 'embed-privacy', $css_file_url, [], $file_version );
-		
-		if ( ! Amp::is_amp() ) {
-			$js_file_url = \EPI_EMBED_PRIVACY_URL . 'assets/js/embed-privacy' . $suffix . '.js';
-			$file_version = $is_debug ? \filemtime( \EPI_EMBED_PRIVACY_BASE . 'assets/js/embed-privacy' . $suffix . '.js' ) : \EMBED_PRIVACY_VERSION;
-			
-			\wp_register_script( 'embed-privacy', $js_file_url, [], $file_version, [ 'strategy' => 'defer' ] );
-		}
-		
-		/**
-		 * Fires after assets have been registered.
-		 * 
-		 * @since	1.10.0
-		 * 
-		 * @param	bool	$is_debug Whether debug mode is enabled
-		 * @param	string	$suffix A filename suffix
-		 */
-		\do_action( 'embed_privacy_register_assets', $is_debug, $suffix );
-		
-		$current_url = \sprintf(
-			'http%1$s://%2$s%3$s',
-			\is_ssl() ? 's' : '',
-			! empty( $_SERVER['HTTP_HOST'] ) ? \sanitize_text_field( \wp_unslash( $_SERVER['HTTP_HOST'] ) ) : '',
-			! empty( $_SERVER['REQUEST_URI'] ) ? \sanitize_text_field( \wp_unslash( $_SERVER['REQUEST_URI'] ) ) : ''
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\Frontend::register_assets()',
+			),
+			'1.10.0'
 		);
-		
-		if ( empty( $_SERVER['HTTP_HOST'] ) ) {
-			return;
-		}
-		
-		$post_id = \url_to_postid( $current_url );
-		
-		if ( $post_id ) {
-			$post = \get_post( $post_id );
-		
-			if ( $post instanceof WP_Post && \has_shortcode( $post->post_content, 'embed_privacy_opt_out' ) ) {
-				$this->print_assets();
-			}
-		}
+		$this->frontend->register_assets();
 	}
 	
 	/**
