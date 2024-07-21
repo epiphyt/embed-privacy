@@ -203,7 +203,7 @@ class Embed_Privacy {
 		// actions
 		\add_action( 'init', [ $this, 'load_textdomain' ], 0 );
 		\add_action( 'init', [ $this, 'set_ignored_request' ] );
-		\add_action( 'init', [ $this, 'set_post_type' ], 5 );
+		\add_action( 'init', [ self::class, 'register_post_type' ], 5 );
 		\add_action( 'plugins_loaded', [ $this, 'init_integrations' ] );
 		\add_action( 'save_post_epi_embed', [ $this, 'preserve_backslashes' ] );
 		
@@ -853,6 +853,44 @@ class Embed_Privacy {
 	}
 	
 	/**
+	 * Register post type.
+	 * 
+	 * @since	1.10.0
+	 */
+	public static function register_post_type() {
+		\register_post_type(
+			'epi_embed',
+			[
+				'label' => \__( 'Embeds', 'embed-privacy' ),
+				'description' => \__( 'Embeds from Embed Privacy', 'embed-privacy' ),
+				'supports' => [
+					'custom-fields',
+					'editor',
+					'revisions',
+					'thumbnail',
+					'title',
+				],
+				'hierarchical' => false,
+				'public' => false,
+				'menu_icon' => 'dashicons-format-video',
+				'show_in_admin_bar' => false,
+				'show_in_menu' => false,
+				'show_in_nav_menus' => false,
+				'show_in_rest' => false,
+				'show_ui' => true,
+				'can_export' => true,
+				'has_archive' => false,
+				'exclude_from_search' => true,
+				'publicly_queryable' => false,
+				'rewrite' => [
+					'with_front' => false,
+					'pages' => false,
+				],
+			]
+		);
+	}
+	
+	/**
 	 * Replace embeds with a container and hide the embed with an HTML comment.
 	 * 
 	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\Replacer::replace_embeds() instead
@@ -1137,39 +1175,20 @@ class Embed_Privacy {
 	/**
 	 * Register post type.
 	 * 
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy::register_post_type() instead
 	 * @since	1.2.0
 	 */
 	public function set_post_type() {
-		\register_post_type(
-			'epi_embed',
-			[
-				'label' => \__( 'Embeds', 'embed-privacy' ),
-				'description' => \__( 'Embeds from Embed Privacy', 'embed-privacy' ),
-				'supports' => [
-					'custom-fields',
-					'editor',
-					'revisions',
-					'thumbnail',
-					'title',
-				],
-				'hierarchical' => false,
-				'public' => false,
-				'menu_icon' => 'dashicons-format-video',
-				'show_in_admin_bar' => false,
-				'show_in_menu' => false,
-				'show_in_nav_menus' => false,
-				'show_in_rest' => false,
-				'show_ui' => true,
-				'can_export' => true,
-				'has_archive' => false,
-				'exclude_from_search' => true,
-				'publicly_queryable' => false,
-				'rewrite' => [
-					'with_front' => false,
-					'pages' => false,
-				],
-			]
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy::register_post_type()',
+			),
+			'1.10.0'
 		);
+		self::register_post_type();
 	}
 	
 	/**
