@@ -3,14 +3,12 @@ namespace epiphyt\Embed_Privacy;
 
 use DOMDocument;
 use DOMElement;
-use DOMNode;
 use epiphyt\Embed_Privacy\admin\Fields;
 use epiphyt\Embed_Privacy\admin\Settings;
 use epiphyt\Embed_Privacy\admin\User_Interface;
-use epiphyt\Embed_Privacy\embed\Assets;
 use epiphyt\Embed_Privacy\embed\Overlay;
-use epiphyt\Embed_Privacy\embed\Provider;
 use epiphyt\Embed_Privacy\embed\Template;
+use epiphyt\Embed_Privacy\handler\Post;
 use epiphyt\Embed_Privacy\integration\Activitypub;
 use epiphyt\Embed_Privacy\integration\Amp;
 use epiphyt\Embed_Privacy\integration\Astra;
@@ -222,10 +220,9 @@ class Embed_Privacy {
 		\add_filter( 'the_content', [ $this, 'replace_embeds' ] );
 		\add_filter( 'wp_video_shortcode', [ $this, 'replace_video_shortcode' ], 10, 2 );
 		\add_shortcode( 'embed_privacy_opt_out', [ $this, 'shortcode_opt_out' ] );
-		\register_activation_hook( $this->plugin_file, [ $this, 'clear_embed_cache' ] );
-		\register_deactivation_hook( $this->plugin_file, [ $this, 'clear_embed_cache' ] );
 		
 		Migration::get_instance()->init();
+		Post::init();
 		Provider_Functionality::get_instance()->init();
 		Settings::init();
 		User_Interface::init();
@@ -265,40 +262,20 @@ class Embed_Privacy {
 	/**
 	 * Embeds are cached in the postmeta database table and need to be removed
 	 * whenever the plugin will be enabled or disabled.
+	 * 
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\handler\Post::clear_embed_cache() instead
 	 */
 	public function clear_embed_cache() {
-		global $wpdb;
-		
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		if ( \is_plugin_active_for_network( 'embed-privacy/embed-privacy.php' ) ) {
-			// on networks we need to iterate through every site
-			$sites = \get_sites( [
-				'fields' => 'ids',
-				'number' => 99999,
-			] );
-			
-			foreach ( $sites as $blog_id ) {
-				$wpdb->query(
-					$wpdb->prepare(
-						// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-						"DELETE FROM	$wpdb->get_blog_prefix( $blog_id )postmeta
-						WHERE			meta_key LIKE %s",
-						// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-						[ '%_oembed_%' ]
-					)
-				);
-			}
-		}
-		else {
-			$wpdb->query(
-				$wpdb->prepare(
-					"DELETE FROM	$wpdb->postmeta
-					WHERE			meta_key LIKE %s",
-					[ '%_oembed_%' ]
-				)
-			);
-		}
-		//phpcs:enable
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\handler\Post::clear_embed_cache()',
+			),
+			'1.10.0'
+		);
+		Post::clear_embed_cache();
 	}
 	
 	/**
@@ -775,50 +752,24 @@ class Embed_Privacy {
 	/**
 	 * Check if a post contains an embed.
 	 * 
-	 * @since	1.3.0
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\handler\Post::has_embed() instead
+	 * @since		1.3.0
 	 * 
 	 * @param	\WP_Post|int|null	$post A post object, post ID or null
 	 * @return	bool True if a post contains an embed, false otherwise
 	 */
 	public function has_embed( $post = null ) {
-		if ( $post === null ) {
-			global $post;
-		}
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\handler\Post::has_embed()',
+			),
+			'1.10.0'
+		);
 		
-		if ( \is_numeric( $post ) ) {
-			$post = \get_post( $post ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		}
-		
-		/**
-		 * Allow overwriting the return value of has_embed().
-		 * If set to anything other than null, this value will be returned.
-		 * 
-		 * @param	null	$has_embed The default value
-		 */
-		$has_embed = \apply_filters( 'embed_privacy_has_embed', null );
-		
-		if ( $has_embed !== null ) {
-			return $has_embed;
-		}
-		
-		if ( ! $post instanceof WP_Post ) {
-			return false;
-		}
-		
-		if ( $this->has_embed ) {
-			return true;
-		}
-		
-		$embed_providers = Provider_Functionality::get_instance()->get_list();
-		
-		// check post content
-		foreach ( $embed_providers as $provider ) {
-			if ( $provider->is_matching( $post->post_content ) ) {
-				return true;
-			}
-		}
-		
-		return false;
+		return Post::has_embed( $post );
 	}
 	
 	/**

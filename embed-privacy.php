@@ -35,6 +35,10 @@ if ( ! \defined( 'EPI_EMBED_PRIVACY_BASE' ) ) {
 	\define( 'EPI_EMBED_PRIVACY_BASE', \WP_PLUGIN_DIR . '/embed-privacy/' );
 }
 
+if ( ! \defined( 'EPI_EMBED_PRIVACY_FILE' ) ) {
+	\define( 'EPI_EMBED_PRIVACY_FILE', __FILE__ );
+}
+
 if ( ! \defined( 'EPI_EMBED_PRIVACY_URL' ) ) {
 	\define( 'EPI_EMBED_PRIVACY_URL', \plugin_dir_url( \EPI_EMBED_PRIVACY_BASE . 'embed-privacy.php' ) );
 }
