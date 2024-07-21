@@ -3,6 +3,7 @@ namespace epiphyt\Embed_Privacy\handler;
 
 use epiphyt\Embed_Privacy\Embed_Privacy;
 use epiphyt\Embed_Privacy\Provider;
+use epiphyt\Embed_Privacy\Replacer;
 use WP_Post;
 
 /**
@@ -18,6 +19,11 @@ final class Post {
 	 * Initialize functionality.
 	 */
 	public static function init() {
+		\add_filter( 'acf_the_content', [ Replacer::class, 'replace_embeds' ] );
+		\add_filter( 'do_shortcode_tag', [ Replacer::class, 'replace_embeds' ], 10, 2 );
+		\add_filter( 'embed_oembed_html', [ Replacer::class, 'replace_oembed' ], 10, 3 );
+		\add_filter( 'the_content', [ Replacer::class, 'replace_embeds' ] );
+		\add_filter( 'wp_video_shortcode', [ Replacer::class, 'replace_video_shortcode' ], 10, 2 );
 		\register_activation_hook( \EPI_EMBED_PRIVACY_FILE, [ self::class, 'clear_embed_cache' ] );
 		\register_deactivation_hook( \EPI_EMBED_PRIVACY_FILE, [ self::class, 'clear_embed_cache' ] );
 	}

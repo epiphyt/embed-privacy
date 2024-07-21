@@ -1,8 +1,6 @@
 <?php
 namespace epiphyt\Embed_Privacy;
 
-use DOMDocument;
-use DOMElement;
 use epiphyt\Embed_Privacy\admin\Fields;
 use epiphyt\Embed_Privacy\admin\Settings;
 use epiphyt\Embed_Privacy\admin\User_Interface;
@@ -21,6 +19,7 @@ use epiphyt\Embed_Privacy\integration\Polylang;
 use epiphyt\Embed_Privacy\integration\Shortcodes_Ultimate;
 use epiphyt\Embed_Privacy\integration\Twitter;
 use epiphyt\Embed_Privacy\Provider as Provider_Functionality;
+use epiphyt\Embed_Privacy\Replacer;
 use epiphyt\Embed_Privacy\thumbnail\Thumbnail;
 use ReflectionMethod;
 use WP_Post;
@@ -135,7 +134,7 @@ class Embed_Privacy {
 	/**
 	 * @var		bool Determine if we use the cache
 	 */
-	private $usecache;
+	public $use_cache;
 	
 	/**
 	 * @deprecated	1.2.0
@@ -190,7 +189,7 @@ class Embed_Privacy {
 	public function __construct() {
 		$this->fields = new Fields();
 		$this->thumbnail = new Thumbnail();
-		$this->usecache = ! \is_admin();
+		$this->use_cache = ! \is_admin();
 	}
 	
 	/**
@@ -208,17 +207,12 @@ class Embed_Privacy {
 		\add_action( 'save_post_epi_embed', [ $this, 'preserve_backslashes' ] );
 		
 		// filters
-		if ( ! $this->usecache ) {
+		if ( ! $this->use_cache ) {
 			// set ttl to 0 in admin
 			\add_filter( 'oembed_ttl', '__return_zero' );
 		}
 		
-		\add_filter( 'acf_the_content', [ $this, 'replace_embeds' ] );
-		\add_filter( 'do_shortcode_tag', [ $this, 'replace_embeds' ], 10, 2 );
-		\add_filter( 'embed_oembed_html', [ $this, 'replace_embeds_oembed' ], 10, 3 );
 		\add_filter( 'embed_privacy_widget_output', [ $this, 'replace_embeds' ] );
-		\add_filter( 'the_content', [ $this, 'replace_embeds' ] );
-		\add_filter( 'wp_video_shortcode', [ $this, 'replace_video_shortcode' ], 10, 2 );
 		\add_shortcode( 'embed_privacy_opt_out', [ $this, 'shortcode_opt_out' ] );
 		
 		Migration::get_instance()->init();
@@ -594,70 +588,6 @@ class Embed_Privacy {
 	}
 	
 	/**
-	 * Get en oEmbed title by its title attribute.
-	 * 
-	 * @since	1.6.4
-	 * 
-	 * @param	string	$content The content to get the title of
-	 * @return	array The dimensions or an empty array
-	 */
-	private function get_oembed_dimensions( $content ) {
-		\libxml_use_internal_errors( true );
-		$dom = new DOMDocument();
-		$dom->loadHTML(
-			'<html><meta charset="utf-8">' . $content . '</html>',
-			\LIBXML_HTML_NOIMPLIED | \LIBXML_HTML_NODEFDTD
-		);
-		\libxml_use_internal_errors( false );
-		
-		foreach ( [ 'embed', 'iframe', 'img', 'object' ] as $tag ) {
-			foreach ( $dom->getElementsByTagName( $tag ) as $element ) {
-				$height = $element->getAttribute( 'height' );
-				$width = $element->getAttribute( 'width' );
-				
-				if ( $height && $width ) {
-					return [
-						'height' => $height,
-						'width' => $width,
-					];
-				}
-			}
-		}
-		
-		return [];
-	}
-	
-	/**
-	 * Get en oEmbed title by its title attribute.
-	 * 
-	 * @since	1.4.0
-	 * 
-	 * @param	string	$content The content to get the title of
-	 * @return	string The title or an empty string
-	 */
-	private function get_oembed_title( $content ) {
-		\libxml_use_internal_errors( true );
-		$dom = new DOMDocument();
-		$dom->loadHTML(
-			'<html><meta charset="utf-8">' . $content . '</html>',
-			\LIBXML_HTML_NOIMPLIED | \LIBXML_HTML_NODEFDTD
-		);
-		\libxml_use_internal_errors( false );
-		
-		foreach ( [ 'embed', 'iframe', 'object' ] as $tag ) {
-			foreach ( $dom->getElementsByTagName( $tag ) as $element ) {
-				$title = $element->getAttribute( 'title' );
-				
-				if ( $title ) {
-					return $title;
-				}
-			}
-		}
-		
-		return '';
-	}
-	
-	/**
 	 * Output a complete template of the overlay.
 	 * 
 	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\embed\Template::get() instead
@@ -989,42 +919,33 @@ class Embed_Privacy {
 	/**
 	 * Replace embeds with a container and hide the embed with an HTML comment.
 	 * 
-	 * @since	1.2.0 Changed behavior of the method
-	 * @since	1.6.0 Added optional $tag parameter
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\Replacer::replace_embeds() instead
+	 * @since		1.2.0 Changed behavior of the method
+	 * @since		1.6.0 Added optional $tag parameter
 	 * 
 	 * @param	string	$content The original content
 	 * @param	string	$tag The shortcode tag if called via do_shortcode
 	 * @return	string The updated content
 	 */
 	public function replace_embeds( $content, $tag = '' ) {
-		// do nothing in admin
-		if ( ! $this->usecache ) {
-			return $content;
-		}
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\Replacer::replace_embeds()',
+			),
+			'1.10.0'
+		);
 		
-		if ( $this->is_ignored_request ) {
-			return $content;
-		}
-		
-		// do nothing for ignored shortcodes
-		if ( ! empty( $tag ) && \in_array( $tag, $this->get_ignored_shortcodes(), true ) ) {
-			return $content;
-		}
-		
-		// check content for already available embeds
-		if ( ! $this->has_embed && \strpos( $content, '<div class="embed-privacy-overlay">' ) !== false ) {
-			$this->has_embed = true;
-		}
-		
-		$overlay = new Overlay( $content );
-		
-		return $overlay->get();
+		return Replacer::replace_embeds( $content, $tag );
 	}
 	
 	/**
 	 * Replace oembed embeds with a container and hide the embed with an HTML comment.
 	 * 
-	 * @since	1.2.0
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\Replacer::replace_oembed() instead
+	 * @since		1.2.0
 	 * 
 	 * @param	string	$output The original output
 	 * @param	string	$url The URL to the embed
@@ -1032,74 +953,17 @@ class Embed_Privacy {
 	 * @return	string The updated embed code
 	 */
 	public function replace_embeds_oembed( $output, $url, $args ) {
-		// do nothing in admin
-		if ( ! $this->usecache ) {
-			return $output;
-		}
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\Replacer::replace_oembed()',
+			),
+			'1.10.0'
+		);
 		
-		if ( $this->is_ignored_request ) {
-			return $output;
-		}
-		
-		// ignore embeds without host (ie. relative URLs)
-		if ( empty( \wp_parse_url( $url, \PHP_URL_HOST ) ) ) {
-			return $output;
-		}
-		
-		// check the current host
-		// see: https://github.com/epiphyt/embed-privacy/issues/24
-		if ( \strpos( $url, \wp_parse_url( \home_url(), \PHP_URL_HOST ) ) !== false ) {
-			return $output;
-		}
-		
-		$overlay = new Overlay( $output, $url );
-		
-		// make sure to only run once
-		if ( \str_contains( $output, 'data-embed-provider="' . $overlay->get_provider()->get_name() . '"' ) ) {
-			return $output;
-		}
-		
-		// check if cookie is set
-		if ( Provider_Functionality::is_always_active( $overlay->get_provider()->get_name() ) ) {
-			return $output;
-		}
-		
-		$embed_title = $this->get_oembed_title( $output );
-		/* translators: embed title */
-		$args['embed_title'] = ! empty( $embed_title ) ? $embed_title : '';
-		$args['embed_url'] = $url;
-		$args['is_oembed'] = true;
-		$args['strip_newlines'] = true;
-		
-		// the default dimensions are useless
-		// so ignore them if recognized as such
-		$defaults = \wp_embed_defaults( $url );
-		
-		if (
-			! empty( $args['height'] ) && $args['height'] === $defaults['height']
-			&& ! empty( $args['width'] ) && $args['width'] === $defaults['width']
-		) {
-			unset( $args['height'], $args['width'] );
-			
-			$dimensions = $this->get_oembed_dimensions( $output );
-			
-			if ( ! empty( $dimensions ) ) {
-				$args = \array_merge( $args, $dimensions );
-			}
-		}
-		
-		$output = $overlay->get( $args );
-		
-		if ( $overlay->get_provider()->is( 'youtube' ) ) {
-			// replace youtube.com with youtube-nocookie.com
-			$output = \str_replace( 'youtube.com', 'youtube-nocookie.com', $output );
-		}
-		else if ( $overlay->get_provider()->is( 'twitter' ) && \get_option( 'embed_privacy_local_tweets' ) ) {
-			// check for local tweets
-			return Twitter::get_local_tweet( $output );
-		}
-		
-		return $output;
+		return Replacer::replace_oembed( $output, $url, $args );
 	}
 	
 	/**
@@ -1146,7 +1010,7 @@ class Embed_Privacy {
 		);
 		
 		// do nothing in admin
-		if ( ! $this->usecache ) {
+		if ( ! $this->use_cache ) {
 			return $output;
 		}
 		
@@ -1224,36 +1088,24 @@ class Embed_Privacy {
 	/**
 	 * Replace video shortcode embeds.
 	 * 
-	 * @since	1.7.0
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\Replacer::replace_video_shortcode() instead
+	 * @since		1.7.0
 	 * 
 	 * @param	string	$output Video shortcode HTML output
 	 * @param	array	$atts Array of video shortcode attributes
 	 */
 	public function replace_video_shortcode( $output, $atts ) {
-		$url = isset( $atts['src'] ) ? $atts['src'] : '';
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\Replacer::replace_video_shortcode()',
+			),
+			'1.10.0'
+		);
 		
-		if ( empty( $url ) && ! empty( $atts['mp4'] ) ) {
-			$url = $atts['mp4'];
-		}
-		else if ( empty( $url ) && ! empty( $atts['m4v'] ) ) {
-			$url = $atts['m4v'];
-		}
-		else if ( empty( $url ) && ! empty( $atts['webm'] ) ) {
-			$url = $atts['webm'];
-		}
-		else if ( empty( $url ) && ! empty( $atts['ogv'] ) ) {
-			$url = $atts['ogv'];
-		}
-		else if ( empty( $url ) && ! empty( $atts['flv'] ) ) {
-			$url = $atts['flv'];
-		}
-		
-		// ignore relative URLs
-		if ( empty( \wp_parse_url( $url, \PHP_URL_HOST ) ) ) {
-			return $output;
-		}
-		
-		return $this->replace_embeds_oembed( $output, $url, $atts );
+		return Replacer::replace_video_shortcode( $output, $atts );
 	}
 	
 	/**

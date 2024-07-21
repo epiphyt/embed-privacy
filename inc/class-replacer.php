@@ -1,0 +1,166 @@
+<?php
+namespace epiphyt\Embed_Privacy;
+
+use epiphyt\Embed_Privacy\embed\Overlay;
+use epiphyt\Embed_Privacy\Embed_Privacy;
+use epiphyt\Embed_Privacy\handler\Oembed;
+use epiphyt\Embed_Privacy\integration\Twitter;
+use epiphyt\Embed_Privacy\Provider;
+
+/**
+ * Replacer functionality.
+ * 
+ * @author	Epiphyt
+ * @license	GPL2
+ * @package	epiphyt\Embed_Privacy
+ * @since	1.10.0
+ */
+final class Replacer {
+	/**
+	 * Replace embeds with a container and hide the embed with an HTML comment.
+	 * 
+	 * @param	string	$content The original content
+	 * @param	string	$tag The shortcode tag if called via do_shortcode
+	 * @return	string The updated content
+	 */
+	public static function replace_embeds( $content, $tag = '' ) {
+		$embed_privacy = Embed_Privacy::get_instance();
+		
+		// do nothing in admin
+		if ( ! $embed_privacy->use_cache ) {
+			return $content;
+		}
+		
+		if ( $embed_privacy->is_ignored_request ) {
+			return $content;
+		}
+		
+		// do nothing for ignored shortcodes
+		if ( ! empty( $tag ) && \in_array( $tag, $embed_privacy->get_ignored_shortcodes(), true ) ) {
+			return $content;
+		}
+		
+		// check content for already available embeds
+		if ( ! $embed_privacy->has_embed && \str_contains( $content, '<div class="embed-privacy-overlay">' ) ) {
+			$embed_privacy->has_embed = true;
+		}
+		
+		$overlay = new Overlay( $content );
+		
+		return $overlay->get();
+	}
+	
+	/**
+	 * Replace oembed embeds with a container and hide the embed with an HTML comment.
+	 * 
+	 * @param	string	$output The original output
+	 * @param	string	$url The URL to the embed
+	 * @param	array	$attributes Additional attributes of the embed
+	 * @return	string The updated embed code
+	 */
+	public static function replace_oembed( $output, $url, array $attributes ) {
+		$embed_privacy = Embed_Privacy::get_instance();
+		
+		// do nothing in admin
+		if ( ! $embed_privacy->use_cache ) {
+			return $output;
+		}
+		
+		if ( $embed_privacy->is_ignored_request ) {
+			return $output;
+		}
+		
+		// ignore embeds without host (ie. relative URLs)
+		if ( empty( \wp_parse_url( $url, \PHP_URL_HOST ) ) ) {
+			return $output;
+		}
+		
+		// check the current host
+		// see: https://github.com/epiphyt/embed-privacy/issues/24
+		if ( \strpos( $url, \wp_parse_url( \home_url(), \PHP_URL_HOST ) ) !== false ) {
+			return $output;
+		}
+		
+		$overlay = new Overlay( $output, $url );
+		
+		// make sure to only run once
+		if ( \str_contains( $output, 'data-embed-provider="' . $overlay->get_provider()->get_name() . '"' ) ) {
+			return $output;
+		}
+		
+		// check if cookie is set
+		if ( Provider::is_always_active( $overlay->get_provider()->get_name() ) ) {
+			return $output;
+		}
+		
+		$embed_title = Oembed::get_title( $output );
+		/* translators: embed title */
+		$attributes['embed_title'] = ! empty( $embed_title ) ? $embed_title : '';
+		$attributes['embed_url'] = $url;
+		$attributes['is_oembed'] = true;
+		$attributes['strip_newlines'] = true;
+		
+		// the default dimensions are useless
+		// so ignore them if recognized as such
+		$defaults = \wp_embed_defaults( $url );
+		
+		if (
+			! empty( $attributes['height'] ) && $attributes['height'] === $defaults['height']
+			&& ! empty( $attributes['width'] ) && $attributes['width'] === $defaults['width']
+		) {
+			unset( $attributes['height'], $attributes['width'] );
+			
+			$dimensions = Oembed::get_dimensions( $output );
+			
+			if ( ! empty( $dimensions ) ) {
+				$attributes = \array_merge( $attributes, $dimensions );
+			}
+		}
+		
+		$output = $overlay->get( $attributes );
+		
+		if ( $overlay->get_provider()->is( 'youtube' ) ) {
+			// replace youtube.com with youtube-nocookie.com
+			$output = \str_replace( 'youtube.com', 'youtube-nocookie.com', $output );
+		}
+		else if ( $overlay->get_provider()->is( 'twitter' ) && \get_option( 'embed_privacy_local_tweets' ) ) {
+			// check for local tweets
+			return Twitter::get_local_tweet( $output );
+		}
+		
+		return $output;
+	}
+	
+	/**
+	 * Replace video shortcode embeds.
+	 * 
+	 * @param	string	$output Video shortcode HTML output
+	 * @param	array	$attributes Array of video shortcode attributes
+	 */
+	public static function replace_video_shortcode( $output, array $attributes ) {
+		$url = isset( $attributes['src'] ) ? $attributes['src'] : '';
+		
+		if ( empty( $url ) && ! empty( $attributes['mp4'] ) ) {
+			$url = $attributes['mp4'];
+		}
+		else if ( empty( $url ) && ! empty( $attributes['m4v'] ) ) {
+			$url = $attributes['m4v'];
+		}
+		else if ( empty( $url ) && ! empty( $attributes['webm'] ) ) {
+			$url = $attributes['webm'];
+		}
+		else if ( empty( $url ) && ! empty( $attributes['ogv'] ) ) {
+			$url = $attributes['ogv'];
+		}
+		else if ( empty( $url ) && ! empty( $attributes['flv'] ) ) {
+			$url = $attributes['flv'];
+		}
+		
+		// ignore relative URLs
+		if ( empty( \wp_parse_url( $url, \PHP_URL_HOST ) ) ) {
+			return $output;
+		}
+		
+		return self::replace_oembed( $output, $url, $attributes );
+	}
+}
