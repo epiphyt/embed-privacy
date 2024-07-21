@@ -85,7 +85,6 @@ if ( ! \class_exists( 'DOMDocument' ) ) {
 	}
 } );
 
-Embed_Privacy_Widget_Output_Filter::get_instance();
 $embed_privacy = Embed_Privacy::get_instance();
 $embed_privacy->set_plugin_file( __FILE__ );
 $embed_privacy->init();

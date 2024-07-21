@@ -4,8 +4,9 @@ namespace epiphyt\Embed_Privacy;
 /**
  * Filter the output of widgets.
  * 
- * @see		https://github.com/philipnewcomer/widget-output-filters
- * @since	1.1.0
+ * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\handler\Widget instead
+ * @see			https://github.com/philipnewcomer/widget-output-filters
+ * @since		1.1.0
  * 
  * @author	Epiphyt
  * @license	GPL2
@@ -55,6 +56,8 @@ class Embed_Privacy_Widget_Output_Filter {
 	/**
 	 * Return the single instance of this class.
 	 * 
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\handler\Widget::get_instance() instead
+	 * 
 	 * @return	\epiphyt\Embed_Privacy\Embed_Privacy_Widget_Output_Filter The single instance of this class
 	 */
 	public static function get_instance() {
@@ -67,6 +70,8 @@ class Embed_Privacy_Widget_Output_Filter {
 	
 	/**
 	 * Initialize the functionality by registering actions and filters.
+	 * 
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\handler\Widget instead
 	 */
 	private function __construct() {
 		\add_filter( 'dynamic_sidebar_params', [ $this, 'filter_dynamic_sidebar_params' ], \PHP_INT_MAX );
@@ -75,6 +80,8 @@ class Embed_Privacy_Widget_Output_Filter {
 	/**
 	 * Replace the widget's display callback with the Dynamic Sidebar Params display callback, storing the original callback for use later.
 	 * The $sidebar_params variable is not modified; it is only used to get the current widget's ID.
+	 * 
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\handler\Widget::filter_dynamic_sidebar_params() instead
 	 * 
 	 * @param	array	$sidebar_params The sidebar parameters
 	 * @return	array The sidebar parameters
@@ -97,6 +104,8 @@ class Embed_Privacy_Widget_Output_Filter {
 	
 	/**
 	 * Execute the widget's original callback function, filtering its output.
+	 * 
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\handler\Widget::display_widget() instead
 	 */
 	public function display_widget() {
 		global $wp_registered_widgets;
