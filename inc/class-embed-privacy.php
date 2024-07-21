@@ -566,29 +566,6 @@ class Embed_Privacy {
 	}
 	
 	/**
-	 * Transform a tweet into a local one.
-	 * 
-	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\integration\Twitter::get_local_tweet() instead
-	 * @since		1.3.0
-	 * 
-	 * @param	string	$html Embed code
-	 * @return	string Local embed
-	 */
-	private function get_local_tweet( $html ) {
-		\_doing_it_wrong(
-			__METHOD__,
-			\sprintf(
-				/* translators: alternative method */
-				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\integration\Twitter::get_local_tweet()',
-			),
-			'1.10.0'
-		);
-		
-		return Twitter::get_local_tweet( $html );
-	}
-	
-	/**
 	 * Output a complete template of the overlay.
 	 * 
 	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\embed\Template::get() instead
