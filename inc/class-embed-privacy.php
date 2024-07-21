@@ -7,6 +7,7 @@ use epiphyt\Embed_Privacy\admin\User_Interface;
 use epiphyt\Embed_Privacy\embed\Overlay;
 use epiphyt\Embed_Privacy\embed\Template;
 use epiphyt\Embed_Privacy\handler\Post;
+use epiphyt\Embed_Privacy\handler\Widget;
 use epiphyt\Embed_Privacy\integration\Activitypub;
 use epiphyt\Embed_Privacy\integration\Amp;
 use epiphyt\Embed_Privacy\integration\Astra;
@@ -212,7 +213,6 @@ class Embed_Privacy {
 			\add_filter( 'oembed_ttl', '__return_zero' );
 		}
 		
-		\add_filter( 'embed_privacy_widget_output', [ $this, 'replace_embeds' ] );
 		\add_shortcode( 'embed_privacy_opt_out', [ $this, 'shortcode_opt_out' ] );
 		
 		Migration::get_instance()->init();
@@ -220,6 +220,7 @@ class Embed_Privacy {
 		Provider_Functionality::get_instance()->init();
 		Settings::init();
 		User_Interface::init();
+		Widget::init();
 		$this->fields->init();
 		$this->thumbnail->init();
 	}
