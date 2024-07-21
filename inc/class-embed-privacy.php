@@ -7,6 +7,7 @@ use epiphyt\Embed_Privacy\admin\User_Interface;
 use epiphyt\Embed_Privacy\embed\Overlay;
 use epiphyt\Embed_Privacy\embed\Template;
 use epiphyt\Embed_Privacy\handler\Post;
+use epiphyt\Embed_Privacy\handler\Shortcode;
 use epiphyt\Embed_Privacy\handler\Widget;
 use epiphyt\Embed_Privacy\integration\Activitypub;
 use epiphyt\Embed_Privacy\integration\Amp;
@@ -76,15 +77,6 @@ class Embed_Privacy {
 	public $has_embed = false;
 	
 	/**
-	 * @since	1.6.0
-	 * @var		string[] List of ignored shortcodes
-	 */
-	private $ignored_shortcodes = [
-		'embed_privacy_opt_out',
-		'grw',
-	];
-	
-	/**
 	 * @since	1.10.0
 	 * @var		array List of integrations
 	 */
@@ -117,6 +109,12 @@ class Embed_Privacy {
 	 * @var		string The full path to the main plugin file
 	 */
 	public $plugin_file = '';
+	
+	/**
+	 * @since	1.10.0
+	 * @var		\epiphyt\Embed_Privacy\handler\Shortcode
+	 */
+	public $shortcode;
 	
 	/**
 	 * @deprecated	1.10.0
@@ -190,6 +188,7 @@ class Embed_Privacy {
 	public function __construct() {
 		$this->fields = new Fields();
 		$this->frontend = new Frontend();
+		$this->shortcode = new Shortcode();
 		$this->thumbnail = new Thumbnail();
 		$this->use_cache = ! \is_admin();
 	}
@@ -213,8 +212,6 @@ class Embed_Privacy {
 			\add_filter( 'oembed_ttl', '__return_zero' );
 		}
 		
-		\add_shortcode( 'embed_privacy_opt_out', [ $this, 'shortcode_opt_out' ] );
-		
 		Migration::get_instance()->init();
 		Post::init();
 		Provider_Functionality::get_instance()->init();
@@ -223,6 +220,7 @@ class Embed_Privacy {
 		Widget::init();
 		$this->fields->init();
 		$this->frontend->init();
+		$this->shortcode->init();
 		$this->thumbnail->init();
 	}
 	
@@ -534,21 +532,23 @@ class Embed_Privacy {
 	/**
 	 * Get a list with ignored shortcodes.
 	 * 
-	 * @since	1.6.0
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\Shortcode::get_ignored() instead
+	 * @since		1.6.0
 	 * 
 	 * @return	string[] List with ignored shortcodes
 	 */
 	public function get_ignored_shortcodes() {
-		/**
-		 * Filter the ignored shortcodes list.
-		 * 
-		 * @since	1.6.0
-		 * 
-		 * @param	string[]	$ignored_shortcodes Current list of ignored shortcodes
-		 */
-		$this->ignored_shortcodes = \apply_filters( 'embed_privacy_ignored_shortcodes', $this->ignored_shortcodes );
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\Shortcode::get_ignored()',
+			),
+			'1.10.0'
+		);
 		
-		return $this->ignored_shortcodes;
+		return $this->shortcode->get_ignored();
 	}
 	
 	/**
@@ -1169,78 +1169,24 @@ class Embed_Privacy {
 	/**
 	 * Display an Opt-out shortcode.
 	 * 
-	 * @since	1.2.0
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\handler\Shortcode::opt_out() instead
+	 * @since		1.2.0
 	 * 
 	 * @param	array	$attributes Shortcode attributes
 	 * @return	string The shortcode output
 	 */
 	public function shortcode_opt_out( $attributes ) {
-		$attributes = \shortcode_atts( [
-			'headline' => \__( 'Embed providers', 'embed-privacy' ),
-			'show_all' => 0,
-			'subline' => \__( 'Enable or disable embed providers globally. By enabling a provider, its embedded content will be displayed directly on every page without asking you anymore.', 'embed-privacy' ),
-		], $attributes );
-		$cookie = $this->get_cookie();
-		$embed_providers = Provider_Functionality::get_instance()->get_list();
-		$enabled_providers = array_keys( (array) $cookie );
-		$is_javascript_detection = get_option( 'embed_privacy_javascript_detection' ) === 'yes';
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\handler\Shortcode::opt_out()',
+			),
+			'1.10.0'
+		);
 		
-		if ( empty( $embed_providers ) ) {
-			return '';
-		}
-		
-		if ( ! $is_javascript_detection && ! $attributes['show_all'] && ! $enabled_providers ) {
-			return '';
-		}
-		
-		$headline = '<h3>' . \esc_html( $attributes['headline'] ) . '</h3>' . \PHP_EOL;
-		
-		/**
-		 * Filter the opt-out headline.
-		 * 
-		 * @param	string	$headline Current headline HTML
-		 * @param	array	$attributes Shortcode attributes
-		 */
-		$headline = \apply_filters( 'embed_privacy_opt_out_headline', $headline, $attributes );
-		
-		/**
-		 * Filter the opt-out subline.
-		 * 
-		 * @param	string	$subline Current subline HTML
-		 * @param	array	$attributes Shortcode attributes
-		 */
-		$subline = \apply_filters( 'embed_privacy_opt_out_subline', '<p>' . \esc_html( $attributes['subline'] ) . '</p>' . \PHP_EOL, $attributes );
-		
-		$output = '<div class="embed-privacy-opt-out" data-show-all="' . ( $attributes['show_all'] ? 1 : 0 ) . '">' . \PHP_EOL . $headline . $subline;
-		
-		foreach ( $embed_providers as $provider ) {
-			if ( $is_javascript_detection ) {
-				$is_checked = false;
-			}
-			else if ( $attributes['show_all'] ) {
-				$is_checked = \in_array( $provider->get_name(), $enabled_providers, true );
-			}
-			else {
-				$is_checked = true;
-			}
-			
-			$is_hidden = ! $is_javascript_detection && ! $attributes['show_all'] && ! \in_array( $provider->get_name(), $enabled_providers, true );
-			$microtime = \str_replace( '.', '', \microtime( true ) );
-			$output .= '<span class="embed-privacy-provider' . ( $is_hidden ? ' is-hidden' : '' ) . '">' . \PHP_EOL;
-			$output .= '<label class="embed-privacy-opt-out-label" for="embed-privacy-provider-' . \esc_attr( $provider->get_name() ) . '-' . $microtime . '" data-embed-provider="' . \esc_attr( $provider->get_name() ) . '">';
-			$output .= '<input type="checkbox" id="embed-privacy-provider-' . \esc_attr( $provider->get_name() ) . '-' . $microtime . '" ' . \checked( $is_checked, true, false ) . ' class="embed-privacy-opt-out-input" data-embed-provider="' . \esc_attr( $provider->get_name() ) . '"> ';
-			$output .= \sprintf(
-				/* translators: embed provider title */
-				\esc_html__( 'Load all embeds from %s', 'embed-privacy' ),
-				\esc_html( $provider->get_title() )
-			);
-			$output .= '</label><br>' . \PHP_EOL;
-			$output .= '</span>' . \PHP_EOL;
-		}
-		
-		$output .= '</div>' . \PHP_EOL;
-		
-		return $output;
+		return Shortcode::opt_out( $attributes );
 	}
 	
 	/**

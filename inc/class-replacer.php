@@ -36,7 +36,7 @@ final class Replacer {
 		}
 		
 		// do nothing for ignored shortcodes
-		if ( ! empty( $tag ) && \in_array( $tag, $embed_privacy->get_ignored_shortcodes(), true ) ) {
+		if ( ! empty( $tag ) && \in_array( $tag, $embed_privacy->shortcode->get_ignored(), true ) ) {
 			return $content;
 		}
 		
