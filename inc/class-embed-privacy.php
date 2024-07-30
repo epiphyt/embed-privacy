@@ -367,7 +367,24 @@ class Embed_Privacy {
 			'1.10.0'
 		);
 		
-		return Provider_Functionality::get_instance()->get_by_name( $name );
+		if ( empty( $name ) ) {
+			return null;
+		}
+		
+		$embed_providers = $this->get_embeds();
+		$embed = null;
+		$pattern = '/^' . \preg_quote( $name, '/' ) . '\-\d+/';
+		
+		foreach ( $embed_providers as $embed_provider ) {
+			if ( $embed_provider->post_name !== $name && ! \preg_match( $pattern, $embed_provider->post_name ) ) {
+				continue;
+			}
+			
+			$embed = $embed_provider;
+			break;
+		}
+		
+		return $embed;
 	}
 	
 	/**
