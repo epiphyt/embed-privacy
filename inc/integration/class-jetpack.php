@@ -41,6 +41,8 @@ final class Jetpack {
 			return $content;
 		}
 		
+		\remove_filter( 'embed_privacy_overlay_replaced_content', [ self::class, 'replace_facebook_posts' ] );
+		
 		$attributes = [
 			'additional_checks' => [
 				[
