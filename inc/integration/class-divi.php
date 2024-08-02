@@ -4,6 +4,7 @@ namespace epiphyt\Embed_Privacy\integration;
 use DOMDocument;
 use epiphyt\Embed_Privacy\Embed_Privacy;
 use epiphyt\Embed_Privacy\handler\Theme;
+use epiphyt\Embed_Privacy\Replacer;
 
 /**
  * Divi integration for Embed Privacy.
@@ -78,6 +79,8 @@ final class Divi {
 		}
 		
 		\libxml_use_internal_errors( $use_internal_errors );
+		
+		return Replacer
 		
 		return Embed_Privacy::get_instance()->replace_embeds_oembed( $item_embed, $url, $attributes );
 	}

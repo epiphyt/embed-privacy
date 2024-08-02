@@ -2,9 +2,7 @@
 namespace epiphyt\Embed_Privacy\integration;
 
 use DOMDocument;
-use epiphyt\Embed_Privacy\embed\Overlay;
 use epiphyt\Embed_Privacy\embed\Provider;
-use epiphyt\Embed_Privacy\embed\Template;
 use epiphyt\Embed_Privacy\Embed_Privacy;
 use epiphyt\Embed_Privacy\Replacer;
 
