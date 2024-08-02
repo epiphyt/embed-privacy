@@ -350,7 +350,7 @@ class Embed_Privacy {
 	/**
 	 * Get an embed provider by its name.
 	 * 
-	 * @deprecated	Use epiphyt\Embed_Privacy\Provider::get_by_name() instead
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\Provider::get_by_name() instead
 	 * @since		1.3.5
 	 * 
 	 * @param	string	$name The name to search for
