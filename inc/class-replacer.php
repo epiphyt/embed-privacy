@@ -117,15 +117,16 @@ final class Replacer {
 			}
 		}
 		
+		// check for local tweets
+		if ( $overlay->get_provider()->is( 'twitter' ) && \get_option( 'embed_privacy_local_tweets' ) ) {
+			return Twitter::get_local_tweet( $output );
+		}
+		
 		$output = $overlay->get( $attributes );
 		
 		if ( $overlay->get_provider()->is( 'youtube' ) ) {
 			// replace youtube.com with youtube-nocookie.com
 			$output = \str_replace( 'youtube.com', 'youtube-nocookie.com', $output );
-		}
-		else if ( $overlay->get_provider()->is( 'twitter' ) && \get_option( 'embed_privacy_local_tweets' ) ) {
-			// check for local tweets
-			return Twitter::get_local_tweet( $output );
 		}
 		
 		return $output;
