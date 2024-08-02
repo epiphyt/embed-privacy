@@ -35,7 +35,7 @@ final class Template {
 				'1.10.0'
 			);
 			
-			$provider = new Embed_Provider( Provider::get_instance()->get_by_name( Provider::sanitize_name( $provider ) ) );
+			$provider = Provider::get_instance()->get_by_name( Provider::sanitize_name( $provider ) );
 		}
 		
 		/**
@@ -231,6 +231,8 @@ final class Template {
 			</div>
 		</div>
 		<?php
+		$markup = \ob_get_clean();
+		
 		/**
 		 * Filter the complete markup of the embed.
 		 * 
@@ -242,7 +244,7 @@ final class Template {
 		$markup = \apply_filters_deprecated(
 			'embed_privacy_markup',
 			[
-				\ob_get_clean(),
+				$markup,
 				$provider->get_title(),
 			],
 			'1.10.0',
@@ -257,7 +259,7 @@ final class Template {
 		 * @param	string									$markup The markup
 		 * @param	\epiphyt\Embed_Privacy\embed\Provider	$provider The embed provider of this embed
 		 */
-		$markup = \apply_filters( 'embed_privacy_template_markup', \ob_get_clean(), $provider );
+		$markup = \apply_filters( 'embed_privacy_template_markup', $markup, $provider );
 		
 		Embed_Privacy::get_instance()->has_embed = true;
 		
