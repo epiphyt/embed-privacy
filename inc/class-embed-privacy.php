@@ -961,7 +961,7 @@ class Embed_Privacy {
 	/**
 	 * Replace embeds in Divi Builder.
 	 * 
-	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\integration\Divi::replace() instead
+	 * @deprecated	1.10.0
 	 * @since		1.2.0
 	 * @since		1.6.0 Deprecated second parameter
 	 * 
@@ -969,18 +969,14 @@ class Embed_Privacy {
 	 * @param	string	$url The URL of the embed
 	 * @return	string The updated embed code
 	 */
-	public function replace_embeds_divi( $item_embed, $url ) {
+	public function replace_embeds_divi( $item_embed, $url ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		\_doing_it_wrong(
 			__METHOD__,
-			\sprintf(
-				/* translators: alternative method */
-				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\integration\Divi::replace()',
-			),
+			\esc_html__( 'This method is outdated and will be removed in the future.', 'embed-privacy' ),
 			'1.10.0'
 		);
 		
-		return ( new Divi() )->replace( $item_embed, $url );
+		return $item_embed;
 	}
 	
 	/**
