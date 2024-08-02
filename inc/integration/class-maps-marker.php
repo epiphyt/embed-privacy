@@ -3,7 +3,10 @@ namespace epiphyt\Embed_Privacy\integration;
 
 use DOMDocument;
 use epiphyt\Embed_Privacy\embed\Overlay;
+use epiphyt\Embed_Privacy\embed\Provider;
+use epiphyt\Embed_Privacy\embed\Template;
 use epiphyt\Embed_Privacy\Embed_Privacy;
+use epiphyt\Embed_Privacy\Replacer;
 
 /**
  * Maps Marker integration for Embed Privacy.
@@ -19,6 +22,48 @@ final class Maps_Marker {
 	 */
 	public static function init() {
 		\add_filter( 'do_shortcode_tag', [ self::class, 'replace' ], 10, 2 );
+		\add_filter( 'embed_privacy_overlay_provider', [ self::class, 'set_provider' ], 10, 2 );
+	}
+	
+	/**
+	 * Get the map dimensions.
+	 * 
+	 * @param	string	$content Embedded content
+	 * @return	array Embed dimensions (height and width)
+	 */
+	private static function get_dimensions( string $content ): array {
+		$height = '';
+		$width = '100%';
+		$use_errors = \libxml_use_internal_errors( true );
+		$dom = new DOMDocument();
+		$dom->loadHTML(
+			'<html><meta charset="utf-8">' . $content . '</html>',
+			\LIBXML_HTML_NOIMPLIED | \LIBXML_HTML_NODEFDTD
+		);
+		
+		/** @var	\DOMElement $element */
+		foreach ( $dom->getElementsByTagName( 'div' ) as $element ) {
+			if ( $element->getAttribute( 'class' ) === 'mmp-map' ) {
+				$style = $element->getAttribute( 'style' );
+				\preg_match( '/height:\s*(?<height>\d+)/', $style, $height_matches );
+				\preg_match( '/width:\s*(?<width>\d+)/', $style, $width_matches );
+				
+				if ( ! empty( $height_matches['height'] ) ) {
+					$height = $height_matches['height'];
+				}
+				
+				if ( ! empty( $width_matches['width'] ) ) {
+					$width = $width_matches['width'];
+				}
+			}
+		}
+		
+		\libxml_use_internal_errors( $use_errors );
+		
+		return [
+			'height' => $height,
+			'width' => $width,
+		];
 	}
 	
 	/**
@@ -37,8 +82,27 @@ final class Maps_Marker {
 			return $output;
 		}
 		
-		$overlay = new Overlay( $output );
+		$attributes = self::get_dimensions( $output );
+		$attributes['is_oembed'] = true;
 		
-		return $overlay->get();
+		return Replacer::replace_oembed( $output, '', $attributes );
+	}
+	
+	/**
+	 * Set the Maps Marker Pro provider.
+	 * 
+	 * @param	null|epiphyt\Embed_Privacy\embed\Provider	$provider Current provider
+	 * @param	string										$content Embedded content
+	 * @return	null|epiphyt\Embed_Privacy\embed\Provider Updated provider
+	 */
+	public static function set_provider( ?Provider $provider, string $content ) {
+		if ( ! $provider && ( \str_contains( $content, 'maps-marker-pro' ) || \str_contains( $content, '[mapsmarker' ) ) ) {
+			$provider = new Provider();
+			$provider->set_name( 'maps-marker-pro' );
+			$provider->set_pattern( '/maps-marker-pro|^\[mapsmarker/' );
+			$provider->set_title( \__( 'Maps Marker Pro', 'embed-privacy' ) );
+		}
+		
+		return $provider;
 	}
 }

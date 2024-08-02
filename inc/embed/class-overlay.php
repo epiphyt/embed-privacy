@@ -50,8 +50,6 @@ final class Overlay {
 	 * @return	string Content with embeds replaced by an overlay
 	 */
 	public function get( array $attributes = [] ) {
-		$content = $this->content;
-		
 		/**
 		 * Filter the content after it has been replaced with an overlay.
 		 * 
@@ -398,5 +396,14 @@ final class Overlay {
 			$this->provider->set_name( $provider );
 			$this->provider->set_title( $provider );
 		}
+		
+		/**
+		 * Filter the overlay provider.
+		 * 
+		 * @param	epiphyt\Embed_Privacy\embed\Provider	$provider Current provider
+		 * @param	string									$content Content to get the provider from
+		 * @param	string									$url URL to the embedded content
+		 */
+		$this->provider = \apply_filters( 'embed_privacy_overlay_provider', $this->provider, $content, $url );
 	}
 }

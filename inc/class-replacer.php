@@ -71,7 +71,7 @@ final class Replacer {
 		}
 		
 		// ignore embeds without host (ie. relative URLs)
-		if ( empty( \wp_parse_url( $url, \PHP_URL_HOST ) ) ) {
+		if ( ! empty( $url ) && empty( \wp_parse_url( $url, \PHP_URL_HOST ) ) ) {
 			return $output;
 		}
 		
