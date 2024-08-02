@@ -234,10 +234,30 @@ final class Template {
 		/**
 		 * Filter the complete markup of the embed.
 		 * 
+		 * @deprecated	1.10.0 Use embed_privacy_template_markup instead
+		 * 
 		 * @param	string	$markup The markup
-		 * @param	string	$provider The embed provider of this embed
+		 * @param	string	$provider_name The embed provider name of this embed
 		 */
-		$markup = \apply_filters( 'embed_privacy_markup', \ob_get_clean(), $provider );
+		$markup = \apply_filters_deprecated(
+			'embed_privacy_markup',
+			[
+				\ob_get_clean(),
+				$provider->get_title(),
+			],
+			'1.10.0',
+			'embed_privacy_template_markup'
+		);
+		
+		/**
+		 * Filter the complete markup of the embed.
+		 * 
+		 * @since	1.10.0
+		 * 
+		 * @param	string									$markup The markup
+		 * @param	\epiphyt\Embed_Privacy\embed\Provider	$provider The embed provider of this embed
+		 */
+		$markup = \apply_filters( 'embed_privacy_template_markup', \ob_get_clean(), $provider );
 		
 		Embed_Privacy::get_instance()->has_embed = true;
 		
