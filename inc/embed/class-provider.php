@@ -44,6 +44,11 @@ final class Provider {
 	private $privacy_policy_url = '';
 	
 	/**
+	 * @var		bool Whether the provider is a system provider
+	 */
+	private $system = false;
+	
+	/**
 	 * @var	int|null Thumbnail ID
 	 */
 	private $thumbnail_id = null;
@@ -71,6 +76,7 @@ final class Provider {
 			$this->set_name( Provider_Functionality::sanitize_name( $provider_object->post_name ) );
 			$this->set_pattern( \get_post_meta( $provider_object->ID, 'regex_default', true ) );
 			$this->set_privacy_policy_url( \get_post_meta( $provider_object->ID, 'privacy_policy_url', true ) );
+			$this->set_is_system( \get_post_meta( $provider_object->ID, 'is_system', true ) );
 			$this->set_thumbnail_id( \get_post_thumbnail_id( $provider_object ) );
 			$this->set_title( $provider_object->post_title );
 		}
@@ -171,6 +177,15 @@ final class Provider {
 	}
 	
 	/**
+	 * Whether the provider is a system provider or not.
+	 * 
+	 * @return	bool Whether the provider is a system provider
+	 */
+	public function is_system() {
+		return $this->system;
+	}
+	
+	/**
 	 * Whether the provider is unknown or not.
 	 * 
 	 * @return	bool Whether the provider is unknown
@@ -204,6 +219,15 @@ final class Provider {
 	 */
 	public function set_is_disabled( $disabled ) {
 		$this->disabled = $disabled;
+	}
+	
+	/**
+	 * Set the system state.
+	 * 
+	 * @param	bool	$system Whether this provider is a system provider
+	 */
+	public function set_is_system( $system ) {
+		$this->system = (bool) $system;
 	}
 	
 	/**
