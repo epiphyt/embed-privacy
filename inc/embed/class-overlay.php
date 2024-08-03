@@ -6,7 +6,7 @@ use DOMElement;
 use DOMNode;
 use epiphyt\Embed_Privacy\Embed_Privacy;
 use epiphyt\Embed_Privacy\Provider as Provider_Functionality;
-use WP_Post;
+use epiphyt\Embed_Privacy\Replacer;
 
 /**
  * Embed overlay related functionality.
@@ -114,9 +114,9 @@ final class Overlay {
 			return $content;
 		}
 		
-		if ( $this->provider === null ) {
+		if ( ! $this->provider instanceof Provider ) {
 			return $content;
-		} 
+		}
 		
 		/**
 		 * Filter whether to ignore this embed.
@@ -135,6 +135,7 @@ final class Overlay {
 			return $content;
 		}
 		
+		$attributes['regex'] = $this->provider->get_pattern();
 		$attributes = \wp_parse_args( $attributes, [
 			'additional_checks' => [],
 			'check_always_active' => false,
@@ -266,8 +267,8 @@ final class Overlay {
 				
 				// reset embed provider name
 				if ( $this->provider->is_unknown() ) {
-					$embed_provider = '';
-					$embed_provider_lowercase = '';
+					$this->provider->set_name( '' );
+					$this->provider->set_title( '' );
 				}
 			}
 			
@@ -306,45 +307,21 @@ final class Overlay {
 			empty( $this->replacements )
 			&& ! empty( $attributes['regex'] )
 			&& ! $this->provider->is_unknown()
+			&& ! $this->provider->is_system()
+			&& ! $this->provider->is_disabled()
 		) {
-			$provider = Provider_Functionality::get_instance()->get_by_name( $embed_provider_lowercase );
-			
-			if (
-				$provider instanceof WP_Post
-				&& ! \get_post_meta( $provider->ID, 'is_system', true )
-				&& \get_post_meta( $provider->ID, 'is_disabled', true ) !== 'yes'
-			) {
-				// extend regular expression to match the full element
-				if ( \strpos( $attributes['regex'], '<' ) === false || \strpos( $attributes['regex'], '>' ) === false ) {
-					$allowed_tags = [
-						'blockquote',
-						'div',
-						'embed',
-						'iframe',
-						'object',
-					];
-					
-					/**
-					 * Filter allowed HTML tags in regular expressions.
-					 * Only elements matching these tags get processed.
-					 * 
-					 * @since	1.6.0
-					 * 
-					 * @param	string[]	$allowed_tags The allowed tags
-					 * @param	string		$embed_provider_lowercase The embed provider without spaces and in lowercase
-					 * @return	array A list of allowed tags
-					 */
-					$allowed_tags = \apply_filters( 'embed_privacy_matcher_elements', $allowed_tags, $embed_provider_lowercase );
-					
-					$tags_regex = '(' . \implode( '|', \array_filter( $allowed_tags, function( $tag ) {
-						return \preg_quote( $tag, '/' );
-					} ) ) . ')';
-					$attributes['regex'] = '/<' . $tags_regex . '([^"]*)"([^<]*)' . \trim( $attributes['regex'], '/' ) . '([^"]*)"([^>]*)(>(.*)<\/' . $tags_regex . ')?>/';
-				}
-				
-				while ( \preg_match( $attributes['regex'], $content, $matches ) ) {
-					$content = \preg_replace( $attributes['regex'], Template::get( $embed_provider, $embed_provider_lowercase, $matches[0], $attributes ), $content, 1 );
-				}
+			while ( \preg_match( $attributes['regex'], $content, $matches ) ) {
+				$content = \preg_replace(
+					$attributes['regex'],
+					Template::get(
+						$this->provider->get_title(),
+						$this->provider->get_name(),
+						$matches[0],
+						$attributes
+					),
+					$content,
+					1
+				);
 			}
 		}
 		
@@ -381,7 +358,13 @@ final class Overlay {
 		$providers = Provider_Functionality::get_instance()->get_list();
 		
 		foreach ( $providers as $provider ) {
-			if ( $provider->is_matching( $content ) || $provider->is_matching( $url ) ) {
+			if (
+				$provider->is_matching(
+					$content,
+					Replacer::extend_pattern( $provider->get_pattern(), $provider )
+				)
+				|| ! empty( $url ) && $provider->is_matching( $url )
+			) {
 				$this->provider = $provider;
 				break;
 			}

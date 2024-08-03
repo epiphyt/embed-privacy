@@ -17,6 +17,70 @@ use epiphyt\Embed_Privacy\Provider;
  */
 final class Replacer {
 	/**
+	 * Extend a regular expression pattern with certain tags.
+	 * 
+	 * @param	string										$pattern Pattern to extend
+	 * @param	epiphyt\Embed_privacy\embed\Provider|null	$provider Current embed provider
+	 */
+	public static function extend_pattern( $pattern, $provider ) {
+		if ( empty( $pattern ) ) {
+			return $pattern;
+		}
+		
+		if ( \strpos( $pattern, '<' ) !== false && \strpos( $pattern, '>' ) !== false ) {
+			return $pattern;
+		}
+		
+		$allowed_tags = [
+			'blockquote',
+			'div',
+			'embed',
+			'iframe',
+			'object',
+		];
+		
+		/**
+		 * Filter allowed HTML tags in regular expressions.
+		 * Only elements matching these tags get processed.
+		 * 
+		 * @deprecated	1.10.0 Use embed_privacy_replacer_matcher_elements instead
+		 * @since		1.6.0
+		 * 
+		 * @param	string[]	$allowed_tags The allowed tags
+		 * @param	string		$provider_name The embed provider without spaces and in lowercase
+		 * @return	array A list of allowed tags
+		 */
+		$allowed_tags = \apply_filters_deprecated(
+			'embed_privacy_matcher_elements',
+			[
+				$allowed_tags,
+				$provider->get_name(),
+			],
+			'1.10.0',
+			'embed_privacy_replacer_matcher_elements'
+		);
+		
+		/**
+		 * Filter allowed HTML tags in regular expressions.
+		 * Only elements matching these tags get processed.
+		 * 
+		 * @since	1.10.0
+		 * 
+		 * @param	string[]	$allowed_tags List of allowed tags
+		 * @param	string		$provider Embed provider
+		 * @return	array Updated list of allowed tags
+		 */
+		$allowed_tags = \apply_filters( 'embed_privacy_replacer_matcher_elements', $allowed_tags, $provider );
+		
+		$tags_regex = '(' . \implode( '|', \array_filter( $allowed_tags, function( $tag ) {
+			return \preg_quote( $tag, '/' );
+		} ) ) . ')';
+		$pattern = '/<' . $tags_regex . '([^"]*)"([^<]*)' . \trim( $pattern, '/' ) . '([^"]*)"([^>]*)(>(.*)<\/' . $tags_regex . ')?>/';
+		
+		return $pattern;
+	}
+	
+	/**
 	 * Replace embeds with a container and hide the embed with an HTML comment.
 	 * 
 	 * @param	string	$content The original content
