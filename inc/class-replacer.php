@@ -27,7 +27,7 @@ final class Replacer {
 			return $pattern;
 		}
 		
-		if ( \strpos( $pattern, '<' ) !== false && \strpos( $pattern, '>' ) !== false ) {
+		if ( \str_contains( $pattern, '<' ) && \str_contains( $pattern, '>' ) ) {
 			return $pattern;
 		}
 		

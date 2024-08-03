@@ -135,7 +135,6 @@ final class Overlay {
 			return $content;
 		}
 		
-		$attributes['regex'] = $this->provider->get_pattern();
 		$attributes = \wp_parse_args( $attributes, [
 			'additional_checks' => [],
 			'check_always_active' => false,
@@ -144,7 +143,7 @@ final class Overlay {
 			'height' => 0,
 			'ignore_aspect_ratio' => false,
 			'is_oembed' => false,
-			'regex' => '',
+			'regex' => $this->provider->get_pattern(),
 			'strip_newlines' => ! \has_blocks( $content ),
 			'width' => 0,
 		] );
