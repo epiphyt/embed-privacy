@@ -24,7 +24,7 @@ final class Elementor {
 	public static function init() {
 		\add_action( 'embed_privacy_print_assets', [ self::class, 'enqueue_assets' ] );
 		\add_action( 'embed_privacy_register_assets', [ self::class, 'register_assets' ], 10, 2 );
-		\add_filter( 'embed_privacy_overlay_replaced_content', [ self::class, 'replace' ] );
+		\add_filter( 'embed_privacy_overlay_replaced_content', [ self::class, 'replace_youtube' ] );
 	}
 	
 	/**
@@ -43,7 +43,7 @@ final class Elementor {
 	 * @param	string	$content The content
 	 * @return	string The content with an embed overlay (if needed)
 	 */
-	private function get_youtube_overlay( $content ) {
+	private static function get_youtube_overlay( $content ) {
 		$provider = Provider::get_instance()->get_by_name( 'youtube' );
 		$replacements = [];
 		
@@ -160,23 +160,15 @@ final class Elementor {
 	}
 	
 	/**
-	 * Replace Elementor videos.
+	 * Replace YouTube videos.
+	 * As they are not embedded via regular iframe, we need to handle them manually.
 	 * 
 	 * @param	string	$content Current replaced content
 	 * @return	string Updated replaced content
 	 */
-	public static function replace( $content ) {
+	public static function replace_youtube( $content ) {
 		if ( ! self::is_used() ) {
 			return $content;
-		}
-		
-		$embed_providers = [
-			Provider::get_instance()->get_by_name( 'dailymotion' ),
-			Provider::get_instance()->get_by_name( 'vimeo' ),
-		];
-		
-		foreach ( $embed_providers as $provider ) {
-			$content = Embed_Privacy::get_instance()->get_embed_overlay( $provider, $content );
 		}
 		
 		if ( strpos( $content, 'youtube.com\/watch' ) !== false ) {
