@@ -74,11 +74,11 @@ final class Provider {
 			$this->set_description( $provider_object->post_content );
 			$this->set_is_disabled( Provider_Functionality::is_disabled( $provider_object ) );
 			$this->set_name( Provider_Functionality::sanitize_name( $provider_object->post_name ) );
-			$this->set_pattern( \get_post_meta( $provider_object->ID, 'regex_default', true ) );
 			$this->set_privacy_policy_url( \get_post_meta( $provider_object->ID, 'privacy_policy_url', true ) );
 			$this->set_is_system( \get_post_meta( $provider_object->ID, 'is_system', true ) );
 			$this->set_thumbnail_id( \get_post_thumbnail_id( $provider_object ) );
 			$this->set_title( $provider_object->post_title );
+			$this->set_pattern( \get_post_meta( $provider_object->ID, 'regex_default', true ) );
 		}
 		else {
 			$this->set_is_unknown( true );
@@ -197,10 +197,14 @@ final class Provider {
 	/**
 	 * Whether the provider is matching the current content.
 	 * 
+	 * @param	string	$content Content to check
+	 * @param	string	$pattern Optional alternative pattern
 	 * @return	bool Whether the provider is matching the current content
 	 */
-	public function is_matching( $content ) {
-		return (bool) ! empty( $this->pattern ) && \preg_match( $this->pattern, $content );
+	public function is_matching( $content, $pattern = '' ) {
+		$used_pattern = $pattern ?: $this->pattern;
+		
+		return (bool) ! empty( $used_pattern ) && \preg_match( $used_pattern, $content );
 	}
 	
 	/**
