@@ -2,6 +2,9 @@
 namespace epiphyt\Embed_Privacy\embed;
 
 use WP_Post;
+use WP_Theme_JSON;
+use WP_Theme_JSON_Data;
+use WP_Theme_JSON_Resolver;
 
 /**
  * Styles of an embed.
@@ -114,6 +117,27 @@ final class Style {
 			// since we cannot determine the actual width
 			if ( \strpos( $attributes['width'], '%' ) !== false ) {
 				global $content_width;
+				
+				if ( $content_width === null ) {
+					$theme_json_data = WP_Theme_JSON_Resolver::get_theme_data();
+					
+					if ( ! empty( $theme_json_data->get_settings()['layout']['contentSize'] ) ) {
+						$content_width = (int) \preg_replace( '/[^\d]*/', '',  $theme_json_data->get_settings()['layout']['contentSize'] );
+					}
+				}
+				
+				if ( $content_width === null ) {
+					$content_width = 800;
+				}
+				
+				/**
+				 * Filter the theme content width, which is used to determine the correct aspect ratio.
+				 * 
+				 * @since	1.10.0
+				 * 
+				 * @param	int		$content_width Current content width
+				 */
+				$content_width = (int) \apply_filters( 'embed_privacy_theme_content_width', (int) $content_width );
 				
 				$attributes['width'] = $content_width;
 			}
