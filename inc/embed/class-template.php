@@ -161,7 +161,15 @@ final class Template {
 		 * @param	string		$content The content
 		 * @param	string		$provider The embed provider of this embed
 		 */
-		$content = \apply_filters_deprecated( 'embed_privacy_content', [ $content, $provider->get_title() ], '1.10.0', 'embed_privacy_template_content' );
+		$content = \apply_filters_deprecated(
+			'embed_privacy_content',
+			[
+				$content,
+				$provider->get_title(),
+			],
+			'1.10.0',
+			'embed_privacy_template_content'
+		);
 		
 		/**
 		 * Filter the content of the embed overlay.
