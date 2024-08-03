@@ -45,9 +45,17 @@ final class Replacer {
 			$embed_privacy->has_embed = true;
 		}
 		
-		$overlay = new Overlay( $content );
+		$new_content = $content;
+		$overlay = new Overlay( $new_content );
+		$new_content = $overlay->get();
 		
-		return $overlay->get();
+		while ( $new_content !== $content ) {
+			$content = $new_content;
+			$overlay = new Overlay( $new_content );
+			$new_content = $overlay->get();
+		}
+		
+		return $new_content;
 	}
 	
 	/**
