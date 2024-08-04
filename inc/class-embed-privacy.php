@@ -21,7 +21,7 @@ use epiphyt\Embed_Privacy\integration\Maps_Marker;
 use epiphyt\Embed_Privacy\integration\Polylang;
 use epiphyt\Embed_Privacy\integration\Shortcodes_Ultimate;
 use epiphyt\Embed_Privacy\integration\Twitter;
-use epiphyt\Embed_Privacy\Provider as Provider_Functionality;
+use epiphyt\Embed_Privacy\Provider;
 use epiphyt\Embed_Privacy\Replacer;
 use epiphyt\Embed_Privacy\thumbnail\Thumbnail;
 use ReflectionMethod;
@@ -216,7 +216,7 @@ class Embed_Privacy {
 		
 		Migration::get_instance()->init();
 		Post::init();
-		Provider_Functionality::get_instance()->init();
+		Provider::get_instance()->init();
 		Settings::init();
 		User_Interface::init();
 		Widget::init();
@@ -291,7 +291,7 @@ class Embed_Privacy {
 	/**
 	 * Enqueue our assets for the frontend.
 	 * 
-	 * @deprecated	1.4.4 Use Embed_Privacy::print_assets() instead
+	 * @deprecated	1.4.4 Use epiphyt\Embed_Privacy\Frontend::print_assets() instead
 	 */
 	public function enqueue_assets() {
 		\_doing_it_wrong(
@@ -299,7 +299,7 @@ class Embed_Privacy {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead.', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\Embed_Privacy::print_assets()',
+				'epiphyt\Embed_Privacy\Frontend::print_assets()',
 			),
 			'1.4.4'
 		);
@@ -408,7 +408,7 @@ class Embed_Privacy {
 			'1.10.0'
 		);
 		
-		if ( Provider_Functionality::is_always_active( $provider->post_name ) ) {
+		if ( Provider::is_always_active( $provider->post_name ) ) {
 			return $content;
 		}
 		
@@ -703,7 +703,7 @@ class Embed_Privacy {
 	/**
 	 * Check if a provider is always active.
 	 * 
-	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\Provider_Functionality::is_always_active() instead
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\Provider::is_always_active() instead
 	 * @since		1.1.0
 	 * 
 	 * @param	string		$provider The embed provider in lowercase
@@ -715,12 +715,12 @@ class Embed_Privacy {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\Provider_Functionality::is_always_active()',
+				'epiphyt\Embed_Privacy\Provider::is_always_active()',
 			),
 			'1.10.0'
 		);
 		
-		return Provider_Functionality::get_instance()::is_always_active( $provider );
+		return Provider::is_always_active( $provider );
 	}
 	
 	/**
@@ -1002,13 +1002,13 @@ class Embed_Privacy {
 			return $output;
 		}
 		
-		$provider = Provider_Functionality::get_instance()->get_by_name( 'twitter' );
+		$provider = Provider::get_instance()->get_by_name( 'twitter' );
 		
 		if ( ! $provider->is_matching( $url ) ) {
 			return $output;
 		}
 		
-		if ( Provider_Functionality::is_always_active( $provider->get_name() ) ) {
+		if ( Provider::is_always_active( $provider->get_name() ) ) {
 			return $output;
 		}
 		
@@ -1190,7 +1190,7 @@ class Embed_Privacy {
 	/**
 	 * Register post type.
 	 * 
-	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy::register_post_type() instead
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy:\Embed_Privacy:register_post_type() instead
 	 * @since	1.2.0
 	 */
 	public function set_post_type() {
@@ -1199,7 +1199,7 @@ class Embed_Privacy {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy::register_post_type()',
+				'epiphyt\Embed_Privacy\Embed_Privacy::register_post_type()',
 			),
 			'1.10.0'
 		);
