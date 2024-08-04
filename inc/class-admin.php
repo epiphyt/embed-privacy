@@ -3,6 +3,8 @@ namespace epiphyt\Embed_Privacy;
 
 use epiphyt\Embed_Privacy\admin\Field;
 use epiphyt\Embed_Privacy\admin\Fields;
+use epiphyt\Embed_Privacy\admin\Settings;
+use epiphyt\Embed_Privacy\admin\User_Interface;
 
 /**
  * Admin related methods for Embed Privacy.
@@ -56,7 +58,7 @@ class Admin {
 	 * @param	string	$file  Current plugin file.
 	 * @return	array Merged links
 	 */
-	public function add_meta_link( $input, $file ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+	public function add_meta_link( $input, $file ) {
 		\_doing_it_wrong(
 			__METHOD__,
 			\sprintf(
@@ -66,6 +68,7 @@ class Admin {
 			),
 			'1.10.0'
 		);
+		User_Interface::add_meta_link( $input, $file );
 	}
 	
 	/**
@@ -111,7 +114,6 @@ class Admin {
 			),
 			'1.10.0'
 		);
-		
 		Field::get( $attributes );
 	}
 	
@@ -143,7 +145,7 @@ class Admin {
 			),
 			'1.10.0'
 		);
-		
+		Settings::register();
 	}
 	
 	/**
@@ -161,6 +163,7 @@ class Admin {
 			),
 			'1.10.0'
 		);
+		Settings::get_page();
 	}
 	
 	/**
@@ -178,5 +181,6 @@ class Admin {
 			),
 			'1.10.0'
 		);
+		Settings::register_menu();
 	}
 }
