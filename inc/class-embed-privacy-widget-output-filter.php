@@ -87,6 +87,16 @@ class Embed_Privacy_Widget_Output_Filter {
 	 * @return	array The sidebar parameters
 	 */
 	public function filter_dynamic_sidebar_params( $sidebar_params ) {
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\handler\Widget::filter_dynamic_sidebar_params()',
+			),
+			'1.10.0'
+		);
+		
 		if ( \is_admin() ) {
 			return $sidebar_params;
 		}
@@ -108,6 +118,16 @@ class Embed_Privacy_Widget_Output_Filter {
 	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\handler\Widget::display_widget() instead
 	 */
 	public function display_widget() {
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\handler\Widget::display_widget()',
+			),
+			'1.10.0'
+		);
+		
 		global $wp_registered_widgets;
 		$original_callback_params = \func_get_args();
 		
