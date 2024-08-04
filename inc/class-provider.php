@@ -197,11 +197,20 @@ final class Provider {
 		}
 		// phpcs:enable
 		
-		if ( ! empty( $hash ) ) {
-			return $this->list[ $hash ];
-		}
+		$identifier = ! empty( $this->list[ $hash ] ) ? $hash : $type;
 		
-		return $this->list[ $type ];
+		/**
+		 * Filter the list of providers of a specific identifier.
+		 * 
+		 * @since	1.10.0
+		 * 
+		 * @param	array	$provider_list Current provider list
+		 * @param	string	$identifier Current identifier
+		 * @param	array	$global_list List with all providers of all identifiers
+		 */
+		$this->list[ $identifier ] = \apply_filters( 'embed_privacy_provider_list', $this->list[ $identifier ], $identifier, $this->list );
+		
+		return $this->list[ $identifier ];
 	}
 	
 	/**
