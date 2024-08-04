@@ -49,7 +49,7 @@ class Admin {
 	/**
 	 * Add plugin meta links.
 	 * 
-	 * @deprecated	1.10.0
+	 * @deprecated	1.10.0 Use epiphyt\admin\User_Interface::add_meta_link() instead
 	 * @since		1.6.0
 	 * 
 	 * @param	array	$input Registered links.
@@ -59,7 +59,11 @@ class Admin {
 	public function add_meta_link( $input, $file ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		\_doing_it_wrong(
 			__METHOD__,
-			\esc_html__( 'This method is outdated and will be removed in the future.', 'embed-privacy' ),
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\admin\User_Interface::add_meta_link()',
+			),
 			'1.10.0'
 		);
 	}
