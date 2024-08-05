@@ -213,8 +213,8 @@ class Thumbnails {
 		/**
 		 * Filter the supported providers.
 		 * 
-		 * @since		1.7.0
 		 * @deprecated	1.9.0
+		 * @since		1.7.0
 		 * 
 		 * @param	array	$supported_providers Current supported providers
 		 */

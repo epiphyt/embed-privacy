@@ -49,7 +49,17 @@ final class Template {
 		 * @param	string	$provider_name The embed provider without spaces and in lowercase
 		 * @param	string	$output The output before replacing it
 		 */
-		$attributes = (array) \apply_filters_deprecated( 'embed_privacy_overlay_args', [ $attributes, $provider, $provider->get_name(), $output ], '1.10.0', 'embed_privacy_template_arguments' );
+		$attributes = (array) \apply_filters_deprecated(
+			'embed_privacy_overlay_args',
+			[
+				$attributes,
+				$provider,
+				$provider->get_name(),
+				$output,
+			],
+			'1.10.0',
+			'embed_privacy_template_arguments'
+		);
 		
 		/**
 		 * Filter the template attributes.

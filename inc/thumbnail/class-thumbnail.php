@@ -128,7 +128,7 @@ final class Thumbnail {
 						/**
 						 * Fires before orphaned data are deleted.
 						 * 
-						 * @deprecated	1.10.0 Use filter embed_privacy_pre_thumbnail_delete_orphaned_delete instead
+						 * @deprecated	1.10.0 Use filter embed_privacy_thumbnail_delete_orphaned instead
 						 * @since		1.8.0
 						 * 
 						 * @param	string	$id The thumbnail ID
@@ -136,7 +136,17 @@ final class Thumbnail {
 						 * @param	int		$post_id The post ID
 						 * @param	string	$provider The provider name
 						 */
-						\do_action_deprecated( 'embed_privacy_pre_thumbnail_delete_orphaned_delete', [ $id, $url, $post_id, $provider ], '1.10.0', 'embed_privacy_pre_thumbnail_delete_orphaned_delete' );
+						\do_action_deprecated(
+							'embed_privacy_pre_thumbnail_delete_orphaned_delete',
+							[
+								$id,
+								$url,
+								$post_id,
+								$provider,
+							],
+							'1.10.0',
+							'embed_privacy_thumbnail_delete_orphaned'
+						);
 						
 						$should_delete = ! \has_action( 'embed_privacy_pre_thumbnail_delete_orphaned_delete' );
 						
@@ -508,8 +518,8 @@ final class Thumbnail {
 		/**
 		 * Filter the supported providers.
 		 * 
-		 * @since		1.7.0
 		 * @deprecated	1.9.0
+		 * @since		1.7.0
 		 * 
 		 * @param	array	$supported_providers Current supported providers
 		 */
