@@ -197,7 +197,7 @@ final class Provider {
 		}
 		// phpcs:enable
 		
-		$identifier = ! empty( $this->list[ $hash ] ) ? $hash : $type;
+		$identifier = ! empty( $hash ) && ! empty( $this->list[ $hash ] ) ? $hash : $type;
 		
 		/**
 		 * Filter the list of providers of a specific identifier.
