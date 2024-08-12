@@ -110,12 +110,13 @@ final class Style {
 			&& empty( $attributes['ignore_aspect_ratio'] )
 		) {
 			// if height is in percentage, we cannot determine the aspect ratio
-			if ( \strpos( $attributes['height'], '%' ) !== false ) {
+			if ( \str_contains( $attributes['height'], '%' ) ) {
 				$attributes['ignore_aspect_ratio'] = true;
 			}
+			
 			// if width is in percentage, we need to use the content width
 			// since we cannot determine the actual width
-			if ( \strpos( $attributes['width'], '%' ) !== false ) {
+			if ( \str_contains( $attributes['width'], '%' ) ) {
 				global $content_width;
 				
 				if ( $content_width === null ) {

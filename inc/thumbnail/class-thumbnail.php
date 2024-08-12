@@ -102,7 +102,7 @@ final class Thumbnail {
 							$url = \reset( $url );
 						}
 						
-						$missing_url = \strpos( $post->post_content, $url ) === false;
+						$missing_url = ! \str_contains( $post->post_content, $url );
 						
 						if ( $missing_url && self::is_in_acf_fields( $post_id, $url ) ) {
 							$missing_url = false;
@@ -203,7 +203,7 @@ final class Thumbnail {
 		$metadata = \get_post_meta( $post_id );
 		
 		foreach ( $metadata as $meta_key => $meta_value ) {
-			if ( \strpos( $meta_key, self::METADATA_PREFIX . '_' ) === false ) {
+			if ( ! \str_contains( $meta_key, self::METADATA_PREFIX . '_' ) ) {
 				continue;
 			}
 			
@@ -462,7 +462,7 @@ final class Thumbnail {
 					break;
 				}
 			}
-			else if ( \strpos( (string) $field, $content ) !== false ) {
+			else if ( \str_contains( (string) $field, $content ) ) {
 				$is_in_fields = true;
 				break;
 			}

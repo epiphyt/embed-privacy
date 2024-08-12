@@ -148,7 +148,7 @@ final class Replacer {
 		
 		// check the current host
 		// see: https://github.com/epiphyt/embed-privacy/issues/24
-		if ( \strpos( $url, \wp_parse_url( \home_url(), \PHP_URL_HOST ) ) !== false ) {
+		if ( \str_contains( $url, \wp_parse_url( \home_url(), \PHP_URL_HOST ) ) ) {
 			return $output;
 		}
 		

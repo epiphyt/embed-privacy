@@ -58,7 +58,7 @@ final class Elementor {
 		
 		/** @var	\DOMElement $element */
 		foreach ( $dom->getElementsByTagName( 'div' ) as $element ) {
-			if ( \strpos( $element->getAttribute( 'data-settings' ), 'youtube_url' ) === false ) {
+			if ( ! \str_contains( $element->getAttribute( 'data-settings' ), 'youtube_url' ) ) {
 				continue;
 			}
 			
@@ -173,7 +173,7 @@ final class Elementor {
 			return $content;
 		}
 		
-		if ( strpos( $content, 'youtube.com\/watch' ) !== false ) {
+		if ( \str_contains( $content, 'youtube.com\/watch' ) ) {
 			$content = self::get_youtube_overlay( $content );
 		}
 		

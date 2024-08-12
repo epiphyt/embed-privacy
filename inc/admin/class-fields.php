@@ -302,7 +302,7 @@ final class Fields {
 			if ( \is_array( $_POST[ $field['name'] ] ) ) {
 				$value = self::sanitize_array( \wp_unslash( $_POST[ $field['name'] ] ) );
 			}
-			else if ( \strpos( $field['name'], 'regex' ) === false ) {
+			else if ( ! \str_contains( $field['name'], 'regex' ) ) {
 				$value = \sanitize_text_field( \wp_unslash( $_POST[ $field['name'] ] ) );
 			}
 			else {
