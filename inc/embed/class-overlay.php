@@ -306,7 +306,6 @@ final class Overlay {
 			empty( $this->replacements )
 			&& ! empty( $attributes['regex'] )
 			&& ! $this->provider->is_unknown()
-			&& ! $this->provider->is_system()
 			&& ! $this->provider->is_disabled()
 			&& \preg_match( $attributes['regex'], $content, $matches ) !== false
 		) {
