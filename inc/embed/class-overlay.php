@@ -143,7 +143,7 @@ final class Overlay {
 			'height' => 0,
 			'ignore_aspect_ratio' => false,
 			'is_oembed' => false,
-			'regex' => $this->provider->get_pattern(),
+			'regex' => Replacer::extend_pattern( $this->provider->get_pattern(), $this->provider ),
 			'strip_newlines' => ! \has_blocks( $content ),
 			'width' => 0,
 		] );
@@ -181,6 +181,7 @@ final class Overlay {
 				$attributes['element_attribute'] = 'data';
 			}
 			
+			/** @var	\DOMElement $element */
 			foreach ( $dom->getElementsByTagName( $tag ) as $element ) {
 				if ( ! Embed_Privacy::get_instance()->run_checks( $attributes['additional_checks'], $element ) ) {
 					continue;
@@ -249,6 +250,7 @@ final class Overlay {
 				);
 				$overlay = null;
 				
+				/** @var	\DOMElement $div */
 				foreach ( $template_dom->getElementsByTagName( 'div' ) as $div ) {
 					if ( stripos( $div->getAttribute( 'class' ), 'embed-privacy-container' ) !== false ) {
 						$overlay = $div;
@@ -277,7 +279,6 @@ final class Overlay {
 				$elements = $dom->getElementsByTagName( $tag );
 				$i = $elements->length - 1;
 				
-				// phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 				// use regressive loop for replaceChild()
 				// see: https://www.php.net/manual/en/domnode.replacechild.php#50500
 				while ( $i > -1 ) {
@@ -285,15 +286,14 @@ final class Overlay {
 					
 					foreach ( $replacements as $replacement ) {
 						if ( $replacement['element'] === $element ) {
-							$element->parentNode->replaceChild( $replacement['replace'], $replacement['element'] );
+							$element->parentNode->replaceChild( $replacement['replace'], $replacement['element'] ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 						}
 					}
 					
 					$i--;
 				}
 				
-				$content = $dom->saveHTML( $dom->documentElement );
-				// phpcs:enable
+				$content = $dom->saveHTML( $dom->documentElement ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 			}
 		}
 		
@@ -308,20 +308,19 @@ final class Overlay {
 			&& ! $this->provider->is_unknown()
 			&& ! $this->provider->is_system()
 			&& ! $this->provider->is_disabled()
+			&& \preg_match( $attributes['regex'], $content, $matches ) !== false
 		) {
-			while ( \preg_match( $attributes['regex'], $content, $matches ) ) {
-				$content = \preg_replace(
-					$attributes['regex'],
-					Template::get(
-						$this->provider->get_title(),
-						$this->provider->get_name(),
-						$matches[0],
-						$attributes
-					),
-					$content,
-					1
-				);
-			}
+			$content = \preg_replace(
+				$attributes['regex'],
+				Template::get(
+					$this->provider->get_title(),
+					$this->provider->get_name(),
+					$matches[0],
+					$attributes
+				),
+				$content,
+				1
+			);
 		}
 		
 		// decode to make sure there is nothing left encoded if replacements have been made
