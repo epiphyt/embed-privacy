@@ -313,8 +313,7 @@ final class Overlay {
 			$content = \preg_replace(
 				$attributes['regex'],
 				Template::get(
-					$this->provider->get_title(),
-					$this->provider->get_name(),
+					$this->provider,
 					$matches[0],
 					$attributes
 				),
