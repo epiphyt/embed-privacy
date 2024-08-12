@@ -74,7 +74,7 @@ final class Replacer {
 		$tags_regex = '(' . \implode( '|', \array_filter( $allowed_tags, function( $tag ) {
 			return \preg_quote( $tag, '/' );
 		} ) ) . ')';
-		$pattern = '/<' . $tags_regex . '([^"]*)"([^<]*)' . \trim( $pattern, '/' ) . '([^"]*)"([^>]*)(>(.*)<\/' . $tags_regex . ')?>/';
+		$pattern = '/<' . $tags_regex . '([^"]*)"([^<]*)' . \trim( $pattern, '/' ) . '([^"]*)"([^>]*)(>(.*?)<\/' . $tags_regex . ')?>/';
 		
 		return $pattern;
 	}
