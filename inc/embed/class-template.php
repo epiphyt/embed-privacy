@@ -1,9 +1,9 @@
 <?php
 namespace epiphyt\Embed_Privacy\embed;
 
-use epiphyt\Embed_Privacy\embed\Provider as Embed_Provider;
+use epiphyt\Embed_Privacy\data\Providers;
+use epiphyt\Embed_Privacy\embed\Provider;
 use epiphyt\Embed_Privacy\Embed_Privacy;
-use epiphyt\Embed_Privacy\Provider;
 
 /**
  * Embed Privacy template related functionality.
@@ -35,7 +35,7 @@ final class Template {
 				'1.10.0'
 			);
 			
-			$provider = Provider::get_instance()->get_by_name( Provider::sanitize_name( $provider ) );
+			$provider = Providers::get_instance()->get_by_name( Providers::sanitize_name( $provider ) );
 		}
 		
 		/**
@@ -75,12 +75,12 @@ final class Template {
 		if ( ! empty( $attributes['post_id'] ) ) {
 			$embed_post = \get_post( $attributes['post_id'] );
 			
-			if ( Provider::is_disabled( $embed_post ) ) {
+			if ( Providers::is_disabled( $embed_post ) ) {
 				return $output;
 			}
 		}
 		else if ( ! empty( $attributes['provider'] ) ) {
-			if ( $attributes['provider'] instanceof Embed_Provider && $attributes['provider']->is_disabled() ) {
+			if ( $attributes['provider'] instanceof Provider && $attributes['provider']->is_disabled() ) {
 				return $output;
 			}
 		}

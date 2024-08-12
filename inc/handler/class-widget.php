@@ -1,7 +1,7 @@
 <?php
 namespace epiphyt\Embed_Privacy\handler;
 
-use epiphyt\Embed_Privacy\Replacer;
+use epiphyt\Embed_Privacy\data\Replacer;
 
 /**
  * Widget handler.

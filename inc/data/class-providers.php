@@ -1,7 +1,7 @@
 <?php
-namespace epiphyt\Embed_Privacy;
+namespace epiphyt\Embed_Privacy\data;
 
-use epiphyt\Embed_Privacy\embed\Provider as Embed_Provider;
+use epiphyt\Embed_Privacy\embed\Provider;
 use epiphyt\Embed_Privacy\Embed_Privacy;
 use WP_Post;
 
@@ -13,9 +13,9 @@ use WP_Post;
  * @package	epiphyt\Embed_Privacy
  * @since	1.10.0
  */
-final class Provider {
+final class Providers {
 	/**
-	 * @var		\epiphyt\Embed_Privacy\Provider
+	 * @var		\epiphyt\Embed_Privacy\data\Providers
 	 */
 	public static $instance;
 	
@@ -65,14 +65,14 @@ final class Provider {
 	 * @return	\epiphyt\Embed_privacy\embed\Provider Embed provider instance
 	 */
 	public static function get_by_post( $post ) {
-		return new Embed_Provider( $post );
+		return new Provider( $post );
 	}
 	
 	/**
 	 * Get a list of providers by their post objects.
 	 * 
 	 * @param	\WP_Post[]	$post List of post objects
-	 * @return	\epiphyt\Embed_privacy\embed\Embed_Provider[] List of embed provider instances
+	 * @return	\epiphyt\Embed_privacy\embed\Provider[] List of embed provider instances
 	 */
 	public static function get_by_posts( $posts ) {
 		return \array_map( [ self::class, 'get_by_post' ], $posts );
@@ -81,7 +81,7 @@ final class Provider {
 	/**
 	 * Get a unique instance of the class.
 	 * 
-	 * @return	\epiphyt\Embed_Privacy\Provider The single instance of this class
+	 * @return	\epiphyt\Embed_Privacy\data\Providers The single instance of this class
 	 */
 	public static function get_instance() {
 		if ( self::$instance === null ) {

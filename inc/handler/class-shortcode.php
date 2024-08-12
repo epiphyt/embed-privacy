@@ -1,8 +1,8 @@
 <?php
 namespace epiphyt\Embed_Privacy\handler;
 
+use epiphyt\Embed_Privacy\data\Providers;
 use epiphyt\Embed_Privacy\Embed_Privacy;
-use epiphyt\Embed_Privacy\Provider;
 
 /**
  * Shortcode handler.
@@ -59,7 +59,7 @@ final class Shortcode {
 			'subline' => \__( 'Enable or disable embed providers globally. By enabling a provider, its embedded content will be displayed directly on every page without asking you anymore.', 'embed-privacy' ),
 		], $attributes );
 		$cookie = Embed_Privacy::get_instance()->get_cookie();
-		$embed_providers = Provider::get_instance()->get_list();
+		$embed_providers = Providers::get_instance()->get_list();
 		$enabled_providers = array_keys( (array) $cookie );
 		$is_javascript_detection = get_option( 'embed_privacy_javascript_detection' ) === 'yes';
 		

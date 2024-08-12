@@ -1,11 +1,10 @@
 <?php
-namespace epiphyt\Embed_Privacy;
+namespace epiphyt\Embed_Privacy\data;
 
 use epiphyt\Embed_Privacy\embed\Overlay;
 use epiphyt\Embed_Privacy\Embed_Privacy;
 use epiphyt\Embed_Privacy\handler\Oembed;
 use epiphyt\Embed_Privacy\integration\Twitter;
-use epiphyt\Embed_Privacy\Provider;
 
 /**
  * Replacer functionality.
@@ -161,7 +160,7 @@ final class Replacer {
 		}
 		
 		// check if cookie is set
-		if ( Provider::is_always_active( $overlay->get_provider()->get_name() ) ) {
+		if ( Providers::is_always_active( $overlay->get_provider()->get_name() ) ) {
 			return $output;
 		}
 		

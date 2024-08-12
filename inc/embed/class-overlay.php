@@ -4,9 +4,9 @@ namespace epiphyt\Embed_Privacy\embed;
 use DOMDocument;
 use DOMElement;
 use DOMNode;
+use epiphyt\Embed_Privacy\data\Providers;
+use epiphyt\Embed_Privacy\data\Replacer;
 use epiphyt\Embed_Privacy\Embed_Privacy;
-use epiphyt\Embed_Privacy\Provider as Provider_Functionality;
-use epiphyt\Embed_Privacy\Replacer;
 
 /**
  * Embed overlay related functionality.
@@ -77,7 +77,7 @@ final class Overlay {
 			! $ignore_unknown_providers
 			&& (
 				! \str_contains( $content, 'youtube-nocookie.com' )
-				|| ! Provider_Functionality::is_always_active( 'youtube' )
+				|| ! Providers::is_always_active( 'youtube' )
 			)
 		) {
 			$attributes['check_always_active'] = true;
@@ -198,7 +198,7 @@ final class Overlay {
 				
 				// providers need to be explicitly checked if they're always active
 				// see https://github.com/epiphyt/embed-privacy/issues/115
-				if ( $attributes['check_always_active'] && Provider_Functionality::is_always_active( $this->provider->get_name() ) ) {
+				if ( $attributes['check_always_active'] && Providers::is_always_active( $this->provider->get_name() ) ) {
 					if ( ! empty( $attributes['assets'] ) ) {
 						$content = Assets::get_static( $attributes['assets'], $content );
 					}
@@ -221,7 +221,7 @@ final class Overlay {
 					
 					// unknown providers need to be explicitly checked if they're always active
 					// see https://github.com/epiphyt/embed-privacy/issues/115
-					if ( $attributes['check_always_active'] && Provider_Functionality::is_always_active( $this->provider->get_name() ) ) {
+					if ( $attributes['check_always_active'] && Providers::is_always_active( $this->provider->get_name() ) ) {
 						if ( ! empty( $attributes['assets'] ) ) {
 							$content = Assets::get_static( $attributes['assets'], $content );
 						}
@@ -230,7 +230,7 @@ final class Overlay {
 					}
 					
 					// check URL for available provider
-					foreach ( Provider_Functionality::get_instance()->get_list() as $provider ) {
+					foreach ( Providers::get_instance()->get_list() as $provider ) {
 						if ( $provider->is_matching( $element->getAttribute( $attributes['element_attribute'] ) ) && empty( $replacements ) ) {
 							continue 2;
 						}
@@ -353,7 +353,7 @@ final class Overlay {
 	 * @param	string	$url URL to the embedded content
 	 */
 	private function set_provider( $content, $url = '' ) {
-		$providers = Provider_Functionality::get_instance()->get_list();
+		$providers = Providers::get_instance()->get_list();
 		
 		foreach ( $providers as $provider ) {
 			if (

@@ -4,6 +4,8 @@ namespace epiphyt\Embed_Privacy;
 use epiphyt\Embed_Privacy\admin\Fields;
 use epiphyt\Embed_Privacy\admin\Settings;
 use epiphyt\Embed_Privacy\admin\User_Interface;
+use epiphyt\Embed_Privacy\data\Providers;
+use epiphyt\Embed_Privacy\data\Replacer;
 use epiphyt\Embed_Privacy\embed\Overlay;
 use epiphyt\Embed_Privacy\embed\Template;
 use epiphyt\Embed_Privacy\handler\Post;
@@ -21,8 +23,6 @@ use epiphyt\Embed_Privacy\integration\Maps_Marker;
 use epiphyt\Embed_Privacy\integration\Polylang;
 use epiphyt\Embed_Privacy\integration\Shortcodes_Ultimate;
 use epiphyt\Embed_Privacy\integration\Twitter;
-use epiphyt\Embed_Privacy\Provider;
-use epiphyt\Embed_Privacy\Replacer;
 use epiphyt\Embed_Privacy\thumbnail\Thumbnail;
 use ReflectionMethod;
 use WP_Post;
@@ -216,7 +216,7 @@ class Embed_Privacy {
 		
 		Migration::get_instance()->init();
 		Post::init();
-		Provider::get_instance()->init();
+		Providers::get_instance()->init();
 		Settings::init();
 		User_Interface::init();
 		Widget::init();
@@ -350,7 +350,7 @@ class Embed_Privacy {
 	/**
 	 * Get an embed provider by its name.
 	 * 
-	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\Provider::get_by_name() instead
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\data\Providers::get_by_name() instead
 	 * @since		1.3.5
 	 * 
 	 * @param	string	$name The name to search for
@@ -362,7 +362,7 @@ class Embed_Privacy {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\Provider::get_by_name()',
+				'epiphyt\Embed_Privacy\data\Providers::get_by_name()',
 			),
 			'1.10.0'
 		);
@@ -408,7 +408,7 @@ class Embed_Privacy {
 			'1.10.0'
 		);
 		
-		if ( Provider::is_always_active( $provider->post_name ) ) {
+		if ( Providers::is_always_active( $provider->post_name ) ) {
 			return $content;
 		}
 		
@@ -428,7 +428,7 @@ class Embed_Privacy {
 	 * {@link https://developer.wordpress.org/reference/classes/wp_query/
 	 * WP_Query} documentation in the Developer Handbook.
 	 * 
-	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\Provider::get_list() instead
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\data\Providers::get_list() instead
 	 * @since		1.3.0
 	 * @since		1.8.0 Added the $args parameter
 	 * 
@@ -442,7 +442,7 @@ class Embed_Privacy {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\Provider::get_list()',
+				'epiphyt\Embed_Privacy\data\Providers::get_list()',
 			),
 			'1.10.0'
 		);
@@ -703,7 +703,7 @@ class Embed_Privacy {
 	/**
 	 * Check if a provider is always active.
 	 * 
-	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\Provider::is_always_active() instead
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\data\Providers::is_always_active() instead
 	 * @since		1.1.0
 	 * 
 	 * @param	string		$provider The embed provider in lowercase
@@ -715,12 +715,12 @@ class Embed_Privacy {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\Provider::is_always_active()',
+				'epiphyt\Embed_Privacy\data\Providers::is_always_active()',
 			),
 			'1.10.0'
 		);
 		
-		return Provider::is_always_active( $provider );
+		return Providers::is_always_active( $provider );
 	}
 	
 	/**
@@ -911,7 +911,7 @@ class Embed_Privacy {
 	/**
 	 * Replace embeds with a container and hide the embed with an HTML comment.
 	 * 
-	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\Replacer::replace_embeds() instead
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\data\Replacer::replace_embeds() instead
 	 * @since		1.2.0 Changed behavior of the method
 	 * @since		1.6.0 Added optional $tag parameter
 	 * 
@@ -925,7 +925,7 @@ class Embed_Privacy {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\Replacer::replace_embeds()',
+				'epiphyt\Embed_Privacy\data\Replacer::replace_embeds()',
 			),
 			'1.10.0'
 		);
@@ -936,7 +936,7 @@ class Embed_Privacy {
 	/**
 	 * Replace oembed embeds with a container and hide the embed with an HTML comment.
 	 * 
-	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\Replacer::replace_oembed() instead
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\data\Replacer::replace_oembed() instead
 	 * @since		1.2.0
 	 * 
 	 * @param	string	$output The original output
@@ -950,7 +950,7 @@ class Embed_Privacy {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\Replacer::replace_oembed()',
+				'epiphyt\Embed_Privacy\data\Replacer::replace_oembed()',
 			),
 			'1.10.0'
 		);
@@ -1002,13 +1002,13 @@ class Embed_Privacy {
 			return $output;
 		}
 		
-		$provider = Provider::get_instance()->get_by_name( 'twitter' );
+		$provider = Providers::get_instance()->get_by_name( 'twitter' );
 		
 		if ( ! $provider->is_matching( $url ) ) {
 			return $output;
 		}
 		
-		if ( Provider::is_always_active( $provider->get_name() ) ) {
+		if ( Providers::is_always_active( $provider->get_name() ) ) {
 			return $output;
 		}
 		
@@ -1076,7 +1076,7 @@ class Embed_Privacy {
 	/**
 	 * Replace video shortcode embeds.
 	 * 
-	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\Replacer::replace_video_shortcode() instead
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\data\Replacer::replace_video_shortcode() instead
 	 * @since		1.7.0
 	 * 
 	 * @param	string	$output Video shortcode HTML output
@@ -1088,7 +1088,7 @@ class Embed_Privacy {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\Replacer::replace_video_shortcode()',
+				'epiphyt\Embed_Privacy\data\Replacer::replace_video_shortcode()',
 			),
 			'1.10.0'
 		);

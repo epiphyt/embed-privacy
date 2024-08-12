@@ -1,9 +1,9 @@
 <?php
 namespace epiphyt\Embed_Privacy\handler;
 
+use epiphyt\Embed_Privacy\data\Providers;
+use epiphyt\Embed_Privacy\data\Replacer;
 use epiphyt\Embed_Privacy\Embed_Privacy;
-use epiphyt\Embed_Privacy\Provider;
-use epiphyt\Embed_Privacy\Replacer;
 use WP_Post;
 
 /**
@@ -104,7 +104,7 @@ final class Post {
 			return true;
 		}
 		
-		$embed_providers = Provider::get_instance()->get_list();
+		$embed_providers = Providers::get_instance()->get_list();
 		
 		// check post content
 		foreach ( $embed_providers as $provider ) {

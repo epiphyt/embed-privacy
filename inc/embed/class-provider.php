@@ -1,7 +1,7 @@
 <?php
 namespace epiphyt\Embed_Privacy\embed;
 
-use epiphyt\Embed_Privacy\Provider as Provider_Functionality;
+use epiphyt\Embed_Privacy\data\Providers;
 use WP_Post;
 
 /**
@@ -72,8 +72,8 @@ final class Provider {
 		if ( $provider_object instanceof WP_Post ) {
 			$this->set_background_image_id( \get_post_meta( $provider_object->ID, 'background_image', true ) );
 			$this->set_description( $provider_object->post_content );
-			$this->set_is_disabled( Provider_Functionality::is_disabled( $provider_object ) );
-			$this->set_name( Provider_Functionality::sanitize_name( $provider_object->post_name ) );
+			$this->set_is_disabled( Providers::is_disabled( $provider_object ) );
+			$this->set_name( Providers::sanitize_name( $provider_object->post_name ) );
 			$this->set_privacy_policy_url( \get_post_meta( $provider_object->ID, 'privacy_policy_url', true ) );
 			$this->set_is_system( \get_post_meta( $provider_object->ID, 'is_system', true ) );
 			$this->set_thumbnail_id( \get_post_thumbnail_id( $provider_object ) );

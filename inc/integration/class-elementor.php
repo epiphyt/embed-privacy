@@ -5,9 +5,9 @@ use DOMDocument;
 use DOMElement;
 use DOMNode;
 use Elementor\Plugin;
+use epiphyt\Embed_Privacy\data\Providers;
 use epiphyt\Embed_Privacy\embed\Template;
 use epiphyt\Embed_Privacy\Embed_Privacy;
-use epiphyt\Embed_Privacy\Provider;
 
 /**
  * Elementor integration for Embed Privacy.
@@ -44,7 +44,7 @@ final class Elementor {
 	 * @return	string The content with an embed overlay (if needed)
 	 */
 	private static function get_youtube_overlay( $content ) {
-		$provider = Provider::get_instance()->get_by_name( 'youtube' );
+		$provider = Providers::get_instance()->get_by_name( 'youtube' );
 		$replacements = [];
 		
 		// phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
@@ -56,6 +56,7 @@ final class Elementor {
 		);
 		$template_dom = new DOMDocument();
 		
+		/** @var	\DOMElement $element */
 		foreach ( $dom->getElementsByTagName( 'div' ) as $element ) {
 			if ( \strpos( $element->getAttribute( 'data-settings' ), 'youtube_url' ) === false ) {
 				continue;
@@ -75,6 +76,7 @@ final class Elementor {
 			);
 			$overlay = null;
 			
+			/** @var	\DOMElement $div */
 			foreach ( $template_dom->getElementsByTagName( 'div' ) as $div ) {
 				if ( \stripos( $div->getAttribute( 'class' ), 'embed-privacy-container' ) !== false ) {
 					$overlay = $div;
