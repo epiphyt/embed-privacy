@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.9.2
+* Improve the text for screen readers upon activating the embedded content
+* Fixed compatibility with other widget plugins
+* Fixed handling of videos in Divi
+
 ## 1.9.1
 * Fixed an error while uninstalling the plugin
 * Fixed aspect ratio of embeds embedded via Divi

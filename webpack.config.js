@@ -8,6 +8,7 @@ const mode = isProduction ? 'production' : 'development';
 
 const jsFiles = {
 	'admin/image-upload': path.resolve( process.cwd(), 'assets/js/admin', 'image-upload.js' ),
+	'divi': path.resolve( process.cwd(), 'assets/js', 'divi.js' ),
 	'elementor-video': path.resolve( process.cwd(), 'assets/js', 'elementor-video.js' ),
 	'embed-privacy': path.resolve( process.cwd(), 'assets/js', 'embed-privacy.js' ),
 };
