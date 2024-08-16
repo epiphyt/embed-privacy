@@ -977,7 +977,7 @@ class Embed_Privacy {
 				$footer_content .= '<span class="embed-privacy-url"><a href="' . \esc_url( $args['embed_url'] ) . '">';
 				$footer_content .= \sprintf(
 				/* translators: content name or 'content' */
-					\esc_html__( 'Open %s directly', 'embed-privacy' ),
+					\esc_html__( 'Open "%s" directly', 'embed-privacy' ),
 					! empty( $args['embed_title'] ) ? $args['embed_title'] : \__( 'content', 'embed-privacy' )
 				);
 				$footer_content .= '</a></span>';
@@ -994,8 +994,16 @@ class Embed_Privacy {
 		}
 		?>
 		<div class="embed-privacy-container is-disabled <?php echo \esc_attr( $embed_classes ); ?>" data-embed-id="oembed_<?php echo \esc_attr( $embed_md5 ); ?>" data-embed-provider="<?php echo \esc_attr( $embed_provider_lowercase ); ?>"<?php echo ( ! empty( $embed_thumbnail['thumbnail_path'] ) && \file_exists( $embed_thumbnail['thumbnail_path'] ) ? ' style="background-image: url(' . \esc_url( $embed_thumbnail['thumbnail_url'] ) . ');"' : '' ); ?>>
-			<?php /* translators: embed provider */ ?>
-			<button class="embed-privacy-enable screen-reader-text"><?php \printf( \esc_html__( 'Display content from %s', 'embed-privacy' ), \esc_html( $embed_provider ) ); ?></button>
+			<?php
+			/* translators: embed provider */
+			$button_text = \sprintf( \__( 'Display content from %s', 'embed-privacy' ), \esc_html( $embed_provider ) );
+			
+			if ( ! empty( $args['embed_title'] ) ) {
+				/* translators: 1: embed title, 2: embed provider */
+				$button_text = \sprintf( \__( 'Display "%1$s" from %2$s', 'embed-privacy' ), $args['embed_title'], \esc_html( $embed_provider ) );
+			}
+			?>
+			<button class="embed-privacy-enable screen-reader-text"><?php echo \esc_html( $button_text ); ?></button>
 			
 			<div class="embed-privacy-overlay">
 				<div class="embed-privacy-inner">
@@ -1177,7 +1185,7 @@ class Embed_Privacy {
 				}
 				
 				/* translators: embed title */
-				$args['embed_title'] = $element->hasAttribute( 'title' ) ? \sprintf( \__( '"%s"', 'embed-privacy' ), $element->getAttribute( 'title' ) ) : '';
+				$args['embed_title'] = $element->hasAttribute( 'title' ) ? $element->getAttribute( 'title' ) : '';
 				$args['embed_url'] = $element->getAttribute( $args['element_attribute'] );
 				$args['height'] = $element->hasAttribute( 'height' ) ? $element->getAttribute( 'height' ) : 0;
 				$args['width'] = $element->hasAttribute( 'width' ) ? $element->getAttribute( 'width' ) : 0;
@@ -1592,6 +1600,7 @@ class Embed_Privacy {
 		}
 		
 		if ( $this->is_theme( 'Divi' ) ) {
+			\wp_enqueue_script( 'embed-privacy-divi' );
 			\wp_enqueue_style( 'embed-privacy-divi' );
 		}
 		
@@ -1695,6 +1704,11 @@ class Embed_Privacy {
 		$file_version = $is_debug ? \filemtime( \EPI_EMBED_PRIVACY_BASE . 'assets/style/astra' . $suffix . '.css' ) : \EMBED_PRIVACY_VERSION;
 		
 		\wp_register_style( 'embed-privacy-astra', $css_file_url, [], $file_version );
+		
+		$js_file_url = \EPI_EMBED_PRIVACY_URL . 'assets/js/divi' . $suffix . '.js';
+		$file_version = $is_debug ? \filemtime( \EPI_EMBED_PRIVACY_BASE . 'assets/js/divi' . $suffix . '.js' ) : \EMBED_PRIVACY_VERSION;
+		
+		\wp_register_script( 'embed-privacy-divi', $js_file_url, [], $file_version, [ 'strategy' => 'defer' ] );
 		
 		$css_file_url = \EPI_EMBED_PRIVACY_URL . 'assets/style/divi' . $suffix . '.css';
 		$file_version = $is_debug ? \filemtime( \EPI_EMBED_PRIVACY_BASE . 'assets/style/divi' . $suffix . '.css' ) : \EMBED_PRIVACY_VERSION;
@@ -1932,7 +1946,7 @@ class Embed_Privacy {
 		
 		$embed_provider = '';
 		$embed_provider_lowercase = '';
-		$embed_providers = $this->get_embeds( 'oembed' );
+		$embed_providers = $this->get_embeds();
 		
 		// get embed provider name
 		foreach ( $embed_providers as $provider ) {
@@ -1976,7 +1990,7 @@ class Embed_Privacy {
 		
 		$embed_title = $this->get_oembed_title( $output );
 		/* translators: embed title */
-		$args['embed_title'] = ! empty( $embed_title ) ? \sprintf( \__( '"%s"', 'embed-privacy' ), $embed_title ) : '';
+		$args['embed_title'] = ! empty( $embed_title ) ? $embed_title : '';
 		$args['embed_url'] = $url;
 		$args['strip_newlines'] = true;
 		

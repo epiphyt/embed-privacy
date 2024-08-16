@@ -69,8 +69,7 @@ class Embed_Privacy_Widget_Output_Filter {
 	 * Initialize the functionality by registering actions and filters.
 	 */
 	private function __construct() {
-		// priority of 9 to run before the Widget Logic plugin.
-		\add_filter( 'dynamic_sidebar_params', [ $this, 'filter_dynamic_sidebar_params' ], 9 );
+		\add_filter( 'dynamic_sidebar_params', [ $this, 'filter_dynamic_sidebar_params' ], \PHP_INT_MAX );
 	}
 	
 	/**

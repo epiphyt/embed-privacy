@@ -1,5 +1,10 @@
 .embed-privacy-container {
 	line-height: 1.7em;
+	
+	.fluid-width-video-wrapper > & {
+		inset: 0;
+		position: absolute;
+	}
 }
 
 // prevent hiding container around Embed Privacy

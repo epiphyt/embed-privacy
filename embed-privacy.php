@@ -4,7 +4,7 @@ namespace epiphyt\Embed_Privacy;
 /*
 Plugin Name:	Embed Privacy
 Description:	Embed Privacy prevents from loading external embeds directly and lets the user control which one should be loaded.
-Version:		1.9.1
+Version:		1.9.2
 Author:			Epiphyt
 Author URI:		https://epiph.yt
 License:		GPL2
@@ -29,7 +29,7 @@ along with Embed Privacy. If not, see https://www.gnu.org/licenses/gpl-2.0.html.
 // exit if ABSPATH is not defined
 \defined( 'ABSPATH' ) || exit;
 
-\define( 'EMBED_PRIVACY_VERSION', '1.9.1' );
+\define( 'EMBED_PRIVACY_VERSION', '1.9.2' );
 
 if ( ! \defined( 'EPI_EMBED_PRIVACY_BASE' ) ) {
 	\define( 'EPI_EMBED_PRIVACY_BASE', \WP_PLUGIN_DIR . '/embed-privacy/' );
@@ -58,7 +58,7 @@ if ( ! \class_exists( 'DOMDocument' ) ) {
 /**
  * Autoload all necessary classes.
  * 
- * @param	string		$class The class name of the autoloaded class
+ * @param	string		$class The class name of the auto-loaded class
  */
 \spl_autoload_register( function( $class ) {
 	$path = \explode( '\\', $class );
