@@ -1086,9 +1086,20 @@ class Embed_Privacy {
 		] );
 		
 		\libxml_use_internal_errors( true );
+		$character_replacements = [
+			'%' => '@@epi_percentage',
+			'[' => '@@epi_square_bracket_start',
+			']' => '@@epi_square_bracket_end',
+			'{' => '@@epi_curly_bracket_start',
+			'}' => '@@epi_curly_bracket_end',
+		];
 		$dom = new DOMDocument();
 		$dom->loadHTML(
-			'<html><meta charset="utf-8">' . \str_replace( '%', '%_epi_', $content ) . '</html>',
+			'<html><meta charset="utf-8">' . \str_replace(
+				\array_keys( $character_replacements ),
+				\array_values( $character_replacements ),
+				$content
+			) . '</html>',
 			\LIBXML_HTML_NOIMPLIED | \LIBXML_HTML_NODEFDTD
 		);
 		$is_empty_provider = empty( $embed_provider );
@@ -1303,18 +1314,21 @@ class Embed_Privacy {
 			$content = \rawurldecode( $content );
 		}
 		
-		// remove root element, see https://github.com/epiphyt/embed-privacy/issues/22
 		return \str_replace(
-			[
-				'<html><meta charset="utf-8">',
-				'</html>',
-				'%_epi_',
-			],
-			[
-				'',
-				'',
-				'%',
-			],
+			\array_merge(
+				[
+					'<html><meta charset="utf-8">',
+					'</html>',
+				],
+				\array_values( $character_replacements )
+			),
+			\array_merge(
+				[
+					'',
+					'',
+				],
+				\array_keys( $character_replacements )
+			),
 			$content
 		);
 	}
