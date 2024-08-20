@@ -1088,6 +1088,7 @@ class Embed_Privacy {
 		\libxml_use_internal_errors( true );
 		$character_replacements = [
 			'%' => '@@epi_percentage',
+			' ' => ' data-epi-spacing ',
 			'[' => '@@epi_square_bracket_start',
 			']' => '@@epi_square_bracket_end',
 			'{' => '@@epi_curly_bracket_start',
@@ -1203,7 +1204,11 @@ class Embed_Privacy {
 				
 				// get overlay template as DOM element
 				$template_dom->loadHTML(
-					'<html><meta charset="utf-8">' . str_replace( '%', '%_epi_', $this->get_output_template( $embed_provider, $embed_provider_lowercase, $dom->saveHTML( $element ), $args ) ) . '</html>',
+					'<html><meta charset="utf-8">' . \str_replace(
+						\array_keys( $character_replacements ),
+						\array_values( $character_replacements ),
+						$this->get_output_template( $embed_provider, $embed_provider_lowercase, $dom->saveHTML( $element ), $args )
+					) . '</html>',
 					\LIBXML_HTML_NOIMPLIED | \LIBXML_HTML_NODEFDTD
 				);
 				$overlay = null;
@@ -1319,6 +1324,7 @@ class Embed_Privacy {
 				[
 					'<html><meta charset="utf-8">',
 					'</html>',
+					'%20data-epi-spacing%20'
 				],
 				\array_values( $character_replacements )
 			),
@@ -1326,6 +1332,7 @@ class Embed_Privacy {
 				[
 					'',
 					'',
+					' ',
 				],
 				\array_keys( $character_replacements )
 			),
