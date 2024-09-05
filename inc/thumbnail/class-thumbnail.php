@@ -295,6 +295,10 @@ final class Thumbnail {
 			];
 		}
 		
+		if ( ! \file_exists( $upload_dir['basedir'] . '/embed-privacy/thumbnails' ) ) {
+			\wp_mkdir_p( $upload_dir['basedir'] . '/embed-privacy/thumbnails' );
+		}
+		
 		return [
 			'base_dir' => $upload_dir['basedir'] . '/embed-privacy/thumbnails',
 			'base_url' => $upload_dir['baseurl'] . '/embed-privacy/thumbnails',
