@@ -123,15 +123,22 @@ final class Template {
 		<p>
 		<?php
 		if ( ! empty( $provider->get_name() ) ) {
-			if ( $embed_post ) {
+			if ( $embed_post || ! empty( $provider->get_description() ) ) {
 				$allowed_tags = [
 					'a' => [
 						'href',
 						'target',
 					],
 				];
-				echo $embed_post->post_content . \PHP_EOL; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-				$privacy_policy = \get_post_meta( $embed_post->ID, 'privacy_policy_url', true );
+				
+				if ( $embed_post ) {
+					echo $embed_post->post_content . \PHP_EOL; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					$privacy_policy = \get_post_meta( $embed_post->ID, 'privacy_policy_url', true );
+				}
+				else {
+					echo $provider->get_description() . \PHP_EOL; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					$privacy_policy = $provider->get_privacy_policy_url();
+				}
 				
 				if ( $privacy_policy ) {
 					?>
