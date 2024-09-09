@@ -6,7 +6,7 @@ use epiphyt\Embed_Privacy\admin\Settings;
 use epiphyt\Embed_Privacy\admin\User_Interface;
 use epiphyt\Embed_Privacy\data\Providers;
 use epiphyt\Embed_Privacy\data\Replacer;
-use epiphyt\Embed_Privacy\embed\Overlay;
+use epiphyt\Embed_Privacy\embed\Replacement;
 use epiphyt\Embed_Privacy\embed\Template;
 use epiphyt\Embed_Privacy\handler\Post;
 use epiphyt\Embed_Privacy\handler\Shortcode;
@@ -390,7 +390,7 @@ class Embed_Privacy {
 	/**
 	 * Get an embed provider overlay.
 	 * 
-	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\embed\Overlay::get() instead
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\embed\Replacement::get() instead
 	 * @since		1.3.5
 	 * 
 	 * @param	\WP_Post	$provider An embed provider
@@ -403,7 +403,7 @@ class Embed_Privacy {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\embed\Overlay::get()',
+				'epiphyt\Embed_Privacy\embed\Replacement::get()',
 			),
 			'1.10.0'
 		);
@@ -412,7 +412,7 @@ class Embed_Privacy {
 			return $content;
 		}
 		
-		$overlay = new Overlay( $content );
+		$overlay = new Replacement( $content );
 		
 		if ( $overlay->get_provider()->is_matching( $content ) ) {
 			$content = Template::get( $overlay->get_provider(), $overlay );
@@ -614,7 +614,7 @@ class Embed_Privacy {
 	/**
 	 * Get a single overlay for all matching embeds.
 	 * 
-	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\embed\Overlay::get() instead
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\embed\Replacement::get() instead
 	 * @since		1.2.0
 	 * 
 	 * @param	string	$content The original content
@@ -629,12 +629,12 @@ class Embed_Privacy {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\embed\Overlay::get()',
+				'epiphyt\Embed_Privacy\embed\Replacement::get()',
 			),
 			'1.10.0'
 		);
 		
-		$overlay = new Overlay( $content );
+		$overlay = new Replacement( $content );
 		
 		return $overlay->get( $args );
 	}
@@ -1027,7 +1027,7 @@ class Embed_Privacy {
 	/**
 	 * Replace Google Maps iframes.
 	 * 
-	 * @deprecated	1.2.0 Use epiphyt\Embed_Privacy\embed\Overlay::get() instead
+	 * @deprecated	1.2.0 Use epiphyt\Embed_Privacy\embed\Replacement::get() instead
 	 * @since		1.1.0
 	 * 
 	 * @param	string	$content The post content
@@ -1039,12 +1039,12 @@ class Embed_Privacy {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead.', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\embed\Overlay::get()',
+				'epiphyt\Embed_Privacy\embed\Replacement::get()',
 			),
 			'1.2.0'
 		);
 		
-		$overlay = new Overlay( $content );
+		$overlay = new Replacement( $content );
 		
 		return $overlay->get();
 	}

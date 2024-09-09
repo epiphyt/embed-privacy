@@ -9,14 +9,14 @@ use epiphyt\Embed_Privacy\data\Replacer;
 use epiphyt\Embed_Privacy\Embed_Privacy;
 
 /**
- * Embed overlay related functionality.
+ * Embed replacement representation.
  * 
  * @author	Epiphyt
  * @license	GPL2
  * @package	epiphyt\Embed_Privacy
  * @since	1.10.0
  */
-final class Overlay {
+final class Replacement {
 	/**
 	 * @var		string Original content
 	 */
@@ -33,7 +33,7 @@ final class Overlay {
 	private $replacements = [];
 	
 	/**
-	 * Overlay constructor
+	 * Replacement constructor
 	 * 
 	 * @param	string	$content Original embedded content
 	 * @param	string	$url Embedded content URL

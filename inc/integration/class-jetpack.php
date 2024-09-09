@@ -2,7 +2,7 @@
 namespace epiphyt\Embed_Privacy\integration;
 
 use Automattic\Jetpack\Assets;
-use epiphyt\Embed_Privacy\embed\Overlay;
+use epiphyt\Embed_Privacy\embed\Replacement;
 use epiphyt\Embed_Privacy\Embed_Privacy;
 use Jetpack as JetpackBase;
 
@@ -87,7 +87,7 @@ final class Jetpack {
 			];
 		}
 		
-		$overlay = new Overlay( $content );
+		$overlay = new Replacement( $content );
 		$new_content = $overlay->get( $attributes );
 		
 		if ( $new_content !== $content ) {

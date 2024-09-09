@@ -64,7 +64,7 @@ final class Provider {
 	private $unknown = false;
 	
 	/**
-	 * Overlay constructor
+	 * Provider constructor
 	 * 
 	 * @param	\WP_Post	$provider_object Provider post object
 	 */

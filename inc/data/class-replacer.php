@@ -1,7 +1,7 @@
 <?php
 namespace epiphyt\Embed_Privacy\data;
 
-use epiphyt\Embed_Privacy\embed\Overlay;
+use epiphyt\Embed_Privacy\embed\Replacement;
 use epiphyt\Embed_Privacy\Embed_Privacy;
 use epiphyt\Embed_Privacy\handler\Oembed;
 use epiphyt\Embed_Privacy\integration\Twitter;
@@ -109,12 +109,12 @@ final class Replacer {
 		}
 		
 		$new_content = $content;
-		$overlay = new Overlay( $new_content );
+		$overlay = new Replacement( $new_content );
 		$new_content = $overlay->get();
 		
 		while ( $new_content !== $content ) {
 			$content = $new_content;
-			$overlay = new Overlay( $new_content );
+			$overlay = new Replacement( $new_content );
 			$new_content = $overlay->get();
 		}
 		
@@ -152,7 +152,7 @@ final class Replacer {
 			return $output;
 		}
 		
-		$overlay = new Overlay( $output, $url );
+		$overlay = new Replacement( $output, $url );
 		
 		// make sure to only run once
 		if ( \str_contains( $output, 'data-embed-provider="' . $overlay->get_provider()->get_name() . '"' ) ) {
