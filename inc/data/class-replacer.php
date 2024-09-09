@@ -110,13 +110,13 @@ final class Replacer {
 		}
 		
 		$new_content = $content;
-		$overlay = new Replacement( $new_content );
-		$new_content = $overlay->get();
+		$replacement = new Replacement( $new_content );
+		$new_content = $replacement->get();
 		
 		while ( $new_content !== $content ) {
 			$content = $new_content;
-			$overlay = new Replacement( $new_content );
-			$new_content = $overlay->get();
+			$replacement = new Replacement( $new_content );
+			$new_content = $replacement->get();
 		}
 		
 		return $new_content;
