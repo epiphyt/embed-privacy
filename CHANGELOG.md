@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.10.0
+* Added: Thumbnail support for Polylang
+* Added: Filter to prevent orphan thumbnail deletion
+* Added: New style system for an improved markup and valid HTML code
+* Improved: Shared content to the Fediverse does not contain the overlay anymore
+* Improved: Made it more clear what the opt-out shortcode does
+* Fixed: Missing assets on the blog homepage if it contains an embed
+* For developers: More notices about deprecated code
+* For developers: Complete rework of the plugin's code (with complete backwards compatibility). See [the migration guide](https://epiph.yt/en/embed-privacy/documentation/migration-to-version-1-10-0/) for more information
+
 ## 1.9.2
 * Improve the text for screen readers upon activating the embedded content
 * Fixed compatibility with other widget plugins
