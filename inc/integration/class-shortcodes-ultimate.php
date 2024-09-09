@@ -1,6 +1,8 @@
 <?php
 namespace epiphyt\Embed_Privacy\integration;
 
+use epiphyt\Embed_Privacy\System;
+
 /**
  * Shortcodes Ultimate integration for Embed Privacy.
  * 
@@ -22,7 +24,7 @@ final class Shortcodes_Ultimate {
 	 * Enqueue assets.
 	 */
 	public static function enqueue_assets() {
-		if ( \is_plugin_active( 'shortcodes-ultimate/shortcodes-ultimate.php' ) ) {
+		if ( System::is_plugin_active( 'shortcodes-ultimate/shortcodes-ultimate.php' ) ) {
 			\wp_enqueue_style( 'embed-privacy-shortcodes-ultimate' );
 		}
 	}

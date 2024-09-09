@@ -40,10 +40,6 @@ final class Frontend {
 			'javascriptDetection' => \get_option( 'embed_privacy_javascript_detection' ),
 		] );
 		
-		if ( ! \function_exists( 'is_plugin_active' ) ) {
-			require_once \ABSPATH . \WPINC . '/plugin.php';
-		}
-		
 		/**
 		 * Fires after assets are printed.
 		 * 

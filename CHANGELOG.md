@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.10.2
+* Fixed: Potential fatal error for missing check of the availability of the function `is_plugin_active`
+
 ## 1.10.1
 * Fixed: Set correct "Tested up to" to WordPress 6.6
 

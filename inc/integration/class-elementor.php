@@ -8,6 +8,7 @@ use Elementor\Plugin;
 use epiphyt\Embed_Privacy\data\Providers;
 use epiphyt\Embed_Privacy\embed\Template;
 use epiphyt\Embed_Privacy\Embed_Privacy;
+use epiphyt\Embed_Privacy\System;
 
 /**
  * Elementor integration for Embed Privacy.
@@ -128,11 +129,7 @@ final class Elementor {
 	 * @return	bool Whether Elementor has been used
 	 */
 	public static function is_used() {
-		if ( ! \function_exists( 'is_plugin_active' ) ) {
-			include_once \ABSPATH . 'wp-admin/includes/plugin.php';
-		}
-		
-		return \is_plugin_active( 'elementor/elementor.php' )
+		return System::is_plugin_active( 'elementor/elementor.php' )
 			&& \get_the_ID()
 			&& Plugin::$instance->documents->get( \get_the_ID() )->is_built_with_elementor();
 	}

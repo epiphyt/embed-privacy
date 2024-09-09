@@ -2,7 +2,7 @@
 Contributors: epiphyt, kittmedia, krafit
 Tags: oembed, privacy, gutenberg
 Requires at least: 5.9
-Stable tag: 1.10.1
+Stable tag: 1.10.2
 Tested up to: 6.6
 Requires PHP: 5.6
 License: GPL2
@@ -176,6 +176,12 @@ We are [Epiphyt](https://epiph.yt/), your friendly neighborhood WordPress plugin
 You can report security bugs through the Patchstack Vulnerability Disclosure Program. The Patchstack team help validate, triage and handle any security vulnerabilities. [Report a security vulnerability.](https://patchstack.com/database/vdp/embed-privacy)
 
 == Changelog ==
+
+= 1.10.2 =
+* Fixed: Potential fatal error for missing check of the availability of the function `is_plugin_active`
+
+= 1.10.1 =
+* Fixed: Set correct "Tested up to" to WordPress 6.6
 
 = 1.10.0 =
 * Added: Thumbnail support for Polylang
