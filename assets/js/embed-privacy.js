@@ -185,15 +185,6 @@ document.addEventListener( 'DOMContentLoaded', function() {
 					return;
 				}
 				
-				if ( currentTarget.checked ) {
-					currentTarget.classList.add( 'is-enabled' );
-					currentTarget.classList.remove( 'is-disabled' );
-				}
-				else {
-					currentTarget.classList.add( 'is-disabled' );
-					currentTarget.classList.remove( 'is-enabled' );
-				}
-				
 				checkboxActivation( currentTarget );
 			} );
 		}

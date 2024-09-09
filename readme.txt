@@ -2,7 +2,7 @@
 Contributors: epiphyt, kittmedia, krafit
 Tags: oembed, privacy, gutenberg
 Requires at least: 5.9
-Stable tag: 1.9.2
+Stable tag: 1.10.0
 Tested up to: 6.5
 Requires PHP: 5.6
 License: GPL2
@@ -38,6 +38,10 @@ Yes. As long as you don't opt in to load external content, you/your visitors can
 = Does Embed Privacy make embedding content privacy-friendly? =
 
 The embedding process itself will be privacy-friendly with Embed Privacy. That means, that no third-party embed provider can track users without their explicit consent by clicking on the overlay to allow the embed to be loaded. However, to make sure everything is fine you need to expand your privacy policy for each embed provider you’re using or you want to use because you need to specify, where data will be sent to and what happens to them.
+
+= Does Embed Privacy use cookies? =
+
+If you use the opt-out functionality with the shortcode or the functionality to allow the user to always display content of certain embed providers, Embed Privacy creates a single cookie called `embed-privacy` with an expiration of 1 year to store the user’s choice.
 
 = Does Embed Privacy support the Gutenberg editor? =
 
@@ -172,6 +176,16 @@ We are [Epiphyt](https://epiph.yt/), your friendly neighborhood WordPress plugin
 You can report security bugs through the Patchstack Vulnerability Disclosure Program. The Patchstack team help validate, triage and handle any security vulnerabilities. [Report a security vulnerability.](https://patchstack.com/database/vdp/embed-privacy)
 
 == Changelog ==
+
+= 1.10.0 =
+* Added: Thumbnail support for Polylang
+* Added: Filter to prevent orphan thumbnail deletion
+* Added: New style system for an improved markup and valid HTML code
+* Improved: Shared content to the Fediverse does not contain the overlay anymore
+* Improved: Made it more clear what the opt-out shortcode does
+* Fixed: Missing assets on the blog homepage if it contains an embed
+* For developers: More notices about deprecated code
+* For developers: Complete rework of the plugin's code (with complete backwards compatibility). See [the migration guide](https://epiph.yt/en/embed-privacy/documentation/migration-to-version-1-10-0/) for more information
 
 = 1.9.2 =
 * Improve the text for screen readers upon activating the embedded content
@@ -438,4 +452,4 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 1. Add embeds using the classic editor or the block editor's embed blocks.
 2. Embed Privacy will add an overlay to supported embeds automatically.
 3. You can customize the overlays for each service individually.
-4. Embed Privacy can deliver embedded Tweets locally without 3rd party scripts or tracking.
+4. Different settings allow you to adjust the functionality of Embed Privacy according to your needs.

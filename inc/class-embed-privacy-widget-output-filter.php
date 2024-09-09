@@ -4,8 +4,9 @@ namespace epiphyt\Embed_Privacy;
 /**
  * Filter the output of widgets.
  * 
- * @see		https://github.com/philipnewcomer/widget-output-filters
- * @since	1.1.0
+ * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\handler\Widget instead
+ * @see			https://github.com/philipnewcomer/widget-output-filters
+ * @since		1.1.0
  * 
  * @author	Epiphyt
  * @license	GPL2
@@ -55,6 +56,8 @@ class Embed_Privacy_Widget_Output_Filter {
 	/**
 	 * Return the single instance of this class.
 	 * 
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\handler\Widget::get_instance() instead
+	 * 
 	 * @return	\epiphyt\Embed_Privacy\Embed_Privacy_Widget_Output_Filter The single instance of this class
 	 */
 	public static function get_instance() {
@@ -67,6 +70,8 @@ class Embed_Privacy_Widget_Output_Filter {
 	
 	/**
 	 * Initialize the functionality by registering actions and filters.
+	 * 
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\handler\Widget instead
 	 */
 	private function __construct() {
 		\add_filter( 'dynamic_sidebar_params', [ $this, 'filter_dynamic_sidebar_params' ], \PHP_INT_MAX );
@@ -76,10 +81,22 @@ class Embed_Privacy_Widget_Output_Filter {
 	 * Replace the widget's display callback with the Dynamic Sidebar Params display callback, storing the original callback for use later.
 	 * The $sidebar_params variable is not modified; it is only used to get the current widget's ID.
 	 * 
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\handler\Widget::filter_dynamic_sidebar_params() instead
+	 * 
 	 * @param	array	$sidebar_params The sidebar parameters
 	 * @return	array The sidebar parameters
 	 */
 	public function filter_dynamic_sidebar_params( $sidebar_params ) {
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\handler\Widget::filter_dynamic_sidebar_params()'
+			),
+			'1.10.0'
+		);
+		
 		if ( \is_admin() ) {
 			return $sidebar_params;
 		}
@@ -87,18 +104,28 @@ class Embed_Privacy_Widget_Output_Filter {
 		global $wp_registered_widgets;
 		$current_widget_id = $sidebar_params[0]['widget_id'];
 		
-		// phpcs:disable WordPress.WP.GlobalVariablesOverride.Prohibited
-		$wp_registered_widgets[ $current_widget_id ]['original_callback'] = $wp_registered_widgets[ $current_widget_id ]['callback'];
-		$wp_registered_widgets[ $current_widget_id ]['callback'] = [ $this, 'display_widget' ];
-		// phpcs: enable
+		$wp_registered_widgets[ $current_widget_id ]['original_callback'] = $wp_registered_widgets[ $current_widget_id ]['callback']; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$wp_registered_widgets[ $current_widget_id ]['callback'] = [ $this, 'display_widget' ]; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		
 		return $sidebar_params;
 	}
 	
 	/**
 	 * Execute the widget's original callback function, filtering its output.
+	 * 
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\handler\Widget::display_widget() instead
 	 */
 	public function display_widget() {
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\handler\Widget::display_widget()'
+			),
+			'1.10.0'
+		);
+		
 		global $wp_registered_widgets;
 		$original_callback_params = \func_get_args();
 		
@@ -111,7 +138,7 @@ class Embed_Privacy_Widget_Output_Filter {
 		
 		if ( \is_callable( $original_callback ) ) {
 			\ob_start();
-			\call_user_func_array( $original_callback, $original_callback_params );
+			\call_user_func_array( $original_callback, $original_callback_params ); // phpcs:ignore NeutronStandard.Functions.DisallowCallUserFunc.CallUserFunc
 			$widget_output = \ob_get_clean();
 			
 			/**

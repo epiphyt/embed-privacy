@@ -12,19 +12,19 @@ use epiphyt\Embed_Privacy\thumbnail\Thumbnail;
  */
 final class SlideShare extends Thumbnail_Provider implements Thumbnail_Provider_Interface {
 	/**
-	 * @inheritDoc
+	 * @var		string[] List of valid domains for the thumbnail provider
 	 */
 	public static $domains = [
 		'slideshare.net',
 	];
 	
 	/**
-	 * @inheritDoc
+	 * @var		string Thumbnail provider name
 	 */
 	public static $name = 'slideshare';
 	
 	/**
-	 * @inheritDoc
+	 * {@inheritDoc}
 	 */
 	public static function get( $data, $url ) {
 		if ( ! self::is_provider_embed( $url ) ) {
@@ -41,7 +41,7 @@ final class SlideShare extends Thumbnail_Provider implements Thumbnail_Provider_
 	}
 	
 	/**
-	 * @inheritDoc
+	 * {@inheritDoc}
 	 */
 	public static function get_id( $content ) {
 		if ( \str_contains( $content, '/embed_code/key/' ) ) {
@@ -73,14 +73,14 @@ final class SlideShare extends Thumbnail_Provider implements Thumbnail_Provider_
 	}
 	
 	/**
-	 * @inheritDoc
+	 * {@inheritDoc}
 	 */
 	public static function get_title() {
 		return \_x( 'SlideShare', 'embed provider', 'embed-privacy' );
 	}
 	
 	/**
-	 * @inheritDoc
+	 * {@inheritDoc}
 	 */
 	public static function save( $id, $url, $thumbnail_url = '' ) {
 		$post = \get_post();
@@ -89,11 +89,11 @@ final class SlideShare extends Thumbnail_Provider implements Thumbnail_Provider_
 			return;
 		}
 		
-		$filename = self::$name . '-' . $id . '.jpg' ;
+		$filename = self::$name . '-' . $id . '.jpg';
 		$thumbnail_path = Thumbnail::get_directory()['base_dir'] . '/' . $filename;
 		
 		if ( ! \file_exists( $thumbnail_path ) ) {
-			require_once ABSPATH . 'wp-admin/includes/file.php';
+			require_once \ABSPATH . 'wp-admin/includes/file.php';
 			
 			$file = \download_url( $thumbnail_url );
 			

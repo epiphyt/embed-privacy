@@ -22,38 +22,38 @@ abstract class Thumbnail_Provider implements Thumbnail_Provider_Interface {
 	public static $name = '';
 	
 	/**
-	 * @inheritDoc
+	 * {@inheritDoc}
 	 */
-	public static function get( $data, $url ) { }
+	public static function get( $data, $url ) { } // phpcs:ignore SlevomatCodingStandard.Functions.DisallowEmptyFunction.EmptyFunction
 	
 	/**
-	 * @inheritDoc
+	 * {@inheritDoc}
 	 */
-	public static function get_id( $url ) { }
+	public static function get_id( $url ) { } // phpcs:ignore SlevomatCodingStandard.Functions.DisallowEmptyFunction.EmptyFunction
 	
 	/**
-	 * @inheritDoc
+	 * {@inheritDoc}
 	 */
 	public static function get_path( $filename ) {
 		return Thumbnail::get_directory()['base_dir'] . '/' . $filename;
 	}
 	
 	/**
-	 * @inheritDoc
+	 * {@inheritDoc}
 	 */
 	public static function get_title() {
 		return '';
 	}
 	
 	/**
-	 * @inheritDoc
+	 * {@inheritDoc}
 	 */
 	public static function get_url( $filename ) {
 		return Thumbnail::get_directory()['base_url'] . '/' . $filename;
 	}
 	
 	/**
-	 * @inheritDoc
+	 * {@inheritDoc}
 	 */
 	public static function is_provider_embed( $url ) {
 		$is_provider_embed = false;
@@ -69,7 +69,7 @@ abstract class Thumbnail_Provider implements Thumbnail_Provider_Interface {
 	}
 	
 	/**
-	 * @inheritDoc
+	 * {@inheritDoc}
 	 */
-	public static function save( $id, $url, $thumbnail_url = '' ) { }
+	public static function save( $id, $url, $thumbnail_url = '' ) { } // phpcs:ignore SlevomatCodingStandard.Functions.DisallowEmptyFunction.EmptyFunction
 }

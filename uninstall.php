@@ -102,7 +102,7 @@ function delete_data() {
 			$metadata = \get_post_meta( $post_id );
 			
 			foreach ( $metadata as $meta_key => $meta_value ) {
-				if ( \strpos( $meta_key, 'embed_privacy_thumbnail_' ) === false ) {
+				if ( ! \str_contains( $meta_key, 'embed_privacy_thumbnail_' ) ) {
 					continue;
 				}
 				

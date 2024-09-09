@@ -12,7 +12,7 @@ use epiphyt\Embed_Privacy\thumbnail\Thumbnail;
  */
 final class YouTube extends Thumbnail_Provider implements Thumbnail_Provider_Interface {
 	/**
-	 * @inheritDoc
+	 * @var		string[] List of valid domains for the thumbnail provider
 	 */
 	public static $domains = [
 		'youtu.be',
@@ -20,12 +20,12 @@ final class YouTube extends Thumbnail_Provider implements Thumbnail_Provider_Int
 	];
 	
 	/**
-	 * @inheritDoc
+	 * @var		string Thumbnail provider name
 	 */
 	public static $name = 'youtube';
 	
 	/**
-	 * @inheritDoc
+	 * {@inheritDoc}
 	 */
 	public static function get( $data, $url ) {
 		if ( ! self::is_provider_embed( $url ) ) {
@@ -40,7 +40,7 @@ final class YouTube extends Thumbnail_Provider implements Thumbnail_Provider_Int
 	}
 	
 	/**
-	 * @inheritDoc
+	 * {@inheritDoc}
 	 */
 	public static function get_id( $content ) {
 		$id = \str_replace(
@@ -68,20 +68,19 @@ final class YouTube extends Thumbnail_Provider implements Thumbnail_Provider_Int
 		$extracted = \str_replace( 'https://i.ytimg.com/vi/', '', $url );
 		// first part is the ID
 		$parts = \explode( '/', $extracted );
-		$id = isset( $parts[0] ) ? $parts[0] : '';
 		
-		return $id;
+		return isset( $parts[0] ) ? $parts[0] : '';
 	}
 	
 	/**
-	 * @inheritDoc
+	 * {@inheritDoc}
 	 */
 	public static function get_title() {
 		return \_x( 'YouTube', 'embed provider', 'embed-privacy' );
 	}
 	
 	/**
-	 * @inheritDoc
+	 * {@inheritDoc}
 	 */
 	public static function save( $id, $url, $thumbnail_url = '' ) {
 		$post = \get_post();
@@ -90,7 +89,7 @@ final class YouTube extends Thumbnail_Provider implements Thumbnail_Provider_Int
 			return;
 		}
 		
-		require_once ABSPATH . 'wp-admin/includes/file.php';
+		require_once \ABSPATH . 'wp-admin/includes/file.php';
 		
 		$directory = Thumbnail::get_directory();
 		// list of images we try to retrieve
@@ -112,7 +111,7 @@ final class YouTube extends Thumbnail_Provider implements Thumbnail_Provider_Int
 					continue;
 				}
 				
-				/** @var \WP_Filesystem_Direct $wp_filesystem */
+				/** @var	\WP_Filesystem_Direct $wp_filesystem */
 				global $wp_filesystem;
 				
 				// initialize the WP filesystem if not exists
@@ -128,11 +127,7 @@ final class YouTube extends Thumbnail_Provider implements Thumbnail_Provider_Int
 				Thumbnail::METADATA_PREFIX . '_' . self::$name . '_' . $id,
 				self::$name . '-' . $id . '-' . $image . '.jpg'
 			);
-			\update_post_meta(
-				$post->ID,
-				Thumbnail::METADATA_PREFIX . '_' . self::$name . '_' . $id . '_url',
-				$url
-			);
+			\update_post_meta( $post->ID, Thumbnail::METADATA_PREFIX . '_' . self::$name . '_' . $id . '_url', $url );
 			break;
 		}
 	}

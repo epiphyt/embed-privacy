@@ -1,15 +1,30 @@
 <?php
 namespace epiphyt\Embed_Privacy;
 
-use Automattic\Jetpack\Assets;
-use DOMDocument;
-use DOMElement;
-use DOMNode;
-use DOMXPath;
-use Elementor\Plugin;
+use epiphyt\Embed_Privacy\admin\Fields;
+use epiphyt\Embed_Privacy\admin\Settings;
+use epiphyt\Embed_Privacy\admin\User_Interface;
+use epiphyt\Embed_Privacy\data\Providers;
+use epiphyt\Embed_Privacy\data\Replacer;
+use epiphyt\Embed_Privacy\embed\Replacement;
+use epiphyt\Embed_Privacy\embed\Template;
+use epiphyt\Embed_Privacy\handler\Post;
+use epiphyt\Embed_Privacy\handler\Shortcode;
+use epiphyt\Embed_Privacy\handler\Theme;
+use epiphyt\Embed_Privacy\handler\Widget;
+use epiphyt\Embed_Privacy\integration\Activitypub;
+use epiphyt\Embed_Privacy\integration\Amp;
+use epiphyt\Embed_Privacy\integration\Astra;
+use epiphyt\Embed_Privacy\integration\Divi;
+use epiphyt\Embed_Privacy\integration\Elementor;
+use epiphyt\Embed_Privacy\integration\Jetpack;
+use epiphyt\Embed_Privacy\integration\Kadence_Blocks;
+use epiphyt\Embed_Privacy\integration\Maps_Marker;
+use epiphyt\Embed_Privacy\integration\Polylang;
+use epiphyt\Embed_Privacy\integration\Shortcodes_Ultimate;
+use epiphyt\Embed_Privacy\integration\Twitter;
 use epiphyt\Embed_Privacy\thumbnail\Thumbnail;
-use Jetpack;
-use WP_Post;
+use ReflectionMethod;
 
 /**
  * Two click embed main class.
@@ -35,7 +50,7 @@ class Embed_Privacy {
 	 * @since	1.3.5
 	 * @var		array Replacements that already have taken place.
 	 */
-	private $did_replacements = [];
+	public $did_replacements = [];
 	
 	/**
 	 * @since	1.3.0
@@ -44,25 +59,46 @@ class Embed_Privacy {
 	public $embeds = [];
 	
 	/**
+	 * @since	1.10.0
+	 * @var		\epiphyt\Embed_Privacy\admin\Fields
+	 */
+	public $fields;
+	
+	/**
+	 * @since	1.10.0
+	 * @var		\epiphyt\Embed_Privacy\Frontend
+	 */
+	public $frontend;
+	
+	/**
 	 * @since	1.3.0
 	 * @var		bool Whether the current request has any embed processed by Embed Privacy
 	 */
 	public $has_embed = false;
 	
 	/**
-	 * @since	1.6.0
-	 * @var		string[] List of ignored shortcodes
+	 * @since	1.10.0
+	 * @var		array List of integrations
 	 */
-	private $ignored_shortcodes = [
-		'embed_privacy_opt_out',
-		'grw',
+	private $integrations = [
+		Activitypub::class,
+		Amp::class,
+		Astra::class,
+		Divi::class,
+		Elementor::class,
+		Jetpack::class,
+		Kadence_Blocks::class,
+		Maps_Marker::class,
+		Polylang::class,
+		Shortcodes_Ultimate::class,
+		Twitter::class,
 	];
 	
 	/**
-	 * @since	1.4.8
-	 * @var		bool Whether the current request has printed Embed Privacy assets.
+	 * @since	1.10.0
+	 * @var		bool Whether the current request should be ignored
 	 */
-	private $is_printed = false;
+	public $is_ignored_request = false;
 	
 	/**
 	 * @var		\epiphyt\Embed_Privacy\Embed_Privacy
@@ -70,12 +106,20 @@ class Embed_Privacy {
 	public static $instance;
 	
 	/**
+	 * @deprecated	1.10.0 Use \EPI_EMBED_PRIVACY_FILE instead
 	 * @var		string The full path to the main plugin file
 	 */
 	public $plugin_file = '';
 	
 	/**
-	 * @var		array Style properties
+	 * @since	1.10.0
+	 * @var		\epiphyt\Embed_Privacy\handler\Shortcode
+	 */
+	public $shortcode;
+	
+	/**
+	 * @deprecated	1.10.0
+	 * @var			array Style properties
 	 */
 	public $style = [
 		'container' => [],
@@ -90,13 +134,13 @@ class Embed_Privacy {
 	/**
 	 * @var		bool Determine if we use the cache
 	 */
-	private $usecache;
+	public $use_cache;
 	
 	/**
 	 * @deprecated	1.2.0
 	 * @var			array The supported media providers
 	 */
-	public $embed_providers = [
+	public $embed_providers = [ // phpcs:ignore SlevomatCodingStandard.Arrays.AlphabeticallySortedByKeys.IncorrectKeyOrder
 		'.amazon.' => 'Amazon Kindle',
 		'.amzn.' => 'Amazon Kindle',
 		'a.co' => 'Amazon Kindle',
@@ -143,9 +187,11 @@ class Embed_Privacy {
 	 * Embed Privacy constructor.
 	 */
 	public function __construct() {
-		// assign variables
+		$this->fields = new Fields();
+		$this->frontend = new Frontend();
+		$this->shortcode = new Shortcode();
 		$this->thumbnail = new Thumbnail();
-		$this->usecache = ! \is_admin();
+		$this->use_cache = ! \is_admin();
 	}
 	
 	/**
@@ -156,92 +202,107 @@ class Embed_Privacy {
 	public function init() {
 		// actions
 		\add_action( 'init', [ $this, 'load_textdomain' ], 0 );
-		\add_action( 'init', [ $this, 'register_assets' ] );
-		\add_action( 'init', [ $this, 'set_post_type' ], 5 );
+		\add_action( 'init', [ $this, 'set_ignored_request' ] );
+		\add_action( 'init', [ self::class, 'register_post_type' ], 5 );
+		\add_action( 'plugins_loaded', [ $this, 'init_integrations' ] );
 		\add_action( 'save_post_epi_embed', [ $this, 'preserve_backslashes' ] );
-		\add_action( 'wp_enqueue_scripts', [ $this, 'deregister_assets' ], 100 );
-		\add_action( 'wp_head', [ $this, 'start_output_buffer' ] );
 		
 		// filters
-		if ( ! $this->usecache ) {
+		if ( ! $this->use_cache ) {
 			// set ttl to 0 in admin
 			\add_filter( 'oembed_ttl', '__return_zero' );
 		}
 		
-		\add_filter( 'acf_the_content', [ $this, 'replace_embeds' ] );
-		\add_filter( 'do_shortcode_tag', [ $this, 'replace_embeds' ], 10, 2 );
-		\add_filter( 'do_shortcode_tag', [ $this, 'replace_maps_marker' ], 10, 2 );
-		\add_filter( 'embed_oembed_html', [ $this, 'replace_embeds_oembed' ], 10, 3 );
-		\add_filter( 'embed_privacy_widget_output', [ $this, 'replace_embeds' ] );
-		\add_filter( 'et_builder_get_oembed', [ $this, 'replace_embeds_divi' ], 10, 2 );
-		\add_filter( 'pll_get_post_types', [ $this, 'register_polylang_post_type' ], 10, 2 );
-		\add_filter( 'the_content', [ $this, 'replace_embeds' ] );
-		\add_filter( 'wp_video_shortcode', [ $this, 'replace_video_shortcode' ], 10, 2 );
-		\add_shortcode( 'embed_privacy_opt_out', [ $this, 'shortcode_opt_out' ] );
-		\register_activation_hook( $this->plugin_file, [ $this, 'clear_embed_cache' ] );
-		\register_deactivation_hook( $this->plugin_file, [ $this, 'clear_embed_cache' ] );
-		
-		Admin::get_instance()->init();
-		Fields::get_instance()->init();
 		Migration::get_instance()->init();
-		Thumbnails::get_instance()->init();
+		Post::init();
+		Providers::get_instance()->init();
+		Settings::init();
+		User_Interface::init();
+		Widget::init();
+		$this->fields->init();
+		$this->frontend->init();
+		$this->shortcode->init();
 		$this->thumbnail->init();
+	}
+	
+	/**
+	 * Initialize all integrations, if necessary.
+	 */
+	public function init_integrations() {
+		/**
+		 * Filter the integrations.
+		 * 
+		 * @since	1.10.0
+		 * 
+		 * @param	array	$integrations List of integrations
+		 */
+		$this->integrations = (array) \apply_filters( 'embed_privacy_integrations', $this->integrations );
+		
+		foreach ( $this->integrations as $integration ) {
+			if ( ! \method_exists( $integration, 'init' ) ) {
+				continue;
+			}
+			
+			$reflection = new ReflectionMethod( $integration, 'init' );
+			
+			if ( $reflection->isStatic() ) {
+				$integration::init();
+			}
+			else {
+				( new $integration() )->init(); // phpcs:ignore NeutronStandard.Functions.VariableFunctions.VariableFunction
+			}
+		}
 	}
 	
 	/**
 	 * Embeds are cached in the postmeta database table and need to be removed
 	 * whenever the plugin will be enabled or disabled.
+	 * 
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\handler\Post::clear_embed_cache() instead
 	 */
 	public function clear_embed_cache() {
-		global $wpdb;
-		
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		if ( \is_plugin_active_for_network( 'embed-privacy/embed-privacy.php' ) ) {
-			// on networks we need to iterate through every site
-			$sites = \get_sites( [
-				'fields' => 'ids',
-				'number' => 99999,
-			] );
-			
-			foreach ( $sites as $blog_id ) {
-				$wpdb->query(
-					$wpdb->prepare(
-						// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-						"DELETE FROM	$wpdb->get_blog_prefix( $blog_id )postmeta
-						WHERE			meta_key LIKE %s",
-						// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-						[ '%_oembed_%' ]
-					)
-				);
-			}
-		}
-		else {
-			$wpdb->query(
-				$wpdb->prepare(
-					"DELETE FROM	$wpdb->postmeta
-					WHERE			meta_key LIKE %s",
-					[ '%_oembed_%' ]
-				)
-			);
-		}
-		//phpcs:enable
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\handler\Post::clear_embed_cache()'
+			),
+			'1.10.0'
+		);
+		Post::clear_embed_cache();
 	}
 	
 	/**
 	 * Deregister assets.
 	 * 
-	 * @since	1.4.6
+	 * @deprecated	1.10.0
+	 * @since		1.4.6
 	 */
 	public function deregister_assets() {
-		\wp_deregister_script( 'jetpack-facebook-embed' );
+		\_doing_it_wrong(
+			__METHOD__,
+			\esc_html__( 'This method is outdated and will be removed in the future.', 'embed-privacy' ),
+			'1.10.0'
+		);
 	}
 	
 	/**
 	 * Enqueue our assets for the frontend.
 	 * 
-	 * @deprecated	1.4.4 Use Embed_Privacy::print_assets() instead
+	 * @deprecated	1.4.4 Use epiphyt\Embed_Privacy\Frontend::print_assets() instead
 	 */
-	public function enqueue_assets() { }
+	public function enqueue_assets() {
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead.', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\Frontend::print_assets()'
+			),
+			'1.4.4'
+		);
+	}
 	
 	/**
 	 * Get the Embed Privacy cookie.
@@ -265,12 +326,17 @@ class Embed_Privacy {
 	/**
 	 * Get filters for Elementor.
 	 * 
-	 * @since		1.3.0
 	 * @deprecated	1.3.5
-	 * @noinspection PhpUnused
+	 * @since		1.3.0
 	 */
 	public function get_elementor_filters() {
-		if ( ! $this->is_elementor() ) {
+		\_doing_it_wrong(
+			__METHOD__,
+			\esc_html__( 'This method is outdated and will be removed in the future.', 'embed-privacy' ),
+			'1.3.5'
+		);
+		
+		if ( ! Elementor::is_used() ) {
 			return;
 		}
 		
@@ -280,99 +346,25 @@ class Embed_Privacy {
 	}
 	
 	/**
-	 * Get an overlay for Elementor YouTube videos.
-	 * 
-	 * @since	1.3.5
-	 * 
-	 * @param	string	$content The content
-	 * @return	string The content with an embed overlay (if needed)
-	 */
-	private function get_elementor_youtube_overlay( $content ) {
-		$embed_provider = $this->get_embed_by_name( 'youtube' );
-		$replacements = [];
-		
-		// phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
-		\libxml_use_internal_errors( true );
-		$dom = new DOMDocument();
-		$dom->loadHTML(
-			'<html><meta charset="utf-8">' . $content . '</html>',
-			LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
-		);
-		$template_dom = new DOMDocument();
-		
-		foreach ( $dom->getElementsByTagName( 'div' ) as $element ) {
-			if ( \strpos( $element->getAttribute( 'data-settings' ), 'youtube_url' ) === false ) {
-				continue;
-			}
-			
-			$settings = \json_decode( $element->getAttribute( 'data-settings' ) );
-			$args = [];
-			
-			if ( ! empty( $settings->youtube_url ) ) {
-				$args['embed_url'] = $settings->youtube_url;
-			}
-			
-			// get overlay template as DOM element
-			$template_dom->loadHTML(
-				'<html><meta charset="utf-8">' . $this->get_output_template( $embed_provider->post_title, $embed_provider->post_name, $dom->saveHTML( $element ), $args ) . '</html>',
-				\LIBXML_HTML_NOIMPLIED | \LIBXML_HTML_NODEFDTD
-			);
-			$overlay = null;
-			
-			foreach ( $template_dom->getElementsByTagName( 'div' ) as $div ) {
-				if ( \stripos( $div->getAttribute( 'class' ), 'embed-privacy-container' ) !== false ) {
-					$overlay = $div;
-					break;
-				}
-			}
-			
-			// store the elements to replace (see regressive loop down below)
-			if ( $overlay instanceof DOMNode || $overlay instanceof DOMElement ) {
-				$replacements[] = [
-					'element' => $element,
-					'replace' => $dom->importNode( $overlay, true ),
-				];
-			}
-		}
-		
-		if ( ! empty( $replacements ) ) {
-			$this->did_replacements = \array_merge( $this->did_replacements, $replacements );
-			$this->has_embed = true;
-			$elements = $dom->getElementsByTagName( 'div' );
-			$i = $elements->length - 1;
-			
-			// use regressive loop for replaceChild()
-			// see: https://www.php.net/manual/en/domnode.replacechild.php#50500
-			while ( $i > -1 ) {
-				$element = $elements->item( $i );
-				
-				foreach ( $replacements as $replacement ) {
-					if ( $replacement['element'] === $element ) {
-						$element->parentNode->replaceChild( $replacement['replace'], $replacement['element'] );
-					}
-				}
-				
-				$i--;
-			}
-			
-			$content = \str_replace( [ '<html><meta charset="utf-8">', '</html>' ], '', $dom->saveHTML( $dom->documentElement ) );
-		}
-		
-		\libxml_use_internal_errors( false );
-		// phpcs:enable
-		
-		return $content;
-	}
-	
-	/**
 	 * Get an embed provider by its name.
 	 * 
-	 * @since	1.3.5
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\data\Providers::get_by_name() instead
+	 * @since		1.3.5
 	 * 
 	 * @param	string	$name The name to search for
 	 * @return	\WP_Post|null The embed or null
 	 */
 	public function get_embed_by_name( $name ) {
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\data\Providers::get_by_name()'
+			),
+			'1.10.0'
+		);
+		
 		if ( empty( $name ) ) {
 			return null;
 		}
@@ -396,32 +388,32 @@ class Embed_Privacy {
 	/**
 	 * Get an embed provider overlay.
 	 * 
-	 * @since	1.3.5
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\embed\Replacement::get() instead
+	 * @since		1.3.5
 	 * 
 	 * @param	\WP_Post	$provider An embed provider
 	 * @param	string		$content The content
 	 * @return	string The content with additional overlays of an embed provider
 	 */
-	private function get_embed_overlay( $provider, $content ) {
-		// make sure to test every provider for its always active state
-		if ( $this->is_always_active_provider( $provider->post_name ) ) {
+	public function get_embed_overlay( $provider, $content ) {
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\embed\Replacement::get()'
+			),
+			'1.10.0'
+		);
+		
+		if ( Providers::is_always_active( $provider->post_name ) ) {
 			return $content;
 		}
 		
-		$regex = \trim( \get_post_meta( $provider->ID, 'regex_default', true ), '/' );
+		$overlay = new Replacement( $content );
 		
-		if ( ! empty( $regex ) ) {
-			$regex = '/' . $regex . '/';
-		}
-		
-		// get overlay for this provider
-		if ( ! empty( $regex ) && \preg_match( $regex, $content ) ) {
-			$this->has_embed = true;
-			$args['regex'] = $regex;
-			$args['post_id'] = $provider->ID;
-			$embed_provider = $provider->post_title;
-			$embed_provider_lowercase = $provider->post_name;
-			$content = $this->get_single_overlay( $content, $embed_provider, $embed_provider_lowercase, $args );
+		if ( $overlay->get_provider()->is_matching( $content ) ) {
+			$content = Template::get( $overlay->get_provider(), $overlay );
 		}
 		
 		return $content;
@@ -434,14 +426,25 @@ class Embed_Privacy {
 	 * {@link https://developer.wordpress.org/reference/classes/wp_query/
 	 * WP_Query} documentation in the Developer Handbook.
 	 * 
-	 * @since	1.3.0
-	 * @since	1.8.0 Added the $args parameter
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\data\Providers::get_list() instead
+	 * @since		1.3.0
+	 * @since		1.8.0 Added the $args parameter
 	 * 
 	 * @param	string	$type The embed type
 	 * @param	array	$args Additional arguments
 	 * @return	array A list of embeds
 	 */
 	public function get_embeds( $type = 'all', $args = [] ) {
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\data\Providers::get_list()'
+			),
+			'1.10.0'
+		);
+		
 		if ( ! empty( $this->embeds ) && isset( $this->embeds[ $type ] ) ) {
 			return $this->embeds[ $type ];
 		}
@@ -460,14 +463,14 @@ class Embed_Privacy {
 		switch ( $type ) {
 			case 'custom':
 				$custom_providers = \get_posts( \array_merge( [
-					'meta_query' => [
+					'meta_query' => [ // phpcs:ignore SlevomatCodingStandard.Arrays.DisallowPartiallyKeyed.DisallowedPartiallyKeyed
 						'relation' => 'OR',
-						[
+						[ // phpcs:ignore Universal.Arrays.MixedKeyedUnkeyedArray.Found, Universal.Arrays.MixedArrayKeyTypes.ImplicitNumericKey
 							'compare' => 'NOT EXISTS',
 							'key' => 'is_system',
 							'value' => 'yes',
 						],
-						[
+						[ // phpcs:ignore Universal.Arrays.MixedKeyedUnkeyedArray.Found, Universal.Arrays.MixedArrayKeyTypes.ImplicitNumericKey
 							'compare' => '!=',
 							'key' => 'is_system',
 							'value' => 'yes',
@@ -546,21 +549,23 @@ class Embed_Privacy {
 	/**
 	 * Get a list with ignored shortcodes.
 	 * 
-	 * @since	1.6.0
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\Shortcode::get_ignored() instead
+	 * @since		1.6.0
 	 * 
 	 * @return	string[] List with ignored shortcodes
 	 */
 	public function get_ignored_shortcodes() {
-		/**
-		 * Filter the ignored shortcodes list.
-		 * 
-		 * @since	1.6.0
-		 * 
-		 * @param	string[]	$ignored_shortcodes Current list of ignored shortcodes
-		 */
-		$this->ignored_shortcodes = \apply_filters( 'embed_privacy_ignored_shortcodes', $this->ignored_shortcodes );
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\Shortcode::get_ignored()'
+			),
+			'1.10.0'
+		);
 		
-		return $this->ignored_shortcodes;
+		return $this->shortcode->get_ignored();
 	}
 	
 	/**
@@ -579,144 +584,10 @@ class Embed_Privacy {
 	}
 	
 	/**
-	 * Transform a tweet into a local one.
-	 * 
-	 * @since	1.3.0
-	 * 
-	 * @param	string	$html Embed code
-	 * @return	string Local embed
-	 */
-	private function get_local_tweet( $html ) {
-		\libxml_use_internal_errors( true );
-		$dom = new DOMDocument();
-		$dom->loadHTML(
-			'<html><meta charset="utf-8">' . $html . '</html>',
-			\LIBXML_HTML_NOIMPLIED | \LIBXML_HTML_NODEFDTD
-		);
-		
-		// phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
-		// remove script tag
-		foreach ( $dom->getElementsByTagName( 'script' ) as $script ) {
-			$script->parentNode->removeChild( $script );
-		}
-		
-		$xpath = new DOMXPath( $dom );
-		
-		// get text node, which represents the author name
-		// and give it a span with class
-		foreach ( $xpath->query( '//blockquote/text()' ) as $node ) {
-			$author_node = $dom->createElement( 'span', $node->nodeValue );
-			$author_node->setAttribute( 'class', 'embed-privacy-author-meta' );
-			$node->parentNode->replaceChild( $author_node, $node );
-		}
-		
-		// wrap author name by a meta div
-		foreach ( $dom->getElementsByTagName( 'span' ) as $node ) {
-			if ( $node->getAttribute( 'class' ) !== 'embed-privacy-author-meta' ) {
-				continue;
-			}
-			
-			// create meta cite
-			$parent_node = $dom->createElement( 'cite' );
-			$parent_node->setAttribute( 'class', 'embed-privacy-tweet-meta' );
-			// append created cite to blockquote
-			$node->parentNode->appendChild( $parent_node );
-			// move author meta inside meta cite
-			$parent_node->appendChild( $node );
-		}
-		
-		foreach ( $dom->getElementsByTagName( 'a' ) as $link ) {
-			if ( ! \preg_match( '/https?:\/\/twitter.com\/([^\/]+)\/status\/(\d+)/', $link->getAttribute( 'href' ) ) ) {
-				continue;
-			}
-			
-			// modify date in link to tweet
-			$l10n_date = \wp_date( \get_option( 'date_format' ), \strtotime( $link->nodeValue ) );
-			
-			if ( \is_string( $l10n_date ) ) {
-				$link->nodeValue = $l10n_date;
-			}
-			
-			// move link inside meta div
-			if ( isset( $parent_node ) && $parent_node instanceof DOMElement ) {
-				$parent_node->appendChild( $link );
-			}
-		}
-		
-		$content = $dom->saveHTML( $dom->documentElement );
-		// phpcs:enable
-		
-		return \str_replace( [ '<html><meta charset="utf-8">', '</html>' ], [ '<div class="embed-privacy-local-tweet">', '</div>' ], $content );
-	}
-	
-	/**
-	 * Get en oEmbed title by its title attribute.
-	 * 
-	 * @since	1.6.4
-	 * 
-	 * @param	string	$content The content to get the title of
-	 * @return	array The dimensions or an empty array
-	 */
-	private function get_oembed_dimensions( $content ) {
-		\libxml_use_internal_errors( true );
-		$dom = new DOMDocument();
-		$dom->loadHTML(
-			'<html><meta charset="utf-8">' . $content . '</html>',
-			\LIBXML_HTML_NOIMPLIED | \LIBXML_HTML_NODEFDTD
-		);
-		\libxml_use_internal_errors( false );
-		
-		foreach ( [ 'embed', 'iframe', 'img', 'object' ] as $tag ) {
-			foreach ( $dom->getElementsByTagName( $tag ) as $element ) {
-				$height = $element->getAttribute( 'height' );
-				$width = $element->getAttribute( 'width' );
-				
-				if ( $height && $width ) {
-					return [
-						'height' => $height,
-						'width' => $width,
-					];
-				}
-			}
-		}
-		
-		return [];
-	}
-	
-	/**
-	 * Get en oEmbed title by its title attribute.
-	 * 
-	 * @since	1.4.0
-	 * 
-	 * @param	string	$content The content to get the title of
-	 * @return	string The title or an empty string
-	 */
-	private function get_oembed_title( $content ) {
-		\libxml_use_internal_errors( true );
-		$dom = new DOMDocument();
-		$dom->loadHTML(
-			'<html><meta charset="utf-8">' . $content . '</html>',
-			\LIBXML_HTML_NOIMPLIED | \LIBXML_HTML_NODEFDTD
-		);
-		\libxml_use_internal_errors( false );
-		
-		foreach ( [ 'embed', 'iframe', 'object' ] as $tag ) {
-			foreach ( $dom->getElementsByTagName( $tag ) as $element ) {
-				$title = $element->getAttribute( 'title' );
-				
-				if ( $title ) {
-					return $title;
-				}
-			}
-		}
-		
-		return '';
-	}
-	
-	/**
 	 * Output a complete template of the overlay.
 	 * 
-	 * @since	1.1.0
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\embed\Template::get() instead
+	 * @since		1.1.0
 	 * 
 	 * @param	string	$embed_provider The embed provider
 	 * @param	string	$embed_provider_lowercase The embed provider without spaces and in lowercase
@@ -725,325 +596,24 @@ class Embed_Privacy {
 	 * @return	string The overlay template
 	 */
 	public function get_output_template( $embed_provider, $embed_provider_lowercase, $output, $args = [] ) {
-		/**
-		 * Filter the overlay arguments.
-		 * 
-		 * @since	1.9.0
-		 * 
-		 * @param	array	$args Template arguments
-		 * @param	string	$embed_provider The embed provider
-		 * @param	string	$embed_provider_lowercase The embed provider without spaces and in lowercase
-		 * @param	string	$output The output before replacing it
-		 */
-		$args = (array) \apply_filters( 'embed_privacy_overlay_args', $args, $embed_provider, $embed_provider_lowercase, $output );
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\embed\Template::get()'
+			),
+			'1.10.0'
+		);
 		
-		if ( ! empty( $args['post_id'] ) ) {
-			$embed_post = \get_post( $args['post_id'] );
-			
-			// if provider is disabled, to nothing
-			if ( \get_post_meta( $embed_post->ID, 'is_disabled', true ) === 'yes' ) {
-				return $output;
-			}
-		}
-		else {
-			$embed_post = null;
-		}
-		
-		if ( $embed_provider_lowercase === 'youtube' ) {
-			$output = \str_replace( 'youtube.com', 'youtube-nocookie.com', $output );
-		}
-		
-		$embed_provider_lowercase = \sanitize_title( $embed_provider_lowercase );
-		$embed_class = 'embed-' . ( ! empty( $embed_provider_lowercase ) ? $embed_provider_lowercase : 'default' );
-		$embed_classes = $embed_class;
-		
-		$background_path = '';
-		$background_url = '';
-		$embed_thumbnail = [
-			'thumbnail_path' => '',
-			'thumbnail_url' => '',
-		];
-		$logo_path = '';
-		$logo_url = '';
-		
-		if ( ! empty( $args['align'] ) ) {
-			$embed_classes .= ' align' . $args['align'];
-		}
-		
-		// display embed provider background image and logo
-		if ( $embed_post ) {
-			$background_image_id = \get_post_meta( $embed_post->ID, 'background_image', true );
-			$thumbnail_id = \get_post_thumbnail_id( $embed_post );
-		}
-		else {
-			$background_image_id = null;
-			$thumbnail_id = null;
-		}
-		
-		if ( $background_image_id ) {
-			$background_path = \get_attached_file( $background_image_id );
-			$background_url = \wp_get_attachment_url( $background_image_id );
-		}
-		
-		if ( $thumbnail_id ) {
-			$logo_path = \get_attached_file( $thumbnail_id );
-			$logo_url = \get_the_post_thumbnail_url( $args['post_id'] );
-		}
-		else if ( \file_exists( \plugin_dir_path( $this->plugin_file ) . 'assets/images/embed-' . $embed_provider_lowercase . '.png' ) ) {
-			$logo_path = \plugin_dir_path( $this->plugin_file ) . 'assets/images/embed-' . $embed_provider_lowercase . '.png';
-			$logo_url = \plugin_dir_url( $this->plugin_file ) . 'assets/images/embed-' . $embed_provider_lowercase . '.png';
-		}
-		
-		if ( ! empty( $args['embed_url'] ) && \get_option( 'embed_privacy_download_thumbnails' ) ) {
-			$embed_thumbnail = Embed_Privacy::get_instance()->thumbnail->get_data( \get_post(), $args['embed_url'] );
-		}
-		
-		if ( ! empty( $args['assets'] ) && \is_array( $args['assets'] ) ) {
-			/**
-			 * Filter the additional assets of an embed provider.
-			 * 
-			 * @since	1.4.5
-			 * 
-			 * @param	array	$assets List of embed assets
-			 * @param	string	$embed_provider_lowercase The current embed provider in lowercase
-			 */
-			$args['assets'] = \apply_filters( "embed_privacy_assets_$embed_provider_lowercase", $args['assets'], $embed_provider_lowercase );
-			
-			$output = $this->print_embed_assets( $args['assets'], $output );
-		}
-		
-		/**
-		 * Filter the path to the background image.
-		 * 
-		 * @param	string	$background_path The default background path
-		 * @param	string	$embed_provider_lowercase The current embed provider in lowercase
-		 */
-		$background_path = \apply_filters( "embed_privacy_background_path_$embed_provider_lowercase", $background_path, $embed_provider_lowercase );
-		
-		/**
-		 * Filter the URL to the background image.
-		 * 
-		 * @param	string	$background_url The default background URL
-		 * @param	string	$embed_provider_lowercase The current embed provider in lowercase
-		 */
-		$background_url = \apply_filters( "embed_privacy_background_url_$embed_provider_lowercase", $background_url, $embed_provider_lowercase );
-		
-		/**
-		 * Filter the path to the thumbnail.
-		 * 
-		 * @param	string	$thumbnail_path The default thumbnail path
-		 * @param	string	$embed_provider_lowercase The current embed provider in lowercase
-		 */
-		$embed_thumbnail['thumbnail_path'] = \apply_filters( "embed_privacy_thumbnail_path_$embed_provider_lowercase", $embed_thumbnail['thumbnail_path'], $embed_provider_lowercase );
-		
-		/**
-		 * Filter the URL to the thumbnail.
-		 * 
-		 * @param	string	$thumbnail_url The default thumbnail URL
-		 * @param	string	$embed_provider_lowercase The current embed provider in lowercase
-		 */
-		$embed_thumbnail['thumbnail_url'] = \apply_filters( "embed_privacy_thumbnail_url_$embed_provider_lowercase", $embed_thumbnail['thumbnail_url'], $embed_provider_lowercase );
-		
-		/**
-		 * Filter the path to the logo.
-		 * 
-		 * @param	string	$logo_path The default logo path
-		 * @param	string	$embed_provider_lowercase The current embed provider in lowercase
-		 */
-		$logo_path = \apply_filters( "embed_privacy_logo_path_$embed_provider_lowercase", $logo_path, $embed_provider_lowercase );
-		
-		/**
-		 * Filter the URL to the logo.
-		 * 
-		 * @param	string	$logo_url The default logo URL
-		 * @param	string	$embed_provider_lowercase The current embed provider in lowercase
-		 */
-		$logo_url = \apply_filters( "embed_privacy_logo_url_$embed_provider_lowercase", $logo_url, $embed_provider_lowercase );
-		
-		$embed_md5 = \md5( $output . \wp_generate_uuid4() );
-		
-		if ( empty( $this->style['container'][ $embed_md5 ] ) ) {
-			$this->style['container'][ $embed_md5 ] = [
-				'background-image' => ! empty( $embed_thumbnail['thumbnail_path'] ) && \file_exists( $embed_thumbnail['thumbnail_path'] ) ? 'url("' . \esc_url( $embed_thumbnail['thumbnail_url'] ) . '")' : '',
-			];
-		}
-		
-		if ( ! empty( $args['height'] ) && ! empty( $args['width'] ) && empty( $args['ignore_aspect_ratio'] ) ) {
-			// if height is in percentage, we cannot determine the aspect ratio
-			if ( \strpos( $args['height'], '%' ) !== false ) {
-				$args['ignore_aspect_ratio'] = true;
-			}
-			// if width is in percentage, we need to use the content width
-			// since we cannot determine the actual width
-			if ( \strpos( $args['width'], '%' ) !== false ) {
-				global $content_width;
-				
-				$args['width'] = $content_width;
-			}
-			
-			$this->style['container'][ $embed_md5 ]['aspect-ratio'] = $args['width'] . '/' . $args['height'];
-		}
-		
-		$is_debug = \defined( 'WP_DEBUG' ) && WP_DEBUG;
-		
-		// display only if file exists
-		if ( \file_exists( $background_path ) && empty( $this->style['global']['container']['background-image'] ) ) {
-			$version = $is_debug ? \filemtime( $background_path ) : EMBED_PRIVACY_VERSION;
-			$this->style['global'][ $embed_provider_lowercase ]['container']['background-image'] = \sprintf(
-				'url(%1$s?v=%2$s)',
-				\esc_url( $background_url ),
-				\esc_html( $version )
-			);
-		}
-		
-		// display only if file exists
-		if ( \file_exists( $logo_path ) && empty( $this->style['global']['logo']['background-image'] ) ) {
-			$version = $is_debug ? \filemtime( $logo_path ) : EMBED_PRIVACY_VERSION;
-			$this->style['global'][ $embed_provider_lowercase ]['logo']['background-image'] = \sprintf(
-				'url(%1$s?v=%2$s)',
-				\esc_url( $logo_url ),
-				\esc_html( $version )
-			);
-		}
-		
-		\ob_start();
-		?>
-		<p>
-		<?php
-			if ( ! empty( $embed_provider ) ) {
-				if ( $embed_post ) {
-					$allowed_tags = [
-						'a' => [
-							'href',
-							'target',
-						],
-					];
-					echo $embed_post->post_content . \PHP_EOL; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-					$privacy_policy = \get_post_meta( $embed_post->ID, 'privacy_policy_url', true );
-					
-					if ( $privacy_policy ) {
-						?>
-						<br>
-						<?php
-						/* translators: 1: the embed provider, 2: opening <a> tag to the privacy policy, 3: closing </a> */
-						\printf( \wp_kses( \__( 'Learn more in %1$s’s %2$sprivacy policy%3$s.', 'embed-privacy' ), $allowed_tags ), \esc_html( $embed_provider ), '<a href="' . \esc_url( $privacy_policy ) . '" target="_blank">', '</a>' );
-					}
-				}
-				else {
-					/* translators: the embed provider */
-					\printf( \esc_html__( 'Click here to display content from %s', 'embed-privacy' ), \esc_html( $embed_provider ) );
-				}
-			}
-			else {
-				\esc_html_e( 'Click here to display content from an external service.', 'embed-privacy' );
-			}
-		?>
-		</p>
-		<?php
-		$checkbox_id = 'embed-privacy-store-' . $embed_provider_lowercase . '-' . $embed_md5;
-		
-		if ( $embed_provider_lowercase !== 'default' ) {
-			?>
-			<p class="embed-privacy-input-wrapper">
-				<input id="<?php echo \esc_attr( $checkbox_id ); ?>" type="checkbox" value="1" class="embed-privacy-input" data-embed-provider="<?php echo \esc_attr( $embed_provider_lowercase ); ?>">
-				<label for="<?php echo \esc_attr( $checkbox_id ); ?>" class="embed-privacy-label" data-embed-provider="<?php echo \esc_attr( $embed_provider_lowercase ); ?>">
-					<?php
-					/* translators: the embed provider */
-					\printf( \esc_html__( 'Always display content from %s', 'embed-privacy' ), \esc_html( $embed_provider ) );
-					?>
-				</label>
-			</p>
-			<?php
-		}
-		
-		$content = \ob_get_clean();
-		
-		/**
-		 * Filter the content of the embed overlay.
-		 * 
-		 * @param	string		$content The content
-		 * @param	string		$embed_provider The embed provider of this embed
-		 */
-		$content = \apply_filters( 'embed_privacy_content', $content, $embed_provider );
-		
-		\ob_start();
-		
-		$footer_content = '';
-		
-		if ( ! empty( $args['embed_url'] ) ) {
-			$footer_content = '<div class="embed-privacy-footer">';
-			
-			if ( ! \get_option( 'embed_privacy_disable_link' ) ) {
-				$footer_content .= '<span class="embed-privacy-url"><a href="' . \esc_url( $args['embed_url'] ) . '">';
-				$footer_content .= \sprintf(
-				/* translators: content name or 'content' */
-					\esc_html__( 'Open "%s" directly', 'embed-privacy' ),
-					! empty( $args['embed_title'] ) ? $args['embed_title'] : \__( 'content', 'embed-privacy' )
-				);
-				$footer_content .= '</a></span>';
-			}
-			
-			$footer_content .= '</div>' . \PHP_EOL;
-			
-			/**
-			 * Filter the overlay footer.
-			 * 
-			 * @param	string	$footer_content The footer content
-			 */
-			$footer_content = \apply_filters( 'embed_privacy_overlay_footer', $footer_content );
-		}
-		?>
-		<div class="embed-privacy-container is-disabled <?php echo \esc_attr( $embed_classes ); ?>" data-embed-id="oembed_<?php echo \esc_attr( $embed_md5 ); ?>" data-embed-provider="<?php echo \esc_attr( $embed_provider_lowercase ); ?>"<?php echo ( ! empty( $embed_thumbnail['thumbnail_path'] ) && \file_exists( $embed_thumbnail['thumbnail_path'] ) ? ' style="background-image: url(' . \esc_url( $embed_thumbnail['thumbnail_url'] ) . ');"' : '' ); ?>>
-			<?php
-			/* translators: embed provider */
-			$button_text = \sprintf( \__( 'Display content from %s', 'embed-privacy' ), \esc_html( $embed_provider ) );
-			
-			if ( ! empty( $args['embed_title'] ) ) {
-				/* translators: 1: embed title, 2: embed provider */
-				$button_text = \sprintf( \__( 'Display "%1$s" from %2$s', 'embed-privacy' ), $args['embed_title'], \esc_html( $embed_provider ) );
-			}
-			?>
-			<button class="embed-privacy-enable screen-reader-text"><?php echo \esc_html( $button_text ); ?></button>
-			
-			<div class="embed-privacy-overlay">
-				<div class="embed-privacy-inner">
-					<?php
-					echo ( \file_exists( $logo_path ) ? '<div class="embed-privacy-logo"></div>' . \PHP_EOL : '' );
-					echo $content . \PHP_EOL; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-					?>
-				</div>
-				
-				<?php echo $footer_content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-			</div>
-			
-			<div class="embed-privacy-content">
-				<script>var _oembed_<?php echo $embed_md5; ?> = '<?php echo \addslashes( \wp_json_encode( [ 'embed' => \htmlentities( \preg_replace( '/\s+/S', ' ', $output ) ) ] ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>';</script>
-			</div>
-		</div>
-		<?php
-		$markup = \ob_get_clean();
-		
-		/**
-		 * Filter the complete markup of the embed.
-		 * 
-		 * @param	string	$markup The markup
-		 * @param	string	$embed_provider The embed provider of this embed
-		 */
-		$markup = \apply_filters( 'embed_privacy_markup', $markup, $embed_provider );
-		
-		$this->has_embed = true;
-		
-		if ( ! empty( $args['strip_newlines'] ) ) {
-			$markup = \str_replace( \PHP_EOL, '', $markup );
-		}
-		
-		return $markup;
+		return Template::get( $embed_provider, $embed_provider_lowercase, $output, $args );
 	}
 	
 	/**
 	 * Get a single overlay for all matching embeds.
 	 * 
-	 * @since	1.2.0
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\embed\Replacement::get() instead
+	 * @since		1.2.0
 	 * 
 	 * @param	string	$content The original content
 	 * @param	string	$embed_provider The embed provider
@@ -1052,354 +622,55 @@ class Embed_Privacy {
 	 * @return	string The updated content
 	 */
 	public function get_single_overlay( $content, $embed_provider, $embed_provider_lowercase, $args ) {
-		if ( empty( $content ) ) {
-			return $content;
-		}
-		
-		/**
-		 * Filter whether to ignore this embed.
-		 * 
-		 * @since	1.9.0
-		 * 
-		 * @param	bool	$ignore_embed Whether to ignore this embed
-		 * @param	string	$content The original content
-		 * @param	string	$embed_provider The embed provider
-		 * @param	string	$embed_provider_lowercase The embed provider without spaces and in lowercase
-		 * @param	array	$args Additional arguments
-		 */
-		$ignore_embed = (bool) \apply_filters( 'embed_privacy_ignore_embed', false, $content, $embed_provider, $embed_provider_lowercase, $args );
-		
-		if ( $ignore_embed ) {
-			return $content;
-		}
-		
-		$args = \wp_parse_args( $args, [
-			'additional_checks' => [],
-			'check_always_active' => false,
-			'element_attribute' => 'src',
-			'elements' => [ 'embed', 'iframe', 'object' ],
-			'height' => 0,
-			'ignore_aspect_ratio' => false,
-			'regex' => '',
-			'strip_newlines' => ! \has_blocks( $content ),
-			'width' => 0,
-		] );
-		
-		\libxml_use_internal_errors( true );
-		$dom = new DOMDocument();
-		$dom->loadHTML(
-			'<html><meta charset="utf-8">' . \str_replace( '%', '%_epi_', $content ) . '</html>',
-			\LIBXML_HTML_NOIMPLIED | \LIBXML_HTML_NODEFDTD
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\embed\Replacement::get()'
+			),
+			'1.10.0'
 		);
-		$is_empty_provider = empty( $embed_provider );
-		$template_dom = new DOMDocument();
 		
-		if ( $is_empty_provider ) {
-			$providers = $this->get_embeds();
-		}
+		$overlay = new Replacement( $content );
 		
-		// detect domain if WordPress is installed on a sub domain
-		$host = \wp_parse_url( \home_url(), \PHP_URL_HOST );
-		
-		if ( ! \filter_var( $host, \FILTER_VALIDATE_IP ) ) {
-			$host_array = \explode( '.', \str_replace( 'www.', '', $host ) );
-			$tld_count = \count( $host_array );
-			
-			if ( $tld_count >= 3 && strlen( $host_array[ $tld_count - 2 ] ) === 2 ) {
-				$host = \implode( '.', \array_splice( $host_array, $tld_count - 3, 3 ) );
-			}
-			else if ( $tld_count >= 2 ) {
-				$host = \implode( '.', \array_splice( $host_array, $tld_count - 2, $tld_count ) );
-			}
-		}
-		
-		foreach ( $args['elements'] as $tag ) {
-			$replacements = [];
-			
-			if ( $tag === 'object' ) {
-				$args['element_attribute'] = 'data';
-			}
-			
-			foreach ( $dom->getElementsByTagName( $tag ) as $element ) {
-				if ( ! $this->run_checks( $args['additional_checks'], $element ) ) {
-					continue;
-				}
-				
-				// ignore embeds from the same (sub-)domain
-				if ( \preg_match( '/https?:\/\/(.*\.)?' . \preg_quote( $host, '/' ) . '/', $element->getAttribute( $args['element_attribute'] ) ) ) {
-					continue;
-				}
-				
-				if ( ! empty( $args['regex'] ) && ! \preg_match( $args['regex'], $element->getAttribute( $args['element_attribute'] ) ) ) {
-					continue;
-				}
-				
-				// providers need to be explicitly checked if they're always active
-				// see https://github.com/epiphyt/embed-privacy/issues/115
-				if ( $embed_provider_lowercase && $args['check_always_active'] && $this->is_always_active_provider( $embed_provider_lowercase ) ) {
-					if ( ! empty( $args['assets'] ) ) {
-						$content = $this->print_embed_assets( $args['assets'], $content );
-					}
-					
-					return $content;
-				}
-				
-				if ( $is_empty_provider ) {
-					$embedded_host = \wp_parse_url( $element->getAttribute( $args['element_attribute'] ), \PHP_URL_HOST );
-					
-					// embeds with relative paths have no host
-					// and they are local by definition, so do nothing
-					// see https://github.com/epiphyt/embed-privacy/issues/27
-					if ( empty( $embedded_host ) ) {
-						return $content;
-					}
-					
-					$embed_provider = $embedded_host;
-					$embed_provider_lowercase = \sanitize_title( $embedded_host );
-					
-					// unknown providers need to be explicitly checked if they're always active
-					// see https://github.com/epiphyt/embed-privacy/issues/115
-					if ( $args['check_always_active'] && $this->is_always_active_provider( $embed_provider_lowercase ) ) {
-						if ( ! empty( $args['assets'] ) ) {
-							$content = $this->print_embed_assets( $args['assets'], $content );
-						}
-						
-						return $content;
-					}
-					
-					// check URL for available provider
-					foreach ( $providers as $provider ) {
-						$regex = \trim( \get_post_meta( $provider->ID, 'regex_default', true ), '/' );
-						
-						if ( ! empty( $regex ) ) {
-							$regex = '/' . $regex . '/';
-						}
-						else {
-							continue;
-						}
-						
-						if ( \preg_match( $regex, $element->getAttribute( $args['element_attribute'] ) ) && empty( $replacements ) ) {
-							continue 2;
-						}
-					}
-				}
-				
-				/* translators: embed title */
-				$args['embed_title'] = $element->hasAttribute( 'title' ) ? $element->getAttribute( 'title' ) : '';
-				$args['embed_url'] = $element->getAttribute( $args['element_attribute'] );
-				$args['height'] = $element->hasAttribute( 'height' ) ? $element->getAttribute( 'height' ) : 0;
-				$args['width'] = $element->hasAttribute( 'width' ) ? $element->getAttribute( 'width' ) : 0;
-				
-				// get overlay template as DOM element
-				$template_dom->loadHTML(
-					'<html><meta charset="utf-8">' . str_replace( '%', '%_epi_', $this->get_output_template( $embed_provider, $embed_provider_lowercase, $dom->saveHTML( $element ), $args ) ) . '</html>',
-					\LIBXML_HTML_NOIMPLIED | \LIBXML_HTML_NODEFDTD
-				);
-				$overlay = null;
-				
-				foreach ( $template_dom->getElementsByTagName( 'div' ) as $div ) {
-					if ( stripos( $div->getAttribute( 'class' ), 'embed-privacy-container' ) !== false ) {
-						$overlay = $div;
-						break;
-					}
-				}
-				
-				// store the elements to replace (see regressive loop down below)
-				if ( $overlay instanceof DOMNode || $overlay instanceof DOMElement ) {
-					$replacements[] = [
-						'element' => $element,
-						'replace' => $dom->importNode( $overlay, true ),
-					];
-				}
-				
-				// reset embed provider name
-				if ( $is_empty_provider ) {
-					$embed_provider = '';
-					$embed_provider_lowercase = '';
-				}
-			}
-			
-			if ( ! empty( $replacements ) ) {
-				$this->did_replacements = \array_merge( $this->did_replacements, $replacements );
-				$this->has_embed = true;
-				$elements = $dom->getElementsByTagName( $tag );
-				$i = $elements->length - 1;
-				
-				// phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
-				// use regressive loop for replaceChild()
-				// see: https://www.php.net/manual/en/domnode.replacechild.php#50500
-				while ( $i > -1 ) {
-					$element = $elements->item( $i );
-					
-					foreach ( $replacements as $replacement ) {
-						if ( $replacement['element'] === $element ) {
-							$element->parentNode->replaceChild( $replacement['replace'], $replacement['element'] );
-						}
-					}
-					
-					$i--;
-				}
-				
-				$content = $dom->saveHTML( $dom->documentElement );
-				// phpcs:enable
-			}
-		}
-		
-		\libxml_use_internal_errors( false );
-		
-		// embeds for other elements need to be handled manually
-		// make sure to test before if the regex matches
-		// see: https://github.com/epiphyt/embed-privacy/issues/26
-		if (
-			empty( $this->did_replacements )
-			&& ! empty( $args['regex'] )
-			&& ! $is_empty_provider
-		) {
-			$provider = $this->get_embed_by_name( $embed_provider_lowercase );
-			
-			if (
-				$provider instanceof WP_Post
-				&& ! \get_post_meta( $provider->ID, 'is_system', true )
-				&& \get_post_meta( $provider->ID, 'is_disabled', true ) !== 'yes'
-			) {
-				// extend regular expression to match the full element
-				if ( \strpos( $args['regex'], '<' ) === false || \strpos( $args['regex'], '>' ) === false ) {
-					$allowed_tags = [
-						'blockquote',
-						'div',
-						'embed',
-						'iframe',
-						'object',
-					];
-					
-					/**
-					 * Filter allowed HTML tags in regular expressions.
-					 * Only elements matching these tags get processed.
-					 * 
-					 * @since	1.6.0
-					 * 
-					 * @param	string[]	$allowed_tags The allowed tags
-					 * @param	string		$embed_provider_lowercase The embed provider without spaces and in lowercase
-					 * @return	array A list of allowed tags
-					 */
-					$allowed_tags = \apply_filters( 'embed_privacy_matcher_elements', $allowed_tags, $embed_provider_lowercase );
-					
-					$tags_regex = '(' . \implode( '|', \array_filter( $allowed_tags, function( $tag ) {
-						return \preg_quote( $tag, '/' );
-					} ) ) . ')';
-					$args['regex'] = '/<' . $tags_regex . '([^"]*)"([^<]*)' . \trim( $args['regex'], '/' ) . '([^"]*)"([^>]*)(>(.*)<\/' . $tags_regex . ')?>/';
-				}
-				
-				while ( \preg_match( $args['regex'], $content, $matches ) ) {
-					$content = \preg_replace( $args['regex'], $this->get_output_template( $embed_provider, $embed_provider_lowercase, $matches[0], $args ), $content, 1 );
-				}
-			}
-		}
-		
-		// decode to make sure there is nothing left encoded if replacements have been made
-		// otherwise, content is untouched by DOMDocument, and we don't need a decoding
-		// only required for WPBakery Page Builder
-		if ( ! empty( $this->did_replacements ) && \str_contains( 'vc_row', $content ) ) {
-			$content = \rawurldecode( $content );
-		}
-		
-		// remove root element, see https://github.com/epiphyt/embed-privacy/issues/22
-		return \str_replace(
-			[
-				'<html><meta charset="utf-8">',
-				'</html>',
-				'%_epi_',
-			],
-			[
-				'',
-				'',
-				'%',
-			],
-			$content
-		);
+		return $overlay->get( $args );
 	}
 	
 	/**
 	 * Get dynamically generated style.
 	 * 
+	 * @deprecated	1.10.0
+	 * 
 	 * @return	string Dynamically generated style
 	 */
 	public function get_style() {
-		$style = '';
+		\_doing_it_wrong(
+			__METHOD__,
+			\esc_html__( 'This method has no more functionality.', 'embed-privacy' ),
+			'1.10.0'
+		);
 		
 		/**
 		 * Filter the style properties before generating dynamic styles.
 		 * 
-		 * @since	1.9.0
+		 * @deprecated	1.10.0
+		 * @since		1.9.0
 		 * 
 		 * @param	array $style_properties Style properties array
 		 */
-		$this->style = (array) \apply_filters( 'embed_privacy_dynamic_style_properties', $this->style );
-		
-		foreach ( $this->style as $identifier => $styling ) {
-			if ( $identifier === 'container' ) {
-				foreach ( $styling as $oembed_id => $styles ) {
-					$properties = '';
-					
-					foreach ( $styles as $property => $value ) {
-						if ( empty( $value ) ) {
-							continue;
-						}
-						
-						$properties .= $property . ': ' . $value . '; ';
-					}
-					
-					if ( empty( $properties ) ) {
-						continue;
-					}
-					
-					$style .= \sprintf(
-						'[data-embed-id="oembed_%1$s"] { %2$s }' . \PHP_EOL,
-						\esc_html( $oembed_id ),
-						\esc_html( \trim( $properties ) )
-					);
-				}
-			}
-			else if ( $identifier === 'global' ) {
-				foreach ( $styling as $provider => $types ) {
-					foreach ( $types as $type => $styles ) {
-						$properties = '';
-						
-						foreach ( $styles as $property => $value ) {
-							if ( empty( $value ) ) {
-								continue;
-							}
-							
-							$properties .= $property . ': ' . $value . '; ';
-						}
-						
-						if ( empty( $properties ) ) {
-							continue;
-						}
-						
-						switch ( $type ) {
-							case 'logo': {
-								$style .= \sprintf(
-									'.embed-%1$s .embed-privacy-logo { %2$s }' . \PHP_EOL,
-									\esc_html( $provider ),
-									\esc_html( \trim( $properties ) )
-								);
-							}
-						}
-					}
-				}
-			}
-		}
+		$this->style = (array) \apply_filters_deprecated( 'embed_privacy_dynamic_style_properties', $this->style, '1.10.0' );
 		
 		/**
 		 * Filter dynamic generated style.
 		 * 
+		 * @deprecated	1.10.0
 		 * @since	1.9.0
 		 * 
 		 * @param	string	$style Generated style
 		 * @param	array	$style_properties Style properties array
 		 */
-		$style = \apply_filters( 'embed_privacy_dynamic_style', \trim( $style ), $this->style );
+		$style = \apply_filters_deprecated( 'embed_privacy_dynamic_style', '', $this->style, '1.10.0' ); // phpcs:ignore SlevomatCodingStandard.Variables.UselessVariable.UselessVariable
 		
 		return $style;
 	}
@@ -1407,133 +678,92 @@ class Embed_Privacy {
 	/**
 	 * Check if a post contains an embed.
 	 * 
-	 * @since	1.3.0
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\handler\Post::has_embed() instead
+	 * @since		1.3.0
 	 * 
 	 * @param	\WP_Post|int|null	$post A post object, post ID or null
 	 * @return	bool True if a post contains an embed, false otherwise
 	 */
 	public function has_embed( $post = null ) {
-		if ( $post === null ) {
-			global $post;
-		}
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\handler\Post::has_embed()'
+			),
+			'1.10.0'
+		);
 		
-		if ( \is_numeric( $post ) ) {
-			$post = \get_post( $post ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		}
-		
-		/**
-		 * Allow overwriting the return value of has_embed().
-		 * If set to anything other than null, this value will be returned.
-		 * 
-		 * @param	null	$has_embed The default value
-		 */
-		$has_embed = \apply_filters( 'embed_privacy_has_embed', null );
-		
-		if ( $has_embed !== null ) {
-			return $has_embed;
-		}
-		
-		if ( ! $post instanceof WP_Post ) {
-			return false;
-		}
-		
-		if ( $this->has_embed ) {
-			return true;
-		}
-		
-		$embed_providers = $this->get_embeds();
-		
-		// check post content
-		foreach ( $embed_providers as $provider ) {
-			$regex = \trim( \get_post_meta( $provider->ID, 'regex_default', true ), '/' );
-			
-			if ( empty( $regex ) ) {
-				continue;
-			}
-			
-			// get overlay for this provider
-			if ( \preg_match( '/' . $regex . '/', $post->post_content ) ) {
-				return true;
-			}
-		}
-		
-		return false;
-	}
-	
-	/**
-	 * Determine whether this is an AMP response.
-	 * Note that this must only be called after the parse_query action.
-	 * 
-	 * @return	bool True if the current page is an AMP page, false otherwise
-	 */
-	private function is_amp() {
-		/** @disregard P1010 */
-		return \function_exists( 'is_amp_endpoint' ) && \is_amp_endpoint();
+		return Post::has_embed( $post );
 	}
 	
 	/**
 	 * Check if a provider is always active.
 	 * 
-	 * @since	1.1.0
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\data\Providers::is_always_active() instead
+	 * @since		1.1.0
 	 * 
 	 * @param	string		$provider The embed provider in lowercase
 	 * @return	bool True if provider is always active, false otherwise
 	 */
 	public function is_always_active_provider( $provider ) {
-		$javascript_detection = \get_option( 'embed_privacy_javascript_detection' );
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\data\Providers::is_always_active()'
+			),
+			'1.10.0'
+		);
 		
-		if ( $javascript_detection ) {
-			return false;
-		}
-		
-		$cookie = $this->get_cookie();
-		
-		if ( isset( $cookie->{$provider} ) && $cookie->{$provider} === true ) {
-			return true;
-		}
-		
-		return false;
+		return Providers::is_always_active( $provider );
 	}
 	
 	/**
 	 * Check if a post is written in Elementor.
 	 * 
-	 * @since	1.3.5
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\integration\Elementor::is_used() instead
+	 * @since		1.3.5
 	 * 
 	 * @return	bool True if Elementor is used, false otherwise
 	 */
 	public function is_elementor() {
-		if ( ! function_exists( 'is_plugin_active' ) ) {
-			include_once ABSPATH . 'wp-admin/includes/plugin.php';
-		}
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\integration\Elementor::is_used()'
+			),
+			'1.10.0'
+		);
 		
-		if (
-			! \is_plugin_active( 'elementor/elementor.php' )
-			|| ! \get_the_ID()
-			|| ! Plugin::$instance->documents->get( \get_the_ID() )->is_built_with_elementor()
-		) {
-			return false;
-		}
-		
-		return true;
+		return Elementor::is_used();
 	}
 	
 	/**
 	 * Check if the current theme is matching your name.
 	 * 
-	 * @since	1.3.5
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\handler\Theme::is() instead
+	 * @since		1.3.5
 	 * 
 	 * @param	string	$name The theme name to test
 	 * @return	bool True if the current theme is matching, false otherwise
 	 */
 	public function is_theme( $name ) {
-		$name = \strtolower( $name );
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\handler\Theme::is()'
+			),
+			'1.10.0'
+		);
 		
-		if ( \strtolower( \wp_get_theme()->get( 'Name' ) ) === $name || \strtolower( \wp_get_theme()->get( 'Template' ) ) === $name ) {
-			return true;
-		}
-		
-		return false;
+		return Theme::is( $name );
 	}
 	
 	/**
@@ -1546,19 +776,17 @@ class Embed_Privacy {
 	/**
 	 * Callback for the page output buffer.
 	 * 
+	 * @deprecated	1.10.0
+	 * 
 	 * @param	string	$buffer Current buffer
 	 * @return	string Updated buffer
 	 */
 	public function output_buffer_callback( $buffer ) {
-		$style = $this->get_style();
-		
-		if ( ! empty( $style ) ) {
-			$buffer = \str_replace(
-				'</head>',
-				'<style id="embed-privacy-inline-css">' . \PHP_EOL . $style . \PHP_EOL . '</style>' . \PHP_EOL . '</head>',
-				$buffer
-			);
-		}
+		\_doing_it_wrong(
+			__METHOD__,
+			\esc_html__( 'This method has no more functionality.', 'embed-privacy' ),
+			'1.10.0'
+		);
 		
 		return $buffer;
 	}
@@ -1581,346 +809,133 @@ class Embed_Privacy {
 	/**
 	 * Handle printing assets.
 	 * 
-	 * @since	1.3.0
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\Frontend::print_assets() instead
+	 * @since		1.3.0
 	 */
 	public function print_assets() {
-		if ( $this->is_printed ) {
-			return;
-		}
-		
-		\wp_enqueue_script( 'embed-privacy' );
-		\wp_enqueue_style( 'embed-privacy' );
-		\wp_localize_script( 'embed-privacy', 'embedPrivacy', [
-			'alwaysActiveProviders' => \array_keys( (array) $this->get_cookie() ), // deprecated
-			'javascriptDetection' => \get_option( 'embed_privacy_javascript_detection' ),
-		] );
-		
-		if ( $this->is_theme( 'Astra' ) ) {
-			\wp_enqueue_style( 'embed-privacy-astra' );
-		}
-		
-		if ( $this->is_theme( 'Divi' ) ) {
-			\wp_enqueue_script( 'embed-privacy-divi' );
-			\wp_enqueue_style( 'embed-privacy-divi' );
-		}
-		
-		if ( $this->is_elementor() ) {
-			\wp_enqueue_script( 'embed-privacy-elementor-video' );
-			\wp_enqueue_style( 'embed-privacy-elementor' );
-		}
-		
-		if ( ! \function_exists( 'is_plugin_active' ) ) {
-			require_once ABSPATH . WPINC . '/plugin.php';
-		}
-		
-		if ( \is_plugin_active( 'kadence-blocks/kadence-blocks.php' ) ) {
-			\wp_enqueue_style( 'embed-privacy-kadence-blocks' );
-		}
-		
-		if ( \is_plugin_active( 'shortcodes-ultimate/shortcodes-ultimate.php' ) ) {
-			\wp_enqueue_style( 'embed-privacy-shortcodes-ultimate' );
-		}
-		
-		$this->is_printed = true;
-	}
-	
-	/**
-	 * Print assets of an embed before the content.
-	 * 
-	 * @since	1.4.5
-	 * 
-	 * @param	array	$assets List of assets
-	 * @param	string	$output The output
-	 * @return	string The updated output
-	 */
-	private function print_embed_assets( $assets, $output ) {
-		if ( empty( $assets ) ) {
-			return $output;
-		}
-		
-		foreach ( array_reverse( $assets ) as $asset ) {
-			if ( empty( $asset['type'] ) ) {
-				continue;
-			}
-			
-			if ( $asset['type'] === 'script' ) {
-				if ( empty( $asset['handle'] ) || empty( $asset['src'] ) ) {
-					continue;
-				}
-				
-				$output = '<script src="' . \esc_url( $asset['src'] ) . ( ! empty( $asset['version'] ) ? '?ver=' . \esc_attr( \rawurlencode( $asset['version'] ) ) : '' ) . '" id="' . \esc_attr( $asset['handle'] ) . '"></script>' . \PHP_EOL . $output; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
-			}
-			else if ( $asset['type'] === 'inline' ) {
-				if ( empty( $asset['data'] ) || empty( $asset['object_name'] ) ) {
-					continue;
-				}
-				
-				if ( \is_string( $asset['data'] ) ) {
-					$data = \html_entity_decode( $asset['data'], \ENT_QUOTES, 'UTF-8' );
-				}
-				else {
-					foreach ( (array) $asset['data'] as $key => $value ) {
-						if ( ! \is_scalar( $value ) ) {
-							continue;
-						}
-						
-						$data[ $key ] = \html_entity_decode( (string) $value, \ENT_QUOTES, 'UTF-8' );
-					}
-				}
-				$output = '<script>var ' . esc_js( $asset['object_name'] ) . ' = ' . \wp_json_encode( $data ) . ';</script>' . \PHP_EOL . $output;
-			}
-		}
-		
-		return $output;
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\Frontend::print_assets()'
+			),
+			'1.10.0'
+		);
+		$this->frontend->print_assets();
 	}
 	
 	/**
 	 * Register our assets for the frontend.
 	 * 
-	 * @since	1.4.4
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\Frontend::register_assets() instead
+	 * @since		1.4.4
 	 */
 	public function register_assets() {
-		if ( \is_admin() || \wp_doing_ajax() || \wp_doing_cron() ) {
-			return;
-		}
-		
-		$is_debug = \defined( 'WP_DEBUG' ) && WP_DEBUG;
-		$suffix = ( $is_debug ? '' : '.min' );
-		$css_file_url = \EPI_EMBED_PRIVACY_URL . 'assets/style/embed-privacy' . $suffix . '.css';
-		$file_version = $is_debug ? \filemtime( \EPI_EMBED_PRIVACY_BASE . 'assets/style/embed-privacy' . $suffix . '.css' ) : \EMBED_PRIVACY_VERSION;
-		
-		\wp_register_style( 'embed-privacy', $css_file_url, [], $file_version );
-		
-		if ( ! $this->is_amp() ) {
-			$js_file_url = \EPI_EMBED_PRIVACY_URL . 'assets/js/embed-privacy' . $suffix . '.js';
-			$file_version = $is_debug ? \filemtime( \EPI_EMBED_PRIVACY_BASE . 'assets/js/embed-privacy' . $suffix . '.js' ) : \EMBED_PRIVACY_VERSION;
-			
-			\wp_register_script( 'embed-privacy', $js_file_url, [], $file_version, [ 'strategy' => 'defer' ] );
-		}
-		
-		// Astra is too greedy at its CSS selectors
-		// see https://github.com/epiphyt/embed-privacy/issues/33
-		$css_file_url = \EPI_EMBED_PRIVACY_URL . 'assets/style/astra' . $suffix . '.css';
-		$file_version = $is_debug ? \filemtime( \EPI_EMBED_PRIVACY_BASE . 'assets/style/astra' . $suffix . '.css' ) : \EMBED_PRIVACY_VERSION;
-		
-		\wp_register_style( 'embed-privacy-astra', $css_file_url, [], $file_version );
-		
-		$js_file_url = \EPI_EMBED_PRIVACY_URL . 'assets/js/divi' . $suffix . '.js';
-		$file_version = $is_debug ? \filemtime( \EPI_EMBED_PRIVACY_BASE . 'assets/js/divi' . $suffix . '.js' ) : \EMBED_PRIVACY_VERSION;
-		
-		\wp_register_script( 'embed-privacy-divi', $js_file_url, [], $file_version, [ 'strategy' => 'defer' ] );
-		
-		$css_file_url = \EPI_EMBED_PRIVACY_URL . 'assets/style/divi' . $suffix . '.css';
-		$file_version = $is_debug ? \filemtime( \EPI_EMBED_PRIVACY_BASE . 'assets/style/divi' . $suffix . '.css' ) : \EMBED_PRIVACY_VERSION;
-		
-		\wp_register_style( 'embed-privacy-divi', $css_file_url, [], $file_version );
-		
-		$js_file_url = \EPI_EMBED_PRIVACY_URL . 'assets/js/elementor-video' . $suffix . '.js';
-		$file_version = $is_debug ? \filemtime( \EPI_EMBED_PRIVACY_BASE . 'assets/js/elementor-video' . $suffix . '.js' ) : \EMBED_PRIVACY_VERSION;
-		
-		\wp_register_script( 'embed-privacy-elementor-video', $js_file_url, [], $file_version, [ 'strategy' => 'defer' ] );
-		
-		$css_file_url = \EPI_EMBED_PRIVACY_URL . 'assets/style/elementor' . $suffix . '.css';
-		$file_version = $is_debug ? \filemtime( \EPI_EMBED_PRIVACY_BASE . 'assets/style/elementor' . $suffix . '.css' ) : \EMBED_PRIVACY_VERSION;
-		
-		\wp_register_style( 'embed-privacy-elementor', $css_file_url, [], $file_version );
-		
-		$css_file_url = \EPI_EMBED_PRIVACY_URL . 'assets/style/kadence-blocks' . $suffix . '.css';
-		$file_version = $is_debug ? \filemtime( \EPI_EMBED_PRIVACY_BASE . 'assets/style/kadence-blocks' . $suffix . '.css' ) : \EMBED_PRIVACY_VERSION;
-		
-		\wp_register_style( 'embed-privacy-kadence-blocks', $css_file_url, [], $file_version );
-		
-		$css_file_url = \EPI_EMBED_PRIVACY_URL . 'assets/style/shortcodes-ultimate' . $suffix . '.css';
-		$file_version = $is_debug ? \filemtime( \EPI_EMBED_PRIVACY_BASE . 'assets/style/shortcodes-ultimate' . $suffix . '.css' ) : \EMBED_PRIVACY_VERSION;
-		
-		\wp_register_style( 'embed-privacy-shortcodes-ultimate', $css_file_url, [], $file_version );
-		
-		$current_url = \sprintf(
-			'http%1$s://%2$s%3$s',
-			\is_ssl() ? 's' : '',
-			! empty( $_SERVER['HTTP_HOST'] ) ? \sanitize_text_field( \wp_unslash( $_SERVER['HTTP_HOST'] ) ) : '',
-			! empty( $_SERVER['REQUEST_URI'] ) ? \sanitize_text_field( \wp_unslash( $_SERVER['REQUEST_URI'] ) ) : ''
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\Frontend::register_assets()'
+			),
+			'1.10.0'
 		);
-		
-		if ( empty( $_SERVER['HTTP_HOST'] ) ) {
-			return;
-		}
-		
-		$post_id = \url_to_postid( $current_url );
-		
-		if ( $post_id ) {
-			$post = \get_post( $post_id );
-		
-			if ( $post instanceof WP_Post && \has_shortcode( $post->post_content, 'embed_privacy_opt_out' ) ) {
-				$this->print_assets();
-			}
-		}
+		$this->frontend->register_assets();
 	}
 	
 	/**
 	 * Register post type in Polylang to allow translation.
 	 * 
-	 * @since	1.5.0
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\integration\Polylang::register_post_type() instead
+	 * @since		1.5.0
 	 * 
 	 * @param	array	$post_types List of current translatable custom post types
 	 * @param	bool	$is_settings Whether the current page is the settings page
 	 * @return	array Updated list of translatable custom post types
 	 */
 	public function register_polylang_post_type( array $post_types, $is_settings ) {
-		if ( $is_settings ) {
-			unset( $post_types['epi_embed'] );
-		}
-		else {
-			$post_types['epi_embed'] = 'epi_embed';
-		}
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\integration\Polylang::register_post_type()'
+			),
+			'1.10.0'
+		);
 		
-		return $post_types;
+		return Polylang::register_post_type( $post_types, $is_settings );
+	}
+	
+	/**
+	 * Register post type.
+	 * 
+	 * @since	1.10.0
+	 */
+	public static function register_post_type() {
+		\register_post_type(
+			'epi_embed',
+			[ // phpcs:ignore SlevomatCodingStandard.Arrays.AlphabeticallySortedByKeys.IncorrectKeyOrder
+				'label' => \__( 'Embeds', 'embed-privacy' ),
+				'description' => \__( 'Embeds from Embed Privacy', 'embed-privacy' ),
+				'supports' => [
+					'custom-fields',
+					'editor',
+					'revisions',
+					'thumbnail',
+					'title',
+				],
+				'hierarchical' => false,
+				'public' => false,
+				'menu_icon' => 'dashicons-format-video',
+				'show_in_admin_bar' => false,
+				'show_in_menu' => false,
+				'show_in_nav_menus' => false,
+				'show_in_rest' => false,
+				'show_ui' => true,
+				'can_export' => true,
+				'has_archive' => false,
+				'exclude_from_search' => true,
+				'publicly_queryable' => false,
+				'rewrite' => [
+					'pages' => false,
+					'with_front' => false,
+				],
+			]
+		);
 	}
 	
 	/**
 	 * Replace embeds with a container and hide the embed with an HTML comment.
 	 * 
-	 * @since	1.2.0 Changed behavior of the method
-	 * @since	1.6.0 Added optional $tag parameter
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\data\Replacer::replace_embeds() instead
+	 * @since		1.2.0 Changed behavior of the method
+	 * @since		1.6.0 Added optional $tag parameter
 	 * 
 	 * @param	string	$content The original content
 	 * @param	string	$tag The shortcode tag if called via do_shortcode
 	 * @return	string The updated content
 	 */
 	public function replace_embeds( $content, $tag = '' ) {
-		// do nothing in admin
-		if ( ! $this->usecache ) {
-			return $content;
-		}
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\data\Replacer::replace_embeds()'
+			),
+			'1.10.0'
+		);
 		
-		// do nothing for ignored shortcodes
-		if ( ! empty( $tag ) && \in_array( $tag, $this->get_ignored_shortcodes(), true ) ) {
-			return $content;
-		}
-		
-		// check content for already available embeds
-		if ( ! $this->has_embed && \strpos( $content, '<div class="embed-privacy-overlay">' ) !== false ) {
-			$this->has_embed = true;
-		}
-		
-		// get all embed providers
-		$embed_providers = $this->get_embeds();
-		
-		foreach ( $embed_providers as $provider ) {
-			$content = $this->get_embed_overlay( $provider, $content );
-		}
-		
-		// Elementor video providers need special treatment
-		if ( $this->is_elementor() ) {
-			$embed_providers = [
-				$this->get_embed_by_name( 'dailymotion' ),
-				$this->get_embed_by_name( 'vimeo' ),
-			];
-			
-			foreach ( $embed_providers as $provider ) {
-				$content = $this->get_embed_overlay( $provider, $content );
-			}
-			
-			if ( strpos( $content, 'youtube.com\/watch' ) !== false ) {
-				$content = $this->get_elementor_youtube_overlay( $content );
-			}
-		}
-		
-		/**
-		 * If set to true, unknown providers are not handled via Embed Privacy.
-		 * 
-		 * @since	1.5.0
-		 * 
-		 * @param	bool	$ignore_unknown Whether unknown providers should be ignored
-		 * @param	string	$content The original content
-		 */
-		$ignore_unknown_providers = \apply_filters( 'embed_privacy_ignore_unknown_providers', false, $content );
-		
-		// get default external content
-		// special case for youtube-nocookie.com as it is part of YouTube provider
-		// and gets rewritten in Divi
-		// see: https://github.com/epiphyt/embed-privacy/issues/69
-		if (
-			! $ignore_unknown_providers
-			&& (
-				\strpos( $content, 'youtube-nocookie.com' ) === false
-				|| ! $this->is_always_active_provider( 'youtube' )
-			)
-		) {
-			$new_content = $this->get_single_overlay( $content, '', '', [ 'check_always_active' => true ] );
-			
-			if ( $new_content !== $content ) {
-				$this->has_embed = true;
-				$content = $new_content;
-			}
-		}
-		
-		if ( \strpos( $content, 'class="fb-post"' ) !== false ) {
-			$provider = $this->get_embed_by_name( 'facebook' );
-			$args = [
-				'additional_checks' => [
-					[
-						'attribute' => 'class',
-						'compare' => '===',
-						'type' => 'attribute',
-						'value' => 'fb-post',
-					],
-				],
-				'assets' => [],
-				'check_always_active' => true,
-				'element_attribute' => 'data-href',
-				'elements' => [
-					'div',
-				],
-			];
-			
-			// register jetpack script if available
-			if ( \class_exists( '\Automattic\Jetpack\Assets' ) && \defined( 'JETPACK__VERSION' ) ) {
-				/** @disregard P1009 */
-				$jetpack = Jetpack::init();
-				
-				$args['assets'][] = [
-					'type' => 'inline',
-					'object_name' => 'jpfbembed',
-					'data' => [
-						/**
-						 * Filter the Jetpack sharing Facebook app ID.
-						 * 
-						 * @since	1.4.5
-						 * 
-						 * @param	string	$app_id The current app ID
-						 */
-						'appid' => \apply_filters( 'jetpack_sharing_facebook_app_id', '249643311490' ),
-						'locale' => $jetpack->get_locale(),
-					],
-				];
-				$args['assets'][] = [
-					'type' => 'script',
-					'handle' => 'jetpack-facebook-embed',
-					'src' => Assets::get_file_url_for_environment( '_inc/build/facebook-embed.min.js', '_inc/facebook-embed.js' ),
-					'version' => \JETPACK__VERSION,
-				];
-			}
-			
-			$new_content = $this->get_single_overlay( $content, $provider->post_title, $provider->post_name, $args );
-			
-			if ( $new_content !== $content ) {
-				$this->has_embed = true;
-				$content = $new_content;
-			}
-		}
-		
-		if ( $this->has_embed ) {
-			$this->print_assets();
-		}
-		
-		return $content;
+		return Replacer::replace_embeds( $content, $tag );
 	}
 	
 	/**
 	 * Replace oembed embeds with a container and hide the embed with an HTML comment.
 	 * 
-	 * @since	1.2.0
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\data\Replacer::replace_oembed() instead
+	 * @since		1.2.0
 	 * 
 	 * @param	string	$output The original output
 	 * @param	string	$url The URL to the embed
@@ -1928,121 +943,38 @@ class Embed_Privacy {
 	 * @return	string The updated embed code
 	 */
 	public function replace_embeds_oembed( $output, $url, $args ) {
-		// do nothing in admin
-		if ( ! $this->usecache ) {
-			return $output;
-		}
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\data\Replacer::replace_oembed()'
+			),
+			'1.10.0'
+		);
 		
-		// ignore embeds without host (ie. relative URLs)
-		if ( empty( \wp_parse_url( $url, \PHP_URL_HOST ) ) ) {
-			return $output;
-		}
-		
-		// check the current host
-		// see: https://github.com/epiphyt/embed-privacy/issues/24
-		if ( \strpos( $url, \wp_parse_url( \home_url(), \PHP_URL_HOST ) ) !== false ) {
-			return $output;
-		}
-		
-		$embed_provider = '';
-		$embed_provider_lowercase = '';
-		$embed_providers = $this->get_embeds();
-		
-		// get embed provider name
-		foreach ( $embed_providers as $provider ) {
-			$regex = \get_post_meta( $provider->ID, 'regex_default', true );
-			$regex = '/' . \trim( $regex, '/' ) . '/';
-			
-			// save name of provider and stop loop
-			if ( $regex !== '//' && \preg_match( $regex, $url ) ) {
-				$this->has_embed = true;
-				$args['post_id'] = $provider->ID;
-				$embed_provider = $provider->post_title;
-				$embed_provider_lowercase = $provider->post_name;
-				break;
-			}
-		}
-		
-		// see https://github.com/epiphyt/embed-privacy/issues/89
-		if ( empty( $embed_provider ) ) {
-			$parsed_url = \wp_parse_url( $url );
-			$embed_provider = isset( $parsed_url['host'] ) ? $parsed_url['host'] : '';
-		}
-		
-		// make sure to only run once
-		if ( \strpos( $output, 'data-embed-provider="' . $embed_provider_lowercase . '"' ) !== false ) {
-			return $output;
-		}
-		
-		if ( $embed_provider_lowercase === 'youtube' ) {
-			// replace youtube.com to youtube-nocookie.com
-			$output = \str_replace( 'youtube.com', 'youtube-nocookie.com', $output );
-		}
-		else if ( $embed_provider_lowercase === 'twitter' && \get_option( 'embed_privacy_local_tweets' ) ) {
-			// check for local tweets
-			return $this->get_local_tweet( $output );
-		}
-		
-		// check if cookie is set
-		if ( $embed_provider_lowercase !== 'default' && $this->is_always_active_provider( $embed_provider_lowercase ) ) {
-			return $output;
-		}
-		
-		$embed_title = $this->get_oembed_title( $output );
-		/* translators: embed title */
-		$args['embed_title'] = ! empty( $embed_title ) ? $embed_title : '';
-		$args['embed_url'] = $url;
-		$args['strip_newlines'] = true;
-		
-		// the default dimensions are useless
-		// so ignore them if recognized as such
-		$defaults = \wp_embed_defaults( $url );
-		
-		if (
-			! empty( $args['height'] ) && $args['height'] === $defaults['height']
-			&& ! empty( $args['width'] ) && $args['width'] === $defaults['width']
-		) {
-			unset( $args['height'], $args['width'] );
-			
-			$dimensions = $this->get_oembed_dimensions( $output );
-			
-			if ( ! empty( $dimensions ) ) {
-				$args = \array_merge( $args, $dimensions );
-			}
-		}
-		
-		// add two click to markup
-		return $this->get_output_template( $embed_provider, $embed_provider_lowercase, $output, $args );
+		return Replacer::replace_oembed( $output, $url, $args );
 	}
 	
 	/**
 	 * Replace embeds in Divi Builder.
 	 * 
-	 * @since	1.2.0
-	 * @since	1.6.0 Deprecated second parameter
+	 * @deprecated	1.10.0
+	 * @since		1.2.0
+	 * @since		1.6.0 Deprecated second parameter
 	 * 
 	 * @param	string	$item_embed The original output
 	 * @param	string	$url The URL of the embed
 	 * @return	string The updated embed code
 	 */
-	public function replace_embeds_divi( $item_embed, $url ) {
-		$attributes = [];
-		$use_internal_errors = \libxml_use_internal_errors( true );
-		$dom = new DOMDocument();
-		$dom->loadHTML(
-			'<html><meta charset="utf-8">' . $item_embed . '</html>',
-			\LIBXML_HTML_NOIMPLIED | \LIBXML_HTML_NODEFDTD
+	public function replace_embeds_divi( $item_embed, $url ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		\_doing_it_wrong(
+			__METHOD__,
+			\esc_html__( 'This method is outdated and will be removed in the future.', 'embed-privacy' ),
+			'1.10.0'
 		);
 		
-		/** @var \DOMElement $iframe */
-		foreach ( $dom->getElementsByTagName( 'iframe' ) as $iframe ) {
-			$attributes['height'] = $iframe->hasAttribute( 'height' ) ? $iframe->getAttribute( 'height' ) : 0;
-			$attributes['width'] = $iframe->hasAttribute( 'width' ) ? $iframe->getAttribute( 'width' ) : 0;
-		}
-		
-		\libxml_use_internal_errors( $use_internal_errors );
-		
-		return $this->replace_embeds_oembed( $item_embed, $url, $attributes );
+		return $item_embed;
 	}
 	
 	/**
@@ -2057,125 +989,110 @@ class Embed_Privacy {
 	 * @return	string The updated embed code
 	 */
 	public function replace_embeds_twitter( $output, $url, $args ) {
+		\_doing_it_wrong(
+			__METHOD__,
+			\esc_html__( 'This method is outdated and will be removed in the future.', 'embed-privacy' ),
+			'1.6.3'
+		);
+		
 		// do nothing in admin
-		if ( ! $this->usecache ) {
+		if ( ! $this->use_cache ) {
 			return $output;
 		}
 		
-		$provider = $this->get_embed_by_name( 'twitter' );
+		$provider = Providers::get_instance()->get_by_name( 'twitter' );
 		
-		if ( ! \preg_match( \get_post_meta( $provider->ID, 'regex_default', true ), $url ) ) {
+		if ( ! $provider->is_matching( $url ) ) {
 			return $output;
 		}
 		
-		if ( $this->is_always_active_provider( $provider->post_name ) ) {
+		if ( Providers::is_always_active( $provider->get_name() ) ) {
 			return $output;
 		}
 		
 		if ( \get_option( 'embed_privacy_local_tweets' ) ) {
 			// check for local tweets
-			return $this->get_local_tweet( $output );
+			return Twitter::get_local_tweet( $output );
 		}
 		
 		$args['embed_url'] = $url;
 		$args['ignore_aspect_ratio'] = true;
 		$args['strip_newlines'] = true;
 		
-		return $this->get_output_template( $provider->post_title, $provider->post_name, $output, $args );
+		return Template::get( $provider, $output, $args );
 	}
 	
 	/**
 	 * Replace Google Maps iframes.
 	 * 
-	 * @deprecated	1.2.0 Use Embed_Privacy::get_embed_overlay() instead
+	 * @deprecated	1.2.0 Use epiphyt\Embed_Privacy\embed\Replacement::get() instead
 	 * @since		1.1.0
 	 * 
 	 * @param	string	$content The post content
 	 * @return	string The post content
 	 */
 	public function replace_google_maps( $content ) {
-		\preg_match_all( self::IFRAME_REGEX, $content, $matches );
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead.', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\embed\Replacement::get()'
+			),
+			'1.2.0'
+		);
 		
-		if ( empty( $matches ) || empty( $matches[0] ) ) {
-			return $content;
-		}
+		$overlay = new Replacement( $content );
 		
-		$embed_provider = 'Google Maps';
-		$embed_provider_lowercase = 'google-maps';
-		
-		// check if cookie is set
-		if ( $this->is_always_active_provider( $embed_provider_lowercase ) ) {
-			return $content;
-		}
-		
-		foreach ( $matches[0] as $match ) {
-			if ( \strpos( $match, 'google.com/maps' ) === false ) {
-				continue;
-			}
-			
-			$overlay_output = $this->get_output_template( $embed_provider, $embed_provider_lowercase, $match );
-			$content = \str_replace( $match, $overlay_output, $content );
-		}
-		
-		return $content;
+		return $overlay->get();
 	}
 	
 	/**
 	 * Replace Maps Marker (Pro) shortcodes.
 	 * 
-	 * @since	1.5.0
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\integration\Maps_Marker::replace() instead
+	 * @since		1.5.0
 	 * 
 	 * @param	string	$output Shortcode output
 	 * @param	string	$tag Shortcode tag
 	 * @return	string Updated shortcode output
 	 */
 	public function replace_maps_marker( $output, $tag ) {
-		if ( $tag !== 'mapsmarker' ) {
-			return $output;
-		}
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\integration\Maps_Marker::replace()'
+			),
+			'1.10.0'
+		);
 		
-		$embed_provider = $this->get_embed_by_name( 'maps-marker' );
-		
-		if ( \get_post_meta( $embed_provider->ID, 'is_disabled', true ) ) {
-			return $output;
-		}
-		
-		return $this->get_output_template( $embed_provider->post_title, $embed_provider->post_name, $output );
+		return Maps_Marker::replace( $output, $tag );
 	}
 	
 	/**
 	 * Replace video shortcode embeds.
 	 * 
-	 * @since	1.7.0
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\data\Replacer::replace_video_shortcode() instead
+	 * @since		1.7.0
 	 * 
 	 * @param	string	$output Video shortcode HTML output
 	 * @param	array	$atts Array of video shortcode attributes
+	 * @return	string Updated embed code
 	 */
 	public function replace_video_shortcode( $output, $atts ) {
-		$url = isset( $atts['src'] ) ? $atts['src'] : '';
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\data\Replacer::replace_video_shortcode()'
+			),
+			'1.10.0'
+		);
 		
-		if ( empty( $url ) && ! empty( $atts['mp4'] ) ) {
-			$url = $atts['mp4'];
-		}
-		else if ( empty( $url ) && ! empty( $atts['m4v'] ) ) {
-			$url = $atts['m4v'];
-		}
-		else if ( empty( $url ) && ! empty( $atts['webm'] ) ) {
-			$url = $atts['webm'];
-		}
-		else if ( empty( $url ) && ! empty( $atts['ogv'] ) ) {
-			$url = $atts['ogv'];
-		}
-		else if ( empty( $url ) && ! empty( $atts['flv'] ) ) {
-			$url = $atts['flv'];
-		}
-		
-		// ignore relative URLs
-		if ( empty( \wp_parse_url( $url, \PHP_URL_HOST ) ) ) {
-			return $output;
-		}
-		
-		return $this->replace_embeds_oembed( $output, $url, $atts );
+		return Replacer::replace_video_shortcode( $output, $atts );
 	}
 	
 	/**
@@ -2215,12 +1132,13 @@ class Embed_Privacy {
 	 * Run additional for a DOM node checks.
 	 * 
 	 * @since	1.4.4
+	 * @since	1.10.0 Method is now public
 	 * 
 	 * @param	array		$checks A list of checks
 	 * @param	\DOMElement	$element The DOM Element
 	 * @return	bool Whether all checks are successful
 	 */
-	private function run_checks( $checks, $element ) {
+	public function run_checks( $checks, $element ) {
 		if ( empty( $checks ) ) {
 			return true;
 		}
@@ -2239,9 +1157,26 @@ class Embed_Privacy {
 	}
 	
 	/**
+	 * Check whether this request should be ignored by Embed Privacy.
+	 * 
+	 * @since	1.10.0
+	 */
+	public function set_ignored_request() {
+		/**
+		 * Filter whether the current request should be ignored.
+		 * 
+		 * @since	1.10.0
+		 * 
+		 * @param	bool	$is_ignored_request Whether the current request should be ignored
+		 */
+		$this->is_ignored_request = (bool) \apply_filters( 'embed_privacy_is_ignored_request', $this->is_ignored_request );
+	}
+	
+	/**
 	 * Set the plugin file.
 	 * 
-	 * @since	1.1.0
+	 * @deprecated	1.10.0 Use \EPI_EMBED_PRIVACY_FILE instead
+	 * @since		1.1.0
 	 * 
 	 * @param	string	$file The path to the file
 	 */
@@ -2254,120 +1189,55 @@ class Embed_Privacy {
 	/**
 	 * Register post type.
 	 * 
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy:\Embed_Privacy:register_post_type() instead
 	 * @since	1.2.0
 	 */
 	public function set_post_type() {
-		\register_post_type(
-			'epi_embed',
-			[
-				'label' => \__( 'Embeds', 'embed-privacy' ),
-				'description' => \__( 'Embeds from Embed Privacy', 'embed-privacy' ),
-				'supports' => [
-					'custom-fields',
-					'editor',
-					'revisions',
-					'thumbnail',
-					'title',
-				],
-				'hierarchical' => false,
-				'public' => false,
-				'menu_icon' => 'dashicons-format-video',
-				'show_in_admin_bar' => false,
-				'show_in_menu' => false,
-				'show_in_nav_menus' => false,
-				'show_in_rest' => false,
-				'show_ui' => true,
-				'can_export' => true,
-				'has_archive' => false,
-				'exclude_from_search' => true,
-				'publicly_queryable' => false,
-				'rewrite' => [
-					'with_front' => false,
-					'pages' => false,
-				],
-			]
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\Embed_Privacy::register_post_type()'
+			),
+			'1.10.0'
 		);
+		self::register_post_type();
 	}
 	
 	/**
 	 * Display an Opt-out shortcode.
 	 * 
-	 * @since	1.2.0
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\handler\Shortcode::opt_out() instead
+	 * @since		1.2.0
 	 * 
 	 * @param	array	$attributes Shortcode attributes
 	 * @return	string The shortcode output
 	 */
 	public function shortcode_opt_out( $attributes ) {
-		$attributes = \shortcode_atts( [
-			'headline' => \__( 'Embed providers', 'embed-privacy' ),
-			'show_all' => 0,
-			'subline' => \__( 'Enable or disable embed providers globally. By enabling a provider, its embedded content will be displayed directly on every page without asking you anymore.', 'embed-privacy' ),
-		], $attributes );
-		$cookie = $this->get_cookie();
-		$embed_providers = $this->get_embeds();
-		$enabled_providers = array_keys( (array) $cookie );
-		$is_javascript_detection = get_option( 'embed_privacy_javascript_detection' ) === 'yes';
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\handler\Shortcode::opt_out()'
+			),
+			'1.10.0'
+		);
 		
-		if ( empty( $embed_providers ) ) {
-			return '';
-		}
-		
-		if ( ! $is_javascript_detection && ! $attributes['show_all'] && ! $enabled_providers ) {
-			return '';
-		}
-		
-		$headline = '<h3>' . \esc_html( $attributes['headline'] ) . '</h3>' . \PHP_EOL;
-		
-		/**
-		 * Filter the opt-out headline.
-		 * 
-		 * @param	string	$headline Current headline HTML
-		 * @param	array	$attributes Shortcode attributes
-		 */
-		$headline = \apply_filters( 'embed_privacy_opt_out_headline', $headline, $attributes );
-		
-		/**
-		 * Filter the opt-out subline.
-		 * 
-		 * @param	string	$subline Current subline HTML
-		 * @param	array	$attributes Shortcode attributes
-		 */
-		$subline = \apply_filters( 'embed_privacy_opt_out_subline', '<p>' . \esc_html( $attributes['subline'] ) . '</p>' . \PHP_EOL, $attributes );
-		
-		$output = '<div class="embed-privacy-opt-out" data-show-all="' . ( $attributes['show_all'] ? 1 : 0 ) . '">' . \PHP_EOL . $headline . $subline;
-		
-		foreach ( $embed_providers as $provider ) {
-			if ( $is_javascript_detection ) {
-				$is_checked = false;
-			}
-			else if ( $attributes['show_all'] ) {
-				$is_checked = \in_array( $provider->post_name, $enabled_providers, true );
-			}
-			else {
-				$is_checked = true;
-			}
-			
-			$is_hidden = ! $is_javascript_detection && ! $attributes['show_all'] && ! \in_array( $provider->post_name, $enabled_providers, true );
-			$microtime = \str_replace( '.', '', \microtime( true ) );
-			$output .= '<span class="embed-privacy-provider' . ( $is_hidden ? ' is-hidden' : '' ) . '">' . \PHP_EOL;
-			$output .= '<input type="checkbox" id="embed-privacy-provider-' . \esc_attr( $provider->post_name ) . '-' . $microtime . '" ' . \checked( $is_checked, true, false ) . ' class="embed-privacy-opt-out-input ' . ( $is_checked ? 'is-enabled' : 'is-disabled' ) . '" data-embed-provider="' . \esc_attr( $provider->post_name ) . '">';
-			$output .= '<label class="embed-privacy-opt-out-label" for="embed-privacy-provider-' . \esc_attr( $provider->post_name ) . '-' . $microtime . '" data-embed-provider="' . \esc_attr( $provider->post_name ) . '">';
-			$enable_disable = '<span class="embed-privacy-provider-is-enabled">' . \esc_html_x( 'Disable', 'complete string: Disable <embed name>', 'embed-privacy' ) . '</span><span class="embed-privacy-provider-is-disabled">' . \esc_html_x( 'Enable', 'complete string: Disable <embed name>', 'embed-privacy' ) . '</span>';
-			/* translators: 1: Enable/Disable, 2: embed provider title */
-			$output .= \wp_kses( \sprintf( \__( '%1$s %2$s', 'embed-privacy' ), $enable_disable, \esc_html( $provider->post_title ) ), [ 'span' => [ 'class' => true ] ] );
-			$output .= '</label><br>' . \PHP_EOL;
-			$output .= '</span>' . \PHP_EOL;
-		}
-		
-		$output .= '</div>' . \PHP_EOL;
-		
-		return $output;
+		return Shortcode::opt_out( $attributes );
 	}
 	
 	/**
 	 * Start an output buffer.
+	 * 
+	 * @deprecated	1.10.0
 	 */
 	public function start_output_buffer() {
-		\ob_start( [ $this, 'output_buffer_callback' ] );
+		\_doing_it_wrong(
+			__METHOD__,
+			\esc_html__( 'This method has no more functionality.', 'embed-privacy' ),
+			'1.10.0'
+		);
 	}
 }
