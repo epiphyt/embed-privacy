@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.10.1
+* Fixed: Set correct "Tested up to" to WordPress 6.6
+
 ## 1.10.0
 * Added: Thumbnail support for Polylang
 * Added: Filter to prevent orphan thumbnail deletion
