@@ -94,6 +94,31 @@ final class Overlay {
 	}
 	
 	/**
+	 * Get a list of characters to replace to prevent problems with DOMDocument.
+	 * 
+	 * @return	array List of character replacements
+	 */
+	private static function get_character_replacements(): array {
+		$replacements = [
+			'%' => '@@epi_percentage',
+			' ' => ' data-epi-spacing ',
+			'[' => '@@epi_square_bracket_start',
+			']' => '@@epi_square_bracket_end',
+			'{' => '@@epi_curly_bracket_start',
+			'}' => '@@epi_curly_bracket_end',
+		];
+		
+		/**
+		 * Filter character replacements.
+		 * 
+		 * @param	array	$replacements Current replacements
+		 */
+		$replacements = (array) \apply_filters( 'embed_privacy_overlay_character_replacements', $replacements );
+		
+		return $replacements;
+	}
+	
+	/**
 	 * Get the overlay provider.
 	 * 
 	 * @return	\epiphyt\Embed_privacy\embed\Provider Provider object
@@ -154,8 +179,13 @@ final class Overlay {
 		
 		\libxml_use_internal_errors( true );
 		$dom = new DOMDocument();
+		$character_replacements = self::get_character_replacements();
 		$dom->loadHTML(
-			'<html><meta charset="utf-8">' . \str_replace( '%', '%_epi_', $content ) . '</html>',
+			'<html><meta charset="utf-8">' . \str_replace(
+				\array_keys( $character_replacements ),
+				\array_values( $character_replacements ),
+				$content
+			) . '</html>',
 			\LIBXML_HTML_NOIMPLIED | \LIBXML_HTML_NODEFDTD
 		);
 		$template_dom = new DOMDocument();
@@ -328,18 +358,23 @@ final class Overlay {
 			$content = \rawurldecode( $content );
 		}
 		
-		// remove root element, see https://github.com/epiphyt/embed-privacy/issues/22
 		return \str_replace(
-			[
-				'<html><meta charset="utf-8">',
-				'</html>',
-				'%_epi_',
-			],
-			[
-				'',
-				'',
-				'%',
-			],
+			\array_merge(
+				[
+					'<html><meta charset="utf-8">',
+					'</html>',
+					'%20data-epi-spacing%20',
+				],
+				\array_values( $character_replacements )
+			),
+			\array_merge(
+				[
+					'',
+					'',
+					' ',
+				],
+				\array_keys( $character_replacements )
+			),
 			$content
 		);
 	}
@@ -359,7 +394,7 @@ final class Overlay {
 					$content,
 					Replacer::extend_pattern( $provider->get_pattern(), $provider )
 				)
-				|| ! empty( $url ) && $provider->is_matching( $url )
+				|| ( ! empty( $url ) && $provider->is_matching( $url ) )
 			) {
 				$this->provider = $provider;
 				break;
