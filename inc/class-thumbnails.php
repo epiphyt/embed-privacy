@@ -5,14 +5,13 @@ use epiphyt\Embed_Privacy\thumbnail\provider\SlideShare;
 use epiphyt\Embed_Privacy\thumbnail\provider\Vimeo;
 use epiphyt\Embed_Privacy\thumbnail\provider\YouTube;
 use epiphyt\Embed_Privacy\thumbnail\Thumbnail;
-use WP_Post;
 
 /**
  * Thumbnails for Embed Privacy.
  * 
  * @deprecated	1.9.0 Use the functionality of epiphyt\Embed_Privacy\thumbnail\Thumbnail instead
  * @since		1.5.0
- *
+ * 
  * @author	Epiphyt
  * @license	GPL2
  * @package	epiphyt\Embed_Privacy
@@ -42,7 +41,7 @@ class Thumbnails {
 			\sprintf(
 				/* translators: alternative class */
 				\esc_html__( 'Use the functionality of %s instead.', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\thumbnail\Thumbnail',
+				'epiphyt\Embed_Privacy\thumbnail\Thumbnail'
 			),
 			'1.9.0'
 		);
@@ -61,7 +60,7 @@ class Thumbnails {
 			\sprintf(
 				/* translators: alternative class */
 				\esc_html__( 'Use the functionality of %s instead.', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\thumbnail\Thumbnail',
+				'epiphyt\Embed_Privacy\thumbnail\Thumbnail'
 			),
 			'1.9.0'
 		);
@@ -81,7 +80,7 @@ class Thumbnails {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead.', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\thumbnail\Thumbnail::delete_orphaned()',
+				'epiphyt\Embed_Privacy\thumbnail\Thumbnail::delete_orphaned()'
 			),
 			'1.9.0'
 		);
@@ -102,7 +101,7 @@ class Thumbnails {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead.', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\thumbnail\Thumbnail::delete_thumbnails()',
+				'epiphyt\Embed_Privacy\thumbnail\Thumbnail::delete_thumbnails()'
 			),
 			'1.9.0'
 		);
@@ -125,7 +124,7 @@ class Thumbnails {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead.', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\thumbnail\Thumbnail::get_data()',
+				'epiphyt\Embed_Privacy\thumbnail\Thumbnail::get_data()'
 			),
 			'1.9.0'
 		);
@@ -149,7 +148,7 @@ class Thumbnails {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead.', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\thumbnail\Thumbnail::get_directory()',
+				'epiphyt\Embed_Privacy\thumbnail\Thumbnail::get_directory()'
 			),
 			'1.9.0'
 		);
@@ -162,23 +161,23 @@ class Thumbnails {
 	 * 
 	 * @deprecated	1.9.0 Use epiphyt\Embed_Privacy\thumbnail\Thumbnail::get_from_provider() instead
 	 * 
-	 * @param	string	$return The returned oEmbed HTML
+	 * @param	string	$output The returned oEmbed HTML
 	 * @param	object	$data A data object result from an oEmbed provider
 	 * @param	string	$url The URL of the content to be embedded
 	 * @return	string The returned oEmbed HTML
 	 */
-	public function get_from_provider( $return, $data, $url ) {
+	public function get_from_provider( $output, $data, $url ) {
 		\_doing_it_wrong(
 			__METHOD__,
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead.', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\thumbnail\Thumbnail::get_from_provider()',
+				'epiphyt\Embed_Privacy\thumbnail\Thumbnail::get_from_provider()'
 			),
 			'1.9.0'
 		);
 		
-		return Embed_Privacy::get_instance()->thumbnail->get_from_provider( $return, $data, $url );
+		return Embed_Privacy::get_instance()->thumbnail->get_from_provider( $output, $data, $url );
 	}
 	
 	/**
@@ -222,7 +221,7 @@ class Thumbnails {
 		
 		return $providers;
 	}
-
+	
 	/**
 	 * Download and save a SlideShare thumbnail.
 	 * 
@@ -239,7 +238,7 @@ class Thumbnails {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead.', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\thumbnail\provider\SlideShare::save()',
+				'epiphyt\Embed_Privacy\thumbnail\provider\SlideShare::save()'
 			),
 			'1.9.0'
 		);
@@ -250,7 +249,7 @@ class Thumbnails {
 	/**
 	 * Download and save a Vimeo thumbnail.
 	 * 
-	 * @deprecated 1.9.0 Use epiphyt\Embed_Privacy\thumbnail\provider\Vimeo::save() instead
+	 * @deprecated	1.9.0 Use epiphyt\Embed_Privacy\thumbnail\provider\Vimeo::save() instead
 	 * 
 	 * @param	string	$id Vimeo video ID
 	 * @param	string	$url Vimeo video URL
@@ -262,7 +261,7 @@ class Thumbnails {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead.', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\thumbnail\provider\Vimeo::save()',
+				'epiphyt\Embed_Privacy\thumbnail\provider\Vimeo::save()'
 			),
 			'1.9.0'
 		);
@@ -273,7 +272,7 @@ class Thumbnails {
 	/**
 	 * Download and save a YouTube thumbnail.
 	 * 
-	 * @deprecated 1.9.0 Use epiphyt\Embed_Privacy\thumbnail\provider\YouTube::save() instead
+	 * @deprecated	1.9.0 Use epiphyt\Embed_Privacy\thumbnail\provider\YouTube::save() instead
 	 * 
 	 * @param	string	$id YouTube video ID
 	 * @param	string	$url YouTube video URL
@@ -284,7 +283,7 @@ class Thumbnails {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead.', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\thumbnail\provider\YouTube::save()',
+				'epiphyt\Embed_Privacy\thumbnail\provider\YouTube::save()'
 			),
 			'1.9.0'
 		);

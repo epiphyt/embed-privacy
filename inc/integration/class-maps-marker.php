@@ -2,9 +2,9 @@
 namespace epiphyt\Embed_Privacy\integration;
 
 use DOMDocument;
+use epiphyt\Embed_Privacy\data\Replacer;
 use epiphyt\Embed_Privacy\embed\Provider;
 use epiphyt\Embed_Privacy\Embed_Privacy;
-use epiphyt\Embed_Privacy\data\Replacer;
 
 /**
  * Maps Marker integration for Embed Privacy.
@@ -29,7 +29,7 @@ final class Maps_Marker {
 	 * @param	string	$content Embedded content
 	 * @return	array Embed dimensions (height and width)
 	 */
-	private static function get_dimensions( string $content ): array {
+	private static function get_dimensions( $content ) {
 		$height = '';
 		$width = '100%';
 		$use_errors = \libxml_use_internal_errors( true );
@@ -89,12 +89,15 @@ final class Maps_Marker {
 	/**
 	 * Set the Maps Marker Pro provider.
 	 * 
-	 * @param	null|epiphyt\Embed_Privacy\embed\Provider	$provider Current provider
+	 * @param	\epiphyt\Embed_Privacy\embed\Provider|null	$provider Current provider
 	 * @param	string										$content Embedded content
-	 * @return	null|epiphyt\Embed_Privacy\embed\Provider Updated provider
+	 * @return	\epiphyt\Embed_Privacy\embed\Provider|null Updated provider
 	 */
-	public static function set_provider( ?Provider $provider, string $content ) {
-		if ( ! $provider && ( \str_contains( $content, 'maps-marker-pro' ) || \str_contains( $content, '[mapsmarker' ) ) ) {
+	public static function set_provider( $provider, $content ) {
+		if (
+			! $provider
+			&& ( \str_contains( $content, 'maps-marker-pro' ) || \str_contains( $content, '[mapsmarker' ) )
+		) {
 			$provider = new Provider();
 			$provider->set_name( 'maps-marker-pro' );
 			$provider->set_pattern( '/maps-marker-pro|^\[mapsmarker/' );

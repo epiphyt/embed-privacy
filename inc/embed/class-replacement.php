@@ -98,7 +98,7 @@ final class Replacement {
 	 * 
 	 * @return	array List of character replacements
 	 */
-	private static function get_character_replacements(): array {
+	private static function get_character_replacements() {
 		$replacements = [
 			'%' => '@@epi_percentage',
 			' ' => ' data-epi-spacing ',
@@ -163,8 +163,8 @@ final class Replacement {
 		$attributes = \wp_parse_args( $attributes, [
 			'additional_checks' => [],
 			'check_always_active' => false,
-			'element_attribute' => 'src',
 			'elements' => [ 'embed', 'iframe', 'object' ],
+			'element_attribute' => 'src',
 			'height' => 0,
 			'ignore_aspect_ratio' => false,
 			'is_oembed' => false,
@@ -196,7 +196,7 @@ final class Replacement {
 			$host_array = \explode( '.', \str_replace( 'www.', '', $host ) );
 			$tld_count = \count( $host_array );
 			
-			if ( $tld_count >= 3 && strlen( $host_array[ $tld_count - 2 ] ) === 2 ) {
+			if ( $tld_count >= 3 && \strlen( $host_array[ $tld_count - 2 ] ) === 2 ) {
 				$host = \implode( '.', \array_splice( $host_array, $tld_count - 3, 3 ) );
 			}
 			else if ( $tld_count >= 2 ) {
@@ -222,7 +222,10 @@ final class Replacement {
 					continue;
 				}
 				
-				if ( ! empty( $attributes['regex'] ) && ! \preg_match( $attributes['regex'], $element->getAttribute( $attributes['element_attribute'] ) ) ) {
+				if (
+					! empty( $attributes['regex'] )
+					&& ! \preg_match( $attributes['regex'], $element->getAttribute( $attributes['element_attribute'] ) )
+				) {
 					continue;
 				}
 				
@@ -251,7 +254,10 @@ final class Replacement {
 					
 					// unknown providers need to be explicitly checked if they're always active
 					// see https://github.com/epiphyt/embed-privacy/issues/115
-					if ( $attributes['check_always_active'] && Providers::is_always_active( $this->provider->get_name() ) ) {
+					if (
+						$attributes['check_always_active']
+						&& Providers::is_always_active( $this->provider->get_name() )
+					) {
 						if ( ! empty( $attributes['assets'] ) ) {
 							$content = Assets::get_static( $attributes['assets'], $content );
 						}
@@ -261,7 +267,10 @@ final class Replacement {
 					
 					// check URL for available provider
 					foreach ( Providers::get_instance()->get_list() as $provider ) {
-						if ( $provider->is_matching( $element->getAttribute( $attributes['element_attribute'] ) ) && empty( $replacements ) ) {
+						if (
+							$provider->is_matching( $element->getAttribute( $attributes['element_attribute'] ) )
+							&& empty( $replacements )
+						) {
 							continue 2;
 						}
 					}
@@ -275,14 +284,14 @@ final class Replacement {
 				
 				// get overlay template as DOM element
 				$template_dom->loadHTML(
-					'<html><meta charset="utf-8">' . str_replace( '%', '%_epi_', Template::get( $this->provider, $dom->saveHTML( $element ), $attributes ) ) . '</html>',
+					'<html><meta charset="utf-8">' . \str_replace( '%', '%_epi_', Template::get( $this->provider, $dom->saveHTML( $element ), $attributes ) ) . '</html>',
 					\LIBXML_HTML_NOIMPLIED | \LIBXML_HTML_NODEFDTD
 				);
 				$overlay = null;
 				
 				/** @var	\DOMElement $div */
 				foreach ( $template_dom->getElementsByTagName( 'div' ) as $div ) {
-					if ( stripos( $div->getAttribute( 'class' ), 'embed-privacy-container' ) !== false ) {
+					if ( \stripos( $div->getAttribute( 'class' ), 'embed-privacy-container' ) !== false ) {
 						$overlay = $div;
 						break;
 					}
@@ -320,7 +329,7 @@ final class Replacement {
 						}
 					}
 					
-					$i--;
+					--$i;
 				}
 				
 				$content = $dom->saveHTML( $dom->documentElement ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
@@ -414,7 +423,7 @@ final class Replacement {
 		/**
 		 * Filter the overlay provider.
 		 * 
-		 * @param	epiphyt\Embed_Privacy\embed\Provider	$provider Current provider
+		 * @param	\epiphyt\Embed_Privacy\embed\Provider	$provider Current provider
 		 * @param	string									$content Content to get the provider from
 		 * @param	string									$url URL to the embedded content
 		 */

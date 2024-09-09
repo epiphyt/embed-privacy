@@ -1,7 +1,6 @@
 <?php
 namespace epiphyt\Embed_Privacy\integration;
 
-use epiphyt\Embed_Privacy\Embed_Privacy;
 use epiphyt\Embed_Privacy\handler\Theme;
 
 /**

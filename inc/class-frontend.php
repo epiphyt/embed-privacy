@@ -41,7 +41,7 @@ final class Frontend {
 		] );
 		
 		if ( ! \function_exists( 'is_plugin_active' ) ) {
-			require_once ABSPATH . WPINC . '/plugin.php';
+			require_once \ABSPATH . \WPINC . '/plugin.php';
 		}
 		
 		/**
@@ -62,7 +62,7 @@ final class Frontend {
 			return;
 		}
 		
-		$is_debug = \defined( 'WP_DEBUG' ) && WP_DEBUG;
+		$is_debug = \defined( 'WP_DEBUG' ) && \WP_DEBUG;
 		$suffix = ( $is_debug ? '' : '.min' );
 		$css_file_url = \EPI_EMBED_PRIVACY_URL . 'assets/style/embed-privacy' . $suffix . '.css';
 		$file_version = $is_debug ? \filemtime( \EPI_EMBED_PRIVACY_BASE . 'assets/style/embed-privacy' . $suffix . '.css' ) : \EMBED_PRIVACY_VERSION;
@@ -101,7 +101,7 @@ final class Frontend {
 		
 		if ( $post_id ) {
 			$post = \get_post( $post_id );
-		
+			
 			if ( $post instanceof WP_Post && \has_shortcode( $post->post_content, 'embed_privacy_opt_out' ) ) {
 				$this->print_assets();
 			}

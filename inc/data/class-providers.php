@@ -71,7 +71,7 @@ final class Providers {
 	/**
 	 * Get a list of providers by their post objects.
 	 * 
-	 * @param	\WP_Post[]	$post List of post objects
+	 * @param	\WP_Post[]	$posts List of post objects
 	 * @return	\epiphyt\Embed_privacy\embed\Provider[] List of embed provider instances
 	 */
 	public static function get_by_posts( $posts ) {
@@ -121,14 +121,14 @@ final class Providers {
 		switch ( $type ) {
 			case 'custom':
 				$custom_providers = \get_posts( \array_merge( [
-					'meta_query' => [
+					'meta_query' => [ // phpcs:ignore SlevomatCodingStandard.Arrays.DisallowPartiallyKeyed.DisallowedPartiallyKeyed
 						'relation' => 'OR',
-						[
+						[ // phpcs:ignore Universal.Arrays.MixedKeyedUnkeyedArray.Found, Universal.Arrays.MixedArrayKeyTypes.ImplicitNumericKey
 							'compare' => 'NOT EXISTS',
 							'key' => 'is_system',
 							'value' => 'yes',
 						],
-						[
+						[ // phpcs:ignore Universal.Arrays.MixedKeyedUnkeyedArray.Found
 							'compare' => '!=',
 							'key' => 'is_system',
 							'value' => 'yes',
@@ -257,7 +257,7 @@ final class Providers {
 	 * @param	string	$name Current provider name
 	 * @return	string Sanitized provider name
 	 */
-	public static function sanitize_name( $title ) {
-		return \preg_replace( '/-\d+$/', '', \sanitize_title( \strtolower( $title ) ) );
+	public static function sanitize_name( $name ) {
+		return \preg_replace( '/-\d+$/', '', \sanitize_title( \strtolower( $name ) ) );
 	}
 }

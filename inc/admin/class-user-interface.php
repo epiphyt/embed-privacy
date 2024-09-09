@@ -50,7 +50,7 @@ final class User_Interface {
 			return;
 		}
 		
-		$suffix = \defined( 'WP_DEBUG' ) && WP_DEBUG || \defined( 'SCRIPT_DEBUG' ) && \SCRIPT_DEBUG ? '' : '.min';
+		$suffix = \defined( 'WP_DEBUG' ) && \WP_DEBUG || \defined( 'SCRIPT_DEBUG' ) && \SCRIPT_DEBUG ? '' : '.min';
 		$script_path = \EPI_EMBED_PRIVACY_BASE . 'assets/js/admin/image-upload' . $suffix . '.js';
 		$script_url = \EPI_EMBED_PRIVACY_URL . 'assets/js/admin/image-upload' . $suffix . '.js';
 		

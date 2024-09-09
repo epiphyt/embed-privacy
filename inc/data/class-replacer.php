@@ -19,7 +19,8 @@ final class Replacer {
 	 * Extend a regular expression pattern with certain tags.
 	 * 
 	 * @param	string										$pattern Pattern to extend
-	 * @param	epiphyt\Embed_privacy\embed\Provider|null	$provider Current embed provider
+	 * @param	\epiphyt\Embed_privacy\embed\Provider|null	$provider Current embed provider
+	 * @return	string Extended pattern
 	 */
 	public static function extend_pattern( $pattern, $provider ) {
 		if ( empty( $pattern ) ) {
@@ -71,7 +72,7 @@ final class Replacer {
 		 */
 		$allowed_tags = \apply_filters( 'embed_privacy_replacer_matcher_elements', $allowed_tags, $provider );
 		
-		$tags_regex = '(' . \implode( '|', \array_filter( $allowed_tags, function( $tag ) {
+		$tags_regex = '(' . \implode( '|', \array_filter( $allowed_tags, static function( $tag ) {
 			return \preg_quote( $tag, '/' );
 		} ) ) . ')';
 		$pattern = '/<' . $tags_regex . '([^"]*)"([^<]*)' . \trim( $pattern, '/' ) . '([^"]*)"([^>]*)(>(.*?)<\/' . $tags_regex . ')?>/';
@@ -208,6 +209,7 @@ final class Replacer {
 	 * 
 	 * @param	string	$output Video shortcode HTML output
 	 * @param	array	$attributes Array of video shortcode attributes
+	 * @return	string Updated embed code
 	 */
 	public static function replace_video_shortcode( $output, array $attributes ) {
 		$url = isset( $attributes['src'] ) ? $attributes['src'] : '';

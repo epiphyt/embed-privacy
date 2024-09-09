@@ -64,11 +64,12 @@ class Admin {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\admin\User_Interface::add_meta_link()',
+				'epiphyt\admin\User_Interface::add_meta_link()'
 			),
 			'1.10.0'
 		);
-		User_Interface::add_meta_link( $input, $file );
+		
+		return User_Interface::add_meta_link( $input, $file );
 	}
 	
 	/**
@@ -89,7 +90,7 @@ class Admin {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\admin\Fields::disallow_deleting_system_embeds()',
+				'epiphyt\Embed_Privacy\admin\Fields::disallow_deleting_system_embeds()'
 			),
 			'1.10.0'
 		);
@@ -110,7 +111,7 @@ class Admin {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\admin\Field::get()',
+				'epiphyt\Embed_Privacy\admin\Field::get()'
 			),
 			'1.10.0'
 		);
@@ -141,7 +142,7 @@ class Admin {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\admin\Settings::register()',
+				'epiphyt\Embed_Privacy\admin\Settings::register()'
 			),
 			'1.10.0'
 		);
@@ -159,7 +160,7 @@ class Admin {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\admin\Settings::get_page()',
+				'epiphyt\Embed_Privacy\admin\Settings::get_page()'
 			),
 			'1.10.0'
 		);
@@ -177,7 +178,7 @@ class Admin {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\admin\Settings::register_menu()',
+				'epiphyt\Embed_Privacy\admin\Settings::register_menu()'
 			),
 			'1.10.0'
 		);

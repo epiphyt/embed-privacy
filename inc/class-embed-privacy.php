@@ -25,7 +25,6 @@ use epiphyt\Embed_Privacy\integration\Shortcodes_Ultimate;
 use epiphyt\Embed_Privacy\integration\Twitter;
 use epiphyt\Embed_Privacy\thumbnail\Thumbnail;
 use ReflectionMethod;
-use WP_Post;
 
 /**
  * Two click embed main class.
@@ -141,7 +140,7 @@ class Embed_Privacy {
 	 * @deprecated	1.2.0
 	 * @var			array The supported media providers
 	 */
-	public $embed_providers = [
+	public $embed_providers = [ // phpcs:ignore SlevomatCodingStandard.Arrays.AlphabeticallySortedByKeys.IncorrectKeyOrder
 		'.amazon.' => 'Amazon Kindle',
 		'.amzn.' => 'Amazon Kindle',
 		'a.co' => 'Amazon Kindle',
@@ -250,7 +249,7 @@ class Embed_Privacy {
 				$integration::init();
 			}
 			else {
-				( new $integration() )->init();
+				( new $integration() )->init(); // phpcs:ignore NeutronStandard.Functions.VariableFunctions.VariableFunction
 			}
 		}
 	}
@@ -267,7 +266,7 @@ class Embed_Privacy {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\handler\Post::clear_embed_cache()',
+				'epiphyt\Embed_Privacy\handler\Post::clear_embed_cache()'
 			),
 			'1.10.0'
 		);
@@ -299,7 +298,7 @@ class Embed_Privacy {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead.', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\Frontend::print_assets()',
+				'epiphyt\Embed_Privacy\Frontend::print_assets()'
 			),
 			'1.4.4'
 		);
@@ -329,7 +328,6 @@ class Embed_Privacy {
 	 * 
 	 * @deprecated	1.3.5
 	 * @since		1.3.0
-	 * @noinspection PhpUnused
 	 */
 	public function get_elementor_filters() {
 		\_doing_it_wrong(
@@ -362,7 +360,7 @@ class Embed_Privacy {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\data\Providers::get_by_name()',
+				'epiphyt\Embed_Privacy\data\Providers::get_by_name()'
 			),
 			'1.10.0'
 		);
@@ -403,7 +401,7 @@ class Embed_Privacy {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\embed\Replacement::get()',
+				'epiphyt\Embed_Privacy\embed\Replacement::get()'
 			),
 			'1.10.0'
 		);
@@ -442,7 +440,7 @@ class Embed_Privacy {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\data\Providers::get_list()',
+				'epiphyt\Embed_Privacy\data\Providers::get_list()'
 			),
 			'1.10.0'
 		);
@@ -465,14 +463,14 @@ class Embed_Privacy {
 		switch ( $type ) {
 			case 'custom':
 				$custom_providers = \get_posts( \array_merge( [
-					'meta_query' => [
+					'meta_query' => [ // phpcs:ignore SlevomatCodingStandard.Arrays.DisallowPartiallyKeyed.DisallowedPartiallyKeyed
 						'relation' => 'OR',
-						[
+						[ // phpcs:ignore Universal.Arrays.MixedKeyedUnkeyedArray.Found, Universal.Arrays.MixedArrayKeyTypes.ImplicitNumericKey
 							'compare' => 'NOT EXISTS',
 							'key' => 'is_system',
 							'value' => 'yes',
 						],
-						[
+						[ // phpcs:ignore Universal.Arrays.MixedKeyedUnkeyedArray.Found, Universal.Arrays.MixedArrayKeyTypes.ImplicitNumericKey
 							'compare' => '!=',
 							'key' => 'is_system',
 							'value' => 'yes',
@@ -562,7 +560,7 @@ class Embed_Privacy {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\Shortcode::get_ignored()',
+				'epiphyt\Embed_Privacy\Shortcode::get_ignored()'
 			),
 			'1.10.0'
 		);
@@ -603,7 +601,7 @@ class Embed_Privacy {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\embed\Template::get()',
+				'epiphyt\Embed_Privacy\embed\Template::get()'
 			),
 			'1.10.0'
 		);
@@ -629,7 +627,7 @@ class Embed_Privacy {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\embed\Replacement::get()',
+				'epiphyt\Embed_Privacy\embed\Replacement::get()'
 			),
 			'1.10.0'
 		);
@@ -672,7 +670,7 @@ class Embed_Privacy {
 		 * @param	string	$style Generated style
 		 * @param	array	$style_properties Style properties array
 		 */
-		$style = \apply_filters_deprecated( 'embed_privacy_dynamic_style', '', $this->style, '1.10.0' );
+		$style = \apply_filters_deprecated( 'embed_privacy_dynamic_style', '', $this->style, '1.10.0' ); // phpcs:ignore SlevomatCodingStandard.Variables.UselessVariable.UselessVariable
 		
 		return $style;
 	}
@@ -692,7 +690,7 @@ class Embed_Privacy {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\handler\Post::has_embed()',
+				'epiphyt\Embed_Privacy\handler\Post::has_embed()'
 			),
 			'1.10.0'
 		);
@@ -715,7 +713,7 @@ class Embed_Privacy {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\data\Providers::is_always_active()',
+				'epiphyt\Embed_Privacy\data\Providers::is_always_active()'
 			),
 			'1.10.0'
 		);
@@ -737,7 +735,7 @@ class Embed_Privacy {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\integration\Elementor::is_used()',
+				'epiphyt\Embed_Privacy\integration\Elementor::is_used()'
 			),
 			'1.10.0'
 		);
@@ -760,7 +758,7 @@ class Embed_Privacy {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\handler\Theme::is()',
+				'epiphyt\Embed_Privacy\handler\Theme::is()'
 			),
 			'1.10.0'
 		);
@@ -820,7 +818,7 @@ class Embed_Privacy {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\Frontend::print_assets()',
+				'epiphyt\Embed_Privacy\Frontend::print_assets()'
 			),
 			'1.10.0'
 		);
@@ -839,7 +837,7 @@ class Embed_Privacy {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\Frontend::register_assets()',
+				'epiphyt\Embed_Privacy\Frontend::register_assets()'
 			),
 			'1.10.0'
 		);
@@ -862,7 +860,7 @@ class Embed_Privacy {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\integration\Polylang::register_post_type()',
+				'epiphyt\Embed_Privacy\integration\Polylang::register_post_type()'
 			),
 			'1.10.0'
 		);
@@ -878,7 +876,7 @@ class Embed_Privacy {
 	public static function register_post_type() {
 		\register_post_type(
 			'epi_embed',
-			[
+			[ // phpcs:ignore SlevomatCodingStandard.Arrays.AlphabeticallySortedByKeys.IncorrectKeyOrder
 				'label' => \__( 'Embeds', 'embed-privacy' ),
 				'description' => \__( 'Embeds from Embed Privacy', 'embed-privacy' ),
 				'supports' => [
@@ -901,8 +899,8 @@ class Embed_Privacy {
 				'exclude_from_search' => true,
 				'publicly_queryable' => false,
 				'rewrite' => [
-					'with_front' => false,
 					'pages' => false,
+					'with_front' => false,
 				],
 			]
 		);
@@ -925,7 +923,7 @@ class Embed_Privacy {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\data\Replacer::replace_embeds()',
+				'epiphyt\Embed_Privacy\data\Replacer::replace_embeds()'
 			),
 			'1.10.0'
 		);
@@ -950,7 +948,7 @@ class Embed_Privacy {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\data\Replacer::replace_oembed()',
+				'epiphyt\Embed_Privacy\data\Replacer::replace_oembed()'
 			),
 			'1.10.0'
 		);
@@ -1039,7 +1037,7 @@ class Embed_Privacy {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead.', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\embed\Replacement::get()',
+				'epiphyt\Embed_Privacy\embed\Replacement::get()'
 			),
 			'1.2.0'
 		);
@@ -1065,7 +1063,7 @@ class Embed_Privacy {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\integration\Maps_Marker::replace()',
+				'epiphyt\Embed_Privacy\integration\Maps_Marker::replace()'
 			),
 			'1.10.0'
 		);
@@ -1081,6 +1079,7 @@ class Embed_Privacy {
 	 * 
 	 * @param	string	$output Video shortcode HTML output
 	 * @param	array	$atts Array of video shortcode attributes
+	 * @return	string Updated embed code
 	 */
 	public function replace_video_shortcode( $output, $atts ) {
 		\_doing_it_wrong(
@@ -1088,7 +1087,7 @@ class Embed_Privacy {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\data\Replacer::replace_video_shortcode()',
+				'epiphyt\Embed_Privacy\data\Replacer::replace_video_shortcode()'
 			),
 			'1.10.0'
 		);
@@ -1199,7 +1198,7 @@ class Embed_Privacy {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\Embed_Privacy::register_post_type()',
+				'epiphyt\Embed_Privacy\Embed_Privacy::register_post_type()'
 			),
 			'1.10.0'
 		);
@@ -1221,7 +1220,7 @@ class Embed_Privacy {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\handler\Shortcode::opt_out()',
+				'epiphyt\Embed_Privacy\handler\Shortcode::opt_out()'
 			),
 			'1.10.0'
 		);

@@ -3,14 +3,13 @@ namespace epiphyt\Embed_Privacy;
 
 use epiphyt\Embed_Privacy\admin\Field;
 use epiphyt\Embed_Privacy\admin\User_Interface;
-use WP_Error;
 
 /**
  * Custom fields for Embed Privacy.
  * 
  * @deprecated	1.10.0
  * @since		1.2.0
- *
+ * 
  * @author	Epiphyt
  * @license	GPL2
  * @package	epiphyt\Embed_Privacy
@@ -44,7 +43,7 @@ class Fields {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\admin\Fields::init()',
+				'epiphyt\Embed_Privacy\admin\Fields::init()'
 			),
 			'1.10.0'
 		);
@@ -61,7 +60,7 @@ class Fields {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\admin\Fields::add_meta_boxes()',
+				'epiphyt\Embed_Privacy\admin\Fields::add_meta_boxes()'
 			),
 			'1.10.0'
 		);
@@ -81,7 +80,7 @@ class Fields {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\admin\User_Interface::enqueue_assets()',
+				'epiphyt\Embed_Privacy\admin\User_Interface::enqueue_assets()'
 			),
 			'1.10.0'
 		);
@@ -112,7 +111,7 @@ class Fields {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\admin\Fields::get()',
+				'epiphyt\Embed_Privacy\admin\Fields::get()'
 			),
 			'1.10.0'
 		);
@@ -133,7 +132,7 @@ class Fields {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\admin\Field::get_image()',
+				'epiphyt\Embed_Privacy\admin\Field::get_image()'
 			),
 			'1.10.0'
 		);
@@ -154,7 +153,7 @@ class Fields {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\admin\Field::get()',
+				'epiphyt\Embed_Privacy\admin\Field::get()'
 			),
 			'1.10.0'
 		);
@@ -174,7 +173,7 @@ class Fields {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\admin\Fields::register()',
+				'epiphyt\Embed_Privacy\admin\Fields::register()'
 			),
 			'1.10.0'
 		);
@@ -192,7 +191,7 @@ class Fields {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\admin\Fields::register_default()',
+				'epiphyt\Embed_Privacy\admin\Fields::register_default()'
 			),
 			'1.10.0'
 		);
@@ -210,7 +209,7 @@ class Fields {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\admin\Fields::remove_default()',
+				'epiphyt\Embed_Privacy\admin\Fields::remove_default()'
 			),
 			'1.10.0'
 		);
@@ -231,7 +230,7 @@ class Fields {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\admin\Fields::save()',
+				'epiphyt\Embed_Privacy\admin\Fields::save()'
 			),
 			'1.10.0'
 		);
@@ -252,7 +251,7 @@ class Fields {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\admin\Fields::upload_file()',
+				'epiphyt\Embed_Privacy\admin\Fields::upload_file()'
 			),
 			'1.10.0'
 		);

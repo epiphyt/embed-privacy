@@ -52,7 +52,7 @@ final class Elementor {
 		$dom = new DOMDocument();
 		$dom->loadHTML(
 			'<html><meta charset="utf-8">' . $content . '</html>',
-			LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
+			\LIBXML_HTML_NOIMPLIED | \LIBXML_HTML_NODEFDTD
 		);
 		$template_dom = new DOMDocument();
 		
@@ -110,7 +110,7 @@ final class Elementor {
 					}
 				}
 				
-				$i--;
+				--$i;
 			}
 			
 			$content = \str_replace( [ '<html><meta charset="utf-8">', '</html>' ], '', $dom->saveHTML( $dom->documentElement ) );
@@ -128,19 +128,13 @@ final class Elementor {
 	 * @return	bool Whether Elementor has been used
 	 */
 	public static function is_used() {
-		if ( ! function_exists( 'is_plugin_active' ) ) {
-			include_once ABSPATH . 'wp-admin/includes/plugin.php';
+		if ( ! \function_exists( 'is_plugin_active' ) ) {
+			include_once \ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 		
-		if (
-			! \is_plugin_active( 'elementor/elementor.php' )
-			|| ! \get_the_ID()
-			|| ! Plugin::$instance->documents->get( \get_the_ID() )->is_built_with_elementor()
-		) {
-			return false;
-		}
-		
-		return true;
+		return \is_plugin_active( 'elementor/elementor.php' )
+			&& \get_the_ID()
+			&& Plugin::$instance->documents->get( \get_the_ID() )->is_built_with_elementor();
 	}
 	
 	/**

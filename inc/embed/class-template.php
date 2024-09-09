@@ -2,7 +2,6 @@
 namespace epiphyt\Embed_Privacy\embed;
 
 use epiphyt\Embed_Privacy\data\Providers;
-use epiphyt\Embed_Privacy\embed\Provider;
 use epiphyt\Embed_Privacy\Embed_Privacy;
 
 /**
@@ -30,7 +29,7 @@ final class Template {
 					/* translators: alternative method */
 					\esc_html__( 'Providing a string as parameter %1$s is deprecated. Use an object of type %2$s instead.', 'embed-privacy' ),
 					'$provider',
-					'epiphyt\Embed_Privacy\embed\Provider',
+					'epiphyt\Embed_Privacy\embed\Provider'
 				),
 				'1.10.0'
 			);
@@ -243,7 +242,7 @@ final class Template {
 			<div class="embed-privacy-overlay">
 				<div class="embed-privacy-inner">
 					<?php
-					echo ( ! empty( $logo_style ) ? '<div class="embed-privacy-logo" style="' . \esc_attr( $logo_style ) . '"></div>' . \PHP_EOL : '' );
+					echo ! empty( $logo_style ) ? '<div class="embed-privacy-logo" style="' . \esc_attr( $logo_style ) . '"></div>' . \PHP_EOL : '';
 					echo $content . \PHP_EOL; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 					?>
 				</div>

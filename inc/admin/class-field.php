@@ -100,8 +100,6 @@ final class Field {
 		<?php
 	}
 	
-	
-	
 	/**
 	 * Get an image field.
 	 * 
@@ -131,11 +129,11 @@ final class Field {
 			<td class="embed-privacy-image-item">
 				<input type="hidden" name="<?php echo \esc_attr( $attributes['name'] ); ?>" value="<?php echo \esc_attr( $attributes['value'] ); ?>" class="embed-privacy-image-input">
 				
-				<div class="embed-privacy-image-input-container<?php echo ( ! empty( $attributes['value'] ) ? ' embed-privacy-hidden' : '' ); ?>">
+				<div class="embed-privacy-image-input-container<?php echo ! empty( $attributes['value'] ) ? ' embed-privacy-hidden' : ''; ?>">
 					<button type="button" class="button button-secondary embed-privacy-image-upload"><?php \esc_html_e( 'Upload or choose file', 'embed-privacy' ); ?></button>
 				</div>
 				
-				<div class="embed-privacy-image-container<?php echo ( empty( $attributes['value'] ) ? ' embed-privacy-hidden' : '' ); ?>">
+				<div class="embed-privacy-image-container<?php echo empty( $attributes['value'] ) ? ' embed-privacy-hidden' : ''; ?>">
 					<?php echo $image; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 					<span class="dashicons dashicons-no embed-privacy-icon embed-privacy-remove-image"></span>
 				</div>
@@ -157,7 +155,7 @@ final class Field {
 	public static function get_text( array $attributes, $current_value ) {
 		\ob_start();
 		?>
-		<input type="<?php echo \esc_attr( $attributes['type'] ); ?>" name="<?php echo \esc_attr( $attributes['name'] ); ?>" id="<?php echo \esc_attr( $attributes['name'] ); ?>" value="<?php echo esc_attr( $current_value ); ?>" class="<?php echo esc_attr( $attributes['classes'] ); ?>">
+		<input type="<?php echo \esc_attr( $attributes['type'] ); ?>" name="<?php echo \esc_attr( $attributes['name'] ); ?>" id="<?php echo \esc_attr( $attributes['name'] ); ?>" value="<?php echo \esc_attr( $current_value ); ?>" class="<?php echo \esc_attr( $attributes['classes'] ); ?>">
 		<?php if ( ! empty( $attributes['description'] ) ) : ?>
 		<p>
 			<?php

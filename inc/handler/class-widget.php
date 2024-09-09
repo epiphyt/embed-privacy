@@ -89,7 +89,7 @@ final class Widget {
 		
 		if ( \is_callable( $original_callback ) ) {
 			\ob_start();
-			\call_user_func_array( $original_callback, $original_callback_params );
+			\call_user_func_array( $original_callback, $original_callback_params ); // phpcs:ignore NeutronStandard.Functions.DisallowCallUserFunc.CallUserFunc
 			$widget_output = \ob_get_clean();
 			
 			/**
@@ -120,10 +120,8 @@ final class Widget {
 		global $wp_registered_widgets;
 		$current_widget_id = $sidebar_params[0]['widget_id'];
 		
-		// phpcs:disable WordPress.WP.GlobalVariablesOverride.Prohibited
-		$wp_registered_widgets[ $current_widget_id ]['original_callback'] = $wp_registered_widgets[ $current_widget_id ]['callback'];
-		$wp_registered_widgets[ $current_widget_id ]['callback'] = [ self::class, 'display_widget' ];
-		// phpcs: enable
+		$wp_registered_widgets[ $current_widget_id ]['original_callback'] = $wp_registered_widgets[ $current_widget_id ]['callback']; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$wp_registered_widgets[ $current_widget_id ]['callback'] = [ self::class, 'display_widget' ]; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		
 		return $sidebar_params;
 	}

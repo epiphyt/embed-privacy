@@ -21,10 +21,6 @@ final class Theme {
 		$theme_name = \strtolower( \wp_get_theme()->get( 'Name' ) );
 		$theme_template = \strtolower( \wp_get_theme()->get( 'Template' ) );
 		
-		if ( $theme_name === $name || $theme_template === $name ) {
-			return true;
-		}
-		
-		return false;
+		return $theme_name === $name || $theme_template === $name;
 	}
 }

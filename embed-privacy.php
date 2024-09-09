@@ -25,8 +25,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Embed Privacy. If not, see https://www.gnu.org/licenses/gpl-2.0.html.
 */
-
-// exit if ABSPATH is not defined
 \defined( 'ABSPATH' ) || exit;
 
 \define( 'EMBED_PRIVACY_VERSION', '1.10.0-dev' );
@@ -62,29 +60,28 @@ if ( ! \class_exists( 'DOMDocument' ) ) {
 /**
  * Autoload all necessary classes.
  * 
- * @param	string		$class The class name of the auto-loaded class
+ * @param	string	$class_name The class name of the auto-loaded class
  */
-\spl_autoload_register( function( $class ) {
-	$path = \explode( '\\', $class );
+\spl_autoload_register( static function( $class_name ) {
+	$path = \explode( '\\', $class_name );
 	$filename = \str_replace( '_', '-', \strtolower( \array_pop( $path ) ) );
-	$class = \str_replace(
+	$class_name = \str_replace(
 		[ 'epiphyt\embed_privacy\\', '\\', '_' ],
 		[ '', '/', '-' ],
-		\strtolower( $class )
+		\strtolower( $class_name )
 	);
-	$name_pos = \strrpos( $class, $filename );
+	$name_pos = \strrpos( $class_name, $filename );
 	
 	if ( $name_pos !== false ) {
-		$class = \substr_replace( $class, 'class-' . $filename, $name_pos, \strlen( $filename ) );
+		$class_name = \substr_replace( $class_name, 'class-' . $filename, $name_pos, \strlen( $filename ) );
 	}
 	
-	$maybe_file = __DIR__ . '/inc/' . $class . '.php';
+	$maybe_file = __DIR__ . '/inc/' . $class_name . '.php';
 	
 	if ( \file_exists( $maybe_file ) ) {
 		require_once $maybe_file;
 	}
 } );
 
-$embed_privacy = Embed_Privacy::get_instance();
-$embed_privacy->set_plugin_file( __FILE__ );
-$embed_privacy->init();
+Embed_Privacy::get_instance()->set_plugin_file( __FILE__ );
+Embed_Privacy::get_instance()->init();

@@ -16,10 +16,10 @@ use WP_Post;
  * @package	epiphyt\Embed_Privacy
  */
 final class Thumbnail {
-	public const METADATA_PREFIX = 'embed_privacy_thumbnail';
+	const METADATA_PREFIX = 'embed_privacy_thumbnail';
 	
 	/**
-	 * @var		Thumbnail_Provider[] List of thumbnail provider classes
+	 * @var		\epiphyt\Embed_Privacy\thumbnail\provider\Thumbnail_Provider[] List of thumbnail provider classes
 	 */
 	public $providers = [
 		SlideShare::class,
@@ -59,7 +59,7 @@ final class Thumbnail {
 		$metadata = \get_post_meta( $post_id );
 		$supported_providers = \array_map(
 			static function( $provider ) {
-				$provider_obj = new $provider();
+				$provider_obj = new $provider(); // phpcs:ignore NeutronStandard.Functions.VariableFunctions.VariableFunction
 				
 				return $provider_obj::$name;
 			},
@@ -71,7 +71,7 @@ final class Thumbnail {
 		 * 
 		 * @since	1.7.0
 		 * 
-		 * @param	Thumbnail_Provider[]	$supported_providers Current supported provider names
+		 * @param	\epiphyt\Embed_Privacy\thumbnail\provider\Thumbnail_Provider[]	$supported_providers Current supported provider names
 		 */
 		$supported_providers = (array) \apply_filters( 'embed_privacy_thumbnail_supported_provider_names', $supported_providers );
 		
@@ -110,7 +110,7 @@ final class Thumbnail {
 					}
 					
 					$should_delete = $missing_id && $missing_url && ! self::is_in_use( $meta_value, $post_id, $global_metadata );
-						
+					
 					/**
 					 * Filters whether an thumbnail marked as orphaned should be deleted.
 					 * 
@@ -162,15 +162,15 @@ final class Thumbnail {
 					 * 
 					 * @since	1.7.0
 					 * 
-					 * @param	string	$provider Provider name
-					 * @param	string	$id The ID of the embedded content
-					 * @param	string	$url The embed URL
-					 * @param	bool	$missing_id Whether the ID is missing
-					 * @param	bool	$missing_url Whether the URL is missing
-					 * @param	string	$meta_value The thumbnail filename
-					 * @param	string	$meta_key The thumbnail meta key
-					 * @param	WP_Post	$post The post object
-					 * @param	int		$post_id The post ID
+					 * @param	string		$provider Provider name
+					 * @param	string		$id The ID of the embedded content
+					 * @param	string		$url The embed URL
+					 * @param	bool		$missing_id Whether the ID is missing
+					 * @param	bool		$missing_url Whether the URL is missing
+					 * @param	string		$meta_value The thumbnail filename
+					 * @param	string		$meta_key The thumbnail meta key
+					 * @param	\WP_Post	$post The post object
+					 * @param	int			$post_id The post ID
 					 */
 					\do_action( 'embed_privacy_thumbnail_checked_orphaned', $provider, $id, $url, $missing_id, $missing_url, $meta_value, $meta_key, $post, $post_id );
 				}
@@ -252,9 +252,9 @@ final class Thumbnail {
 		 * 
 		 * @since	1.7.0
 		 * 
-		 * @param	string	$id The thumbnail ID
-		 * @param	WP_Post	$post The post object
-		 * @param	string	$url The embed URL
+		 * @param	string		$id The thumbnail ID
+		 * @param	\WP_Post	$post The post object
+		 * @param	string		$url The embed URL
 		 */
 		$id = \apply_filters( 'embed_privacy_thumbnail_data_id', $id, $post, $url );
 		
@@ -263,9 +263,9 @@ final class Thumbnail {
 		 * 
 		 * @since	1.7.0
 		 * 
-		 * @param	string	$thumbnail The thumbnail filename
-		 * @param	WP_Post	$post The post object
-		 * @param	string	$url The embed URL
+		 * @param	string		$thumbnail The thumbnail filename
+		 * @param	\WP_Post	$post The post object
+		 * @param	string		$url The embed URL
 		 */
 		$thumbnail = \apply_filters( 'embed_privacy_thumbnail_data_filename', $thumbnail, $post, $url );
 		
@@ -283,9 +283,9 @@ final class Thumbnail {
 		 * 
 		 * @since	1.7.0
 		 * 
-		 * @param	string	$thumbnail The thumbnail path
-		 * @param	WP_Post	$post The post object
-		 * @param	string	$url The embed URL
+		 * @param	string		$thumbnail The thumbnail path
+		 * @param	\WP_Post	$post The post object
+		 * @param	string		$url The embed URL
 		 */
 		$thumbnail_path = \apply_filters( 'embed_privacy_thumbnail_data_path', $thumbnail_path, $post, $url );
 		
@@ -294,9 +294,9 @@ final class Thumbnail {
 		 * 
 		 * @since	1.7.0
 		 * 
-		 * @param	string	$thumbnail The thumbnail URL
-		 * @param	WP_Post	$post The post object
-		 * @param	string	$url The embed URL
+		 * @param	string		$thumbnail The thumbnail URL
+		 * @param	\WP_Post	$post The post object
+		 * @param	string		$url The embed URL
 		 */
 		$thumbnail_url = \apply_filters( 'embed_privacy_thumbnail_data_url', $thumbnail_url, $post, $url );
 		
@@ -336,14 +336,14 @@ final class Thumbnail {
 	/**
 	 * Get embed thumbnails from the embed provider.
 	 * 
-	 * @param	string	$return The returned oEmbed HTML
+	 * @param	string	$output The returned oEmbed HTML
 	 * @param	object	$data A data object result from an oEmbed provider
 	 * @param	string	$url The URL of the content to be embedded
 	 * @return	string The returned oEmbed HTML
 	 */
-	public function get_from_provider( $return, $data, $url ) {
+	public function get_from_provider( $output, $data, $url ) {
 		foreach ( $this->providers as $provider ) {
-			$provider_obj = new $provider();
+			$provider_obj = new $provider(); // phpcs:ignore NeutronStandard.Functions.VariableFunctions.VariableFunction
 			$provider_obj->get( $data, $url );
 		}
 		
@@ -352,13 +352,13 @@ final class Thumbnail {
 		 * 
 		 * @since	1.7.0
 		 * 
-		 * @param	string	$return The returned oEmbed HTML
+		 * @param	string	$output The returned oEmbed HTML
 		 * @param	object	$data A data object result from an oEmbed provider
 		 * @param	string	$url The URL of the content to be embedded
 		 */
-		\do_action( 'embed_privacy_thumbnail_get_from_provider', $return, $data, $url );
+		\do_action( 'embed_privacy_thumbnail_get_from_provider', $output, $data, $url );
 		
-		return $return;
+		return $output;
 	}
 	
 	/**
@@ -396,11 +396,11 @@ final class Thumbnail {
 	 * Get a thumbnail provider by an URL.
 	 * 
 	 * @param	string	$url Embed URL
-	 * @return	Thumbnail_Provider|null Thumbnail provider object or null
+	 * @return	\epiphyt\Embed_Privacy\thumbnail\provider\Thumbnail_Provider|null Thumbnail provider object or null
 	 */
 	public function get_provider_by_url( $url ) {
 		foreach ( $this->providers as $provider ) {
-			$provider_obj = new $provider();
+			$provider_obj = new $provider(); // phpcs:ignore NeutronStandard.Functions.VariableFunctions.VariableFunction
 			
 			foreach ( $provider_obj::$domains as $domain ) {
 				if ( \str_contains( $url, $domain ) ) {
@@ -420,7 +420,7 @@ final class Thumbnail {
 	public function get_provider_titles() {
 		$titles = \array_map(
 			static function( $provider ) {
-				$provider_obj = new $provider();
+				$provider_obj = new $provider(); // phpcs:ignore NeutronStandard.Functions.VariableFunctions.VariableFunction
 				
 				return $provider_obj->get_title();
 			},
@@ -509,7 +509,7 @@ final class Thumbnail {
 		 * 
 		 * @since	1.9.0
 		 * 
-		 * @param	Thumbnail_Provider[]	$supported_providers Current supported providers
+		 * @param	\epiphyt\Embed_Privacy\thumbnail\provider\Thumbnail_Provider[]	$supported_providers Current supported providers
 		 */
 		$this->providers = (array) \apply_filters( 'embed_privacy_thumbnail_providers', $this->providers );
 		
@@ -531,7 +531,7 @@ final class Thumbnail {
 		
 		foreach ( $this->providers as $provider ) {
 			try {
-				$provider_obj = new $provider();
+				$provider_obj = new $provider(); // phpcs:ignore NeutronStandard.Functions.VariableFunctions.VariableFunction
 				
 				if ( ! $provider_obj instanceof Thumbnail_Provider ) {
 					\wp_die(

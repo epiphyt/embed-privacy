@@ -4,7 +4,6 @@ namespace epiphyt\Embed_Privacy\integration;
 use Automattic\Jetpack\Assets;
 use epiphyt\Embed_Privacy\embed\Replacement;
 use epiphyt\Embed_Privacy\Embed_Privacy;
-use Jetpack as JetpackBase;
 
 /**
  * Jetpack integration for Embed Privacy.
@@ -54,20 +53,18 @@ final class Jetpack {
 			],
 			'assets' => [],
 			'check_always_active' => true,
-			'element_attribute' => 'data-href',
 			'elements' => [
 				'div',
 			],
+			'element_attribute' => 'data-href',
 		];
 		
 		// register jetpack script if available
 		if ( \class_exists( '\Automattic\Jetpack\Assets' ) && \defined( 'JETPACK__VERSION' ) ) {
-			/** @disregard P1009 */
-			$jetpack = JetpackBase::init();
+			/** @disregard	P1009 */
+			$jetpack = \Jetpack::init();
 			$attributes['assets'][] = [
-				'type' => 'inline',
-				'object_name' => 'jpfbembed',
-				'data' => [
+				'data' => [ // phpcs:ignore SlevomatCodingStandard.Arrays.AlphabeticallySortedByKeys.IncorrectKeyOrder
 					/**
 					 * Filter the Jetpack sharing Facebook app ID.
 					 * 
@@ -78,11 +75,13 @@ final class Jetpack {
 					'appid' => \apply_filters( 'jetpack_sharing_facebook_app_id', '249643311490' ),
 					'locale' => $jetpack->get_locale(),
 				],
+				'object_name' => 'jpfbembed',
+				'type' => 'inline',
 			];
 			$attributes['assets'][] = [
-				'type' => 'script',
 				'handle' => 'jetpack-facebook-embed',
 				'src' => Assets::get_file_url_for_environment( '_inc/build/facebook-embed.min.js', '_inc/facebook-embed.js' ),
+				'type' => 'script',
 				'version' => \JETPACK__VERSION,
 			];
 		}

@@ -100,7 +100,6 @@ class Migration {
 	 * 
 	 * @param	string	$option The option name
 	 * @return	bool True if the option was deleted, false otherwise
-	 * @noinspection PhpReturnValueOfMethodIsNeverUsedInspection
 	 */
 	private function delete_option( $option ) {
 		return \delete_option( 'embed_privacy_' . $option );
@@ -123,11 +122,11 @@ class Migration {
 	 * Get an option either from the global multisite settings or the regular site.
 	 * 
 	 * @param	string	$option The option name
-	 * @param	mixed	$default The default value if the option is not set
+	 * @param	mixed	$default_value The default value if the option is not set
 	 * @return	mixed Value set for the option
 	 */
-	private function get_option( $option, $default = false ) {
-		return \get_option( 'embed_privacy_' . $option, $default );
+	private function get_option( $option, $default_value = false ) {
+		return \get_option( 'embed_privacy_' . $option, $default_value );
 	}
 	
 	/**
@@ -186,7 +185,7 @@ class Migration {
 		}
 		
 		// start the migration
-		$this->update_option( 'is_migrating', time() );
+		$this->update_option( 'is_migrating', \time() );
 		$this->update_option( 'migration_count', (int) $this->get_option( 'migration_count' ) + 1 );
 		// load textdomain early for migrations
 		\load_plugin_textdomain( 'embed-privacy', false, \dirname( \plugin_basename( Embed_Privacy::get_instance()->plugin_file ) ) . '/languages' );
@@ -304,7 +303,7 @@ class Migration {
 		
 		// initialize the WP filesystem if not exists
 		if ( empty( $wp_filesystem ) ) {
-			require_once ABSPATH . 'wp-admin/includes/file.php';
+			require_once \ABSPATH . 'wp-admin/includes/file.php';
 			\WP_Filesystem();
 		}
 		
@@ -341,7 +340,7 @@ class Migration {
 	 * - Update regex for Amazon Kindle
 	 */
 	private function migrate_1_2_2() {
-		$amazon_provider = get_posts( [
+		$amazon_provider = \get_posts( [
 			'meta_key' => 'is_system',
 			'meta_value' => 'yes',
 			'name' => 'amazon-kindle',
@@ -581,6 +580,7 @@ class Migration {
 	
 	/**
 	 * Migrations for version 1.7.3.
+	 * 
 	 * @since	1.7.3
 	 * 
 	 * - Copy thumbnails to different directory
@@ -654,6 +654,7 @@ class Migration {
 	
 	/**
 	 * Migrations for version 1.8.0.
+	 * 
 	 * @since	1.8.0
 	 * 
 	 * - Add new embed provider Anghami
@@ -1162,7 +1163,7 @@ class Migration {
 		<div class="notice notice-error" data-notice="embed_privacy_migration_failed_notice">
 			<p>
 				<?php
-				printf(
+				\printf(
 					/* translators: 1: current migration version, 2: target migration version, 3: starting HTML anchor, 4: ending HTML anchor */
 					\esc_html__( 'Embed Privacy migration from version %1$s to %2$s failed. Please contact the %3$ssupport%4$s for further assistance.', 'embed-privacy' ),
 					\esc_html( $this->get_option( 'migrate_version' ) ),
@@ -1181,7 +1182,6 @@ class Migration {
 	 * @param	string	$option The option name
 	 * @param	mixed	$value The value to update
 	 * @return	bool Whether the update was successful
-	 * @noinspection PhpReturnValueOfMethodIsNeverUsedInspection
 	 */
 	private function update_option( $option, $value ) {
 		return \update_option( 'embed_privacy_' . $option, $value );

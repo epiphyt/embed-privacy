@@ -45,6 +45,7 @@ final class Twitter {
 		}
 		
 		// wrap author name by a meta div
+		/** @var	\DOMElement $node */
 		foreach ( $dom->getElementsByTagName( 'span' ) as $node ) {
 			if ( $node->getAttribute( 'class' ) !== 'embed-privacy-author-meta' ) {
 				continue;
@@ -59,6 +60,7 @@ final class Twitter {
 			$parent_node->appendChild( $node );
 		}
 		
+		/** @var	\DOMElement $link */
 		foreach ( $dom->getElementsByTagName( 'a' ) as $link ) {
 			if ( ! \preg_match( '/https?:\/\/twitter.com\/([^\/]+)\/status\/(\d+)/', $link->getAttribute( 'href' ) ) ) {
 				continue;

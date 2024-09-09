@@ -1,9 +1,6 @@
 <?php
 namespace epiphyt\Embed_Privacy\embed;
 
-use WP_Post;
-use WP_Theme_JSON;
-use WP_Theme_JSON_Data;
 use WP_Theme_JSON_Resolver;
 
 /**
@@ -16,7 +13,7 @@ use WP_Theme_JSON_Resolver;
  */
 final class Style {
 	/**
-	 * @var		Assets Assets object
+	 * @var		\epiphyt\Embed_Privacy\embed\Assets Assets object
 	 */
 	private $assets = null;
 	
@@ -29,7 +26,7 @@ final class Style {
 	 * Construct the object.
 	 * 
 	 * @param	string			$provider Provider name
-	 * @param	\WP_Post|null	$embed_provider Settings of the embed provider
+	 * @param	\WP_Post|null	$embed_post Settings of the embed provider
 	 * @param	array			$attributes Additional embed attributes
 	 */
 	public function __construct( $provider, $embed_post = null, $attributes = [] ) {
@@ -90,11 +87,7 @@ final class Style {
 		}
 		
 		if ( ! empty( $logo['path'] ) ) {
-			$this->styling['logo']['background-image'] = \sprintf(
-				'url(%1$s?ver=%2$s)',
-				$logo['url'],
-				$logo['version']
-			);
+			$this->styling['logo']['background-image'] = \sprintf( 'url(%1$s?ver=%2$s)', $logo['url'], $logo['version'] );
 		}
 	}
 	

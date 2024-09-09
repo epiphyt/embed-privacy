@@ -1,8 +1,6 @@
 <?php
 namespace epiphyt\Embed_Privacy\integration;
 
-use function Activitypub\is_activitypub_request;
-
 /**
  * ActivityPub integration for Embed Privacy.
  * 
@@ -31,6 +29,6 @@ final class Activitypub {
 			return $is_ignored;
 		}
 		
-		return \function_exists( 'Activitypub\is_activitypub_request' ) && is_activitypub_request();
+		return \function_exists( 'Activitypub\is_activitypub_request' ) && \Activitypub\is_activitypub_request();
 	}
 }

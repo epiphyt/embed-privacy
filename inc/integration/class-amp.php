@@ -17,7 +17,7 @@ final class Amp {
 	 * @return	bool True if the current page is an AMP page, false otherwise
 	 */
 	public static function is_amp() {
-		/** @disregard P1010 */
+		/** @disregard	P1010 */
 		return \function_exists( 'is_amp_endpoint' ) && \is_amp_endpoint();
 	}
 }

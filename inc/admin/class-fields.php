@@ -1,7 +1,6 @@
 <?php
 namespace epiphyt\Embed_Privacy\admin;
 
-use WP_Error;
 use WP_Post;
 
 /**
@@ -139,7 +138,7 @@ final class Fields {
 		
 		if ( ! \is_array( $additional_fields ) ) {
 			\wp_die(
-				new WP_Error( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				new \WP_Error( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 					'invalid_fields',
 					\esc_html__( 'Invalid value for additional Embed Privacy fields provided.', 'embed-privacy' )
 				)
@@ -161,7 +160,7 @@ final class Fields {
 	 * Register default fields.
 	 */
 	public function register_default() {
-		$this->register( [
+		$this->register( [ // phpcs:ignore SlevomatCodingStandard.Arrays.AlphabeticallySortedByKeys.IncorrectKeyOrder
 			'privacy_policy_url' => [
 				'description' => \__( 'Link to the embed provider’s privacy policy URL.', 'embed-privacy' ),
 				'field_type' => 'input',
@@ -177,11 +176,11 @@ final class Fields {
 			'regex_default' => [
 				'description' => \sprintf(
 					/* translators: link to documentation */
-					__( 'Regular expression that will be searched for in the content. See the %s for more information.', 'embed-privacy' ),
+					\__( 'Regular expression that will be searched for in the content. See the %s for more information.', 'embed-privacy' ),
 					'<a href="' . \esc_url(
 						\sprintf(
 							/* translators: plugin version */
-							__( 'https://epiph.yt/en/embed-privacy/documentation/?version=%s#regex-pattern', 'embed-privacy' ),
+							\__( 'https://epiph.yt/en/embed-privacy/documentation/?version=%s#regex-pattern', 'embed-privacy' ),
 							\EMBED_PRIVACY_VERSION
 						)
 					) . '" target="_blank" rel="noopener noreferrer">' . \esc_html__( 'documentation', 'embed-privacy' ) . '</a>'
@@ -269,7 +268,10 @@ final class Fields {
 		}
 		
 		// ignore actions to trash the post
-		if ( ! empty( $_GET['action'] ) && \in_array( \sanitize_text_field( \wp_unslash( $_GET['action'] ) ), [ 'trash', 'untrash' ], true ) ) {
+		if (
+			! empty( $_GET['action'] )
+			&& \in_array( \sanitize_text_field( \wp_unslash( $_GET['action'] ) ), [ 'trash', 'untrash' ], true )
+		) {
 			return;
 		}
 		
@@ -283,7 +285,7 @@ final class Fields {
 			! \defined( 'WP_CLI' ) && ! \current_user_can( 'edit_posts', $post_id )
 			|| \defined( 'WP_CLI' ) && ! \WP_CLI
 		) {
-			\wp_die( new WP_Error( 403, \esc_html__( 'You are not allowed to edit an embed.', 'embed-privacy' ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			\wp_die( new \WP_Error( 403, \esc_html__( 'You are not allowed to edit an embed.', 'embed-privacy' ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		}
 		
 		if ( \defined( 'WP_CLI' ) && \WP_CLI ) {
@@ -352,21 +354,21 @@ final class Fields {
 		
 		// get attachment data
 		$attachment = [
-			'post_mime_type' => $upload_file['type'],
-			'post_title' => \sanitize_title( $file['name'] ),
 			'post_content' => '',
+			'post_mime_type' => $upload_file['type'],
 			'post_status' => 'inherit',
+			'post_title' => \sanitize_title( $file['name'] ),
 		];
 		// save the file as attachment
 		$attachment_id = \wp_insert_attachment( $attachment, $upload_file['file'] );
 		
-		if ( is_wp_error( $attachment_id ) ) {
+		if ( \is_wp_error( $attachment_id ) ) {
 			return 0;
 		}
 		
 		// make wp_generate_attachment_metadata() available
 		// see https://wordpress.stackexchange.com/a/261262
-		include_once ABSPATH . 'wp-admin/includes/image.php';
+		include_once \ABSPATH . 'wp-admin/includes/image.php';
 		// generate meta data
 		\wp_update_attachment_metadata( $attachment_id, \wp_generate_attachment_metadata( $attachment_id, $upload_file['file'] ) );
 		
@@ -383,7 +385,7 @@ final class Fields {
 		
 		// initialize the WP filesystem if not exists
 		if ( empty( $wp_filesystem ) ) {
-			require_once ABSPATH . 'wp-admin/includes/file.php';
+			require_once \ABSPATH . 'wp-admin/includes/file.php';
 			\WP_Filesystem();
 		}
 		
@@ -400,14 +402,13 @@ final class Fields {
 		}
 		
 		foreach ( $_FILES as $key => $files ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
-			// check valid files
-			if ( ! \in_array( $key, $valid_files, true ) ) {
+			if ( ! \in_array( $key, $valid_files, true ) ) { // check valid files
 				continue;
 			}
 			
 			$validated[ $key ] = [
-				'name' => $files['name'],
 				'content' => $wp_filesystem->get_contents( $files['tmp_name'] ),
+				'name' => $files['name'],
 				'tmp_name' => $files['tmp_name'],
 			];
 		}

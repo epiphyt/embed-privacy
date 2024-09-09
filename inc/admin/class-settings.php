@@ -12,7 +12,7 @@ use epiphyt\Embed_Privacy\Embed_Privacy;
  * @since	1.10.0
  */
 final class Settings {
-	public const CAPABILITY = 'manage_options';
+	const CAPABILITY = 'manage_options';
 	
 	/**
 	 * Initialize functionality.
@@ -24,7 +24,6 @@ final class Settings {
 	
 	/**
 	 * Get settings page.
-	 * 
 	 */
 	public static function get_page() {
 		if ( ! \current_user_can( self::CAPABILITY ) ) {
@@ -40,7 +39,7 @@ final class Settings {
 				<?php
 				\settings_fields( 'embed_privacy' );
 				\do_settings_sections( 'embed_privacy' );
-				\submit_button( esc_html__( 'Save Settings', 'embed-privacy' ) );
+				\submit_button( \esc_html__( 'Save Settings', 'embed-privacy' ) );
 				?>
 			</form>
 		</div>
@@ -51,15 +50,10 @@ final class Settings {
 	 * Register settings.
 	 */
 	public static function register() {
-		\add_settings_section(
-			'embed_privacy_general',
-			null,
-			'__return_null',
-			'embed_privacy'
-		);
+		\add_settings_section( 'embed_privacy_general', null, '__return_null', 'embed_privacy' );
 		\add_settings_field(
 			'embed_privacy_javascript_detection',
-			__( 'JavaScript detection', 'embed-privacy' ),
+			\__( 'JavaScript detection', 'embed-privacy' ),
 			[ Field::class, 'get' ],
 			'embed_privacy',
 			'embed_privacy_general',
@@ -74,7 +68,7 @@ final class Settings {
 		\register_setting( 'embed_privacy', 'embed_privacy_javascript_detection' );
 		\add_settings_field(
 			'embed_privacy_local_tweets',
-			__( 'Embeds', 'embed-privacy' ),
+			\__( 'Embeds', 'embed-privacy' ),
 			[ Field::class, 'get' ],
 			'embed_privacy',
 			'embed_privacy_general',
@@ -123,7 +117,7 @@ final class Settings {
 		\register_setting( 'embed_privacy', 'embed_privacy_download_thumbnails' );
 		\add_settings_field(
 			'embed_privacy_preserve_data_on_uninstall',
-			__( 'Data handling', 'embed-privacy' ),
+			\__( 'Data handling', 'embed-privacy' ),
 			[ Field::class, 'get' ],
 			'embed_privacy',
 			'embed_privacy_general',

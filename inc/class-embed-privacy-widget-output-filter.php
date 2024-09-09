@@ -92,7 +92,7 @@ class Embed_Privacy_Widget_Output_Filter {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\handler\Widget::filter_dynamic_sidebar_params()',
+				'epiphyt\Embed_Privacy\handler\Widget::filter_dynamic_sidebar_params()'
 			),
 			'1.10.0'
 		);
@@ -104,10 +104,8 @@ class Embed_Privacy_Widget_Output_Filter {
 		global $wp_registered_widgets;
 		$current_widget_id = $sidebar_params[0]['widget_id'];
 		
-		// phpcs:disable WordPress.WP.GlobalVariablesOverride.Prohibited
-		$wp_registered_widgets[ $current_widget_id ]['original_callback'] = $wp_registered_widgets[ $current_widget_id ]['callback'];
-		$wp_registered_widgets[ $current_widget_id ]['callback'] = [ $this, 'display_widget' ];
-		// phpcs: enable
+		$wp_registered_widgets[ $current_widget_id ]['original_callback'] = $wp_registered_widgets[ $current_widget_id ]['callback']; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$wp_registered_widgets[ $current_widget_id ]['callback'] = [ $this, 'display_widget' ]; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		
 		return $sidebar_params;
 	}
@@ -123,7 +121,7 @@ class Embed_Privacy_Widget_Output_Filter {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\Embed_Privacy\handler\Widget::display_widget()',
+				'epiphyt\Embed_Privacy\handler\Widget::display_widget()'
 			),
 			'1.10.0'
 		);
@@ -140,7 +138,7 @@ class Embed_Privacy_Widget_Output_Filter {
 		
 		if ( \is_callable( $original_callback ) ) {
 			\ob_start();
-			\call_user_func_array( $original_callback, $original_callback_params );
+			\call_user_func_array( $original_callback, $original_callback_params ); // phpcs:ignore NeutronStandard.Functions.DisallowCallUserFunc.CallUserFunc
 			$widget_output = \ob_get_clean();
 			
 			/**

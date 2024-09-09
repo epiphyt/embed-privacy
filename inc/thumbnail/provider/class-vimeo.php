@@ -12,19 +12,19 @@ use epiphyt\Embed_Privacy\thumbnail\Thumbnail;
  */
 final class Vimeo extends Thumbnail_Provider implements Thumbnail_Provider_Interface {
 	/**
-	 * @inheritDoc
+	 * @var		string[] List of valid domains for the thumbnail provider
 	 */
 	public static $domains = [
 		'vimeo.com',
 	];
 	
 	/**
-	 * @inheritDoc
+	 * @var		string Thumbnail provider name
 	 */
 	public static $name = 'vimeo';
 	
 	/**
-	 * @inheritDoc
+	 * {@inheritDoc}
 	 */
 	public static function get( $data, $url ) {
 		if ( ! self::is_provider_embed( $url ) ) {
@@ -42,7 +42,7 @@ final class Vimeo extends Thumbnail_Provider implements Thumbnail_Provider_Inter
 	}
 	
 	/**
-	 * @inheritDoc
+	 * {@inheritDoc}
 	 */
 	public static function get_id( $content ) {
 		$id = \str_replace(
@@ -53,7 +53,7 @@ final class Vimeo extends Thumbnail_Provider implements Thumbnail_Provider_Inter
 			'',
 			$content
 		);
-			
+		
 		if ( \str_contains( $id, '?' ) ) {
 			$id = \substr( $id, 0, \strpos( $id, '?' ) );
 		}
@@ -62,14 +62,14 @@ final class Vimeo extends Thumbnail_Provider implements Thumbnail_Provider_Inter
 	}
 	
 	/**
-	 * @inheritDoc
+	 * {@inheritDoc}
 	 */
 	public static function get_title() {
 		return \_x( 'Vimeo', 'embed provider', 'embed-privacy' );
 	}
 	
 	/**
-	 * @inheritDoc
+	 * {@inheritDoc}
 	 */
 	public static function save( $id, $url, $thumbnail_url = '' ) {
 		$post = \get_post();
@@ -81,7 +81,7 @@ final class Vimeo extends Thumbnail_Provider implements Thumbnail_Provider_Inter
 		$thumbnail_path = Thumbnail::get_directory()['base_dir'] . '/' . self::$name . '-' . $id . '.jpg';
 		
 		if ( ! \file_exists( $thumbnail_path ) ) {
-			require_once ABSPATH . 'wp-admin/includes/file.php';
+			require_once \ABSPATH . 'wp-admin/includes/file.php';
 			
 			$file = \download_url( $thumbnail_url );
 			
@@ -89,7 +89,7 @@ final class Vimeo extends Thumbnail_Provider implements Thumbnail_Provider_Inter
 				return;
 			}
 			
-			/** @var \WP_Filesystem_Direct $wp_filesystem */
+			/** @var	\WP_Filesystem_Direct $wp_filesystem */
 			global $wp_filesystem;
 			
 			// initialize the WP filesystem if not exists
@@ -105,10 +105,6 @@ final class Vimeo extends Thumbnail_Provider implements Thumbnail_Provider_Inter
 			Thumbnail::METADATA_PREFIX . '_' . self::$name . '_' . $id,
 			self::$name . '-' . $id . '.jpg'
 		);
-		\update_post_meta(
-			$post->ID,
-			Thumbnail::METADATA_PREFIX . '_' . self::$name . '_' . $id . '_url',
-			$url
-		);
+		\update_post_meta( $post->ID, Thumbnail::METADATA_PREFIX . '_' . self::$name . '_' . $id . '_url', $url );
 	}
 }

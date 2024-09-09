@@ -23,7 +23,7 @@ final class Assets {
 	];
 	
 	/**
-	 * @var		WP_Post|null Embed post object or null
+	 * @var		\WP_Post|null Embed post object or null
 	 */
 	private $embed_post = null;
 	
@@ -59,7 +59,7 @@ final class Assets {
 	 * Construct the object.
 	 * 
 	 * @param	string			$provider Provider name
-	 * @param	\WP_Post|null	$embed_provider Settings of the embed provider
+	 * @param	\WP_Post|null	$embed_post Settings of the embed provider
 	 * @param	array			$attributes Additional embed attributes
 	 */
 	public function __construct( $provider, $embed_post = null, $attributes = [] ) {
@@ -237,6 +237,8 @@ final class Assets {
 	
 	/**
 	 * Set the thumbnail image asset data.
+	 * 
+	 * @param	array	$attributes Embed attributes
 	 */
 	private function set_thumbnail( $attributes ) {
 		if ( empty( $attributes['embed_url'] ) || ! \get_option( 'embed_privacy_download_thumbnails' ) ) {

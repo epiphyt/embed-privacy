@@ -12,7 +12,6 @@ use DOMDocument;
  * @since	1.10.0
  */
 final class Oembed {
-	
 	/**
 	 * Get the dimensions of an oEmbed.
 	 * 
@@ -29,6 +28,7 @@ final class Oembed {
 		\libxml_use_internal_errors( $use_error );
 		
 		foreach ( [ 'embed', 'iframe', 'img', 'object' ] as $tag ) {
+			/** @var	\DOMElement $element */
 			foreach ( $dom->getElementsByTagName( $tag ) as $element ) {
 				$height = $element->getAttribute( 'height' );
 				$width = $element->getAttribute( 'width' );
@@ -61,6 +61,7 @@ final class Oembed {
 		\libxml_use_internal_errors( $use_error );
 		
 		foreach ( [ 'embed', 'iframe', 'object' ] as $tag ) {
+			/** @var	\DOMElement $element */
 			foreach ( $dom->getElementsByTagName( $tag ) as $element ) {
 				$title = $element->getAttribute( 'title' );
 				

@@ -14,19 +14,19 @@ use epiphyt\Embed_Privacy\thumbnail\Thumbnail;
  */
 final class WordPress_TV extends Thumbnail_Provider implements Thumbnail_Provider_Interface {
 	/**
-	 * @inheritDoc
+	 * @var		string[] List of valid domains for the thumbnail provider
 	 */
 	public static $domains = [
 		'wordpress.tv',
 	];
 	
 	/**
-	 * @inheritDoc
+	 * @var		string Thumbnail provider name
 	 */
 	public static $name = 'wordpress-tv';
 	
 	/**
-	 * @inheritDoc
+	 * {@inheritDoc}
 	 */
 	public static function get( $data, $url ) {
 		if ( ! self::is_provider_embed( $url ) ) {
@@ -41,7 +41,7 @@ final class WordPress_TV extends Thumbnail_Provider implements Thumbnail_Provide
 	}
 	
 	/**
-	 * @inheritDoc
+	 * {@inheritDoc}
 	 */
 	public static function get_id( $content ) {
 		if ( \str_contains( $content, '/video.wordpress.com/embed/' ) ) {
@@ -73,14 +73,14 @@ final class WordPress_TV extends Thumbnail_Provider implements Thumbnail_Provide
 	}
 	
 	/**
-	 * @inheritDoc
+	 * {@inheritDoc}
 	 */
 	public static function get_title() {
 		return \_x( 'WordPress TV', 'embed provider', 'embed-privacy' );
 	}
 	
 	/**
-	 * @inheritDoc
+	 * {@inheritDoc}
 	 */
 	public static function save( $id, $url, $thumbnail_url = '' ) {
 		$post = \get_post();
@@ -89,7 +89,7 @@ final class WordPress_TV extends Thumbnail_Provider implements Thumbnail_Provide
 			return;
 		}
 		
-		require_once ABSPATH . 'wp-admin/includes/file.php';
+		require_once \ABSPATH . 'wp-admin/includes/file.php';
 		
 		$directory = Thumbnail::get_directory();
 		$thumbnail_path = $directory['base_dir'] . '/' . self::$name . '-' . $id . '.jpg';
@@ -102,7 +102,7 @@ final class WordPress_TV extends Thumbnail_Provider implements Thumbnail_Provide
 			
 			$dom->loadHTML(
 				\wp_remote_retrieve_body( $request ),
-				LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
+				\LIBXML_HTML_NOIMPLIED | \LIBXML_HTML_NODEFDTD
 			);
 			$xpath = new DOMXPath( $dom );
 			// get thumbnail URL from og:image meta
@@ -115,7 +115,7 @@ final class WordPress_TV extends Thumbnail_Provider implements Thumbnail_Provide
 				return;
 			}
 			
-			/** @var \WP_Filesystem_Direct $wp_filesystem */
+			/** @var	\WP_Filesystem_Direct $wp_filesystem */
 			global $wp_filesystem;
 			
 			// initialize the WP filesystem if not exists
@@ -131,10 +131,6 @@ final class WordPress_TV extends Thumbnail_Provider implements Thumbnail_Provide
 			Thumbnail::METADATA_PREFIX . '_' . self::$name . '_' . $id,
 			self::$name . '-' . $id . '.jpg'
 		);
-		\update_post_meta(
-			$post->ID,
-			Thumbnail::METADATA_PREFIX . '_' . self::$name . '_' . $id . '_url',
-			$url
-		);
+		\update_post_meta( $post->ID, Thumbnail::METADATA_PREFIX . '_' . self::$name . '_' . $id . '_url', $url );
 	}
 }
