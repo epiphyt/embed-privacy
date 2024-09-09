@@ -208,7 +208,7 @@ final class Providers {
 		 * @param	string	$identifier Current identifier
 		 * @param	array	$global_list List with all providers of all identifiers
 		 */
-		$this->list[ $identifier ] = \apply_filters( 'embed_privacy_provider_list', $this->list[ $identifier ], $identifier, $this->list );
+		$this->list[ $identifier ] = (array) \apply_filters( 'embed_privacy_provider_list', $this->list[ $identifier ], $identifier, $this->list );
 		
 		return $this->list[ $identifier ];
 	}

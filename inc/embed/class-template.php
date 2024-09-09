@@ -40,7 +40,7 @@ final class Template {
 		/**
 		 * Filter the overlay arguments.
 		 * 
-		 * @deprecated	1.10.0 Use embed_privacy_template_arguments instead
+		 * @deprecated	1.10.0 Use embed_privacy_template_attributes instead
 		 * @since		1.9.0
 		 * 
 		 * @param	array	$attributes Template arguments
@@ -57,7 +57,7 @@ final class Template {
 				$output,
 			],
 			'1.10.0',
-			'embed_privacy_template_arguments'
+			'embed_privacy_template_attributes'
 		);
 		
 		/**

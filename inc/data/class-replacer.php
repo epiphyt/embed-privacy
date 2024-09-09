@@ -66,11 +66,11 @@ final class Replacer {
 		 * 
 		 * @since	1.10.0
 		 * 
-		 * @param	string[]	$allowed_tags List of allowed tags
-		 * @param	string		$provider Embed provider
+		 * @param	string[]									$allowed_tags List of allowed tags
+		 * @param	\epiphyt\Embed_privacy\embed\Provider|null	$provider Embed provider
 		 * @return	array Updated list of allowed tags
 		 */
-		$allowed_tags = \apply_filters( 'embed_privacy_replacer_matcher_elements', $allowed_tags, $provider );
+		$allowed_tags = (array) \apply_filters( 'embed_privacy_replacer_matcher_elements', $allowed_tags, $provider );
 		
 		$tags_regex = '(' . \implode( '|', \array_filter( $allowed_tags, static function( $tag ) {
 			return \preg_quote( $tag, '/' );

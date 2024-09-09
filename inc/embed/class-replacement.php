@@ -67,7 +67,7 @@ final class Replacement {
 		 * @param	bool	$ignore_unknown Whether unknown providers should be ignored
 		 * @param	string	$content The original content
 		 */
-		$ignore_unknown_providers = \apply_filters( 'embed_privacy_ignore_unknown_providers', false, $content );
+		$ignore_unknown_providers = (bool) \apply_filters( 'embed_privacy_ignore_unknown_providers', false, $content );
 		
 		// get default external content
 		// special case for youtube-nocookie.com as it is part of YouTube provider
@@ -110,6 +110,8 @@ final class Replacement {
 		
 		/**
 		 * Filter character replacements.
+		 * 
+		 * @since	1.10.0
 		 * 
 		 * @param	array	$replacements Current replacements
 		 */
@@ -422,6 +424,8 @@ final class Replacement {
 		
 		/**
 		 * Filter the overlay provider.
+		 * 
+		 * @since	1.10.0
 		 * 
 		 * @param	\epiphyt\Embed_Privacy\embed\Provider	$provider Current provider
 		 * @param	string									$content Content to get the provider from
