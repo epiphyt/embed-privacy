@@ -12,7 +12,7 @@ License:			GPL2
 License URI:		https://www.gnu.org/licenses/gpl-2.0.html
 Requires at least:	5.9
 Requires PHP:		5.6
-Tested up to:		6.5
+Tested up to:		6.6
 Text Domain:		embed-privacy
 
 Embed Privacy is free software: you can redistribute it and/or modify
