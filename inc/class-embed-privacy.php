@@ -704,7 +704,7 @@ class Embed_Privacy {
 	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\data\Providers::is_always_active() instead
 	 * @since		1.1.0
 	 * 
-	 * @param	string		$provider The embed provider in lowercase
+	 * @param	string	$provider The embed provider in lowercase
 	 * @return	bool True if provider is always active, false otherwise
 	 */
 	public function is_always_active_provider( $provider ) {
