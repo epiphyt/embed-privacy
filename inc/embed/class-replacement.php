@@ -349,6 +349,7 @@ final class Replacement {
 			&& ! $this->provider->is_unknown()
 			&& ! $this->provider->is_disabled()
 			&& \preg_match( $attributes['regex'], $content, $matches ) !== false
+			&& ! \str_contains( $matches[0], 'embed-privacy-' )
 		) {
 			$content = \preg_replace(
 				$attributes['regex'],
