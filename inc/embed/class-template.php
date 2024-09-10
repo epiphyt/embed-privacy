@@ -22,7 +22,7 @@ final class Template {
 	 * @return	string The overlay template
 	 */
 	public static function get( $provider, $output, $attributes = [] ) {
-		if ( \is_string( $provider ) ) {
+		if ( ! $provider instanceof Provider ) {
 			\_doing_it_wrong(
 				__METHOD__,
 				\sprintf(
@@ -65,9 +65,9 @@ final class Template {
 		 * 
 		 * @since	1.10.0
 		 * 
-		 * @param	array	$attributes Template attributes
-		 * @param	string	$provider The embed provider
-		 * @param	string	$output The output before replacing it
+		 * @param	array									$attributes Template attributes
+		 * @param	\epiphyt\Embed_privacy\embed\Provider	$provider The embed provider
+		 * @param	string									$output The output before replacing it
 		 */
 		$attributes = (array) \apply_filters( 'embed_privacy_template_attributes', $attributes, $provider, $output );
 		

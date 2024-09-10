@@ -35,15 +35,16 @@ final class Providers {
 	 * Get an embed provider by its name.
 	 * 
 	 * @param	string	$name The name to search for
-	 * @return	\epiphyt\Embed_privacy\embed\Provider|null The embed or null
+	 * @return	\epiphyt\Embed_privacy\embed\Provider The embed provider
 	 */
 	public function get_by_name( $name ) {
+		$provider = new Provider();
+		
 		if ( empty( $name ) ) {
-			return null;
+			return $provider;
 		}
 		
 		$embed_providers = $this->get_list();
-		$provider = null;
 		$name = self::sanitize_name( $name );
 		
 		foreach ( $embed_providers as $embed_provider ) {
