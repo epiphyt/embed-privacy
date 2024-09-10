@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.10.3
+* Fixed: Multiple replacements of the same embed
+* Fixed: Replacing unknown embeds
+* Fixed: Always return an embed provider via `Providers::get_by_name()`
+* Fixed: Warning about potentially non-available asset version
+
 ## 1.10.2
 * Fixed: Potential fatal error for missing check of the availability of the function `is_plugin_active`
 

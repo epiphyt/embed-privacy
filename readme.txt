@@ -1,8 +1,8 @@
 === Embed Privacy ===
 Contributors: epiphyt, kittmedia, krafit
-Tags: oembed, privacy, gutenberg
+Tags: oembed, privacy, gutenberg, iframes, performance
 Requires at least: 5.9
-Stable tag: 1.10.2
+Stable tag: 1.10.3
 Tested up to: 6.6
 Requires PHP: 5.6
 License: GPL2
@@ -43,9 +43,9 @@ The embedding process itself will be privacy-friendly with Embed Privacy. That m
 
 If you use the opt-out functionality with the shortcode or the functionality to allow the user to always display content of certain embed providers, Embed Privacy creates a single cookie called `embed-privacy` with an expiration of 1 year to store the user’s choice.
 
-= Does Embed Privacy support the Gutenberg editor? =
+= Does Embed Privacy support the block editor? =
 
-Sure thing! We enjoy playing with the new WordPress editor and developed Embed Privacy with Gutenberg in mind, the plugin will work no matter the editor you use.
+Sure thing! We enjoy playing with the block editor and developed Embed Privacy with Gutenberg in mind, the plugin will work no matter the editor you use.
 
 = Which embeds are currently supported? =
 
@@ -94,38 +94,6 @@ Since version 1.2.0, you can also add custom embed providers by going to **Setti
 = Can Embed Privacy automatically download thumbnails of the embedded content? =
 
 Yes! Since version 1.5.0, Embed Privacy supports downloading and displaying thumbnails in posts for SlideShare, Vimeo and YouTube as background of Embed Privacy’s overlay.
-
-= Developers: How to use Embed Privacy’s methods for custom content? =
-
-Since version 1.1.0 you can now use our mechanism for content we don’t support in our plugin. You can do it the following way:
-
-`
-/**
- * Replace specific content with the Embed Privacy overlay of type 'google-maps'.
- * 
- * @param	string		$content The content to replace
- * @return	string The updated content
- */
-function prefix_replace_content_with_overlay( $content ) {
-	// check for Embed Privacy
-	if ( ! class_exists( 'epiphyt\Embed_Privacy\Embed_Privacy' ) ) {
-		return $content;
-	}
-	
-	// get Embed Privacy instance
-	$embed_privacy = epiphyt\Embed_Privacy\Embed_Privacy::get_instance();
-	
-	// check if provider is always active; if so, just return the content
-	if ( ! $embed_privacy->is_always_active_provider( 'google-maps' ) ) {
-		// replace the content with the overlay
-		$content = $embed_privacy->get_output_template( 'Google Maps', 'google-maps', $content );
-		// enqueue assets
-		$embed_privacy->print_assets();
-	}
-	
-	return $content;
-}
-`
 
 = Can users opt-out of already opted in embed providers? =
 
@@ -176,6 +144,12 @@ We are [Epiphyt](https://epiph.yt/), your friendly neighborhood WordPress plugin
 You can report security bugs through the Patchstack Vulnerability Disclosure Program. The Patchstack team help validate, triage and handle any security vulnerabilities. [Report a security vulnerability.](https://patchstack.com/database/vdp/embed-privacy)
 
 == Changelog ==
+
+= 1.10.3 =
+* Fixed: Multiple replacements of the same embed
+* Fixed: Replacing unknown embeds
+* Fixed: Always return an embed provider via `Providers::get_by_name()`
+* Fixed: Warning about potentially non-available asset version
 
 = 1.10.2 =
 * Fixed: Potential fatal error for missing check of the availability of the function `is_plugin_active`
