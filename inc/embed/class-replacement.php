@@ -422,6 +422,10 @@ final class Replacement {
 			$this->provider->set_title( $provider );
 		}
 		
+		if ( $this->provider === null ) {
+			$this->provider = new Provider();
+		}
+		
 		/**
 		 * Filter the overlay provider.
 		 * 
