@@ -2,7 +2,7 @@
 Contributors: epiphyt, kittmedia, krafit
 Tags: oembed, privacy, gutenberg, iframes, performance
 Requires at least: 5.9
-Stable tag: 1.10.3
+Stable tag: 1.10.4
 Tested up to: 6.6
 Requires PHP: 5.6
 License: GPL2
@@ -144,6 +144,10 @@ We are [Epiphyt](https://epiph.yt/), your friendly neighborhood WordPress plugin
 You can report security bugs through the Patchstack Vulnerability Disclosure Program. The Patchstack team help validate, triage and handle any security vulnerabilities. [Report a security vulnerability.](https://patchstack.com/database/vdp/embed-privacy)
 
 == Changelog ==
+
+= 1.10.4 =
+* Fixed: Blocking embeds appearing in the same content after a disabled/always active provider
+* Fixed: Cookie lifetime
 
 = 1.10.3 =
 * Fixed: Multiple replacements of the same embed

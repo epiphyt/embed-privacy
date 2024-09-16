@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.10.4
+* Fixed: Blocking embeds appearing in the same content after a disabled/always active provider
+* Fixed: Cookie lifetime
+
 ## 1.10.3
 * Fixed: Multiple replacements of the same embed
 * Fixed: Replacing unknown embeds
