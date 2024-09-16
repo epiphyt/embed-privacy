@@ -87,7 +87,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 			if ( cookie !== null && Object.keys( cookie ).length !== 0 && cookie.constructor === Object ) {
 				cookie[ embedProvider ] = true;
 				
-				set_cookie( 'embed-privacy', JSON.stringify( cookie ) );
+				set_cookie( 'embed-privacy', JSON.stringify( cookie ), 365 );
 			}
 			else {
 				set_cookie( 'embed-privacy', '{"' + embedProvider + '":true}', 365 );
