@@ -153,52 +153,54 @@ final class Replacer {
 			return $output;
 		}
 		
-		$overlay = new Replacement( $output, $url );
+		$replacement = new Replacement( $output, $url );
 		
-		// make sure to only run once
-		if ( \str_contains( $output, 'data-embed-provider="' . $overlay->get_provider()->get_name() . '"' ) ) {
-			return $output;
-		}
-		
-		// check if cookie is set
-		if ( Providers::is_always_active( $overlay->get_provider()->get_name() ) ) {
-			return $output;
-		}
-		
-		$embed_title = Oembed::get_title( $output );
-		/* translators: embed title */
-		$attributes['embed_title'] = ! empty( $embed_title ) ? $embed_title : '';
-		$attributes['embed_url'] = $url;
-		$attributes['is_oembed'] = true;
-		$attributes['strip_newlines'] = true;
-		
-		// the default dimensions are useless
-		// so ignore them if recognized as such
-		$defaults = \wp_embed_defaults( $url );
-		
-		if (
-			! empty( $attributes['height'] ) && $attributes['height'] === $defaults['height']
-			&& ! empty( $attributes['width'] ) && $attributes['width'] === $defaults['width']
-		) {
-			unset( $attributes['height'], $attributes['width'] );
-			
-			$dimensions = Oembed::get_dimensions( $output );
-			
-			if ( ! empty( $dimensions ) ) {
-				$attributes = \array_merge( $attributes, $dimensions );
+		foreach ( $replacement->get_providers() as $provider ) {
+			// make sure to only run once
+			if ( \str_contains( $output, 'data-embed-provider="' . $provider->get_name() . '"' ) ) {
+				return $output;
 			}
-		}
-		
-		// check for local tweets
-		if ( $overlay->get_provider()->is( 'twitter' ) && \get_option( 'embed_privacy_local_tweets' ) ) {
-			return Twitter::get_local_tweet( $output );
-		}
-		
-		$output = $overlay->get( $attributes );
-		
-		if ( $overlay->get_provider()->is( 'youtube' ) ) {
-			// replace youtube.com with youtube-nocookie.com
-			$output = \str_replace( 'youtube.com', 'youtube-nocookie.com', $output );
+			
+			// check if cookie is set
+			if ( Providers::is_always_active( $provider->get_name() ) ) {
+				return $output;
+			}
+			
+			$embed_title = Oembed::get_title( $output );
+			/* translators: embed title */
+			$attributes['embed_title'] = ! empty( $embed_title ) ? $embed_title : '';
+			$attributes['embed_url'] = $url;
+			$attributes['is_oembed'] = true;
+			$attributes['strip_newlines'] = true;
+			
+			// the default dimensions are useless
+			// so ignore them if recognized as such
+			$defaults = \wp_embed_defaults( $url );
+			
+			if (
+				! empty( $attributes['height'] ) && $attributes['height'] === $defaults['height']
+				&& ! empty( $attributes['width'] ) && $attributes['width'] === $defaults['width']
+			) {
+				unset( $attributes['height'], $attributes['width'] );
+				
+				$dimensions = Oembed::get_dimensions( $output );
+				
+				if ( ! empty( $dimensions ) ) {
+					$attributes = \array_merge( $attributes, $dimensions );
+				}
+			}
+			
+			// check for local tweets
+			if ( $provider->is( 'twitter' ) && \get_option( 'embed_privacy_local_tweets' ) ) {
+				return Twitter::get_local_tweet( $output );
+			}
+			
+			$output = $replacement->get( $attributes );
+			
+			if ( $provider->is( 'youtube' ) ) {
+				// replace youtube.com with youtube-nocookie.com
+				$output = \str_replace( 'youtube.com', 'youtube-nocookie.com', $output );
+			}
 		}
 		
 		return $output;

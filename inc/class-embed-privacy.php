@@ -410,10 +410,10 @@ class Embed_Privacy {
 			return $content;
 		}
 		
-		$overlay = new Replacement( $content );
+		$replacement = new Replacement( $content );
 		
-		if ( $overlay->get_provider()->is_matching( $content ) ) {
-			$content = Template::get( $overlay->get_provider(), $overlay );
+		foreach ( $replacement->get_providers() as $provider ) {
+			$content = Template::get( $provider, $replacement );
 		}
 		
 		return $content;
