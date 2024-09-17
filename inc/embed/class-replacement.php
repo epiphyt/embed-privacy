@@ -369,14 +369,12 @@ final class Replacement {
 		\libxml_use_internal_errors( false );
 		
 		// embeds for other elements need to be handled manually
-		// make sure to test before if the regex matches
-		// see: https://github.com/epiphyt/embed-privacy/issues/26
 		if (
 			empty( $this->replacements )
 			&& ! empty( $attributes['regex'] )
 			&& ! $this->provider->is_unknown()
 			&& ! $this->provider->is_disabled()
-			&& \preg_match( $attributes['regex'], $content, $matches ) !== false
+			&& \preg_match( $attributes['regex'], $content, $matches ) === 1
 			&& ! \str_contains( $matches[0], 'embed-privacy-' )
 		) {
 			$content = \preg_replace(
