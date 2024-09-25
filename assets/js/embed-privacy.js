@@ -172,8 +172,8 @@ document.addEventListener( 'DOMContentLoaded', function() {
 			if ( embedPrivacy.javascriptDetection === 'yes' && alwaysActiveProviders.indexOf( optOutCheckboxes[ i ].getAttribute( 'data-embed-provider' ) ) !== -1 ) {
 				optOutCheckboxes[ i ].checked = true;
 			}
-			else if ( embedPrivacy.javascriptDetection === 'yes' && ! showAll ) {
-				optOutCheckboxes[ i ].parentNode.classList.add( 'is-hidden' );
+			else if ( ! showAll ) {
+				optOutCheckboxes[ i ].parentNode.parentNode.classList.add( 'is-hidden' );
 				
 				continue;
 			}
