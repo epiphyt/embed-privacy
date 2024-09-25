@@ -433,7 +433,7 @@ final class Replacement {
 					$content,
 					Replacer::extend_pattern( $provider->get_pattern(), $provider )
 				)
-				|| ( ! empty( $url ) && ! $provider->is_matching( $url ) )
+				&& ( ! empty( $url ) && ! $provider->is_matching( $url ) )
 			) {
 				continue;
 			}
