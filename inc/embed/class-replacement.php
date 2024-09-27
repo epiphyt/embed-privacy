@@ -23,9 +23,14 @@ final class Replacement {
 	private $content = '';
 	
 	/**
-	 * @var		\epiphyt\Embed_privacy\embed\Provider Provider of this overlay
+	 * @var		\epiphyt\Embed_privacy\embed\Provider|null Current processed provider for this replacement
 	 */
 	private $provider;
+	
+	/**
+	 * @var		\epiphyt\Embed_privacy\embed\Provider[] List of matching providers for this replacement
+	 */
+	private $providers = [];
 	
 	/**
 	 * @var		array List of replacements
@@ -67,7 +72,7 @@ final class Replacement {
 		 * @param	bool	$ignore_unknown Whether unknown providers should be ignored
 		 * @param	string	$content The original content
 		 */
-		$ignore_unknown_providers = \apply_filters( 'embed_privacy_ignore_unknown_providers', false, $content );
+		$ignore_unknown_providers = (bool) \apply_filters( 'embed_privacy_ignore_unknown_providers', false, $content );
 		
 		// get default external content
 		// special case for youtube-nocookie.com as it is part of YouTube provider
@@ -81,13 +86,19 @@ final class Replacement {
 			)
 		) {
 			$attributes['check_always_active'] = true;
-			$new_content = $this->replace_content( $content, $attributes );
 			
-			if ( $new_content !== $content ) {
-				Embed_Privacy::get_instance()->has_embed = true;
-				Embed_Privacy::get_instance()->frontend->print_assets();
-				$content = $new_content;
+			foreach ( $this->get_providers() as $provider ) {
+				$this->provider = $provider;
+				$new_content = $this->replace_content( $content, $attributes );
+				
+				if ( $new_content !== $content ) {
+					Embed_Privacy::get_instance()->has_embed = true;
+					Embed_Privacy::get_instance()->frontend->print_assets();
+					$content = $new_content;
+				}
 			}
+			
+			$this->provider = null;
 		}
 		
 		return $content;
@@ -111,6 +122,8 @@ final class Replacement {
 		/**
 		 * Filter character replacements.
 		 * 
+		 * @since	1.10.0
+		 * 
 		 * @param	array	$replacements Current replacements
 		 */
 		$replacements = (array) \apply_filters( 'embed_privacy_overlay_character_replacements', $replacements );
@@ -119,12 +132,29 @@ final class Replacement {
 	}
 	
 	/**
-	 * Get the overlay provider.
+	 * Get the current provider.
 	 * 
-	 * @return	\epiphyt\Embed_privacy\embed\Provider Provider object
+	 * @deprecated	1.10.4
+	 * 
+	 * @return	\epiphyt\Embed_privacy\embed\Provider|null Provider object
 	 */
 	public function get_provider() {
+		\_doing_it_wrong(
+			__METHOD__,
+			\esc_html__( 'This method is outdated and will be removed in the future.', 'embed-privacy' ),
+			'1.10.4'
+		);
+		
 		return $this->provider;
+	}
+	
+	/**
+	 * Get all providers to replace an embed of.
+	 * 
+	 * @return	\epiphyt\Embed_privacy\embed\Provider[] Provider object
+	 */
+	public function get_providers() {
+		return $this->providers;
 	}
 	
 	/**
@@ -339,14 +369,13 @@ final class Replacement {
 		\libxml_use_internal_errors( false );
 		
 		// embeds for other elements need to be handled manually
-		// make sure to test before if the regex matches
-		// see: https://github.com/epiphyt/embed-privacy/issues/26
 		if (
 			empty( $this->replacements )
 			&& ! empty( $attributes['regex'] )
 			&& ! $this->provider->is_unknown()
 			&& ! $this->provider->is_disabled()
-			&& \preg_match( $attributes['regex'], $content, $matches ) !== false
+			&& \preg_match( $attributes['regex'], $content, $matches ) === 1
+			&& ! \str_contains( $matches[0], 'embed-privacy-' )
 		) {
 			$content = \preg_replace(
 				$attributes['regex'],
@@ -395,38 +424,46 @@ final class Replacement {
 	 * @param	string	$url URL to the embedded content
 	 */
 	private function set_provider( $content, $url = '' ) {
+		$current_provider = null;
 		$providers = Providers::get_instance()->get_list();
 		
 		foreach ( $providers as $provider ) {
 			if (
-				$provider->is_matching(
+				! $provider->is_matching(
 					$content,
 					Replacer::extend_pattern( $provider->get_pattern(), $provider )
 				)
-				|| ( ! empty( $url ) && $provider->is_matching( $url ) )
+				&& ( ! empty( $url ) && ! $provider->is_matching( $url ) )
 			) {
-				$this->provider = $provider;
-				break;
+				continue;
 			}
+			
+			$current_provider = $provider;
+			
+			// support unknown oEmbed provider
+			// see https://github.com/epiphyt/embed-privacy/issues/89
+			if ( $current_provider === null && ! empty( $url ) ) {
+				$parsed_url = \wp_parse_url( $url );
+				$provider = isset( $parsed_url['host'] ) ? $parsed_url['host'] : '';
+				$current_provider = new Provider();
+				$current_provider->set_name( $provider );
+				$current_provider->set_title( $provider );
+			}
+			
+			if ( $current_provider === null ) {
+				$current_provider = new Provider();
+			}
+			
+			/**
+			 * Filter the overlay provider.
+			 * 
+			 * @since	1.10.0
+			 * 
+			 * @param	\epiphyt\Embed_Privacy\embed\Provider	$provider Current provider
+			 * @param	string									$content Content to get the provider from
+			 * @param	string									$url URL to the embedded content
+			 */
+			$this->providers[] = \apply_filters( 'embed_privacy_overlay_provider', $current_provider, $content, $url );
 		}
-		
-		// support unknown oEmbed provider
-		// see https://github.com/epiphyt/embed-privacy/issues/89
-		if ( $this->provider === null && ! empty( $url ) ) {
-			$parsed_url = \wp_parse_url( $url );
-			$provider = isset( $parsed_url['host'] ) ? $parsed_url['host'] : '';
-			$this->provider = new Provider();
-			$this->provider->set_name( $provider );
-			$this->provider->set_title( $provider );
-		}
-		
-		/**
-		 * Filter the overlay provider.
-		 * 
-		 * @param	\epiphyt\Embed_Privacy\embed\Provider	$provider Current provider
-		 * @param	string									$content Content to get the provider from
-		 * @param	string									$url URL to the embedded content
-		 */
-		$this->provider = \apply_filters( 'embed_privacy_overlay_provider', $this->provider, $content, $url );
 	}
 }

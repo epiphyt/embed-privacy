@@ -87,7 +87,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 			if ( cookie !== null && Object.keys( cookie ).length !== 0 && cookie.constructor === Object ) {
 				cookie[ embedProvider ] = true;
 				
-				set_cookie( 'embed-privacy', JSON.stringify( cookie ) );
+				set_cookie( 'embed-privacy', JSON.stringify( cookie ), 365 );
 			}
 			else {
 				set_cookie( 'embed-privacy', '{"' + embedProvider + '":true}', 365 );
@@ -172,8 +172,8 @@ document.addEventListener( 'DOMContentLoaded', function() {
 			if ( embedPrivacy.javascriptDetection === 'yes' && alwaysActiveProviders.indexOf( optOutCheckboxes[ i ].getAttribute( 'data-embed-provider' ) ) !== -1 ) {
 				optOutCheckboxes[ i ].checked = true;
 			}
-			else if ( embedPrivacy.javascriptDetection === 'yes' && ! showAll ) {
-				optOutCheckboxes[ i ].parentNode.classList.add( 'is-hidden' );
+			else if ( ! showAll ) {
+				optOutCheckboxes[ i ].parentNode.parentNode.classList.add( 'is-hidden' );
 				
 				continue;
 			}

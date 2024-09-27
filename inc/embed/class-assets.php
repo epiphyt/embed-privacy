@@ -173,6 +173,7 @@ final class Assets {
 		if ( $background_id ) {
 			$this->background['path'] = \get_attached_file( $background_id );
 			$this->background['url'] = \wp_get_attachment_url( $background_id );
+			$this->background['version'] = '';
 		}
 		
 		/**
@@ -203,6 +204,7 @@ final class Assets {
 		if ( \file_exists( \EPI_EMBED_PRIVACY_BASE . 'assets/images/embed-' . $this->provider . '.png' ) ) {
 			$this->logo['path'] = \EPI_EMBED_PRIVACY_BASE . 'assets/images/embed-' . $this->provider . '.png';
 			$this->logo['url'] = \EPI_EMBED_PRIVACY_URL . 'assets/images/embed-' . $this->provider . '.png';
+			$this->logo['version'] = '';
 		}
 		
 		if ( $this->embed_post instanceof WP_Post ) {
@@ -249,6 +251,7 @@ final class Assets {
 		$this->thumbnail = [
 			'path' => $thumbnail['thumbnail_path'],
 			'url' => $thumbnail['thumbnail_url'],
+			'version' => '',
 		];
 		
 		/**

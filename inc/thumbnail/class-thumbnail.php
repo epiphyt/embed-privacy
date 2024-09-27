@@ -120,7 +120,7 @@ final class Thumbnail {
 					 * @param	string	$id The thumbnail ID
 					 * @param	string	$url The thumbnail URL
 					 * @param	int		$post_id The post ID
-					 * @param	string	$provider The provider name
+					 * @param	string	$provider The provider
 					 */
 					$should_delete = \apply_filters( 'embed_privacy_thumbnail_delete_orphaned', $should_delete, $id, $url, $post_id, $provider );
 					

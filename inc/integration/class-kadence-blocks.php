@@ -1,6 +1,8 @@
 <?php
 namespace epiphyt\Embed_Privacy\integration;
 
+use epiphyt\Embed_Privacy\System;
+
 /**
  * Kadence Blocks integration for Embed Privacy.
  * 
@@ -22,7 +24,7 @@ final class Kadence_Blocks {
 	 * Enqueue assets.
 	 */
 	public static function enqueue_assets() {
-		if ( \is_plugin_active( 'kadence-blocks/kadence-blocks.php' ) ) {
+		if ( System::is_plugin_active( 'kadence-blocks/kadence-blocks.php' ) ) {
 			\wp_enqueue_style( 'embed-privacy-kadence-blocks' );
 		}
 	}

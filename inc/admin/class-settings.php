@@ -73,7 +73,7 @@ final class Settings {
 			'embed_privacy',
 			'embed_privacy_general',
 			[
-				'description' => \__( 'By enabling this option, tweets are embedded locally as text without any connection to Twitter, and no privacy overlay is required.', 'embed-privacy' ),
+				'description' => \__( 'By enabling this option, tweets are embedded locally as text without any connection to X, and no privacy overlay is required.', 'embed-privacy' ),
 				'name' => 'embed_privacy_local_tweets',
 				'option_type' => 'option',
 				'title' => \__( 'Local tweets', 'embed-privacy' ),

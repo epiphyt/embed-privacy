@@ -1,6 +1,8 @@
 <?php
 namespace epiphyt\Embed_Privacy\integration;
 
+use epiphyt\Embed_Privacy\System;
+
 /**
  * Polylang integration for Embed Privacy.
  * 
@@ -44,7 +46,7 @@ final class Polylang {
 	 */
 	public static function sanitize_name( $name ) {
 		if (
-			\is_plugin_active( 'polylang/polylang.php' )
+			System::is_plugin_active( 'polylang/polylang.php' )
 			&& \function_exists( 'pll_current_language' )
 			&& \str_ends_with( $name, '-' . \pll_current_language() )
 		) {

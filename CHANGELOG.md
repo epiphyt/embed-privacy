@@ -1,5 +1,28 @@
 # Changelog
 
+## 1.10.5
+* Improved: Renamed Twitter to X
+* Fixed: Check for matching provider
+* Fixed: Missing assets for YouTube overlay in Elementor
+* Fixed: Hiding providers in the opt-out shortcodes if desired
+* Fixed: Potential PHP warning
+
+## 1.10.4
+* Fixed: Blocking embeds appearing in the same content after a disabled/always active provider
+* Fixed: Cookie lifetime
+
+## 1.10.3
+* Fixed: Multiple replacements of the same embed
+* Fixed: Replacing unknown embeds
+* Fixed: Always return an embed provider via `Providers::get_by_name()`
+* Fixed: Warning about potentially non-available asset version
+
+## 1.10.2
+* Fixed: Potential fatal error for missing check of the availability of the function `is_plugin_active`
+
+## 1.10.1
+* Fixed: Set correct "Tested up to" to WordPress 6.6
+
 ## 1.10.0
 * Added: Thumbnail support for Polylang
 * Added: Filter to prevent orphan thumbnail deletion
