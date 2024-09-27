@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.10.5
+* Improved: Renamed Twitter to X
+* Fixed: Check for matching provider
+* Fixed: Missing assets for YouTube overlay in Elementor
+* Fixed: Hiding providers in the opt-out shortcodes if desired
+* Fixed: Potential PHP warning
+
 ## 1.10.4
 * Fixed: Blocking embeds appearing in the same content after a disabled/always active provider
 * Fixed: Cookie lifetime
