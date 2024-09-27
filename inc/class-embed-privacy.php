@@ -22,7 +22,7 @@ use epiphyt\Embed_Privacy\integration\Kadence_Blocks;
 use epiphyt\Embed_Privacy\integration\Maps_Marker;
 use epiphyt\Embed_Privacy\integration\Polylang;
 use epiphyt\Embed_Privacy\integration\Shortcodes_Ultimate;
-use epiphyt\Embed_Privacy\integration\Twitter;
+use epiphyt\Embed_Privacy\integration\X;
 use epiphyt\Embed_Privacy\thumbnail\Thumbnail;
 use ReflectionMethod;
 
@@ -91,7 +91,7 @@ class Embed_Privacy {
 		Maps_Marker::class,
 		Polylang::class,
 		Shortcodes_Ultimate::class,
-		Twitter::class,
+		X::class,
 	];
 	
 	/**
@@ -978,7 +978,7 @@ class Embed_Privacy {
 	}
 	
 	/**
-	 * Replace twitter embeds.
+	 * Replace X embeds.
 	 * 
 	 * @deprecated	1.6.3
 	 * @since		1.6.1
@@ -1000,7 +1000,7 @@ class Embed_Privacy {
 			return $output;
 		}
 		
-		$provider = Providers::get_instance()->get_by_name( 'twitter' );
+		$provider = Providers::get_instance()->get_by_name( 'x' );
 		
 		if ( ! $provider->is_matching( $url ) ) {
 			return $output;
@@ -1012,7 +1012,7 @@ class Embed_Privacy {
 		
 		if ( \get_option( 'embed_privacy_local_tweets' ) ) {
 			// check for local tweets
-			return Twitter::get_local_tweet( $output );
+			return X::get_local_tweet( $output );
 		}
 		
 		$args['embed_url'] = $url;

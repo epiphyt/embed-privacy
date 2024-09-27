@@ -4,7 +4,7 @@ namespace epiphyt\Embed_Privacy\data;
 use epiphyt\Embed_Privacy\embed\Replacement;
 use epiphyt\Embed_Privacy\Embed_Privacy;
 use epiphyt\Embed_Privacy\handler\Oembed;
-use epiphyt\Embed_Privacy\integration\Twitter;
+use epiphyt\Embed_Privacy\integration\X;
 
 /**
  * Replacer functionality.
@@ -191,8 +191,8 @@ final class Replacer {
 			}
 			
 			// check for local tweets
-			if ( $provider->is( 'twitter' ) && \get_option( 'embed_privacy_local_tweets' ) ) {
-				return Twitter::get_local_tweet( $output );
+			if ( $provider->is( 'x' ) && \get_option( 'embed_privacy_local_tweets' ) ) {
+				return X::get_local_tweet( $output );
 			}
 			
 			$output = $replacement->get( $attributes );

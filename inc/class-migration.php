@@ -29,7 +29,7 @@ class Migration {
 	 * @var		string Current migration version
 	 * @since	1.2.2
 	 */
-	private $version = '1.8.0';
+	private $version = '1.10.5';
 	
 	/**
 	 * Migration constructor.
@@ -196,31 +196,40 @@ class Migration {
 			case $this->version:
 				// most recent version, do nothing
 				break;
+			case '1.8.0':
+				$this->migrate_1_10_5();
+				break;
 			case '1.7.3':
+				$this->migrate_1_10_5();
 				$this->migrate_1_8_0();
 				break;
 			case '1.7.0':
+				$this->migrate_1_10_5();
 				$this->migrate_1_8_0();
 				$this->migrate_1_7_3();
 				break;
 			case '1.6.0':
+				$this->migrate_1_10_5();
 				$this->migrate_1_8_0();
 				$this->migrate_1_7_3();
 				$this->migrate_1_7_0();
 				break;
 			case '1.5.0':
+				$this->migrate_1_10_5();
 				$this->migrate_1_8_0();
 				$this->migrate_1_7_3();
 				$this->migrate_1_7_0();
 				$this->migrate_1_6_0();
 				break;
 			case '1.4.7':
+				$this->migrate_1_10_5();
 				$this->migrate_1_8_0();
 				$this->migrate_1_7_0();
 				$this->migrate_1_6_0();
 				$this->migrate_1_5_0();
 				break;
 			case '1.4.0':
+				$this->migrate_1_10_5();
 				$this->migrate_1_8_0();
 				$this->migrate_1_7_0();
 				$this->migrate_1_6_0();
@@ -228,6 +237,7 @@ class Migration {
 				$this->migrate_1_4_7();
 				break;
 			case '1.3.0':
+				$this->migrate_1_10_5();
 				$this->migrate_1_8_0();
 				$this->migrate_1_7_0();
 				$this->migrate_1_6_0();
@@ -235,6 +245,7 @@ class Migration {
 				$this->migrate_1_4_0();
 				break;
 			case '1.2.2':
+				$this->migrate_1_10_5();
 				$this->migrate_1_8_0();
 				$this->migrate_1_7_0();
 				$this->migrate_1_6_0();
@@ -243,6 +254,7 @@ class Migration {
 				$this->migrate_1_3_0();
 				break;
 			case '1.2.1':
+				$this->migrate_1_10_5();
 				$this->migrate_1_8_0();
 				$this->migrate_1_7_0();
 				$this->migrate_1_6_0();
@@ -252,6 +264,7 @@ class Migration {
 				$this->migrate_1_2_2();
 				break;
 			case '1.2.0':
+				$this->migrate_1_10_5();
 				$this->migrate_1_8_0();
 				$this->migrate_1_7_0();
 				$this->migrate_1_6_0();
@@ -560,7 +573,7 @@ class Migration {
 	 * @see		https://github.com/epiphyt/embed-privacy/issues/163
 	 * @since	1.7.0
 	 * 
-	 * - Update Google Maps regex
+	 * - Update CrowdSignal regex
 	 */
 	private function migrate_1_7_0() {
 		$crowdsignal_provider = \get_posts( [
@@ -672,6 +685,45 @@ class Migration {
 			'post_title' => \_x( 'Anghami', 'embed provider', 'embed-privacy' ),
 			'post_type' => 'epi_embed',
 		] );
+	}
+	
+	/**
+	 * Migrations for version 1.10.5.
+	 * 
+	 * @see		https://github.com/epiphyt/embed-privacy/issues/235
+	 * @since	1.10.5
+	 * 
+	 * - Rename Twitter to X
+	 */
+	private function migrate_1_10_5() {
+		$twitter_provider = \get_posts( [
+			'meta_key' => 'is_system',
+			'meta_value' => 'yes',
+			'name' => 'twitter',
+			'no_found_rows' => true,
+			'post_type' => 'epi_embed',
+			'update_post_term_cache' => false,
+		] );
+		$twitter_provider = \reset( $twitter_provider );
+		
+		if ( $twitter_provider instanceof WP_Post ) {
+			$x_provider = [
+				'ID' => $twitter_provider->ID,
+				'post_name' => \sanitize_title( \_x( 'X', 'embed provider', 'embed-privacy' ) ),
+				'post_title' => \_x( 'X', 'embed provider', 'embed-privacy' ),
+			];
+			
+			/* translators: embed provider */
+			if ( $twitter_provider->post_content === \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Twitter', 'embed provider', 'embed-privacy' ) ) ) {
+				/* translators: embed provider */
+				$x_provider['post_content'] = \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'X', 'embed provider', 'embed-privacy' ) );
+			}
+			
+			\wp_update_post( $x_provider );
+			\update_post_meta( $twitter_provider->ID, 'privacy_policy_url', \__( 'https://x.com/privacy', 'embed-privacy' ) );
+			\update_post_meta( $twitter_provider->ID, 'regex_default', '/(twitter|x)\\\.com/' );
+			\update_post_meta( $twitter_provider->ID, 'is_system', 'yes' );
+		}
 	}
 	
 	/**
@@ -1066,13 +1118,13 @@ class Migration {
 			[
 				'meta_input' => [
 					'is_system' => 'yes',
-					'privacy_policy_url' => \__( 'https://twitter.com/privacy', 'embed-privacy' ),
-					'regex_default' => '/twitter\\\.com/',
+					'privacy_policy_url' => \__( 'https://x.com/privacy', 'embed-privacy' ),
+					'regex_default' => '/(twitter|x)\\\.com/',
 				],
 				/* translators: embed provider */
-				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Twitter', 'embed provider', 'embed-privacy' ) ),
+				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'X', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
-				'post_title' => \_x( 'Twitter', 'embed provider', 'embed-privacy' ),
+				'post_title' => \_x( 'X', 'embed provider', 'embed-privacy' ),
 				'post_type' => 'epi_embed',
 			],
 			[
