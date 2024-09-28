@@ -1,4 +1,5 @@
 <?php
+// // phpcs:disable SlevomatCodingStandard.Namespaces.FullyQualifiedGlobalFunctions.NonFullyQualified
 namespace epiphyt\Embed_Privacy;
 
 use epiphyt\Embed_Privacy\thumbnail\Thumbnail;
@@ -101,7 +102,7 @@ function delete_data() {
 		foreach ( $posts as $post_id ) {
 			$metadata = \get_post_meta( $post_id );
 			
-			foreach ( $metadata as $meta_key => $meta_value ) {
+			foreach ( \array_keys( $metadata ) as $meta_key ) {
 				if ( ! \str_contains( $meta_key, 'embed_privacy_thumbnail_' ) ) {
 					continue;
 				}
@@ -119,7 +120,7 @@ function delete_data() {
 	// delete thumbnail directory
 	delete_directory( Thumbnail::get_directory()['base_dir'] );
 	// delete old thumbnail directory
-	delete_directory( WP_CONTENT_DIR . '/uploads/embed-privacy' );
+	delete_directory( \WP_CONTENT_DIR . '/uploads/embed-privacy' );
 }
 
 /**
