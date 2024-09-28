@@ -80,7 +80,7 @@ class Migration {
 	 * @since	1.5.0
 	 */
 	private function create_thumbnails_dir() {
-		$directory = Thumbnails::get_instance()->get_directory();
+		$directory = Thumbnail::get_directory();
 		
 		if ( empty( $directory['base_dir'] ) ) {
 			return;
