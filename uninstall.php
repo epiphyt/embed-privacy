@@ -3,8 +3,6 @@
 namespace epiphyt\Embed_Privacy;
 
 use epiphyt\Embed_Privacy\thumbnail\Thumbnail;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
 
 // if uninstall.php is not called by WordPress, die
 if ( ! \defined( 'WP_UNINSTALL_PLUGIN' ) ) {
@@ -135,17 +133,7 @@ function delete_directory( $directory ) {
 		return;
 	}
 	
-	$iterator = new RecursiveDirectoryIterator( $directory, RecursiveDirectoryIterator::SKIP_DOTS );
-	$files = new RecursiveIteratorIterator( $iterator, RecursiveIteratorIterator::CHILD_FIRST );
+	require_once __DIR__ . '/inc/class-embed-privacy.php';
 	
-	foreach ( $files as $file ) {
-		if ( $file->isDir() ) {
-			\rmdir( $file->getRealPath() );
-		}
-		else {
-			\unlink( $file->getRealPath() );
-		}
-	}
-	
-	\rmdir( $directory );
+	Embed_Privacy::get_wp_filesystem()->rmdir( $directory, true );
 }

@@ -645,7 +645,7 @@ class Migration {
 						
 						// move thumbnail
 						if ( \file_exists( $old_dir . '/' . $filename ) ) {
-							\rename( $old_dir . '/' . $filename, $new_dir . '/' . $filename );
+							Embed_Privacy::get_wp_filesystem()->move( $old_dir . '/' . $filename, $new_dir . '/' . $filename );
 						}
 					}
 				}
@@ -654,13 +654,9 @@ class Migration {
 				$posts = \get_posts( $post_args );
 			}
 			
-			// remove old directory if it's empty
+			// remove old directory 
 			if ( ! ( new FilesystemIterator( $old_dir ) )->valid() ) {
-				\rmdir( $old_dir );
-				
-				if ( ! ( new FilesystemIterator( \dirname( $old_dir ) ) )->valid() ) {
-					\rmdir( \dirname( $old_dir ) );
-				}
+				Embed_Privacy::get_wp_filesystem()->rmdir( $old_dir, true );
 			}
 		}
 	}
