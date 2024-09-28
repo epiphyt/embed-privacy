@@ -15,9 +15,25 @@ jobs:
     - name: npm build
       run: npm run build
     - name: WordPress Plugin Deploy
-      uses: 10up/action-wordpress-plugin-deploy@master
+      uses: 10up/action-wordpress-plugin-deploy@stable
       with:
         generate-zip: true
       env:
         SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
         SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+    # Move all files that should be uploaded to a new directory
+    - run: mkdir ${{ github.event.repository.name }}-build && rsync -a --exclude-from='.github/exclude_list' . ${{ github.event.repository.name }}-build
+    - run: cd ${{ github.event.repository.name }}-build && zip -r ../${{ github.event.repository.name }}.zip * -x "${{ github.event.repository.name }}-build/*" && cd ..
+    - run: rm -rf ${{ github.event.repository.name }}-build
+    # Create artifacts
+    - uses: actions/upload-artifact@v4
+      with:
+        name: ${{ github.event.repository.name }}.zip
+        path: ${{ github.event.repository.name }}.zip
+    # Create release
+    - name: Create Release
+      id: create_release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: ${{ github.event.repository.name }}.zip
+        name: Release ${{ github.ref_name }}
