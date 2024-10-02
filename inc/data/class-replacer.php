@@ -195,7 +195,7 @@ final class Replacer {
 				return X::get_local_tweet( $output );
 			}
 			
-			$output = $replacement->get( $attributes );
+			$output = $replacement->get( $attributes, $provider );
 			
 			if ( $provider->is( 'youtube' ) ) {
 				// replace youtube.com with youtube-nocookie.com

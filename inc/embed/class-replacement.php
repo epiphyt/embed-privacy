@@ -51,10 +51,11 @@ final class Replacement {
 	/**
 	 * Get the content with an overlay.
 	 * 
-	 * @param	array	$attributes Embed attributes
+	 * @param	array										$attributes Embed attributes
+	 * @param	\epiphyt\Embed_Privacy\embed\Provider|null	$provider Embed provider
 	 * @return	string Content with embeds replaced by an overlay
 	 */
-	public function get( array $attributes = [] ) {
+	public function get( array $attributes = [], $provider = null ) {
 		/**
 		 * Filter the content after it has been replaced with an overlay.
 		 * 
@@ -87,14 +88,14 @@ final class Replacement {
 		) {
 			$attributes['check_always_active'] = true;
 			
-			foreach ( $this->get_providers() as $provider ) {
+			if ( $provider instanceof Provider ) {
 				$this->provider = $provider;
-				$new_content = $this->replace_content( $content, $attributes );
-				
-				if ( $new_content !== $content ) {
-					Embed_Privacy::get_instance()->has_embed = true;
-					Embed_Privacy::get_instance()->frontend->print_assets();
-					$content = $new_content;
+				$content = $this->replace( $content, $attributes );
+			}
+			else {
+				foreach ( $this->get_providers() as $provider ) {
+					$this->provider = $provider;
+					$content = $this->replace( $content, $attributes );
 				}
 			}
 			
@@ -158,13 +159,32 @@ final class Replacement {
 	}
 	
 	/**
+	 * Replace content with an overlay and print assets.
+	 * 
+	 * @param	string	$content Content to replace embeds in
+	 * @param	array	$attributes Additional attributes
+	 * @return	string Replaced content
+	 */
+	private function replace( $content, array $attributes ) {
+		$new_content = $this->replace_content( $content, $attributes );
+		
+		if ( $new_content !== $content ) {
+			Embed_Privacy::get_instance()->has_embed = true;
+			Embed_Privacy::get_instance()->frontend->print_assets();
+			$content = $new_content;
+		}
+		
+		return $content;
+	}
+	
+	/**
 	 * Replace embedded content with an overlay.
 	 * 
 	 * @param	string	$content Content to replace embeds in
 	 * @param	array	$attributes Additional attributes
 	 * @return	string Updated content
 	 */
-	private function replace_content( $content, $attributes ) {
+	private function replace_content( $content, array $attributes ) {
 		if ( empty( $content ) ) {
 			return $content;
 		}
