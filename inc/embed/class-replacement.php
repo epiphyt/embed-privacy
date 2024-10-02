@@ -453,26 +453,12 @@ final class Replacement {
 					$content,
 					Replacer::extend_pattern( $provider->get_pattern(), $provider )
 				)
-				&& ( ! empty( $url ) && ! $provider->is_matching( $url ) )
+				&& ( empty( $url ) || ! $provider->is_matching( $url ) )
 			) {
 				continue;
 			}
 			
 			$current_provider = $provider;
-			
-			// support unknown oEmbed provider
-			// see https://github.com/epiphyt/embed-privacy/issues/89
-			if ( $current_provider === null && ! empty( $url ) ) {
-				$parsed_url = \wp_parse_url( $url );
-				$provider = isset( $parsed_url['host'] ) ? $parsed_url['host'] : '';
-				$current_provider = new Provider();
-				$current_provider->set_name( $provider );
-				$current_provider->set_title( $provider );
-			}
-			
-			if ( $current_provider === null ) {
-				$current_provider = new Provider();
-			}
 			
 			/**
 			 * Filter the overlay provider.
@@ -485,5 +471,25 @@ final class Replacement {
 			 */
 			$this->providers[] = \apply_filters( 'embed_privacy_overlay_provider', $current_provider, $content, $url );
 		}
+		
+		// support unknown oEmbed provider
+		// see https://github.com/epiphyt/embed-privacy/issues/89
+		if ( $current_provider === null && ! empty( $url ) ) {
+			$parsed_url = \wp_parse_url( $url );
+			$provider = isset( $parsed_url['host'] ) ? $parsed_url['host'] : '';
+			$current_provider = new Provider();
+			$current_provider->set_name( $provider );
+			$current_provider->set_title( $provider );
+		}
+		
+		// unknown embeds
+		if ( $current_provider === null ) {
+			$current_provider = new Provider();
+		}
+		
+		/**
+		 * This filter is documented in inc/embed/class-replacement.php.
+		 */
+		$this->providers[] = \apply_filters( 'embed_privacy_overlay_provider', $current_provider, $content, $url );
 	}
 }
