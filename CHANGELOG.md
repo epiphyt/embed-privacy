@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.10.6
+* Fixed: Detection for unknown embeds
+* Fixed: Detection for Maps Marker Pro
+
 ## 1.10.5
 * Improved: Renamed Twitter to X
 * Fixed: Check for matching provider
