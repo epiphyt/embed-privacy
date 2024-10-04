@@ -2,7 +2,7 @@
 Contributors: epiphyt, kittmedia, krafit
 Tags: oembed, privacy, gutenberg, iframes, performance
 Requires at least: 5.9
-Stable tag: 1.10.5
+Stable tag: 1.10.6
 Tested up to: 6.6
 Requires PHP: 5.6
 License: GPL2
