@@ -51,10 +51,11 @@ final class Replacement {
 	/**
 	 * Get the content with an overlay.
 	 * 
-	 * @param	array	$attributes Embed attributes
+	 * @param	array										$attributes Embed attributes
+	 * @param	\epiphyt\Embed_Privacy\embed\Provider|null	$provider Embed provider
 	 * @return	string Content with embeds replaced by an overlay
 	 */
-	public function get( array $attributes = [] ) {
+	public function get( array $attributes = [], $provider = null ) {
 		/**
 		 * Filter the content after it has been replaced with an overlay.
 		 * 
@@ -87,14 +88,14 @@ final class Replacement {
 		) {
 			$attributes['check_always_active'] = true;
 			
-			foreach ( $this->get_providers() as $provider ) {
+			if ( $provider instanceof Provider ) {
 				$this->provider = $provider;
-				$new_content = $this->replace_content( $content, $attributes );
-				
-				if ( $new_content !== $content ) {
-					Embed_Privacy::get_instance()->has_embed = true;
-					Embed_Privacy::get_instance()->frontend->print_assets();
-					$content = $new_content;
+				$content = $this->replace( $content, $attributes );
+			}
+			else {
+				foreach ( $this->get_providers() as $provider ) {
+					$this->provider = $provider;
+					$content = $this->replace( $content, $attributes );
 				}
 			}
 			
@@ -158,13 +159,32 @@ final class Replacement {
 	}
 	
 	/**
+	 * Replace content with an overlay and print assets.
+	 * 
+	 * @param	string	$content Content to replace embeds in
+	 * @param	array	$attributes Additional attributes
+	 * @return	string Replaced content
+	 */
+	private function replace( $content, array $attributes ) {
+		$new_content = $this->replace_content( $content, $attributes );
+		
+		if ( $new_content !== $content ) {
+			Embed_Privacy::get_instance()->has_embed = true;
+			Embed_Privacy::get_instance()->frontend->print_assets();
+			$content = $new_content;
+		}
+		
+		return $content;
+	}
+	
+	/**
 	 * Replace embedded content with an overlay.
 	 * 
 	 * @param	string	$content Content to replace embeds in
 	 * @param	array	$attributes Additional attributes
 	 * @return	string Updated content
 	 */
-	private function replace_content( $content, $attributes ) {
+	private function replace_content( $content, array $attributes ) {
 		if ( empty( $content ) ) {
 			return $content;
 		}
@@ -433,26 +453,12 @@ final class Replacement {
 					$content,
 					Replacer::extend_pattern( $provider->get_pattern(), $provider )
 				)
-				&& ( ! empty( $url ) && ! $provider->is_matching( $url ) )
+				&& ( empty( $url ) || ! $provider->is_matching( $url ) )
 			) {
 				continue;
 			}
 			
 			$current_provider = $provider;
-			
-			// support unknown oEmbed provider
-			// see https://github.com/epiphyt/embed-privacy/issues/89
-			if ( $current_provider === null && ! empty( $url ) ) {
-				$parsed_url = \wp_parse_url( $url );
-				$provider = isset( $parsed_url['host'] ) ? $parsed_url['host'] : '';
-				$current_provider = new Provider();
-				$current_provider->set_name( $provider );
-				$current_provider->set_title( $provider );
-			}
-			
-			if ( $current_provider === null ) {
-				$current_provider = new Provider();
-			}
 			
 			/**
 			 * Filter the overlay provider.
@@ -465,5 +471,25 @@ final class Replacement {
 			 */
 			$this->providers[] = \apply_filters( 'embed_privacy_overlay_provider', $current_provider, $content, $url );
 		}
+		
+		// support unknown oEmbed provider
+		// see https://github.com/epiphyt/embed-privacy/issues/89
+		if ( $current_provider === null && ! empty( $url ) ) {
+			$parsed_url = \wp_parse_url( $url );
+			$provider = isset( $parsed_url['host'] ) ? $parsed_url['host'] : '';
+			$current_provider = new Provider();
+			$current_provider->set_name( $provider );
+			$current_provider->set_title( $provider );
+		}
+		
+		// unknown embeds
+		if ( $current_provider === null ) {
+			$current_provider = new Provider();
+		}
+		
+		/**
+		 * This filter is documented in inc/embed/class-replacement.php.
+		 */
+		$this->providers[] = \apply_filters( 'embed_privacy_overlay_provider', $current_provider, $content, $url );
 	}
 }

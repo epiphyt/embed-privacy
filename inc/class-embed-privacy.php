@@ -767,6 +767,25 @@ class Embed_Privacy {
 	}
 	
 	/**
+	 * Get the WP_Filesystem object
+	 * 
+	 * @return	\WP_Filesystem_Direct WP_Filesystem object
+	 */
+	public static function get_wp_filesystem() {
+		/** @var	\WP_Filesystem_Direct $wp_filesystem */
+		global $wp_filesystem;
+		
+		// initialize the WP filesystem if not exists
+		if ( empty( $wp_filesystem ) ) {
+			require_once \ABSPATH . 'wp-admin/includes/file.php';
+			
+			\WP_Filesystem();
+		}
+		
+		return $wp_filesystem;
+	}
+	
+	/**
 	 * Load the translation files.
 	 */
 	public function load_textdomain() {

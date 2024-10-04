@@ -4,10 +4,10 @@
 
 We usually only support the latest major version.
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 1.9.x   | :white_check_mark: |
-| < 1.9   | :x:                |
+| Version  | Supported          |
+| -------- | ------------------ |
+| 1.10.x   | :white_check_mark: |
+| < 1.10   | :x:                |
 
 ## How can I report security bugs?
 

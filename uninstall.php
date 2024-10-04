@@ -1,9 +1,8 @@
 <?php
+// // phpcs:disable SlevomatCodingStandard.Namespaces.FullyQualifiedGlobalFunctions.NonFullyQualified
 namespace epiphyt\Embed_Privacy;
 
 use epiphyt\Embed_Privacy\thumbnail\Thumbnail;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
 
 // if uninstall.php is not called by WordPress, die
 if ( ! \defined( 'WP_UNINSTALL_PLUGIN' ) ) {
@@ -101,7 +100,7 @@ function delete_data() {
 		foreach ( $posts as $post_id ) {
 			$metadata = \get_post_meta( $post_id );
 			
-			foreach ( $metadata as $meta_key => $meta_value ) {
+			foreach ( \array_keys( $metadata ) as $meta_key ) {
 				if ( ! \str_contains( $meta_key, 'embed_privacy_thumbnail_' ) ) {
 					continue;
 				}
@@ -119,7 +118,7 @@ function delete_data() {
 	// delete thumbnail directory
 	delete_directory( Thumbnail::get_directory()['base_dir'] );
 	// delete old thumbnail directory
-	delete_directory( WP_CONTENT_DIR . '/uploads/embed-privacy' );
+	delete_directory( \WP_CONTENT_DIR . '/uploads/embed-privacy' );
 }
 
 /**
@@ -134,17 +133,7 @@ function delete_directory( $directory ) {
 		return;
 	}
 	
-	$iterator = new RecursiveDirectoryIterator( $directory, RecursiveDirectoryIterator::SKIP_DOTS );
-	$files = new RecursiveIteratorIterator( $iterator, RecursiveIteratorIterator::CHILD_FIRST );
+	require_once __DIR__ . '/inc/class-embed-privacy.php';
 	
-	foreach ( $files as $file ) {
-		if ( $file->isDir() ) {
-			\rmdir( $file->getRealPath() );
-		}
-		else {
-			\unlink( $file->getRealPath() );
-		}
-	}
-	
-	\rmdir( $directory );
+	Embed_Privacy::get_wp_filesystem()->rmdir( $directory, true );
 }

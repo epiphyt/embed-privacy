@@ -29,7 +29,7 @@ class Migration {
 	 * @var		string Current migration version
 	 * @since	1.2.2
 	 */
-	private $version = '1.10.5';
+	private $version = '1.10.6';
 	
 	/**
 	 * Migration constructor.
@@ -80,7 +80,7 @@ class Migration {
 	 * @since	1.5.0
 	 */
 	private function create_thumbnails_dir() {
-		$directory = Thumbnails::get_instance()->get_directory();
+		$directory = Thumbnail::get_directory();
 		
 		if ( empty( $directory['base_dir'] ) ) {
 			return;
@@ -189,32 +189,40 @@ class Migration {
 		$this->update_option( 'migration_count', (int) $this->get_option( 'migration_count' ) + 1 );
 		// load textdomain early for migrations
 		\load_plugin_textdomain( 'embed-privacy', false, \dirname( \plugin_basename( Embed_Privacy::get_instance()->plugin_file ) ) . '/languages' );
-		// make sure all default embed providers are avalable and translated
+		// make sure all default embed providers are available and translated
 		$this->register_default_embed_providers();
 		
 		switch ( $version ) {
 			case $this->version:
 				// most recent version, do nothing
 				break;
+			case '1.10.5':
+				$this->migrate_1_10_6();
+				break;
 			case '1.8.0':
+				$this->migrate_1_10_6();
 				$this->migrate_1_10_5();
 				break;
 			case '1.7.3':
+				$this->migrate_1_10_6();
 				$this->migrate_1_10_5();
 				$this->migrate_1_8_0();
 				break;
 			case '1.7.0':
+				$this->migrate_1_10_6();
 				$this->migrate_1_10_5();
 				$this->migrate_1_8_0();
 				$this->migrate_1_7_3();
 				break;
 			case '1.6.0':
+				$this->migrate_1_10_6();
 				$this->migrate_1_10_5();
 				$this->migrate_1_8_0();
 				$this->migrate_1_7_3();
 				$this->migrate_1_7_0();
 				break;
 			case '1.5.0':
+				$this->migrate_1_10_6();
 				$this->migrate_1_10_5();
 				$this->migrate_1_8_0();
 				$this->migrate_1_7_3();
@@ -222,6 +230,7 @@ class Migration {
 				$this->migrate_1_6_0();
 				break;
 			case '1.4.7':
+				$this->migrate_1_10_6();
 				$this->migrate_1_10_5();
 				$this->migrate_1_8_0();
 				$this->migrate_1_7_0();
@@ -229,6 +238,7 @@ class Migration {
 				$this->migrate_1_5_0();
 				break;
 			case '1.4.0':
+				$this->migrate_1_10_6();
 				$this->migrate_1_10_5();
 				$this->migrate_1_8_0();
 				$this->migrate_1_7_0();
@@ -237,6 +247,7 @@ class Migration {
 				$this->migrate_1_4_7();
 				break;
 			case '1.3.0':
+				$this->migrate_1_10_6();
 				$this->migrate_1_10_5();
 				$this->migrate_1_8_0();
 				$this->migrate_1_7_0();
@@ -245,6 +256,7 @@ class Migration {
 				$this->migrate_1_4_0();
 				break;
 			case '1.2.2':
+				$this->migrate_1_10_6();
 				$this->migrate_1_10_5();
 				$this->migrate_1_8_0();
 				$this->migrate_1_7_0();
@@ -254,6 +266,7 @@ class Migration {
 				$this->migrate_1_3_0();
 				break;
 			case '1.2.1':
+				$this->migrate_1_10_6();
 				$this->migrate_1_10_5();
 				$this->migrate_1_8_0();
 				$this->migrate_1_7_0();
@@ -264,6 +277,7 @@ class Migration {
 				$this->migrate_1_2_2();
 				break;
 			case '1.2.0':
+				$this->migrate_1_10_6();
 				$this->migrate_1_10_5();
 				$this->migrate_1_8_0();
 				$this->migrate_1_7_0();
@@ -521,9 +535,9 @@ class Migration {
 				'regex_default' => '',
 			],
 			/* translators: embed provider */
-			'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Maps Marker', 'embed provider', 'embed-privacy' ) ),
+			'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Maps Marker Pro', 'embed provider', 'embed-privacy' ) ),
 			'post_status' => 'publish',
-			'post_title' => \_x( 'Maps Marker', 'embed provider', 'embed-privacy' ),
+			'post_title' => \_x( 'Maps Marker Pro', 'embed provider', 'embed-privacy' ),
 			'post_type' => 'epi_embed',
 		] );
 		$this->create_thumbnails_dir();
@@ -645,7 +659,7 @@ class Migration {
 						
 						// move thumbnail
 						if ( \file_exists( $old_dir . '/' . $filename ) ) {
-							\rename( $old_dir . '/' . $filename, $new_dir . '/' . $filename );
+							Embed_Privacy::get_wp_filesystem()->move( $old_dir . '/' . $filename, $new_dir . '/' . $filename );
 						}
 					}
 				}
@@ -654,13 +668,9 @@ class Migration {
 				$posts = \get_posts( $post_args );
 			}
 			
-			// remove old directory if it's empty
+			// remove old directory 
 			if ( ! ( new FilesystemIterator( $old_dir ) )->valid() ) {
-				\rmdir( $old_dir );
-				
-				if ( ! ( new FilesystemIterator( \dirname( $old_dir ) ) )->valid() ) {
-					\rmdir( \dirname( $old_dir ) );
-				}
+				Embed_Privacy::get_wp_filesystem()->rmdir( $old_dir, true );
 			}
 		}
 	}
@@ -723,6 +733,41 @@ class Migration {
 			\update_post_meta( $twitter_provider->ID, 'privacy_policy_url', \__( 'https://x.com/privacy', 'embed-privacy' ) );
 			\update_post_meta( $twitter_provider->ID, 'regex_default', '/(twitter|x)\\\.com/' );
 			\update_post_meta( $twitter_provider->ID, 'is_system', 'yes' );
+		}
+	}
+	
+	/**
+	 * Migrations for version 1.10.6.
+	 * 
+	 * @since	1.10.6
+	 * 
+	 * - Rename Maps Marker to Maps Marker Pro
+	 */
+	private function migrate_1_10_6() {
+		$maps_marker_provider = \get_posts( [
+			'meta_key' => 'is_system',
+			'meta_value' => 'yes',
+			'name' => 'maps-marker',
+			'no_found_rows' => true,
+			'post_type' => 'epi_embed',
+			'update_post_term_cache' => false,
+		] );
+		$maps_marker_provider = \reset( $maps_marker_provider );
+		
+		if ( $maps_marker_provider instanceof WP_Post ) {
+			$maps_marker_pro_provider = [
+				'ID' => $maps_marker_provider->ID,
+				'post_name' => \sanitize_title( \_x( 'Maps Marker Pro', 'embed provider', 'embed-privacy' ) ),
+				'post_title' => \_x( 'Maps Marker Pro', 'embed provider', 'embed-privacy' ),
+			];
+			
+			/* translators: embed provider */
+			if ( $maps_marker_provider->post_content === \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Maps Marker', 'embed provider', 'embed-privacy' ) ) ) {
+				/* translators: embed provider */
+				$maps_marker_pro_provider['post_content'] = \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Maps Marker Pro', 'embed provider', 'embed-privacy' ) );
+			}
+			
+			\wp_update_post( $maps_marker_pro_provider );
 		}
 	}
 	
@@ -906,9 +951,9 @@ class Migration {
 					'regex_default' => '',
 				],
 				/* translators: embed provider */
-				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Maps Marker', 'embed provider', 'embed-privacy' ) ),
+				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Maps Marker Pro', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
-				'post_title' => \_x( 'Maps Marker', 'embed provider', 'embed-privacy' ),
+				'post_title' => \_x( 'Maps Marker Pro', 'embed provider', 'embed-privacy' ),
 				'post_type' => 'epi_embed',
 			],
 			[
