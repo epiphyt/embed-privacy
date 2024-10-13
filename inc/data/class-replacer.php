@@ -196,11 +196,6 @@ final class Replacer {
 			}
 			
 			$output = $replacement->get( $attributes, $provider );
-			
-			if ( $provider->is( 'youtube' ) ) {
-				// replace youtube.com with youtube-nocookie.com
-				$output = \str_replace( 'youtube.com', 'youtube-nocookie.com', $output );
-			}
 		}
 		
 		return $output;
