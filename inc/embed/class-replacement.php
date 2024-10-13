@@ -388,6 +388,8 @@ final class Replacement {
 		
 		\libxml_use_internal_errors( false );
 		
+		$i = -1;
+		
 		// embeds for other elements need to be handled manually
 		if (
 			empty( $this->replacements )
@@ -397,7 +399,18 @@ final class Replacement {
 			&& \preg_match_all( $attributes['regex'], $content, $matches ) >= 1
 		) {
 			foreach ( $matches[0] as $matched_content ) {
+				++$i;
+				
 				if ( \str_contains( $matched_content, 'embed-privacy-' ) ) {
+					continue;
+				}
+				
+				if ( empty( $matches['original_pattern'][ $i ] ) ) {
+					continue;
+				}
+				
+				// the original pattern must not be inside a href attribute
+				if ( \str_contains( $matched_content, 'href="' . $matches['original_pattern'][ $i ] ) ) {
 					continue;
 				}
 				
