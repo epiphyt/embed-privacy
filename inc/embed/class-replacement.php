@@ -394,19 +394,23 @@ final class Replacement {
 			&& ! empty( $attributes['regex'] )
 			&& ! $this->provider->is_unknown()
 			&& ! $this->provider->is_disabled()
-			&& \preg_match( $attributes['regex'], $content, $matches ) === 1
-			&& ! \str_contains( $matches[0], 'embed-privacy-' )
+			&& \preg_match_all( $attributes['regex'], $content, $matches ) >= 1
 		) {
-			$content = \preg_replace(
-				$attributes['regex'],
-				Template::get(
-					$this->provider,
-					$matches[0],
-					$attributes
-				),
-				$content,
-				1
-			);
+			foreach ( $matches[0] as $matched_content ) {
+				if ( \str_contains( $matched_content, 'embed-privacy-' ) ) {
+					continue;
+				}
+				
+				$content = \str_replace(
+					$matched_content,
+					Template::get(
+						$this->provider,
+						$matched_content,
+						$attributes
+					),
+					$content
+				);
+			}
 		}
 		
 		// decode to make sure there is nothing left encoded if replacements have been made
