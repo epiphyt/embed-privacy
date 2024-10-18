@@ -34,6 +34,11 @@ final class Provider {
 	private $name = '';
 	
 	/**
+	 * @var		\WP_Post|null Provider post object
+	 */
+	private $post_object = null;
+	
+	/**
 	 * @var	string Regular expression pattern
 	 */
 	private $pattern = '';
@@ -69,16 +74,18 @@ final class Provider {
 	 * @param	\WP_Post	$provider_object Provider post object
 	 */
 	public function __construct( $provider_object = null ) {
+		$this->set_post_object( $provider_object );
+		
 		if ( $provider_object instanceof WP_Post ) {
-			$this->set_background_image_id( \get_post_meta( $provider_object->ID, 'background_image', true ) );
-			$this->set_description( $provider_object->post_content );
-			$this->set_is_disabled( Providers::is_disabled( $provider_object ) );
 			$this->set_name( Providers::sanitize_name( $provider_object->post_name ) );
-			$this->set_privacy_policy_url( \get_post_meta( $provider_object->ID, 'privacy_policy_url', true ) );
-			$this->set_is_system( \get_post_meta( $provider_object->ID, 'is_system', true ) );
-			$this->set_thumbnail_id( \get_post_thumbnail_id( $provider_object ) );
 			$this->set_title( $provider_object->post_title );
+			$this->set_is_system( \get_post_meta( $provider_object->ID, 'is_system', true ) );
+			$this->set_is_disabled( Providers::is_disabled( $provider_object ) );
 			$this->set_pattern( \get_post_meta( $provider_object->ID, 'regex_default', true ) );
+			$this->set_description( $provider_object->post_content );
+			$this->set_privacy_policy_url( \get_post_meta( $provider_object->ID, 'privacy_policy_url', true ) );
+			$this->set_background_image_id( \get_post_meta( $provider_object->ID, 'background_image', true ) );
+			$this->set_thumbnail_id( \get_post_thumbnail_id( $provider_object ) );
 		}
 		else {
 			$this->set_is_unknown( true );
@@ -119,6 +126,15 @@ final class Provider {
 	 */
 	public function get_pattern() {
 		return $this->pattern;
+	}
+	
+	/**
+	 * Get the post object.
+	 * 
+	 * @return	\WP_Post|null Post object or null
+	 */
+	public function get_post_object() {
+		return $this->post_object;
 	}
 	
 	/**
@@ -273,6 +289,15 @@ final class Provider {
 		if ( ! empty( $this->pattern ) ) {
 			$this->pattern = '/' . $this->pattern . '/';
 		}
+	}
+	
+	/**
+	 * Set the post object.
+	 * 
+	 * @param	string	$post_object Post object
+	 */
+	public function set_post_object( $post_object ) {
+		$this->post_object = $post_object;
 	}
 	
 	/**

@@ -84,7 +84,7 @@ final class Template {
 			}
 		}
 		else {
-			$embed_post = null;
+			$embed_post = $provider->get_post_object();
 		}
 		
 		if ( $provider->is( 'youtube' ) ) {

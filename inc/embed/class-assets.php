@@ -168,7 +168,7 @@ final class Assets {
 	 * Set the background image asset data.
 	 */
 	private function set_background() {
-		$background_id = \get_post_meta( $this->embed_post->ID, 'background', true );
+		$background_id = \get_post_meta( $this->embed_post->ID, 'background_image', true );
 		
 		if ( $background_id ) {
 			$this->background['path'] = \get_attached_file( $background_id );
