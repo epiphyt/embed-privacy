@@ -29,7 +29,7 @@ class Migration {
 	 * @var		string Current migration version
 	 * @since	1.2.2
 	 */
-	private $version = '1.10.6';
+	private $version = '1.10.7';
 	
 	/**
 	 * Migration constructor.
@@ -196,25 +196,32 @@ class Migration {
 			case $this->version:
 				// most recent version, do nothing
 				break;
+			case '1.10.6':
+				$this->migrate_1_10_7();
 			case '1.10.5':
+				$this->migrate_1_10_7();
 				$this->migrate_1_10_6();
 				break;
 			case '1.8.0':
+				$this->migrate_1_10_7();
 				$this->migrate_1_10_6();
 				$this->migrate_1_10_5();
 				break;
 			case '1.7.3':
+				$this->migrate_1_10_7();
 				$this->migrate_1_10_6();
 				$this->migrate_1_10_5();
 				$this->migrate_1_8_0();
 				break;
 			case '1.7.0':
+				$this->migrate_1_10_7();
 				$this->migrate_1_10_6();
 				$this->migrate_1_10_5();
 				$this->migrate_1_8_0();
 				$this->migrate_1_7_3();
 				break;
 			case '1.6.0':
+				$this->migrate_1_10_7();
 				$this->migrate_1_10_6();
 				$this->migrate_1_10_5();
 				$this->migrate_1_8_0();
@@ -222,6 +229,7 @@ class Migration {
 				$this->migrate_1_7_0();
 				break;
 			case '1.5.0':
+				$this->migrate_1_10_7();
 				$this->migrate_1_10_6();
 				$this->migrate_1_10_5();
 				$this->migrate_1_8_0();
@@ -230,6 +238,7 @@ class Migration {
 				$this->migrate_1_6_0();
 				break;
 			case '1.4.7':
+				$this->migrate_1_10_7();
 				$this->migrate_1_10_6();
 				$this->migrate_1_10_5();
 				$this->migrate_1_8_0();
@@ -238,6 +247,7 @@ class Migration {
 				$this->migrate_1_5_0();
 				break;
 			case '1.4.0':
+				$this->migrate_1_10_7();
 				$this->migrate_1_10_6();
 				$this->migrate_1_10_5();
 				$this->migrate_1_8_0();
@@ -247,6 +257,7 @@ class Migration {
 				$this->migrate_1_4_7();
 				break;
 			case '1.3.0':
+				$this->migrate_1_10_7();
 				$this->migrate_1_10_6();
 				$this->migrate_1_10_5();
 				$this->migrate_1_8_0();
@@ -256,6 +267,7 @@ class Migration {
 				$this->migrate_1_4_0();
 				break;
 			case '1.2.2':
+				$this->migrate_1_10_7();
 				$this->migrate_1_10_6();
 				$this->migrate_1_10_5();
 				$this->migrate_1_8_0();
@@ -266,6 +278,7 @@ class Migration {
 				$this->migrate_1_3_0();
 				break;
 			case '1.2.1':
+				$this->migrate_1_10_7();
 				$this->migrate_1_10_6();
 				$this->migrate_1_10_5();
 				$this->migrate_1_8_0();
@@ -277,6 +290,7 @@ class Migration {
 				$this->migrate_1_2_2();
 				break;
 			case '1.2.0':
+				$this->migrate_1_10_7();
 				$this->migrate_1_10_6();
 				$this->migrate_1_10_5();
 				$this->migrate_1_8_0();
@@ -731,7 +745,7 @@ class Migration {
 			
 			\wp_update_post( $x_provider );
 			\update_post_meta( $twitter_provider->ID, 'privacy_policy_url', \__( 'https://x.com/privacy', 'embed-privacy' ) );
-			\update_post_meta( $twitter_provider->ID, 'regex_default', '/(twitter|x)\\\.com/' );
+			\update_post_meta( $twitter_provider->ID, 'regex_default', '/^(www\\\.)?(twitter|x)\\\.com/' );
 			\update_post_meta( $twitter_provider->ID, 'is_system', 'yes' );
 		}
 	}
@@ -768,6 +782,29 @@ class Migration {
 			}
 			
 			\wp_update_post( $maps_marker_pro_provider );
+		}
+	}
+	
+	/**
+	 * Migrations for version 1.10.7.
+	 * 
+	 * @since	1.10.7
+	 * 
+	 * - Improve X regular expression
+	 */
+	private function migrate_1_10_7() {
+		$x_provider = \get_posts( [
+			'meta_key' => 'is_system',
+			'meta_value' => 'yes',
+			'name' => 'x',
+			'no_found_rows' => true,
+			'post_type' => 'epi_embed',
+			'update_post_term_cache' => false,
+		] );
+		$x_provider = \reset( $x_provider );
+		
+		if ( $x_provider instanceof WP_Post ) {
+			\update_post_meta( $x_provider->ID, 'regex_default', '/^(www\\\.)?(twitter|x)\\\.com/' );
 		}
 	}
 	
@@ -1164,7 +1201,7 @@ class Migration {
 				'meta_input' => [
 					'is_system' => 'yes',
 					'privacy_policy_url' => \__( 'https://x.com/privacy', 'embed-privacy' ),
-					'regex_default' => '/(twitter|x)\\\.com/',
+					'regex_default' => '^(www\\\.)?(twitter|x)\\\.com/',
 				],
 				/* translators: embed provider */
 				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'X', 'embed provider', 'embed-privacy' ) ),
