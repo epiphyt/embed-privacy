@@ -414,6 +414,15 @@ final class Replacement {
 					continue;
 				}
 				
+				// if the content contains an embed wrapper class, that means that the
+				// embed is broken
+				if (
+					$this->provider->is_system()
+					&& \str_contains( $matched_content, 'class="wp-block-embed__wrapper' )
+				) {
+					return $content;
+				}
+				
 				$content = \str_replace(
 					$matched_content,
 					Template::get(
