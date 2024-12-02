@@ -2,8 +2,8 @@
 Contributors: epiphyt, kittmedia, krafit
 Tags: oembed, privacy, gutenberg, iframes, performance
 Requires at least: 5.9
-Stable tag: 1.10.6
-Tested up to: 6.6
+Stable tag: 1.10.7
+Tested up to: 6.7
 Requires PHP: 5.6
 License: GPL2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -144,6 +144,15 @@ We are [Epiphyt](https://epiph.yt/), your friendly neighborhood WordPress plugin
 You can report security bugs through the Patchstack Vulnerability Disclosure Program. The Patchstack team help validate, triage and handle any security vulnerabilities. [Report a security vulnerability.](https://patchstack.com/database/vdp/embed-privacy)
 
 == Changelog ==
+
+= 1.10.7 =
+* Fixed: Custom background images and logos
+* Fixed: Direct link to YouTube videos
+* Fixed: Handling of non-available YouTube videos
+* Fixed: Replacing URLs inside attributes
+* Fixed: Invalid HTML
+* Fixed: Replacing URLs ending with x.com
+* Fixed: Displaying always active providers
 
 = 1.10.6 =
 * Fixed: Detection for unknown embeds

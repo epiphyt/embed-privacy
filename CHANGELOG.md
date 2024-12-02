@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.10.7
+* Fixed: Custom background images and logos
+* Fixed: Direct link to YouTube videos
+* Fixed: Handling of non-available YouTube videos
+* Fixed: Replacing URLs inside attributes
+* Fixed: Invalid HTML
+* Fixed: Replacing URLs ending with x.com
+* Fixed: Displaying always active providers
+
 ## 1.10.6
 * Fixed: Detection for unknown embeds
 * Fixed: Detection for Maps Marker Pro
