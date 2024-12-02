@@ -221,14 +221,8 @@ final class Providers {
 	 * @return	bool True if provider is always active, false otherwise
 	 */
 	public static function is_always_active( $provider ) {
-		$javascript_detection = \get_option( 'embed_privacy_javascript_detection' );
-		$provider = self::sanitize_name( $provider );
-		
-		if ( $javascript_detection ) {
-			return false;
-		}
-		
 		$cookie = Embed_Privacy::get_instance()->get_cookie();
+		$provider = self::sanitize_name( $provider );
 		
 		return isset( $cookie->{$provider} ) && $cookie->{$provider} === true;
 	}

@@ -61,13 +61,8 @@ final class Shortcode {
 		$cookie = Embed_Privacy::get_instance()->get_cookie();
 		$embed_providers = Providers::get_instance()->get_list();
 		$enabled_providers = \array_keys( (array) $cookie );
-		$is_javascript_detection = \get_option( 'embed_privacy_javascript_detection' ) === 'yes';
 		
 		if ( empty( $embed_providers ) ) {
-			return '';
-		}
-		
-		if ( ! $is_javascript_detection && ! $attributes['show_all'] && ! $enabled_providers ) {
 			return '';
 		}
 		

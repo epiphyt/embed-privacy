@@ -77,17 +77,7 @@ final class Replacement {
 		
 		// get default external content
 		// special case for youtube-nocookie.com as it is part of YouTube provider
-		// and gets rewritten in Divi
-		// see: https://github.com/epiphyt/embed-privacy/issues/69
-		if (
-			! $ignore_unknown_providers
-			&& (
-				! \str_contains( $content, 'youtube-nocookie.com' )
-				|| ! Providers::is_always_active( 'youtube' )
-			)
-		) {
-			$attributes['check_always_active'] = true;
-			
+		if ( ! $ignore_unknown_providers || \str_contains( $content, 'youtube-nocookie.com' ) ) {
 			if ( $provider instanceof Provider ) {
 				$this->provider = $provider;
 				$content = $this->replace( $content, $attributes );
@@ -212,7 +202,6 @@ final class Replacement {
 		
 		$attributes = \wp_parse_args( $attributes, [
 			'additional_checks' => [],
-			'check_always_active' => false,
 			'elements' => [ 'embed', 'iframe', 'object' ],
 			'element_attribute' => 'src',
 			'height' => 0,
@@ -279,16 +268,6 @@ final class Replacement {
 					continue;
 				}
 				
-				// providers need to be explicitly checked if they're always active
-				// see https://github.com/epiphyt/embed-privacy/issues/115
-				if ( $attributes['check_always_active'] && Providers::is_always_active( $this->provider->get_name() ) ) {
-					if ( ! empty( $attributes['assets'] ) ) {
-						$content = Assets::get_static( $attributes['assets'], $content );
-					}
-					
-					return $content;
-				}
-				
 				if ( $this->provider->is_unknown() ) {
 					$embedded_host = \wp_parse_url( $element->getAttribute( $attributes['element_attribute'] ), \PHP_URL_HOST );
 					
@@ -301,19 +280,6 @@ final class Replacement {
 					
 					$this->provider->set_title( $embedded_host );
 					$this->provider->set_name( \sanitize_title( $embedded_host ) );
-					
-					// unknown providers need to be explicitly checked if they're always active
-					// see https://github.com/epiphyt/embed-privacy/issues/115
-					if (
-						$attributes['check_always_active']
-						&& Providers::is_always_active( $this->provider->get_name() )
-					) {
-						if ( ! empty( $attributes['assets'] ) ) {
-							$content = Assets::get_static( $attributes['assets'], $content );
-						}
-						
-						return $content;
-					}
 					
 					// check URL for available provider
 					foreach ( Providers::get_instance()->get_list() as $provider ) {

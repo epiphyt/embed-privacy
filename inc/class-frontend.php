@@ -37,7 +37,6 @@ final class Frontend {
 		\wp_enqueue_style( 'embed-privacy' );
 		\wp_localize_script( 'embed-privacy', 'embedPrivacy', [
 			'alwaysActiveProviders' => \array_keys( (array) Embed_Privacy::get_instance()->get_cookie() ), // deprecated
-			'javascriptDetection' => \get_option( 'embed_privacy_javascript_detection' ),
 		] );
 		
 		/**

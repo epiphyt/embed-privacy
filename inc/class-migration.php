@@ -806,6 +806,8 @@ class Migration {
 		if ( $x_provider instanceof WP_Post ) {
 			\update_post_meta( $x_provider->ID, 'regex_default', '/^(www\\\.)?(twitter|x)\\\.com/' );
 		}
+		
+		\delete_option( 'embed_privacy_javascript_detection' );
 	}
 	
 	/**

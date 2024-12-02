@@ -52,7 +52,6 @@ final class Jetpack {
 				],
 			],
 			'assets' => [],
-			'check_always_active' => true,
 			'elements' => [
 				'div',
 			],

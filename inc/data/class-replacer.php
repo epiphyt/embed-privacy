@@ -161,11 +161,6 @@ final class Replacer {
 				return $output;
 			}
 			
-			// check if cookie is set
-			if ( Providers::is_always_active( $provider->get_name() ) ) {
-				return $output;
-			}
-			
 			$embed_title = Oembed::get_title( $output );
 			/* translators: embed title */
 			$attributes['embed_title'] = ! empty( $embed_title ) ? $embed_title : '';

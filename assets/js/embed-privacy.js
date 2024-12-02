@@ -37,10 +37,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		} );
 	}
 	
-	if ( embedPrivacy.javascriptDetection === 'yes' ) {
-		enableAlwaysActiveProviders();
-	}
-	
+	enableAlwaysActiveProviders();
 	optOut();
 	setMinHeight();
 	
@@ -169,7 +166,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		const alwaysActiveProviders = getAlwaysActiveProviders();
 		
 		for ( var i = 0; i < optOutCheckboxes.length; i++ ) {
-			if ( embedPrivacy.javascriptDetection === 'yes' && alwaysActiveProviders.indexOf( optOutCheckboxes[ i ].getAttribute( 'data-embed-provider' ) ) !== -1 ) {
+			if ( alwaysActiveProviders.indexOf( optOutCheckboxes[ i ].getAttribute( 'data-embed-provider' ) ) !== -1 ) {
 				optOutCheckboxes[ i ].checked = true;
 			}
 			else if ( ! showAll ) {

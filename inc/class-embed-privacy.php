@@ -406,10 +406,6 @@ class Embed_Privacy {
 			'1.10.0'
 		);
 		
-		if ( Providers::is_always_active( $provider->post_name ) ) {
-			return $content;
-		}
-		
 		$replacement = new Replacement( $content );
 		
 		foreach ( $replacement->get_providers() as $provider ) {
@@ -1025,12 +1021,8 @@ class Embed_Privacy {
 			return $output;
 		}
 		
-		if ( Providers::is_always_active( $provider->get_name() ) ) {
-			return $output;
-		}
-		
+		// check for local tweets
 		if ( \get_option( 'embed_privacy_local_tweets' ) ) {
-			// check for local tweets
 			return X::get_local_tweet( $output );
 		}
 		

@@ -52,21 +52,6 @@ final class Settings {
 	public static function register() {
 		\add_settings_section( 'embed_privacy_general', null, '__return_null', 'embed_privacy' );
 		\add_settings_field(
-			'embed_privacy_javascript_detection',
-			\__( 'JavaScript detection', 'embed-privacy' ),
-			[ Field::class, 'get' ],
-			'embed_privacy',
-			'embed_privacy_general',
-			[
-				'description' => \__( 'By enabling this option, checks for embed providers are made via JavaScript on the client-side rather than on your server. Enabling this option is recommended when using a caching plugin.', 'embed-privacy' ),
-				'name' => 'embed_privacy_javascript_detection',
-				'option_type' => 'option',
-				'title' => \__( 'JavaScript detection for active providers', 'embed-privacy' ),
-				'type' => 'checkbox',
-			]
-		);
-		\register_setting( 'embed_privacy', 'embed_privacy_javascript_detection' );
-		\add_settings_field(
 			'embed_privacy_local_tweets',
 			\__( 'Embeds', 'embed-privacy' ),
 			[ Field::class, 'get' ],
