@@ -5,7 +5,7 @@ namespace epiphyt\Embed_Privacy;
 Plugin Name:		Embed Privacy
 Plugin URL:			https://epiph.yt/en/embed-privacy/
 Description:		Embed Privacy prevents from loading external embeds directly and lets the user control which one should be loaded.
-Version:			1.10.7
+Version:			1.10.8
 Author:				Epiphyt
 Author URI:			https://epiph.yt/en/
 License:			GPL2
@@ -30,7 +30,7 @@ along with Embed Privacy. If not, see https://www.gnu.org/licenses/gpl-2.0.html.
 */
 \defined( 'ABSPATH' ) || exit;
 
-\define( 'EMBED_PRIVACY_VERSION', '1.10.7' );
+\define( 'EMBED_PRIVACY_VERSION', '1.10.8' );
 
 if ( ! \defined( 'EPI_EMBED_PRIVACY_BASE' ) ) {
 	\define( 'EPI_EMBED_PRIVACY_BASE', \WP_PLUGIN_DIR . '/embed-privacy/' );

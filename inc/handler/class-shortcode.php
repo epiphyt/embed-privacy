@@ -87,17 +87,13 @@ final class Shortcode {
 		$output = '<div class="embed-privacy-opt-out" data-show-all="' . ( $attributes['show_all'] ? 1 : 0 ) . '">' . \PHP_EOL . $headline . $subline;
 		
 		foreach ( $embed_providers as $provider ) {
-			if ( $is_javascript_detection ) {
-				$is_checked = false;
-			}
-			else if ( $attributes['show_all'] ) {
+			$is_checked = false;
+			
+			if ( $attributes['show_all'] ) {
 				$is_checked = \in_array( $provider->get_name(), $enabled_providers, true );
 			}
-			else {
-				$is_checked = true;
-			}
 			
-			$is_hidden = ! $is_javascript_detection && ! $attributes['show_all'] && ! \in_array( $provider->get_name(), $enabled_providers, true );
+			$is_hidden = ! $attributes['show_all'] && ! \in_array( $provider->get_name(), $enabled_providers, true );
 			$microtime = \str_replace( '.', '', \microtime( true ) );
 			$output .= '<span class="embed-privacy-provider' . ( $is_hidden ? ' is-hidden' : '' ) . '">' . \PHP_EOL;
 			$output .= '<label class="embed-privacy-opt-out-label" for="embed-privacy-provider-' . \esc_attr( $provider->get_name() ) . '-' . $microtime . '" data-embed-provider="' . \esc_attr( $provider->get_name() ) . '">';

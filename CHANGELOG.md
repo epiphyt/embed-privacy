@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.10.8
+* Fixed: An undefined variable in the shortcode output
+
 ## 1.10.7
 * Fixed: Custom background images and logos
 * Fixed: Direct link to YouTube videos
