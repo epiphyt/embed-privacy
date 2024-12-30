@@ -29,7 +29,7 @@ class Migration {
 	 * @var		string Current migration version
 	 * @since	1.2.2
 	 */
-	private $version = '1.10.7';
+	private $version = '1.10.9';
 	
 	/**
 	 * Migration constructor.
@@ -196,6 +196,7 @@ class Migration {
 			case $this->version:
 				// most recent version, do nothing
 				break;
+			case '1.10.7':
 			case '1.10.6':
 				$this->migrate_1_10_7();
 			case '1.10.5':
@@ -745,7 +746,7 @@ class Migration {
 			
 			\wp_update_post( $x_provider );
 			\update_post_meta( $twitter_provider->ID, 'privacy_policy_url', \__( 'https://x.com/privacy', 'embed-privacy' ) );
-			\update_post_meta( $twitter_provider->ID, 'regex_default', '/^(www\\\.)?(twitter|x)\\\.com/' );
+			\update_post_meta( $twitter_provider->ID, 'regex_default', '/\\\/\\\/(www\\\.)?(twitter|x)\\\.com/' );
 			\update_post_meta( $twitter_provider->ID, 'is_system', 'yes' );
 		}
 	}
@@ -804,7 +805,7 @@ class Migration {
 		$x_provider = \reset( $x_provider );
 		
 		if ( $x_provider instanceof WP_Post ) {
-			\update_post_meta( $x_provider->ID, 'regex_default', '/^(www\\\.)?(twitter|x)\\\.com/' );
+			\update_post_meta( $x_provider->ID, 'regex_default', '/\\\/\\\/(www\\\.)?(twitter|x)\\\.com/' );
 		}
 		
 		\delete_option( 'embed_privacy_javascript_detection' );
@@ -1203,7 +1204,7 @@ class Migration {
 				'meta_input' => [
 					'is_system' => 'yes',
 					'privacy_policy_url' => \__( 'https://x.com/privacy', 'embed-privacy' ),
-					'regex_default' => '^(www\\\.)?(twitter|x)\\\.com/',
+					'regex_default' => '\\\/\\\/(www\\\.)?(twitter|x)\\\.com/',
 				],
 				/* translators: embed provider */
 				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'X', 'embed provider', 'embed-privacy' ) ),
