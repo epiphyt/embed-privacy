@@ -51,7 +51,7 @@ class Admin {
 	/**
 	 * Add plugin meta links.
 	 * 
-	 * @deprecated	1.10.0 Use epiphyt\admin\User_Interface::add_meta_link() instead
+	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\admin\User_Interface::add_meta_link() instead
 	 * @since		1.6.0
 	 * 
 	 * @param	array	$input Registered links.
@@ -64,7 +64,7 @@ class Admin {
 			\sprintf(
 				/* translators: alternative method */
 				\esc_html__( 'Use %s instead', 'embed-privacy' ),
-				'epiphyt\admin\User_Interface::add_meta_link()'
+				'epiphyt\Embed_Privacy\admin\User_Interface::add_meta_link()'
 			),
 			'1.10.0'
 		);
