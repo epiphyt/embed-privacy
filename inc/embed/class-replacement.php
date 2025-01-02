@@ -263,9 +263,28 @@ final class Replacement {
 				
 				if (
 					! empty( $attributes['regex'] )
-					&& ! \preg_match( $attributes['regex'], $element->getAttribute( $attributes['element_attribute'] ) )
+					&& ! \preg_match_all( $attributes['regex'], $element->getAttribute( $attributes['element_attribute'] ), $matches )
 				) {
 					continue;
+				}
+				
+				foreach ( $matches[0] as $matched_content ) {
+					/**
+					 * Filter whether the replacement should take place for given matches.
+					 * 
+					 * @since	1.10.9
+					 * 
+					 * @param	bool									$should_replace Whether the replacement should take place
+				 * @param	string									$matched_content Actual matched content
+					 * @param	\epiphyt\Embed_privacy\embed\Provider	$provider Provider object
+					 * @param	string									$content Current content
+					 * @param	mixed[]									$attributes Current attributes
+					 */
+					$should_replace = \apply_filters( 'embed_privacy_should_replace_match', true, $matched_content, $this->provider, $content, $attributes );
+					
+					if ( ! $should_replace ) {
+						continue 2;
+					}
 				}
 				
 				if ( $this->provider->is_unknown() ) {
@@ -389,15 +408,30 @@ final class Replacement {
 					return $content;
 				}
 				
-				$content = \str_replace(
-					$matched_content,
-					Template::get(
-						$this->provider,
+				/**
+				 * Filter whether the replacement should take place for given matches.
+				 * 
+				 * @since	1.10.9
+				 * 
+				 * @param	bool									$should_replace Whether the replacement should take place
+				 * @param	string									$matched_content Actual matched content
+				 * @param	\epiphyt\Embed_privacy\embed\Provider	$provider Provider object
+				 * @param	string									$content Current content
+				 * @param	mixed[]									$attributes Current attributes
+				 */
+				$should_replace = \apply_filters( 'embed_privacy_should_replace_match', true, $matched_content, $this->provider, $content, $attributes );
+				
+				if ( $should_replace ) {
+					$content = \str_replace(
 						$matched_content,
-						$attributes
-					),
-					$content
-				);
+						Template::get(
+							$this->provider,
+							$matched_content,
+							$attributes
+						),
+						$content
+					);
+				}
 			}
 		}
 		
