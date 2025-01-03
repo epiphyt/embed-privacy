@@ -47,6 +47,16 @@ final class Divi {
 	 */
 	public static function allow_script_in_post( array $html, $context ) {
 		if ( $context === 'post' ) {
+			if ( ! isset( $html['input'] ) ) {
+				$html['input'] = [
+					'class' => true,
+					'date-*' => true,
+					'id' => true,
+					'type' => true,
+					'value' => true,
+				];
+			}
+			
 			$html['script'] = [
 				'type' => true,
 			];
