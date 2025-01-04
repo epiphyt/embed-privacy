@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.10.9
+* Fixed: Recognition for Twitter/X embeds
+* Fixed: Output of the Instagram Feed plugin is replaced with an faulty overlay
+* Fixed: Displaying embeds in Divi’s dynamic content
+
 ## 1.10.8
 * Fixed: An undefined variable in the shortcode output
 
