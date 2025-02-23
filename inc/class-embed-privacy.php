@@ -204,10 +204,10 @@ class Embed_Privacy {
 	public function init() {
 		// actions
 		\add_action( 'init', [ $this, 'load_textdomain' ], 0 );
-		\add_action( 'init', [ $this, 'set_ignored_request' ] );
 		\add_action( 'init', [ self::class, 'register_post_type' ], 5 );
 		\add_action( 'plugins_loaded', [ $this, 'init_integrations' ] );
 		\add_action( 'save_post_epi_embed', [ $this, 'preserve_backslashes' ] );
+		\add_filter( 'template_include', [ $this, 'set_ignored_request_in_template_include' ], 100 );
 		
 		// filters
 		if ( ! $this->use_cache ) {
@@ -1172,9 +1172,20 @@ class Embed_Privacy {
 	/**
 	 * Check whether this request should be ignored by Embed Privacy.
 	 * 
+	 * @deprecated	1.10.10 Use epiphyt\Embed_Privacy:\Embed_Privacy:set_ignored_request_in_template_include() instead
 	 * @since	1.10.0
 	 */
 	public function set_ignored_request() {
+		\_doing_it_wrong(
+			__METHOD__,
+			\sprintf(
+				/* translators: alternative method */
+				\esc_html__( 'Use %s instead', 'embed-privacy' ),
+				'epiphyt\Embed_Privacy\Embed_Privacy::set_ignored_request_in_template_include()'
+			),
+			'1.10.10'
+		);
+		
 		/**
 		 * Filter whether the current request should be ignored.
 		 * 
@@ -1183,6 +1194,28 @@ class Embed_Privacy {
 		 * @param	bool	$is_ignored_request Whether the current request should be ignored
 		 */
 		$this->is_ignored_request = (bool) \apply_filters( 'embed_privacy_is_ignored_request', $this->is_ignored_request );
+	}
+	
+	/**
+	 * Check whether this request should be ignored by Embed Privacy.
+	 * Template inclusion
+	 * 
+	 * @since	1.10.10
+	 * 
+	 * @param	string	$template Template path to include
+	 * @return	string $template Template path to include
+	 */
+	public function set_ignored_request_in_template_include( $template ) {
+		/**
+		 * Filter whether the current request should be ignored.
+		 * 
+		 * @since	1.10.0
+		 * 
+		 * @param	bool	$is_ignored_request Whether the current request should be ignored
+		 */
+		$this->is_ignored_request = (bool) \apply_filters( 'embed_privacy_is_ignored_request', $this->is_ignored_request );
+		
+		return $template;
 	}
 	
 	/**
