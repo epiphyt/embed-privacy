@@ -390,13 +390,15 @@ final class Replacement {
 					continue;
 				}
 				
-				if ( empty( $matches['original_pattern'][ $i ] ) ) {
-					continue;
-				}
-				
-				// the original pattern must not be inside a href attribute
-				if ( \str_contains( $matched_content, 'href="' . $matches['original_pattern'][ $i ] ) ) {
-					continue;
+				if ( isset( $matches['original_pattern'] ) ) {
+					if ( empty( $matches['original_pattern'][ $i ] ) ) {
+						continue;
+					}
+					
+					// the original pattern must not be inside a href attribute
+					if ( \str_contains( $matched_content, 'href="' . $matches['original_pattern'][ $i ] ) ) {
+						continue;
+					}
 				}
 				
 				// if the content contains an embed wrapper class, that means that the
