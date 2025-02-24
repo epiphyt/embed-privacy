@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.10.10
+* Fixed: Loading Google Maps in Divi
+* Fixed: Replacing HTML elements with regular expressions
+* Fixed: Falsely-negative detection of ActivityPub usage
+
 ## 1.10.9
 * Fixed: Recognition for Twitter/X embeds
 * Fixed: Output of the Instagram Feed plugin is replaced with an faulty overlay

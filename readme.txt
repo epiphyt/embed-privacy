@@ -2,7 +2,7 @@
 Contributors: epiphyt, kittmedia, krafit
 Tags: oembed, privacy, gutenberg, iframes, performance
 Requires at least: 5.9
-Stable tag: 1.10.9
+Stable tag: 1.10.10
 Tested up to: 6.7
 Requires PHP: 5.6
 License: GPL2
@@ -144,6 +144,11 @@ We are [Epiphyt](https://epiph.yt/), your friendly neighborhood WordPress plugin
 You can report security bugs through the Patchstack Vulnerability Disclosure Program. The Patchstack team help validate, triage and handle any security vulnerabilities. [Report a security vulnerability.](https://patchstack.com/database/vdp/embed-privacy)
 
 == Changelog ==
+
+= 1.10.10 =
+* Fixed: Loading Google Maps in Divi
+* Fixed: Replacing HTML elements with regular expressions
+* Fixed: Falsely-negative detection of ActivityPub usage
 
 = 1.10.9 =
 * Fixed: Recognition for Twitter/X embeds
