@@ -1,6 +1,9 @@
 <?php
 namespace epiphyt\Embed_Privacy\integration;
 
+use epiphyt\Embed_Privacy\data\Providers;
+use epiphyt\Embed_Privacy\embed\Template;
+use epiphyt\Embed_Privacy\Embed_Privacy;
 use epiphyt\Embed_Privacy\handler\Theme;
 
 /**
@@ -20,6 +23,8 @@ final class Divi {
 		\add_filter( 'embed_privacy_print_assets', [ self::class, 'enqueue_assets' ] );
 		\add_filter( 'et_builder_resolve_dynamic_content', [ self::class, 'add_dynamic_content_filter' ], 5 );
 		\add_filter( 'et_builder_resolve_dynamic_content', [ self::class, 'remove_dynamic_content_filter' ], \PHP_INT_MAX );
+		\add_filter( 'et_module_process_display_conditions', [ self::class, 'replace_google_maps' ], 10, 3 );
+		\add_filter( 'et_pb_enqueue_google_maps_script', '__return_false' );
 	}
 	
 	/**
@@ -73,6 +78,61 @@ final class Divi {
 			\wp_enqueue_script( 'embed-privacy-divi' );
 			\wp_enqueue_style( 'embed-privacy-divi' );
 		}
+	}
+	
+	/**
+	 * Replace Google Maps Markup in Divi.
+	 * 
+	 * @param	string				$output Current output
+	 * @param	string				$render_method Divi render method
+	 * @param	\ET_Builder_Module	$module Module instance
+	 * @return	string Updated output
+	 */
+	public static function replace_google_maps( $output, $render_method, $module ) {
+		if ( $render_method === 'render_as_builder_data' ) {
+			return $output;
+		}
+		
+		if ( ! $module instanceof \ET_Builder_Module_Map ) {
+			return $output;
+		}
+		
+		global $wp_scripts;
+		Embed_Privacy::get_instance()->has_embed = true;
+		Embed_Privacy::get_instance()->frontend->print_assets();
+		
+		$output .= \sprintf(
+			'<script id="%1$s">
+				$.ajax( {
+					url: "%2$s",
+					dataType: "script",
+					success: function() {
+						embed_privacy_et_pb_init_maps();
+					},
+				} );
+			</script>',
+			\esc_attr( $wp_scripts->registered['google-maps-api']->handle . '-embed-privacy' ),
+			\esc_url(
+				\add_query_arg(
+					[
+						'key' => \et_pb_get_google_api_key(),
+						'v' => 3,
+						'ver' => $wp_scripts->registered['google-maps-api']->ver,
+					],
+					$wp_scripts->registered['google-maps-api']->src
+				)
+			)
+		);
+		$output .= "<script>
+		var embed_privacy_et_pb_map=$('.et_pb_map_container');
+		var embed_privacy_et_pb_init_maps = function embed_privacy_et_pb_init_maps() {
+			embed_privacy_et_pb_map.each(function() {
+				embed_privacy_et_pb_map_init($(this));
+			});
+		};
+		</script>";
+		
+		return Template::get( Providers::get_instance()->get_by_name( 'google-maps' ), $output );
 	}
 	
 	/**
