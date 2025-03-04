@@ -383,6 +383,30 @@ final class Replacement {
 			&& ! $this->provider->is_disabled()
 			&& \preg_match_all( $attributes['regex'], $content, $matches ) >= 1
 		) {
+			$ignored_attributes = [
+				'data-*',
+				'href',
+			];
+			
+			/**
+			 * Filter ignored attributes for matches.
+			 * 
+			 * You can use * as a wildcard, e.g. data-*
+			 * 
+			 * @since	1.10.11
+			 * 
+			 * @param	string[]								$ignored_attributes Current list of ignored attributes
+			 * @param	string[]								$matches List of matched content
+			 * @param	\epiphyt\Embed_privacy\embed\Provider	$provider Current provider
+			 */
+			$ignored_attributes = (array) \apply_filters( 'embed_privacy_ignored_match_attributes', $ignored_attributes, $matches[0], $this->provider );
+			
+			$ignored_attributes = \implode( '|', \array_map( static function( $item ) {
+				return \preg_quote( \trim( $item ), '/' );
+			}, $ignored_attributes ) );
+			// allow wildcard
+			$ignored_attributes = \str_replace( '\*', '(.*)', $ignored_attributes );
+			
 			foreach ( $matches[0] as $matched_content ) {
 				++$i;
 				
@@ -396,7 +420,7 @@ final class Replacement {
 					}
 					
 					// the original pattern must not be inside a href attribute
-					if ( \str_contains( $matched_content, 'href="' . $matches['original_pattern'][ $i ] ) ) {
+					if ( \preg_match( '/(' . $ignored_attributes . ')="([^"]*)' . \preg_quote( $matches['original_pattern'][ $i ], '/' ) . '/', $matched_content ) ) {
 						continue;
 					}
 				}
