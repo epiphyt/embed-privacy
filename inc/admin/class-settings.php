@@ -42,6 +42,11 @@ final class Settings {
 				\submit_button( \esc_html__( 'Save Settings', 'embed-privacy' ) );
 				?>
 			</form>
+			
+			<details>
+				<summary><?php \esc_html_e( 'Support data', 'embed-privacy' ); ?></summary>
+				<pre><code><?php echo \esc_html( Support_Data::get() ); ?></code></pre>
+			</details>
 		</div>
 		<?php
 	}
