@@ -43,10 +43,14 @@ final class Settings {
 				?>
 			</form>
 			
-			<details>
-				<summary><?php \esc_html_e( 'Support data', 'embed-privacy' ); ?></summary>
-				<pre><code><?php echo \esc_html( Support_Data::get() ); ?></code></pre>
-			</details>
+			<h2><?php \esc_html_e( 'Support data', 'embed-privacy' ); ?></h2>
+			<p><?php \esc_html_e( 'If you file a support request, please include the following data.', 'embed-privacy' ); ?></p>
+			
+			<div class="embed-privacy__copy-to-clipboard--container">
+				<button type="button" class="button embed-privacy__support-data--copy-to-clipboard embed-privacy__copy-to-clipboard" data-copy="embed-privacy__support-data--code" data-status="embed-privacy__copy-to-clipboard--status--support-data"><?php \esc_html_e( 'Copy support data to clipboard', 'embed-privacy' ); ?></button>
+				<p class="embed-privacy__copy-to-clipboard--status embed-privacy__copy-to-clipboard--status--support-data" role="status" aria-live="polite" aria-atomic="true"></p>
+			</div>
+			<pre class="embed-privacy__support-data--code-container"><code class="embed-privacy__support-data--code"><?php echo \esc_html( Support_Data::get() ); ?></code></pre>
 		</div>
 		<?php
 	}

@@ -1,0 +1,41 @@
+/**
+ * Embed Privacy settings styling.
+ * 
+ * @author	Epiphyt
+ * @license	GPL2
+ * @package	epiphyt\Embed_Privacy
+ */
+.embed-privacy__copy-to-clipboard--container {
+	align-items: center;
+	display: flex;
+	flex-flow: row wrap;
+	justify-content: flex-start;
+	gap: 1em 20px;
+	
+	> .embed-privacy__copy-to-clipboard {
+		margin-bottom: 0;
+	}
+	
+	> .embed-privacy__copy-to-clipboard--status {
+		margin: 0;
+	}
+}
+
+.embed-privacy__copy-to-clipboard--status {
+	padding: 3px 8px;
+	
+	&.is-error {
+		border: 2px solid #d63638;
+	}
+	
+	&.is-success {
+		border: 2px solid #00a32a;
+	}
+}
+
+.embed-privacy__support-data--code {
+	display: block;
+	max-height: 500px;
+	max-width: 570px;
+	overflow: scroll;
+}

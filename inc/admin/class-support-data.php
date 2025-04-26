@@ -73,19 +73,21 @@ final class Support_Data {
 	 */
 	private static function get_plugin_data() {
 		$active_plugins = \wp_get_active_and_valid_plugins();
+		$data = [];
 		$output = self::get_heading( \__( 'Active plugins', 'embed-privacy' ) );
 		
 		foreach ( $active_plugins as $plugin ) {
 			$plugin_data = \get_plugin_data( $plugin, false, false );
-			$output .= \sprintf(
-				'%1$s: (v%2$s, %3$s)' . \PHP_EOL,
-				$plugin_data['Name'],
-				$plugin_data['Version'],
-				$plugin_data['PluginURI'] ?: \__( 'unknown URL', 'embed-privacy' )
-			);
+			$data[] = [
+				'name' => $plugin_data['Name'],
+				'plugin_uri' => $plugin_data['PluginURI'],
+				'version' => $plugin_data['Version'],
+			];
 		}
 		
-		return $output . \PHP_EOL;
+		$output .= \var_export( $data, true ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export
+		
+		return $output . \PHP_EOL . \PHP_EOL;
 	}
 	
 	/**
@@ -96,14 +98,20 @@ final class Support_Data {
 	private static function get_provider_data() {
 		$output = self::get_heading( \__( 'Active providers', 'embed-privacy' ) );
 		$providers = Providers::get_instance()->get_list();
+		$data = [];
 		
 		foreach ( $providers as $provider ) {
-			$output .= $provider->get_title() . ' (' . ( $provider->is_disabled() ? \__( 'disabled', 'embed-privacy' ) : \__( 'enabled', 'embed-privacy' ) ) . ')' . \PHP_EOL;
-			/* translators: pattern */
-			$output .= \sprintf( \__( 'Pattern: %s', 'embed-privacy' ), $provider->get_pattern() ) . \PHP_EOL;
+			$data[] = [
+				'is_disabled' => $provider->is_disabled(),
+				'name' => $provider->get_name(),
+				'pattern' => $provider->get_pattern(),
+				'title' => $provider->get_title(),
+			];
 		}
 		
-		return $output . \PHP_EOL;
+		$output .= \var_export( $data, true ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export
+		
+		return $output . \PHP_EOL . \PHP_EOL;
 	}
 	
 	/**
@@ -113,19 +121,21 @@ final class Support_Data {
 	 */
 	private static function get_theme_data() {
 		$active_themes = \wp_get_active_and_valid_themes();
+		$data = [];
 		$output = self::get_heading( \__( 'Active themes', 'embed-privacy' ) );
 		
 		foreach ( $active_themes as $theme ) {
 			$theme_data = \wp_get_theme( '', \dirname( $theme ) );
-			$output .= \sprintf(
-				'%1$s: (v%2$s, %3$s)' . \PHP_EOL,
-				$theme_data->get( 'Name' ),
-				$theme_data->get( 'Version' ),
-				$theme_data->get( 'ThemeURI' ) ?: \__( 'unknown URL', 'embed-privacy' )
-			);
+			$data[] = [
+				'name' => $theme_data->get( 'Name' ),
+				'theme_uri' => $theme_data->get( 'ThemeURI' ),
+				'version' => $theme_data->get( 'Version' ),
+			];
 		}
 		
-		return $output . \PHP_EOL;
+		$output .= \var_export( $data, true ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export
+		
+		return $output . \PHP_EOL . \PHP_EOL;
 	}
 	
 	/**

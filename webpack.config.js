@@ -7,6 +7,7 @@ const isProduction = process.env.NODE_ENV === 'production';
 const mode = isProduction ? 'production' : 'development';
 
 const jsFiles = {
+	'admin/clipboard': path.resolve( process.cwd(), 'assets/js/admin', 'clipboard.js' ),
 	'admin/image-upload': path.resolve( process.cwd(), 'assets/js/admin', 'image-upload.js' ),
 	'divi': path.resolve( process.cwd(), 'assets/js', 'divi.js' ),
 	'elementor-video': path.resolve( process.cwd(), 'assets/js', 'elementor-video.js' ),
@@ -19,6 +20,7 @@ const scssFiles = {
 	'embed-privacy': path.resolve( process.cwd(), 'assets/style/scss', 'embed-privacy.scss' ),
 	'embed-privacy-admin': path.resolve( process.cwd(), 'assets/style/scss', 'embed-privacy-admin.scss' ),
 	'kadence-blocks': path.resolve( process.cwd(), 'assets/style/scss', 'kadence-blocks.scss' ),
+	settings: path.resolve( process.cwd(), 'assets/style/scss', 'settings.scss' ),
 	'shortcodes-ultimate': path.resolve( process.cwd(), 'assets/style/scss', 'shortcodes-ultimate.scss' ),
 };
 
