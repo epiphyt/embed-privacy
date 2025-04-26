@@ -54,6 +54,8 @@ We currently support all oEmbed providers known to WordPress core by default. Wa
 * Amazon Kindle
 * Anghami
 * Animoto
+* Bluesky
+* Canva
 * Cloudup
 * DailyMotion
 * Facebook
