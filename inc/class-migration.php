@@ -29,7 +29,7 @@ class Migration {
 	 * @var		string Current migration version
 	 * @since	1.2.2
 	 */
-	private $version = '1.10.9';
+	private $version = '1.11.0';
 	
 	/**
 	 * Migration constructor.
@@ -196,25 +196,33 @@ class Migration {
 			case $this->version:
 				// most recent version, do nothing
 				break;
+			case '1.10.9':
+				$this->migrate_1_11_0();
+				break;
 			case '1.10.7':
 			case '1.10.6':
+				$this->migrate_1_11_0();
 				$this->migrate_1_10_7();
 			case '1.10.5':
+				$this->migrate_1_11_0();
 				$this->migrate_1_10_7();
 				$this->migrate_1_10_6();
 				break;
 			case '1.8.0':
+				$this->migrate_1_11_0();
 				$this->migrate_1_10_7();
 				$this->migrate_1_10_6();
 				$this->migrate_1_10_5();
 				break;
 			case '1.7.3':
+				$this->migrate_1_11_0();
 				$this->migrate_1_10_7();
 				$this->migrate_1_10_6();
 				$this->migrate_1_10_5();
 				$this->migrate_1_8_0();
 				break;
 			case '1.7.0':
+				$this->migrate_1_11_0();
 				$this->migrate_1_10_7();
 				$this->migrate_1_10_6();
 				$this->migrate_1_10_5();
@@ -222,6 +230,7 @@ class Migration {
 				$this->migrate_1_7_3();
 				break;
 			case '1.6.0':
+				$this->migrate_1_11_0();
 				$this->migrate_1_10_7();
 				$this->migrate_1_10_6();
 				$this->migrate_1_10_5();
@@ -230,6 +239,7 @@ class Migration {
 				$this->migrate_1_7_0();
 				break;
 			case '1.5.0':
+				$this->migrate_1_11_0();
 				$this->migrate_1_10_7();
 				$this->migrate_1_10_6();
 				$this->migrate_1_10_5();
@@ -239,6 +249,7 @@ class Migration {
 				$this->migrate_1_6_0();
 				break;
 			case '1.4.7':
+				$this->migrate_1_11_0();
 				$this->migrate_1_10_7();
 				$this->migrate_1_10_6();
 				$this->migrate_1_10_5();
@@ -248,6 +259,7 @@ class Migration {
 				$this->migrate_1_5_0();
 				break;
 			case '1.4.0':
+				$this->migrate_1_11_0();
 				$this->migrate_1_10_7();
 				$this->migrate_1_10_6();
 				$this->migrate_1_10_5();
@@ -258,6 +270,7 @@ class Migration {
 				$this->migrate_1_4_7();
 				break;
 			case '1.3.0':
+				$this->migrate_1_11_0();
 				$this->migrate_1_10_7();
 				$this->migrate_1_10_6();
 				$this->migrate_1_10_5();
@@ -268,6 +281,7 @@ class Migration {
 				$this->migrate_1_4_0();
 				break;
 			case '1.2.2':
+				$this->migrate_1_11_0();
 				$this->migrate_1_10_7();
 				$this->migrate_1_10_6();
 				$this->migrate_1_10_5();
@@ -279,6 +293,7 @@ class Migration {
 				$this->migrate_1_3_0();
 				break;
 			case '1.2.1':
+				$this->migrate_1_11_0();
 				$this->migrate_1_10_7();
 				$this->migrate_1_10_6();
 				$this->migrate_1_10_5();
@@ -291,6 +306,7 @@ class Migration {
 				$this->migrate_1_2_2();
 				break;
 			case '1.2.0':
+				$this->migrate_1_11_0();
 				$this->migrate_1_10_7();
 				$this->migrate_1_10_6();
 				$this->migrate_1_10_5();
@@ -812,6 +828,28 @@ class Migration {
 	}
 	
 	/**
+	 * Migrations for version 1.11.0
+	 * 
+	 * @since	1.11.0
+	 * 
+	 * - Add Canva embed provider
+	 */
+	private function migrate_1_11_0() {
+		$this->add_embed( [
+			'meta_input' => [
+				'is_system' => 'yes',
+				'privacy_policy_url' => \__( 'https://www.canva.com/policies/privacy-policy/', 'embed-privacy' ),
+				'regex_default' => '/canva\\\.com/',
+			],
+			/* translators: embed provider */
+			'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Canva', 'embed provider', 'embed-privacy' ) ),
+			'post_status' => 'publish',
+			'post_title' => \_x( 'Canva', 'embed provider', 'embed-privacy' ),
+			'post_type' => 'epi_embed',
+		] );
+	}
+	
+	/**
 	 * Register default embed providers.
 	 */
 	public function register_default_embed_providers() {
@@ -850,6 +888,18 @@ class Migration {
 				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Animoto', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
 				'post_title' => \_x( 'Animoto', 'embed provider', 'embed-privacy' ),
+				'post_type' => 'epi_embed',
+			],
+			[
+				'meta_input' => [
+					'is_system' => 'yes',
+					'privacy_policy_url' => \__( 'https://www.canva.com/policies/privacy-policy/', 'embed-privacy' ),
+					'regex_default' => '/canva\\\.com/',
+				],
+				/* translators: embed provider */
+				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Canva', 'embed provider', 'embed-privacy' ) ),
+				'post_status' => 'publish',
+				'post_title' => \_x( 'Canva', 'embed provider', 'embed-privacy' ),
 				'post_type' => 'epi_embed',
 			],
 			[
