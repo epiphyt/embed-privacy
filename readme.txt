@@ -89,7 +89,11 @@ We currently support all oEmbed providers known to WordPress core by default. Wa
 * WordPress.tv
 * YouTube
 
-We also support Google Maps via iframe and the plugins Maps Marker, Maps Marker Pro and Shortcodes Ultimate.
+We also support Google Maps via iframe and Divi and the following plugins:
+
+* Jetpack (Facebook posts)
+* Maps Marker (Pro)
+* Shortcodes Ultimate
 
 Since version 1.2.0, you can also add custom embed providers by going to **Settings > Embed Privacy > Manage embeds**. Here you can also modify any existing embed provider, change its logo, add a background image, change the text displaying on the embed or disable the embed provider entirely.
 
