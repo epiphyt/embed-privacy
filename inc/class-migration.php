@@ -832,9 +832,22 @@ class Migration {
 	 * 
 	 * @since	1.11.0
 	 * 
+	 * - Add Bluesky embed provider
 	 * - Add Canva embed provider
 	 */
 	private function migrate_1_11_0() {
+		$this->add_embed( [
+			'meta_input' => [
+				'is_system' => 'yes',
+				'privacy_policy_url' => \__( 'https://bsky.social/about/support/privacy-policy', 'embed-privacy' ),
+				'regex_default' => '/bsky.\\\.app/',
+			],
+			/* translators: embed provider */
+			'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Bluesky', 'embed provider', 'embed-privacy' ) ),
+			'post_status' => 'publish',
+			'post_title' => \_x( 'Bluesky', 'embed provider', 'embed-privacy' ),
+			'post_type' => 'epi_embed',
+		] );
 		$this->add_embed( [
 			'meta_input' => [
 				'is_system' => 'yes',
@@ -888,6 +901,18 @@ class Migration {
 				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Animoto', 'embed provider', 'embed-privacy' ) ),
 				'post_status' => 'publish',
 				'post_title' => \_x( 'Animoto', 'embed provider', 'embed-privacy' ),
+				'post_type' => 'epi_embed',
+			],
+			[
+				'meta_input' => [
+					'is_system' => 'yes',
+					'privacy_policy_url' => \__( 'https://bsky.social/about/support/privacy-policy', 'embed-privacy' ),
+					'regex_default' => '/bsky\\\.app/',
+				],
+				/* translators: embed provider */
+				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Bluesky', 'embed provider', 'embed-privacy' ) ),
+				'post_status' => 'publish',
+				'post_title' => \_x( 'Bluesky', 'embed provider', 'embed-privacy' ),
 				'post_type' => 'epi_embed',
 			],
 			[
