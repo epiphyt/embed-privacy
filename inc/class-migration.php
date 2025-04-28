@@ -840,7 +840,7 @@ class Migration {
 			'meta_input' => [
 				'is_system' => 'yes',
 				'privacy_policy_url' => \__( 'https://bsky.social/about/support/privacy-policy', 'embed-privacy' ),
-				'regex_default' => '/bsky.\\\.app/',
+				'regex_default' => '/bsky\\\.app/',
 			],
 			/* translators: embed provider */
 			'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'Bluesky', 'embed provider', 'embed-privacy' ) ),
