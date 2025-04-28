@@ -1,6 +1,7 @@
 <?php
 namespace epiphyt\Embed_Privacy;
 
+use epiphyt\Embed_Privacy\data\Providers;
 use epiphyt\Embed_Privacy\thumbnail\Thumbnail;
 use FilesystemIterator;
 use WP_Post;
@@ -188,7 +189,7 @@ class Migration {
 		$this->update_option( 'is_migrating', \time() );
 		$this->update_option( 'migration_count', (int) $this->get_option( 'migration_count' ) + 1 );
 		// load textdomain early for migrations
-		\load_plugin_textdomain( 'embed-privacy', false, \dirname( \plugin_basename( Embed_Privacy::get_instance()->plugin_file ) ) . '/languages' );
+		\load_plugin_textdomain( 'embed-privacy', false, \dirname( \plugin_basename( \EPI_EMBED_PRIVACY_FILE ) ) . '/languages' );
 		// make sure all default embed providers are available and translated
 		$this->register_default_embed_providers();
 		
@@ -203,6 +204,7 @@ class Migration {
 			case '1.10.6':
 				$this->migrate_1_11_0();
 				$this->migrate_1_10_7();
+				break;
 			case '1.10.5':
 				$this->migrate_1_11_0();
 				$this->migrate_1_10_7();
@@ -834,10 +836,53 @@ class Migration {
 	 * 
 	 * - Add Bluesky embed provider
 	 * - Add Canva embed provider
+	 * - Add default content item names
 	 */
 	private function migrate_1_11_0() {
+		foreach ( Providers::get_instance()->get_list() as $provider ) {
+			if ( ! $provider->get_post_object() ) {
+				continue;
+			}
+			
+			switch ( $provider->get_title() ) {
+				case \_x( 'Instagram', 'embed provider', 'embed-privacy' ):
+				case \_x( 'TikTok', 'embed provider', 'embed-privacy' ):
+					$content_item_name = \_x( 'post', 'content item name', 'embed-privacy' );
+					break;
+				case \_x( 'Flickr', 'embed provider', 'embed-privacy' ):
+				case \_x( 'Imgur', 'embed provider', 'embed-privacy' ):
+					$content_item_name = \_x( 'image', 'content item name', 'embed-privacy' );
+					break;
+				case \_x( 'Maps Marker Pro', 'embed provider', 'embed-privacy' ):
+					$content_item_name = \_x( 'map', 'content item name', 'embed-privacy' );
+					break;
+				case \_x( 'Meetup', 'embed provider', 'embed-privacy' ):
+					$content_item_name = \_x( 'event', 'content item name', 'embed-privacy' );
+					break;
+				case \_x( 'Photobucket', 'embed provider', 'embed-privacy' ):
+					$content_item_name = \_x( 'photo', 'content item name', 'embed-privacy' );
+					break;
+				case \_x( 'X', 'embed provider', 'embed-privacy' ):
+					$content_item_name = \_x( 'tweet', 'content item name', 'embed-privacy' );
+					break;
+				case \_x( 'DailyMotion', 'embed provider', 'embed-privacy' ):
+				case \_x( 'VideoPress', 'embed provider', 'embed-privacy' ):
+				case \_x( 'Vimeo', 'embed provider', 'embed-privacy' ):
+				case \_x( 'WordPress.tv', 'embed provider', 'embed-privacy' ):
+				case \_x( 'YouTube', 'embed provider', 'embed-privacy' ):
+					$content_item_name = \_x( 'video', 'content item name', 'embed-privacy' );
+					break;
+				default:
+					$content_item_name = \_x( 'content', 'content item name', 'embed-privacy' );
+					break;
+			}
+			
+			\add_post_meta( $provider->get_post_object()->ID, 'content_item_name', $content_item_name, true );
+		}
+		
 		$this->add_embed( [
 			'meta_input' => [
+				'content_item_name' => \_x( 'post', 'content item name', 'embed-privacy' ),
 				'is_system' => 'yes',
 				'privacy_policy_url' => \__( 'https://bsky.social/about/support/privacy-policy', 'embed-privacy' ),
 				'regex_default' => '/bsky\\\.app/',
@@ -850,6 +895,7 @@ class Migration {
 		] );
 		$this->add_embed( [
 			'meta_input' => [
+				'content_item_name' => \_x( 'content', 'content item name', 'embed-privacy' ),
 				'is_system' => 'yes',
 				'privacy_policy_url' => \__( 'https://www.canva.com/policies/privacy-policy/', 'embed-privacy' ),
 				'regex_default' => '/canva\\\.com/',
@@ -869,6 +915,7 @@ class Migration {
 		$this->providers = [
 			[
 				'meta_input' => [
+					'content_item_name' => \_x( 'content', 'content item name', 'embed-privacy' ),
 					'is_system' => 'yes',
 					'privacy_policy_url' => \__( 'https://www.amazon.com/gp/help/customer/display.html?nodeId=GX7NJQ4ZB8MHFRNJ', 'embed-privacy' ),
 					'regex_default' => '/\\\.?(ama?zo?n\\\.|a\\\.co\\\/|z\\\.cn\\\/)/',
@@ -881,6 +928,7 @@ class Migration {
 			],
 			[
 				'meta_input' => [
+					'content_item_name' => \_x( 'content', 'content item name', 'embed-privacy' ),
 					'is_system' => 'yes',
 					'privacy_policy_url' => \__( 'https://www.anghami.com/legal', 'embed-privacy' ),
 					'regex_default' => '/anghami\\\.com/',
@@ -893,6 +941,7 @@ class Migration {
 			],
 			[
 				'meta_input' => [
+					'content_item_name' => \_x( 'content', 'content item name', 'embed-privacy' ),
 					'is_system' => 'yes',
 					'privacy_policy_url' => \__( 'https://animoto.com/legal/privacy_policy', 'embed-privacy' ),
 					'regex_default' => '/animoto\\\.com/',
@@ -905,6 +954,7 @@ class Migration {
 			],
 			[
 				'meta_input' => [
+					'content_item_name' => \_x( 'post', 'content item name', 'embed-privacy' ),
 					'is_system' => 'yes',
 					'privacy_policy_url' => \__( 'https://bsky.social/about/support/privacy-policy', 'embed-privacy' ),
 					'regex_default' => '/bsky\\\.app/',
@@ -917,6 +967,7 @@ class Migration {
 			],
 			[
 				'meta_input' => [
+					'content_item_name' => \_x( 'content', 'content item name', 'embed-privacy' ),
 					'is_system' => 'yes',
 					'privacy_policy_url' => \__( 'https://www.canva.com/policies/privacy-policy/', 'embed-privacy' ),
 					'regex_default' => '/canva\\\.com/',
@@ -929,6 +980,7 @@ class Migration {
 			],
 			[
 				'meta_input' => [
+					'content_item_name' => \_x( 'content', 'content item name', 'embed-privacy' ),
 					'is_system' => 'yes',
 					'privacy_policy_url' => \__( 'https://automattic.com/privacy/', 'embed-privacy' ),
 					'regex_default' => '/cloudup\\\.com/',
@@ -941,6 +993,7 @@ class Migration {
 			],
 			[
 				'meta_input' => [
+					'content_item_name' => \_x( 'content', 'content item name', 'embed-privacy' ),
 					'is_system' => 'yes',
 					'privacy_policy_url' => \__( 'https://automattic.com/privacy/', 'embed-privacy' ),
 					'regex_default' => '/((poll(\\\.fm|daddy\\\.com))|crowdsignal\\\.(com|net)|survey\\\.fm)/',
@@ -953,6 +1006,7 @@ class Migration {
 			],
 			[
 				'meta_input' => [
+					'content_item_name' => \_x( 'video', 'content item name', 'embed-privacy' ),
 					'is_system' => 'yes',
 					'privacy_policy_url' => \__( 'https://www.dailymotion.com/legal/privacy?localization=en', 'embed-privacy' ),
 					'regex_default' => '/dailymotion\\\.com/',
@@ -965,6 +1019,7 @@ class Migration {
 			],
 			[
 				'meta_input' => [
+					'content_item_name' => \_x( 'content', 'content item name', 'embed-privacy' ),
 					'is_system' => 'yes',
 					'privacy_policy_url' => \__( 'https://www.facebook.com/privacy/explanation', 'embed-privacy' ),
 					'regex_default' => '/facebook\\\.com/',
@@ -977,6 +1032,7 @@ class Migration {
 			],
 			[
 				'meta_input' => [
+					'content_item_name' => \_x( 'image', 'content item name', 'embed-privacy' ),
 					'is_system' => 'yes',
 					'privacy_policy_url' => \__( 'https://www.flickr.com/help/privacy', 'embed-privacy' ),
 					'regex_default' => '/flickr\\\.com/',
@@ -989,6 +1045,7 @@ class Migration {
 			],
 			[
 				'meta_input' => [
+					'content_item_name' => \_x( 'content', 'content item name', 'embed-privacy' ),
 					'is_system' => 'yes',
 					'privacy_policy_url' => \__( 'https://www.funnyordie.com/legal/privacy-notice', 'embed-privacy' ),
 					'regex_default' => '/funnyordie\\\.com/',
@@ -1001,6 +1058,7 @@ class Migration {
 			],
 			[
 				'meta_input' => [
+					'content_item_name' => '',
 					'is_system' => 'yes',
 					'privacy_policy_url' => \__( 'https://policies.google.com/privacy?hl=en', 'embed-privacy' ),
 					'regex_default' => '/(google\\\.com\\\/maps\\\/embed|maps\\\.google\\\.com\\\/(maps)?)/',
@@ -1013,6 +1071,7 @@ class Migration {
 			],
 			[
 				'meta_input' => [
+					'content_item_name' => \_x( 'image', 'content item name', 'embed-privacy' ),
 					'is_system' => 'yes',
 					'privacy_policy_url' => \__( 'https://imgur.com/privacy', 'embed-privacy' ),
 					'regex_default' => '/imgur\\\.com/',
@@ -1025,6 +1084,7 @@ class Migration {
 			],
 			[
 				'meta_input' => [
+					'content_item_name' => \_x( 'post', 'content item name', 'embed-privacy' ),
 					'is_system' => 'yes',
 					'privacy_policy_url' => \__( 'https://www.instagram.com/legal/privacy/', 'embed-privacy' ),
 					'regex_default' => '/instagram\\\.com/',
@@ -1037,6 +1097,7 @@ class Migration {
 			],
 			[
 				'meta_input' => [
+					'content_item_name' => \_x( 'content', 'content item name', 'embed-privacy' ),
 					'is_system' => 'yes',
 					'privacy_policy_url' => \__( 'https://issuu.com/legal/privacy', 'embed-privacy' ),
 					'regex_default' => '/issuu\\\.com/',
@@ -1049,6 +1110,7 @@ class Migration {
 			],
 			[
 				'meta_input' => [
+					'content_item_name' => \_x( 'content', 'content item name', 'embed-privacy' ),
 					'is_system' => 'yes',
 					'privacy_policy_url' => \__( 'https://www.kickstarter.com/privacy', 'embed-privacy' ),
 					'regex_default' => '/kickstarter\\\.com/',
@@ -1061,6 +1123,7 @@ class Migration {
 			],
 			[
 				'meta_input' => [
+					'content_item_name' => \_x( 'map', 'content item name', 'embed-privacy' ),
 					'is_system' => 'yes',
 					'privacy_policy_url' => '',
 					'regex_default' => '',
@@ -1073,6 +1136,7 @@ class Migration {
 			],
 			[
 				'meta_input' => [
+					'content_item_name' => \_x( 'event', 'content item name', 'embed-privacy' ),
 					'is_system' => 'yes',
 					'privacy_policy_url' => \__( 'https://www.meetup.com/privacy/', 'embed-privacy' ),
 					'regex_default' => '/meetup\\\.com/',
@@ -1085,6 +1149,7 @@ class Migration {
 			],
 			[
 				'meta_input' => [
+					'content_item_name' => \_x( 'content', 'content item name', 'embed-privacy' ),
 					'is_system' => 'yes',
 					'privacy_policy_url' => \__( 'https://www.mixcloud.com/privacy/', 'embed-privacy' ),
 					'regex_default' => '/mixcloud\\\.com/',
@@ -1097,6 +1162,7 @@ class Migration {
 			],
 			[
 				'meta_input' => [
+					'content_item_name' => \_x( 'photo', 'content item name', 'embed-privacy' ),
 					'is_system' => 'yes',
 					'privacy_policy_url' => \__( 'https://app.photobucket.com/privacy', 'embed-privacy' ),
 					'regex_default' => '/photobucket\\\.com/',
@@ -1109,6 +1175,7 @@ class Migration {
 			],
 			[
 				'meta_input' => [
+					'content_item_name' => \_x( 'content', 'content item name', 'embed-privacy' ),
 					'is_system' => 'yes',
 					'privacy_policy_url' => \__( 'https://policy.pinterest.com/en/privacy-policy', 'embed-privacy' ),
 					'regex_default' => '/pinterest\\\./',
@@ -1121,6 +1188,7 @@ class Migration {
 			],
 			[
 				'meta_input' => [
+					'content_item_name' => \_x( 'content', 'content item name', 'embed-privacy' ),
 					'is_system' => 'yes',
 					'privacy_policy_url' => \__( 'https://support.pocketcasts.com/article/privacy-policy/', 'embed-privacy' ),
 					'regex_default' => '/pca\\\.st/',
@@ -1133,6 +1201,7 @@ class Migration {
 			],
 			[
 				'meta_input' => [
+					'content_item_name' => \_x( 'content', 'content item name', 'embed-privacy' ),
 					'is_system' => 'yes',
 					'privacy_policy_url' => \__( 'https://www.reddit.com/help/privacypolicy', 'embed-privacy' ),
 					'regex_default' => '/reddit\\\.com/',
@@ -1145,6 +1214,7 @@ class Migration {
 			],
 			[
 				'meta_input' => [
+					'content_item_name' => \_x( 'content', 'content item name', 'embed-privacy' ),
 					'is_system' => 'yes',
 					'privacy_policy_url' => \__( 'https://www.reverbnation.com/privacy', 'embed-privacy' ),
 					'regex_default' => '/reverbnation\\\.com/',
@@ -1157,6 +1227,7 @@ class Migration {
 			],
 			[
 				'meta_input' => [
+					'content_item_name' => \_x( 'content', 'content item name', 'embed-privacy' ),
 					'is_system' => 'yes',
 					'privacy_policy_url' => \__( 'https://scribd.com/privacy', 'embed-privacy' ),
 					'regex_default' => '/scribd\\\.com/',
@@ -1169,6 +1240,7 @@ class Migration {
 			],
 			[
 				'meta_input' => [
+					'content_item_name' => \_x( 'content', 'content item name', 'embed-privacy' ),
 					'is_system' => 'yes',
 					'privacy_policy_url' => \__( 'https://sketchfab.com/privacy', 'embed-privacy' ),
 					'regex_default' => '/sketchfab\\\.com/',
@@ -1181,6 +1253,7 @@ class Migration {
 			],
 			[
 				'meta_input' => [
+					'content_item_name' => \_x( 'slides', 'content item name', 'embed-privacy' ),
 					'is_system' => 'yes',
 					'privacy_policy_url' => \__( 'https://www.slideshare.net/privacy', 'embed-privacy' ),
 					'regex_default' => '/slideshare\\\.net/',
@@ -1193,6 +1266,7 @@ class Migration {
 			],
 			[
 				'meta_input' => [
+					'content_item_name' => \_x( 'content', 'content item name', 'embed-privacy' ),
 					'is_system' => 'yes',
 					'privacy_policy_url' => \__( 'https://www.smugmug.com/about/privacy', 'embed-privacy' ),
 					'regex_default' => '/smugmug\\\.com/',
@@ -1205,6 +1279,7 @@ class Migration {
 			],
 			[
 				'meta_input' => [
+					'content_item_name' => \_x( 'content', 'content item name', 'embed-privacy' ),
 					'is_system' => 'yes',
 					'privacy_policy_url' => \__( 'https://soundcloud.com/pages/privacy', 'embed-privacy' ),
 					'regex_default' => '/soundcloud\\\.com/',
@@ -1217,6 +1292,7 @@ class Migration {
 			],
 			[
 				'meta_input' => [
+					'content_item_name' => \_x( 'content', 'content item name', 'embed-privacy' ),
 					'is_system' => 'yes',
 					'privacy_policy_url' => \__( 'https://speakerdeck.com/privacy', 'embed-privacy' ),
 					'regex_default' => '/speakerdeck\\\.com/',
@@ -1229,6 +1305,7 @@ class Migration {
 			],
 			[
 				'meta_input' => [
+					'content_item_name' => \_x( 'content', 'content item name', 'embed-privacy' ),
 					'is_system' => 'yes',
 					'privacy_policy_url' => \__( 'https://www.spotify.com/privacy/', 'embed-privacy' ),
 					'regex_default' => '/spotify\\\.com/',
@@ -1241,6 +1318,7 @@ class Migration {
 			],
 			[
 				'meta_input' => [
+					'content_item_name' => \_x( 'post', 'content item name', 'embed-privacy' ),
 					'is_system' => 'yes',
 					'privacy_policy_url' => \__( 'https://www.tiktok.com/legal/privacy-policy?lang=en-US', 'embed-privacy' ),
 					'regex_default' => '/tiktok\\\.com/',
@@ -1253,6 +1331,7 @@ class Migration {
 			],
 			[
 				'meta_input' => [
+					'content_item_name' => \_x( 'content', 'content item name', 'embed-privacy' ),
 					'is_system' => 'yes',
 					'privacy_policy_url' => \__( 'https://www.ted.com/about/our-organization/our-policies-terms/privacy-policy', 'embed-privacy' ),
 					'regex_default' => '/ted\\\.com/',
@@ -1265,6 +1344,7 @@ class Migration {
 			],
 			[
 				'meta_input' => [
+					'content_item_name' => \_x( 'content', 'content item name', 'embed-privacy' ),
 					'is_system' => 'yes',
 					'privacy_policy_url' => \__( 'https://www.tumblr.com/privacy_policy', 'embed-privacy' ),
 					'regex_default' => '/tumblr\\\.com/',
@@ -1277,6 +1357,7 @@ class Migration {
 			],
 			[
 				'meta_input' => [
+					'content_item_name' => \_x( 'tweet', 'content item name', 'embed-privacy' ),
 					'is_system' => 'yes',
 					'privacy_policy_url' => \__( 'https://x.com/privacy', 'embed-privacy' ),
 					'regex_default' => '\\\/\\\/(www\\\.)?(twitter|x)\\\.com/',
@@ -1289,6 +1370,7 @@ class Migration {
 			],
 			[
 				'meta_input' => [
+					'content_item_name' => \_x( 'video', 'content item name', 'embed-privacy' ),
 					'is_system' => 'yes',
 					'privacy_policy_url' => \__( 'https://automattic.com/privacy/', 'embed-privacy' ),
 					'regex_default' => '/videopress\\\.com/',
@@ -1301,6 +1383,7 @@ class Migration {
 			],
 			[
 				'meta_input' => [
+					'content_item_name' => \_x( 'video', 'content item name', 'embed-privacy' ),
 					'is_system' => 'yes',
 					'privacy_policy_url' => \__( 'https://vimeo.com/privacy', 'embed-privacy' ),
 					'regex_default' => '/vimeo\\\.com/',
@@ -1313,6 +1396,7 @@ class Migration {
 			],
 			[
 				'meta_input' => [
+					'content_item_name' => \_x( 'content', 'content item name', 'embed-privacy' ),
 					'is_system' => 'yes',
 					'privacy_policy_url' => \__( 'https://www.wolfram.com/legal/privacy/wolfram/', 'embed-privacy' ),
 					'regex_default' => '/wolframcloud\\\.com/',
@@ -1325,6 +1409,7 @@ class Migration {
 			],
 			[
 				'meta_input' => [
+					'content_item_name' => \_x( 'content', 'content item name', 'embed-privacy' ),
 					'is_system' => 'yes',
 					'privacy_policy_url' => \__( 'https://wordpress.org/about/privacy/', 'embed-privacy' ),
 					'regex_default' => '/wordpress\\\.org\\\/plugins/',
@@ -1337,6 +1422,7 @@ class Migration {
 			],
 			[
 				'meta_input' => [
+					'content_item_name' => \_x( 'video', 'content item name', 'embed-privacy' ),
 					'is_system' => 'yes',
 					'privacy_policy_url' => \__( 'https://wordpress.org/about/privacy/', 'embed-privacy' ),
 					'regex_default' => '/wordpress\\\.tv\/',
@@ -1349,6 +1435,7 @@ class Migration {
 			],
 			[
 				'meta_input' => [
+					'content_item_name' => \_x( 'video', 'content item name', 'embed-privacy' ),
 					'is_system' => 'yes',
 					'privacy_policy_url' => \__( 'https://policies.google.com/privacy?hl=en', 'embed-privacy' ),
 					'regex_default' => '/https?:\\\/\\\/(?:.+?.)?youtu(?:.be|be.com)/',

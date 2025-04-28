@@ -19,6 +19,11 @@ final class Provider {
 	private $background_image_id = null;
 	
 	/**
+	 * @var		string Name of a content item
+	 */
+	private $content_name = '';
+	
+	/**
 	 * @var	string The description
 	 */
 	private $description = '';
@@ -86,6 +91,7 @@ final class Provider {
 			$this->set_privacy_policy_url( \get_post_meta( $provider_object->ID, 'privacy_policy_url', true ) );
 			$this->set_background_image_id( \get_post_meta( $provider_object->ID, 'background_image', true ) );
 			$this->set_thumbnail_id( \get_post_thumbnail_id( $provider_object ) );
+			$this->set_content_name( \get_post_meta( $provider_object->ID, 'content_item_name', true ) );
 		}
 		else {
 			$this->set_is_unknown( true );
@@ -99,6 +105,15 @@ final class Provider {
 	 */
 	public function get_background_image_id() {
 		return $this->background_image_id;
+	}
+	
+	/**
+	 * Get the name of a content item.
+	 * 
+	 * @return	string The content name
+	 */
+	public function get_content_name() {
+		return $this->content_name;
 	}
 	
 	/**
@@ -221,6 +236,15 @@ final class Provider {
 		$used_pattern = $pattern ?: $this->pattern;
 		
 		return (bool) ! empty( $used_pattern ) && \preg_match( $used_pattern, $content );
+	}
+	
+	/**
+	 * Set the content item name.
+	 * 
+	 * @param	string	$content_name Content name
+	 */
+	public function set_content_name( $content_name ) {
+		$this->content_name = $content_name;
 	}
 	
 	/**

@@ -173,6 +173,12 @@ final class Fields {
 				'name' => 'background_image',
 				'title' => \__( 'Background Image', 'embed-privacy' ),
 			],
+			'content_item_name' => [
+				'description' => \__( 'Name of a single content item of this provider.', 'embed-privacy' ),
+				'field_type' => 'input',
+				'name' => 'content_item_name',
+				'title' => \__( 'Content Name', 'embed-privacy' ),
+			],
 			'regex_default' => [
 				'description' => \sprintf(
 					/* translators: link to documentation */

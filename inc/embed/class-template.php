@@ -206,12 +206,29 @@ final class Template {
 			
 			if ( ! \get_option( 'embed_privacy_disable_link' ) ) {
 				$footer_content .= '<span class="embed-privacy-url"><a href="' . \esc_url( $attributes['embed_url'] ) . '">';
-				$footer_content .= \sprintf(
-				/* translators: content name or 'content' */
-					\esc_html__( 'Open "%s" directly', 'embed-privacy' ),
-					! empty( $attributes['embed_title'] ) ? $attributes['embed_title'] : \__( 'content', 'embed-privacy' )
-				);
-				$footer_content .= '</a></span>';
+				
+				if ( ! empty( $attributes['embed_title'] ) ) {
+					$footer_link_title = \sprintf(
+					/* translators: content name  */
+						\esc_html__( 'Open "%s" directly', 'embed-privacy' ),
+						$attributes['embed_title']
+					);
+				}
+				else if ( ! empty( $provider->get_content_name() ) ) {
+					$footer_link_title = \sprintf(
+					/* translators: content name  */
+						\esc_html__( 'Open %s directly', 'embed-privacy' ),
+						$provider->get_content_name()
+					);
+				}
+				
+				if ( ! empty( $footer_link_title ) ) {
+					$footer_content .= \sprintf(
+						'<span class="embed-privacy-url"><a href="%1$s">%2$s</a></span',
+						\esc_url( $attributes['embed_url'] ),
+						$footer_link_title
+					);
+				}
 			}
 			
 			$footer_content .= '</div>' . \PHP_EOL;
