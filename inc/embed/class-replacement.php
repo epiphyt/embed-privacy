@@ -263,7 +263,7 @@ final class Replacement {
 				
 				if (
 					empty( $attributes['regex'] )
-					|| ! \preg_match_all( $attributes['regex'], $element->getAttribute( $attributes['element_attribute'] ), $matches )
+					|| ! \preg_match_all( $this->provider->get_pattern(), $element->getAttribute( $attributes['element_attribute'] ), $matches )
 				) {
 					continue;
 				}

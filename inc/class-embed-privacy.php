@@ -17,6 +17,7 @@ use epiphyt\Embed_Privacy\integration\Amp;
 use epiphyt\Embed_Privacy\integration\Astra;
 use epiphyt\Embed_Privacy\integration\Divi;
 use epiphyt\Embed_Privacy\integration\Elementor;
+use epiphyt\Embed_Privacy\integration\Instagram;
 use epiphyt\Embed_Privacy\integration\Instagram_Feed;
 use epiphyt\Embed_Privacy\integration\Jetpack;
 use epiphyt\Embed_Privacy\integration\Kadence_Blocks;
@@ -87,6 +88,7 @@ class Embed_Privacy {
 		Astra::class,
 		Divi::class,
 		Elementor::class,
+		Instagram::class,
 		Instagram_Feed::class,
 		Jetpack::class,
 		Kadence_Blocks::class,
