@@ -224,7 +224,7 @@ final class Template {
 				
 				if ( ! empty( $footer_link_title ) ) {
 					$footer_content .= \sprintf(
-						'<span class="embed-privacy-url"><a href="%1$s">%2$s</a></span',
+						'<span class="embed-privacy-url"><a href="%1$s">%2$s</a></span>',
 						\esc_url( $attributes['embed_url'] ),
 						$footer_link_title
 					);
