@@ -18,6 +18,10 @@ final class Jetpack {
 	 * Initialize functionality.
 	 */
 	public static function init() {
+		if ( ! \defined( 'JETPACK__VERSION' ) ) {
+			return;
+		}
+		
 		\add_action( 'wp_enqueue_scripts', [ self::class, 'deregister_assets' ], 100 );
 		\add_filter( 'embed_privacy_overlay_replaced_content', [ self::class, 'replace_facebook_posts' ] );
 	}
@@ -59,7 +63,7 @@ final class Jetpack {
 		];
 		
 		// register jetpack script if available
-		if ( \class_exists( '\Automattic\Jetpack\Assets' ) && \defined( 'JETPACK__VERSION' ) ) {
+		if ( \class_exists( '\Automattic\Jetpack\Assets' ) ) {
 			/** @disregard	P1009 */
 			$jetpack = \Jetpack::init();
 			$attributes['assets'][] = [
