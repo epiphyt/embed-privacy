@@ -229,6 +229,8 @@ final class Template {
 						$footer_link_title
 					);
 				}
+				
+				$footer_content .= '</a></span>';
 			}
 			
 			$footer_content .= '</div>' . \PHP_EOL;
