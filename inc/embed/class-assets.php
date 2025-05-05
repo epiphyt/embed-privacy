@@ -1,6 +1,7 @@
 <?php
 namespace epiphyt\Embed_Privacy\embed;
 
+use epiphyt\Embed_Privacy\data\Providers;
 use epiphyt\Embed_Privacy\Embed_Privacy;
 use WP_Post;
 
@@ -23,11 +24,6 @@ final class Assets {
 	];
 	
 	/**
-	 * @var		\WP_Post|null Embed post object or null
-	 */
-	private $embed_post = null;
-	
-	/**
 	 * @var		bool Whether debug mode is enabled
 	 */
 	private $is_debug_mode = false;
@@ -42,9 +38,9 @@ final class Assets {
 	];
 	
 	/**
-	 * @var		string Embed provider name
+	 * @var		\epiphyt\Embed_Privacy\embed\Provider Provider object
 	 */
-	private $provider = '';
+	private $provider;
 	
 	/**
 	 * @var		string[] Thumbnail image asset data
@@ -58,16 +54,36 @@ final class Assets {
 	/**
 	 * Construct the object.
 	 * 
-	 * @param	string			$provider Provider name
-	 * @param	\WP_Post|null	$embed_post Settings of the embed provider
-	 * @param	array			$attributes Additional embed attributes
+	 * @since	1.11.0 Deprecated second parameter
+	 * @since	1.11.0 First parameter must be a provider object
+	 * 
+	 * @param	string|\epiphyt\Embed_Privacy\embed\Provider	$provider Provider object
+	 * @param	null											$deprecated Deprecated parameter
+	 * @param	array											$attributes Additional embed attributes
 	 */
-	public function __construct( $provider, $embed_post = null, $attributes = [] ) {
-		$this->embed_post = $embed_post;
+	public function __construct( $provider, $deprecated = null, $attributes = [] ) {
+		if ( \is_string( $provider ) ) {
+			\_doing_it_wrong(
+				__METHOD__,
+				\sprintf(
+					/* translators: parameter name */
+					\esc_html__( 'Passing a string as parameter %s is deprecated.', 'embed-privacy' ),
+					'$provider'
+				),
+				'1.11.0'
+			);
+			
+			$provider = Providers::get_instance()->get_by_name( $provider );
+		}
+		
+		if ( $deprecated !== null ) {
+			\_deprecated_argument( __METHOD__, '1.11.0' );
+		}
+		
 		$this->is_debug_mode = \defined( 'WP_DEBUG' ) && \WP_DEBUG || \defined( 'SCRIPT_DEBUG' ) && \SCRIPT_DEBUG;
 		$this->provider = $provider;
 		
-		if ( $this->embed_post instanceof WP_Post ) {
+		if ( $this->provider->get_post_object() instanceof WP_Post ) {
 			$this->set_background();
 		}
 		
@@ -168,7 +184,7 @@ final class Assets {
 	 * Set the background image asset data.
 	 */
 	private function set_background() {
-		$background_id = \get_post_meta( $this->embed_post->ID, 'background_image', true );
+		$background_id = \get_post_meta( $this->provider->get_post_object()->ID, 'background_image', true );
 		
 		if ( $background_id ) {
 			$this->background['path'] = \get_attached_file( $background_id );
@@ -207,12 +223,12 @@ final class Assets {
 			$this->logo['version'] = '';
 		}
 		
-		if ( $this->embed_post instanceof WP_Post ) {
-			$thumbnail_id = \get_post_thumbnail_id( $this->embed_post );
+		if ( $this->provider->get_post_object() instanceof WP_Post ) {
+			$thumbnail_id = \get_post_thumbnail_id( $this->provider->get_post_object() );
 			
 			if ( $thumbnail_id ) {
 				$this->logo['path'] = \get_attached_file( $thumbnail_id );
-				$this->logo['url'] = \get_the_post_thumbnail_url( $this->embed_post->ID );
+				$this->logo['url'] = \get_the_post_thumbnail_url( $this->provider->get_post_object()->ID );
 			}
 		}
 		

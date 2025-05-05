@@ -1,6 +1,7 @@
 <?php
 namespace epiphyt\Embed_Privacy\embed;
 
+use epiphyt\Embed_Privacy\data\Providers;
 use WP_Theme_JSON_Resolver;
 
 /**
@@ -25,12 +26,33 @@ final class Style {
 	/**
 	 * Construct the object.
 	 * 
-	 * @param	string			$provider Provider name
-	 * @param	\WP_Post|null	$embed_post Settings of the embed provider
-	 * @param	array			$attributes Additional embed attributes
+	 * @since	1.11.0 Deprecated second parameter
+	 * @since	1.11.0 First parameter must be a provider object
+	 * 
+	 * @param	string|\epiphyt\Embed_Privacy\embed\Provider	$provider Provider object
+	 * @param	null											$deprecated Deprecated parameter
+	 * @param	array											$attributes Additional embed attributes
 	 */
-	public function __construct( $provider, $embed_post = null, $attributes = [] ) {
-		$this->assets = new Assets( $provider, $embed_post, $attributes );
+	public function __construct( $provider, $deprecated = null, $attributes = [] ) {
+		if ( \is_string( $provider ) ) {
+			\_doing_it_wrong(
+				__METHOD__,
+				\sprintf(
+					/* translators: parameter name */
+					\esc_html__( 'Passing a string as parameter %s is deprecated.', 'embed-privacy' ),
+					'$provider'
+				),
+				'1.11.0'
+			);
+			
+			$provider = Providers::get_instance()->get_by_name( $provider );
+		}
+		
+		if ( $deprecated !== null ) {
+			\_deprecated_argument( __METHOD__, '1.11.0' );
+		}
+		
+		$this->assets = new Assets( $provider, $deprecated, $attributes );
 		
 		$this->register_from_assets();
 		$this->register_from_attributes( $attributes );

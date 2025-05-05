@@ -99,6 +99,17 @@ final class Provider {
 	}
 	
 	/**
+	 * String representation of the provider.
+	 * 
+	 * @since	1.11.0
+	 * 
+	 * @return	string Provider name
+	 */
+	public function __toString() {
+		return $this->get_name();
+	}
+	
+	/**
 	 * Get the background image ID.
 	 * 
 	 * @return	int|null Background image ID or null
