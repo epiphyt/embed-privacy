@@ -99,7 +99,7 @@ final class Activitypub {
 	 * Extract the username from the 'attributedTo' field.
 	 * 
 	 * @param	string	$attributed_to Content of the 'attributedTo' field
-	 * @return	string Username in proper format
+	 * @return	string Username in Webfinger format
 	 */
 	private static function get_username_from_attributed_to( $attributed_to ) {
 		$parts = \wp_parse_url( $attributed_to );
@@ -134,7 +134,19 @@ final class Activitypub {
 			return false;
 		}
 		
-		return isset( $content->{'@context'} ) && $content->{'@context'}[0] === 'https://www.w3.org/ns/activitystreams';
+		$supported_types = [
+			'Article',
+			'Document',
+			'Event',
+			'Note',
+			'Page',
+			'Tombstone',
+		];
+		
+		$has_context = isset( $content->{'@context'} ) && $content->{'@context'}[0] === 'https://www.w3.org/ns/activitystreams';
+		$is_type = \in_array( $content->type, $supported_types, true );
+		
+		return $has_context && $is_type;
 	}
 	
 	/**
