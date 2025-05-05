@@ -61,8 +61,23 @@ final class Settings {
 	public static function register() {
 		\add_settings_section( 'embed_privacy_general', null, '__return_null', 'embed_privacy' );
 		\add_settings_field(
-			'embed_privacy_local_tweets',
+			'embed_privacy_local_activitypub_posts',
 			\__( 'Embeds', 'embed-privacy' ),
+			[ Field::class, 'get' ],
+			'embed_privacy',
+			'embed_privacy_general',
+			[
+				'description' => \__( 'By enabling this option, ActivityPub posts are embedded locally as text without any connection to the particular ActivityPub server, and no privacy overlay is required.', 'embed-privacy' ),
+				'name' => 'embed_privacy_local_activitypub_posts',
+				'option_type' => 'option',
+				'title' => \__( 'Local ActivityPub posts', 'embed-privacy' ),
+				'type' => 'checkbox',
+			]
+		);
+		\register_setting( 'embed_privacy', 'embed_privacy_local_activitypub_posts' );
+		\add_settings_field(
+			'embed_privacy_local_tweets',
+			\__return_empty_string(),
 			[ Field::class, 'get' ],
 			'embed_privacy',
 			'embed_privacy_general',
@@ -77,7 +92,7 @@ final class Settings {
 		\register_setting( 'embed_privacy', 'embed_privacy_local_tweets' );
 		\add_settings_field(
 			'embed_privacy_disable_link',
-			null,
+			\__return_empty_string(),
 			[ Field::class, 'get' ],
 			'embed_privacy',
 			'embed_privacy_general',
@@ -92,7 +107,7 @@ final class Settings {
 		\register_setting( 'embed_privacy', 'embed_privacy_disable_link' );
 		\add_settings_field(
 			'embed_privacy_download_thumbnails',
-			null,
+			\__return_empty_string(),
 			[ Field::class, 'get' ],
 			'embed_privacy',
 			'embed_privacy_general',

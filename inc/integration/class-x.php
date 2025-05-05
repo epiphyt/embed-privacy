@@ -13,7 +13,14 @@ use DOMXPath;
  * @package	epiphyt\Embed_Privacy
  * @since	1.10.5
  */
-class X {
+final class X {
+	/**
+	 * Initialize functionality.
+	 */
+	public static function init() {
+		\add_filter( 'embed_privacy_custom_oembed_replacement', [ self::class, 'set_local_tweet' ], 10, 3 );
+	}
+	
 	/**
 	 * Transform a tweet into a local one.
 	 * 
@@ -86,5 +93,21 @@ class X {
 		// phpcs:enable
 		
 		return \str_replace( [ '<html><meta charset="utf-8">', '</html>' ], [ '<div class="embed-privacy-local-tweet">', '</div>' ], $content );
+	}
+	
+	/**
+	 * Set local tweets.
+	 * 
+	 * @param	string									$custom_replacement Current custom replacement
+	 * @param	string									$content The original content
+	 * @param	\epiphyt\Embed_privacy\embed\Provider	$provider Current provider
+	 * @return	string Original replacement or local tweet
+	 */
+	public static function set_local_tweet( $custom_replacement, $content, $provider ) {
+		if ( $provider->is( 'x' ) && \get_option( 'embed_privacy_local_tweets' ) ) {
+			return self::get_local_tweet( $content );
+		}
+		
+		return $custom_replacement;
 	}
 }

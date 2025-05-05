@@ -4,7 +4,6 @@ namespace epiphyt\Embed_Privacy\data;
 use epiphyt\Embed_Privacy\embed\Replacement;
 use epiphyt\Embed_Privacy\Embed_Privacy;
 use epiphyt\Embed_Privacy\handler\Oembed;
-use epiphyt\Embed_Privacy\integration\X;
 
 /**
  * Replacer functionality.
@@ -109,6 +108,22 @@ final class Replacer {
 			$embed_privacy->has_embed = true;
 		}
 		
+		/**
+		 * Filter a custom replacement. If a non-empty string is returned,
+		 * this string will be used as replacement.
+		 * 
+		 * @since	1.11.0
+		 * 
+		 * @param	string	$custom_replacement Current custom replacement
+		 * @param	string	$content The original content
+		 * @param	string	$tag The shortcode tag if called via do_shortcode
+		 */
+		$custom_replacement = \apply_filters( 'embed_privacy_custom_embed_replacement', '', $content, $tag );
+		
+		if ( ! empty( $custom_replacement ) && \is_string( $custom_replacement ) ) {
+			return $custom_replacement;
+		}
+		
 		$new_content = $content;
 		$replacement = new Replacement( $new_content );
 		$new_content = $replacement->get();
@@ -185,9 +200,22 @@ final class Replacer {
 				}
 			}
 			
-			// check for local tweets
-			if ( $provider->is( 'x' ) && \get_option( 'embed_privacy_local_tweets' ) ) {
-				return X::get_local_tweet( $output );
+			/**
+			 * Filter a custom replacement. If a non-empty string is returned,
+			 * this string will be used as replacement.
+			 * 
+			 * @since	1.11.0
+			 * 
+			 * @param	string									$custom_replacement Current custom replacement
+			 * @param	string									$output The original output
+			 * @param	\epiphyt\Embed_privacy\embed\Provider	$provider Current provider
+			 * @param	string									$url The URL to the embed
+			 * @param	array									$attributes Additional attributes of the embed
+			 */
+			$custom_replacement = \apply_filters( 'embed_privacy_custom_oembed_replacement', '', $output, $provider, $url, $attributes );
+			
+			if ( ! empty( $custom_replacement ) && \is_string( $custom_replacement ) ) {
+				return $custom_replacement;
 			}
 			
 			$output = $replacement->get( $attributes, $provider );
