@@ -10,4 +10,6 @@ namespace epiphyt\Embed_Privacy\integration;
  * @package		epiphyt\Embed_Privacy
  * @since		1.10.0
  */
-final class Twitter extends X {}
+final class Twitter extends X {
+	// identical to X, available just for backwards-compatibility
+}
