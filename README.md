@@ -12,7 +12,7 @@ By clicking on the placeholder the respective content will then be loaded.
 ## Requirements
 
 PHP: 5.6 including the `php-dom` extension<br>
-WordPress: 4.7
+WordPress: 5.9
 
 ## Building
 
@@ -46,7 +46,7 @@ Please consult the [contributing guide](CONTRIBUTING.md) for detailed informatio
 
 ## Who are you, folks?
 
-We are [Epiphyt](https://epiph.yt/), your friendly neighborhood WordPress plugin shop from southern Germany.
+We are [Epiphyt](https://epiph.yt/en/), your friendly neighborhood WordPress plugin shop from southern Germany.
 
 ## Security
 

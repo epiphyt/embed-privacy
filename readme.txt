@@ -3,7 +3,7 @@ Contributors: epiphyt, kittmedia, krafit
 Tags: oembed, privacy, gutenberg, iframes, performance
 Requires at least: 5.9
 Stable tag: 1.10.10
-Tested up to: 6.7
+Tested up to: 6.8
 Requires PHP: 5.6
 License: GPL2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -91,9 +91,17 @@ We currently support all oEmbed providers known to WordPress core by default. Wa
 
 We also support Google Maps via iframe and Divi and the following plugins:
 
+* BuddyPress activity stream
 * Jetpack (Facebook posts)
 * Maps Marker (Pro)
 * Shortcodes Ultimate
+
+Additionally, we support the following custom content:
+
+* Local Fediverse content
+* Local X posts
+* Facebook embed code (HTML)
+* Instagram embed code (HTML)
 
 Since version 1.2.0, you can also add custom embed providers by going to **Settings > Embed Privacy > Manage embeds**. Here you can also modify any existing embed provider, change its logo, add a background image, change the text displaying on the embed or disable the embed provider entirely.
 
@@ -143,7 +151,7 @@ Check out our documentation: [https://epiph.yt/en/embed-privacy/documentation/](
 
 = Who are you, folks? =
 
-We are [Epiphyt](https://epiph.yt/), your friendly neighborhood WordPress plugin shop from southern Germany.
+We are [Epiphyt](https://epiph.yt/en/), your friendly neighborhood WordPress plugin shop from southern Germany.
 
 = How can I report security bugs? =
 
