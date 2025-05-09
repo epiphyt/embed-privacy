@@ -15,6 +15,7 @@ use epiphyt\Embed_Privacy\handler\Widget;
 use epiphyt\Embed_Privacy\integration\Activitypub;
 use epiphyt\Embed_Privacy\integration\Amp;
 use epiphyt\Embed_Privacy\integration\Astra;
+use epiphyt\Embed_Privacy\integration\Buddypress;
 use epiphyt\Embed_Privacy\integration\Divi;
 use epiphyt\Embed_Privacy\integration\Elementor;
 use epiphyt\Embed_Privacy\integration\Instagram;
@@ -86,6 +87,7 @@ class Embed_Privacy {
 		Activitypub::class,
 		Amp::class,
 		Astra::class,
+		Buddypress::class,
 		Divi::class,
 		Elementor::class,
 		Instagram::class,
@@ -195,7 +197,7 @@ class Embed_Privacy {
 		$this->frontend = new Frontend();
 		$this->shortcode = new Shortcode();
 		$this->thumbnail = new Thumbnail();
-		$this->use_cache = ! \is_admin();
+		$this->use_cache = ! \is_admin() || \wp_doing_ajax();
 	}
 	
 	/**

@@ -11,33 +11,8 @@ document.addEventListener( 'DOMContentLoaded', function() {
 	var overlays = document.querySelectorAll( '.embed-privacy-overlay' );
 	var overlayLinks = document.querySelectorAll( '.embed-privacy-overlay a' );
 	
-	for ( var i = 0; i < overlays.length; i++ ) {
-		overlays[ i ].addEventListener( 'click', function( event ) {
-			if ( event.currentTarget.tagName !== 'INPUT' ) {
-				overlayClick( event.currentTarget );
-			}
-		} );
-		
-		var button = overlays[ i ].parentNode.querySelector( '.embed-privacy-enable' );
-		
-		if ( ! button ) {
-			continue;
-		}
-		
-		button.addEventListener( 'click', function( event ) {
-			overlayClick( event.currentTarget.parentNode.querySelector( '.embed-privacy-overlay' ) );
-			event.currentTarget.parentNode.removeChild( event.currentTarget ); // IE11 doesn't support .remove()
-		} );
-		button.addEventListener( 'keypress', function( event ) {
-			if ( event.code === 'Enter' || event.code === 'Space' ) {
-				event.preventDefault(); // prevent space from scrolling the page
-				overlayClick( event.currentTarget.parentNode.querySelector( '.embed-privacy-overlay' ) );
-				event.currentTarget.parentNode.removeChild( event.currentTarget ); // IE11 doesn't support .remove()
-			}
-		} );
-	}
-	
-	enableAlwaysActiveProviders();
+	initOverlays( overlays, overlayLinks, checkboxes, labels );
+	initBuddyPressActivityStream();
 	optOut();
 	setMinHeight();
 	
@@ -45,35 +20,12 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		setMinHeight();
 	} );
 	
-	for ( var i = 0; i < overlayLinks.length; i++ ) {
-		overlayLinks[ i ].addEventListener( 'click', function( event ) {
-			// don't trigger the overlays click
-			event.stopPropagation();
-		} );
-	}
-	
-	for ( var i = 0; i < checkboxes.length; i++ ) {
-		checkboxes[ i ].addEventListener( 'click', function( event ) {
-			// don't trigger the overlays click
-			event.stopPropagation();
-			
-			checkboxActivation( event.currentTarget );
-		} );
-	}
-	
-	for ( var i = 0; i < labels.length; i++ ) {
-		labels[ i ].addEventListener( 'click', function( event ) {
-			// don't trigger the overlays click
-			event.stopPropagation();
-		} );
-	}
-	
 	/**
 	 * Clicking on a checkbox to always enable/disable an embed provider.
 	 * 
 	 * @since	1.2.0
 	 * 
-	 * @param	{element}	target Target element
+	 * @param	{HTMLElement}	target Target element
 	 */
 	function checkboxActivation( target ) {
 		var embedProvider = target.getAttribute( 'data-embed-provider' );
@@ -90,7 +42,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 				set_cookie( 'embed-privacy', '{"' + embedProvider + '":true}', 365 );
 			}
 			
-			enableAlwaysActiveProviders();
+			enableAlwaysActiveProviders( document.querySelectorAll( '.embed-privacy-overlay' ) );
 		}
 		else if ( cookie !== null ) {
 			delete cookie[ embedProvider ];
@@ -108,9 +60,15 @@ document.addEventListener( 'DOMContentLoaded', function() {
 	 * Check whether to enable an always active provider by default.
 	 * 
 	 * @since	1.2.0
+	 * 
+	 * @param {HTMLElement[]} currentOverlays List of current overlays
 	 */
-	function enableAlwaysActiveProviders() {
+	function enableAlwaysActiveProviders( currentOverlays ) {
 		var cookie = ( get_cookie( 'embed-privacy' ) ? JSON.parse( get_cookie( 'embed-privacy' ) ) : '' );
+		
+		if ( ! currentOverlays ) {
+			currentOverlays = overlays;
+		}
 		
 		if ( cookie === null || ! Object.keys( cookie ).length ) {
 			return;
@@ -118,11 +76,11 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		
 		var providers = Object.keys( cookie );
 		
-		for ( var i = 0; i < overlays.length; i++ ) {
-			var provider = overlays[ i ].parentNode.getAttribute( 'data-embed-provider' );
+		for ( var i = 0; i < currentOverlays.length; i++ ) {
+			var provider = currentOverlays[ i ].parentNode.getAttribute( 'data-embed-provider' );
 			
 			if ( providers.includes( provider ) ) {
-				overlays[ i ].click();
+				currentOverlays[ i ].click();
 			}
 		}
 	}
@@ -142,6 +100,97 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		}
 		
 		return Object.keys( cookie );
+	}
+	
+	/**
+	 * Initialize overlay functionality.
+	 * 
+	 * @since	1.11.0
+	 * 
+	 * @param {HTMLElement[]} embedOverlays List of embed overlays
+	 * @param {HTMLElement[]} overlayLinks  List of embed overlay links
+	 * @param {HTMLElement[]} checkboxes    List of embed overlay checkbox inputs
+	 * @param {HTMLElement[]} labels        List of embed overlay labels
+	 */
+	function initOverlays( embedOverlays, overlayLinks, checkboxes, labels ) {
+		for ( var i = 0; i < embedOverlays.length; i++ ) {
+			embedOverlays[ i ].addEventListener( 'click', function( event ) {
+				if ( event.currentTarget.tagName !== 'INPUT' ) {
+					overlayClick( event.currentTarget );
+				}
+			} );
+			
+			const button = embedOverlays[ i ].parentNode.querySelector( '.embed-privacy-enable' );
+			
+			if ( ! button ) {
+				continue;
+			}
+			
+			button.addEventListener( 'click', function( event ) {
+				overlayClick( event.currentTarget.parentNode.querySelector( '.embed-privacy-overlay' ) );
+				event.currentTarget.parentNode.removeChild( event.currentTarget ); // IE11 doesn't support .remove()
+			} );
+			button.addEventListener( 'keypress', function( event ) {
+				if ( event.code === 'Enter' || event.code === 'Space' ) {
+					event.preventDefault(); // prevent space from scrolling the page
+					overlayClick( event.currentTarget.parentNode.querySelector( '.embed-privacy-overlay' ) );
+					event.currentTarget.parentNode.removeChild( event.currentTarget ); // IE11 doesn't support .remove()
+				}
+			} );
+		}
+		
+		for ( var i = 0; i < overlayLinks.length; i++ ) {
+			overlayLinks[ i ].addEventListener( 'click', function( event ) {
+				// don't trigger the overlays click
+				event.stopPropagation();
+			} );
+		}
+		
+		for ( var i = 0; i < checkboxes.length; i++ ) {
+			checkboxes[ i ].addEventListener( 'click', function( event ) {
+				// don't trigger the overlays click
+				event.stopPropagation();
+				
+				checkboxActivation( event.currentTarget, [ event.currentTarget.closest( '.embed-privacy-overlay' ) ] );
+			} );
+		}
+		
+		for ( var i = 0; i < labels.length; i++ ) {
+			labels[ i ].addEventListener( 'click', function( event ) {
+				// don't trigger the overlays click
+				event.stopPropagation();
+			} );
+		}
+		
+		enableAlwaysActiveProviders( embedOverlays );
+	}
+	
+	/**
+	 * Initialize support for BuddyPress activity stream.
+	 */
+	function initBuddyPressActivityStream() {
+		const activityStream = document.getElementById( 'activity-stream' );
+		
+		if ( ! activityStream ) {
+			return;
+		}
+		
+		const activityObserver = new MutationObserver( ( mutations ) => {
+			for ( const mutation of mutations ) {
+				const checkboxes = mutation.target.querySelectorAll( '.embed-privacy-inner .embed-privacy-input' );
+				const labels = mutation.target.querySelectorAll( '.embed-privacy-inner .embed-privacy-label' );
+				const overlays = mutation.target.querySelectorAll( '.embed-privacy-overlay' );
+				const overlayLinks = mutation.target.querySelectorAll( '.embed-privacy-overlay a' );
+				
+				if ( overlays.length ) {
+					initOverlays( overlays, overlayLinks, checkboxes, labels );
+				}
+			}
+		} );
+		
+		activityObserver.observe( activityStream, {
+			childList: true,
+		} );
 	}
 	
 	/**
