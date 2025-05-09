@@ -10,7 +10,7 @@ use epiphyt\Embed_Privacy\Embed_Privacy;
  * @author	Epiphyt
  * @license	GPL2
  * @package	epiphyt\Embed_Privacy
- * @since	1.10.0
+ * @since	1.11.0
  */
 final class Buddypress {
 	/**
