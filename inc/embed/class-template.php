@@ -144,7 +144,7 @@ final class Template {
 					<br>
 					<?php
 					/* translators: 1: embed provider, 2: opening <a> tag to the privacy policy, 3: closing </a> */
-					\printf( \wp_kses( \__( 'Learn more in %1$s’s %2$sprivacy policy%3$s.', 'embed-privacy' ), $allowed_tags ), \esc_html( $provider->get_title() ), '<a href="' . \esc_url( $privacy_policy ) . '" target="_blank">', '</a>' );
+					\printf( \wp_kses( \__( 'Learn more in %2$s%1$s’s privacy policy%3$s.', 'embed-privacy' ), $allowed_tags ), \esc_html( $provider->get_title() ), '<a href="' . \esc_url( $privacy_policy ) . '" target="_blank">', '</a>' );
 				}
 			}
 			else {
@@ -205,8 +205,6 @@ final class Template {
 			$footer_content = '<div class="embed-privacy-footer">';
 			
 			if ( ! \get_option( 'embed_privacy_disable_link' ) ) {
-				$footer_content .= '<span class="embed-privacy-url"><a href="' . \esc_url( $attributes['embed_url'] ) . '">';
-				
 				if ( ! empty( $attributes['embed_title'] ) ) {
 					$footer_link_title = \sprintf(
 					/* translators: content name  */
@@ -221,16 +219,15 @@ final class Template {
 						$provider->get_content_name()
 					);
 				}
-				
-				if ( ! empty( $footer_link_title ) ) {
-					$footer_content .= \sprintf(
-						'<span class="embed-privacy-url"><a href="%1$s">%2$s</a></span>',
-						\esc_url( $attributes['embed_url'] ),
-						$footer_link_title
-					);
+				else {
+					$footer_link_title = \esc_html__( 'Open content directly', 'embed-privacy' );
 				}
 				
-				$footer_content .= '</a></span>';
+				$footer_content .= \sprintf(
+					'<span class="embed-privacy-url"><a href="%1$s">%2$s</a></span>',
+					\esc_url( $attributes['embed_url'] ),
+					$footer_link_title
+				);
 			}
 			
 			$footer_content .= '</div>' . \PHP_EOL;
@@ -256,7 +253,7 @@ final class Template {
 				$button_text = \sprintf( \__( 'Display "%1$s" from %2$s', 'embed-privacy' ), $attributes['embed_title'], \esc_html( $provider->get_title() ) );
 			}
 			?>
-			<button class="embed-privacy-enable screen-reader-text"><?php echo \esc_html( $button_text ); ?></button>
+			<button type="button" class="embed-privacy-enable screen-reader-text"><?php echo \esc_html( $button_text ); ?></button>
 			
 			<div class="embed-privacy-overlay">
 				<div class="embed-privacy-inner">
