@@ -22,6 +22,7 @@ const scssFiles = {
 	'kadence-blocks': path.resolve( process.cwd(), 'assets/style/scss', 'kadence-blocks.scss' ),
 	settings: path.resolve( process.cwd(), 'assets/style/scss', 'settings.scss' ),
 	'shortcodes-ultimate': path.resolve( process.cwd(), 'assets/style/scss', 'shortcodes-ultimate.scss' ),
+	'wpforo-embeds': path.resolve( process.cwd(), 'assets/style/scss', 'wpforo-embeds.scss' ),
 };
 
 module.exports = [

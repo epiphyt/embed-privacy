@@ -837,6 +837,7 @@ class Migration {
 	 * - Add Bluesky embed provider
 	 * - Add Canva embed provider
 	 * - Add default content item names
+	 * - Make https: optional for YouTube regular expression
 	 */
 	private function migrate_1_11_0() {
 		foreach ( Providers::get_instance()->get_list() as $provider ) {
@@ -878,6 +879,20 @@ class Migration {
 			}
 			
 			\add_post_meta( $provider->get_post_object()->ID, 'content_item_name', $content_item_name, true );
+		}
+		
+		$youtube_provider = \get_posts( [
+			'meta_key' => 'is_system',
+			'meta_value' => 'yes',
+			'name' => 'youtube',
+			'no_found_rows' => true,
+			'post_type' => 'epi_embed',
+			'update_post_term_cache' => false,
+		] );
+		$youtube_provider = \reset( $youtube_provider );
+		
+		if ( $youtube_provider instanceof WP_Post ) {
+			\update_post_meta( $youtube_provider->ID, 'regex_default', '/(https?:)?\\\/\\\/(?:.+?.)?youtu(?:.be|be.com)/' );
 		}
 		
 		$this->add_embed( [
@@ -1438,7 +1453,7 @@ class Migration {
 					'content_item_name' => \_x( 'video', 'content item name', 'embed-privacy' ),
 					'is_system' => 'yes',
 					'privacy_policy_url' => \__( 'https://policies.google.com/privacy?hl=en', 'embed-privacy' ),
-					'regex_default' => '/https?:\\\/\\\/(?:.+?.)?youtu(?:.be|be.com)/',
+					'regex_default' => '/(https?:)?\\\/\\\/(?:.+?.)?youtu(?:.be|be.com)/',
 				],
 				/* translators: embed provider */
 				'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), \_x( 'YouTube', 'embed provider', 'embed-privacy' ) ),

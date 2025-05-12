@@ -1,0 +1,68 @@
+#wpforo #wpforo-wrap .wpf-embed {
+	* {
+		padding: initial !important;
+		margin: initial !important;
+		height: auto !important;
+		width: auto !important;
+		max-width: auto !important;
+		max-height: auto !important;
+	}
+	
+	.embed-privacy-container {
+		height: 100% !important;
+		position: relative !important;
+		width: 100% !important;
+		
+		a {
+			color: #ddd;
+			
+			&:active,
+			&:focus,
+			&:hover {
+				color: #fff !important;
+			}
+		}
+	}
+	
+	.embed-privacy-content {
+		height: 100% !important;
+		width: 100% !important;
+		
+		> * {
+			height: 100% !important;
+			margin: 0 !important;
+			padding: 0 !important;
+			width: 100% !important;
+		}
+	}
+	
+	.embed-privacy-inner {
+		vertical-align: middle;
+	}
+	
+	.embed-privacy-logo {
+		height: 48px !important;
+		margin-bottom: 30px !important;
+	}
+	
+	.embed-privacy-overlay {
+		color: #ddd;
+		padding: 20px !important;
+		height: 100% !important;
+		width: 100% !important;
+	}
+	
+	.screen-reader-text {
+		height: 1px !important;
+		margin: -1px !important;
+		position: absolute !important;
+		width: 1px !important;
+		
+		&:focus {
+			color: #444 !important;
+			height: auto !important;
+			padding: 15px 23px 14px !important;
+			width: auto !important;
+		}
+	}
+}

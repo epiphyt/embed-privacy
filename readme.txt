@@ -95,6 +95,7 @@ We also support Google Maps via iframe and Divi and the following plugins:
 * Jetpack (Facebook posts)
 * Maps Marker (Pro)
 * Shortcodes Ultimate
+* wpForo (with the plugin wpForo Embeds)
 
 Additionally, we support the following custom content:
 

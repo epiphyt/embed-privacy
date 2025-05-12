@@ -25,6 +25,7 @@ use epiphyt\Embed_Privacy\integration\Kadence_Blocks;
 use epiphyt\Embed_Privacy\integration\Maps_Marker;
 use epiphyt\Embed_Privacy\integration\Polylang;
 use epiphyt\Embed_Privacy\integration\Shortcodes_Ultimate;
+use epiphyt\Embed_Privacy\integration\Wpforo_Embeds;
 use epiphyt\Embed_Privacy\integration\X;
 use epiphyt\Embed_Privacy\thumbnail\Thumbnail;
 use ReflectionMethod;
@@ -97,6 +98,7 @@ class Embed_Privacy {
 		Maps_Marker::class,
 		Polylang::class,
 		Shortcodes_Ultimate::class,
+		Wpforo_Embeds::class,
 		X::class,
 	];
 	
