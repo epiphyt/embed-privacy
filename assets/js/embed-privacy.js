@@ -43,6 +43,8 @@ document.addEventListener( 'DOMContentLoaded', function() {
 			}
 			
 			enableAlwaysActiveProviders( document.querySelectorAll( '.embed-privacy-overlay' ) );
+			// focus first element in container
+			target.closest( '.embed-privacy-container' ).querySelector( '.embed-privacy-content > :first-child' ).focus();
 		}
 		else if ( cookie !== null ) {
 			delete cookie[ embedProvider ];
@@ -290,6 +292,9 @@ document.addEventListener( 'DOMContentLoaded', function() {
 			// append it to body
 			embedContent.appendChild( element );
 		}
+		
+		// focus first element in container
+		embedContainer.querySelector( '.embed-privacy-content > :first-child' ).focus();
 		
 		if ( typeof jQuery !== 'undefined' ) {
 			const videoShortcode = jQuery( '.wp-video-shortcode' );
