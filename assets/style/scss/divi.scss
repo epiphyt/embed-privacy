@@ -5,6 +5,10 @@
 		inset: 0;
 		position: absolute;
 	}
+	
+	.screen-reader-text:focus {
+		clip: auto; // Divi adds its own .screen-reader-text, but without a proper reset on focus
+	}
 }
 
 // prevent hiding container around Embed Privacy
