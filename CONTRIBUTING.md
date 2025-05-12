@@ -18,25 +18,7 @@ If you want to contribute code, please create an issue first so that we can disc
 
 ### Code style
 
-Basically we use the default WordPress coding style with some small adjustments. We recommend using the [WordPress Coding Standard for PHP Code Sniffer](https://github.com/WordPress/WordPress-Coding-Standards) and exclude the following rules:
-
-```xml
-<rule ref="WordPress">
-    <exclude name="WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned"/>
-    <exclude name="WordPress.DB.SlowDBQuery.slow_db_query_meta_key"/>
-    <exclude name="WordPress.DB.SlowDBQuery.slow_db_query_meta_value"/>
-    <exclude name="WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound"/>
-    <exclude name="WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound"/>
-    <exclude name="WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound"/>
-    <exclude name="WordPress.PHP.DisallowShortTernary.Found"/>
-    <exclude name="WordPress.PHP.YodaConditions.NotYoda"/>
-    <exclude name="WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedNamespaceFound"/>
-    <exclude name="WordPress.NamingConventions.PrefixAllGlobals.ShortPrefixPassed"/>
-    <exclude name="WordPress.WhiteSpace.DisallowInlineTabs.NonIndentTabsUsed"/>
-    <exclude name="WordPress.WhiteSpace.PrecisionAlignment.Found"/>
-    <exclude name="WordPress.WP.EnqueuedResourceParameters.NotInFooter"/>
-</rule>
-```
+We’re using the [EpiphytCodingStandard](https://github.com/epiphyt/EpiphytCodingStandard), which is a more strict adaptation of the WordPress Coding Standard for PHP Code. This coding standard is mandatory for every code change.
 
 ### Testing
 
