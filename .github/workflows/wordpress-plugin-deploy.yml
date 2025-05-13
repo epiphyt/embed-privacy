@@ -1,4 +1,5 @@
 name: Deploy to WordPress.org
+
 on:
   push:
     tags:
@@ -8,6 +9,8 @@ jobs:
   tag:
     name: New tag
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
     - uses: actions/checkout@v4
     # Run npm build
