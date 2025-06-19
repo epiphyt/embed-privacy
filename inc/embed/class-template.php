@@ -93,7 +93,7 @@ final class Template {
 		
 		$embed_class = 'embed-' . ( ! empty( $provider->get_name() ) ? $provider->get_name() : 'default' );
 		$embed_classes = $embed_class;
-		$style = new Style( $provider->get_name(), $embed_post, $attributes );
+		$style = new Style( $provider, null, $attributes );
 		
 		if ( ! empty( $attributes['align'] ) ) {
 			$embed_classes .= ' align' . $attributes['align'];
