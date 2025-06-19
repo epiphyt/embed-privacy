@@ -26,6 +26,7 @@ final class Shortcode {
 	 */
 	public function init() {
 		\add_shortcode( 'embed_privacy_opt_out', [ self::class, 'opt_out' ] );
+		\add_filter( 'the_content', [ $this, 'print_assets_for_shortcode' ] );
 	}
 	
 	/**
@@ -110,5 +111,21 @@ final class Shortcode {
 		$output .= '</div>' . \PHP_EOL;
 		
 		return $output;
+	}
+	
+	/**
+	 * Print Embed Privacy assets if page contains the shortcode.
+	 * 
+	 * @since	1.11.1
+	 * 
+	 * @param	string	$content Current page content
+	 * @return	string Current page content
+	 */
+	public function print_assets_for_shortcode( $content ) {
+		if ( \has_shortcode( $content, 'embed_privacy_opt_out' ) ) {
+			Embed_Privacy::get_instance()->frontend->print_assets();
+		}
+		
+		return $content;
 	}
 }

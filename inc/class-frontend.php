@@ -2,7 +2,6 @@
 namespace epiphyt\Embed_Privacy;
 
 use epiphyt\Embed_Privacy\integration\Amp;
-use WP_Post;
 
 /**
  * Frontend functionality.
@@ -80,26 +79,5 @@ final class Frontend {
 		 * @param	string	$suffix A filename suffix
 		 */
 		\do_action( 'embed_privacy_register_assets', $is_debug, $suffix );
-		
-		$current_url = \sprintf(
-			'http%1$s://%2$s%3$s',
-			\is_ssl() ? 's' : '',
-			! empty( $_SERVER['HTTP_HOST'] ) ? \sanitize_text_field( \wp_unslash( $_SERVER['HTTP_HOST'] ) ) : '',
-			! empty( $_SERVER['REQUEST_URI'] ) ? \sanitize_text_field( \wp_unslash( $_SERVER['REQUEST_URI'] ) ) : ''
-		);
-		
-		if ( empty( $_SERVER['HTTP_HOST'] ) ) {
-			return;
-		}
-		
-		$post_id = \url_to_postid( $current_url );
-		
-		if ( $post_id ) {
-			$post = \get_post( $post_id );
-			
-			if ( $post instanceof WP_Post && \has_shortcode( $post->post_content, 'embed_privacy_opt_out' ) ) {
-				$this->print_assets();
-			}
-		}
 	}
 }
