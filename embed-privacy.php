@@ -69,6 +69,11 @@ if ( ! \class_exists( 'DOMDocument' ) ) {
 \spl_autoload_register( static function( $class_name ) {
 	$path = \explode( '\\', $class_name );
 	$filename = \str_replace( '_', '-', \strtolower( \array_pop( $path ) ) );
+	
+	if ( \strpos( $class_name, __NAMESPACE__ ) !== 0 ) {
+		return;
+	}
+	
 	$class_name = \str_replace(
 		[ 'epiphyt\embed_privacy\\', '\\', '_' ],
 		[ '', '/', '-' ],
