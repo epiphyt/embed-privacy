@@ -30,20 +30,21 @@ along with Embed Privacy. If not, see https://www.gnu.org/licenses/gpl-2.0.html.
 */
 \defined( 'ABSPATH' ) || exit;
 
+if ( ! \defined( 'EPI_EMBED_PRIVACY_BASE' ) ) {
+	if ( \file_exists( \WP_PLUGIN_DIR . '/embed-privacy/' ) ) {
+		\define( 'EPI_EMBED_PRIVACY_BASE', \WP_PLUGIN_DIR . '/embed-privacy/' );
+	}
+	else if ( \file_exists( \WPMU_PLUGIN_DIR . '/embed-privacy/' ) ) {
+		\define( 'EPI_EMBED_PRIVACY_BASE', \WPMU_PLUGIN_DIR . '/embed-privacy/' );
+	}
+	else {
+		\define( 'EPI_EMBED_PRIVACY_BASE', \plugin_dir_path( __FILE__ ) );
+	}
+}
+
+\define( 'EPI_EMBED_PRIVACY_FILE', \EPI_EMBED_PRIVACY_BASE . \basename( __FILE__ ) );
+\define( 'EPI_EMBED_PRIVACY_URL', \plugin_dir_url( \EPI_EMBED_PRIVACY_FILE ) );
 \define( 'EMBED_PRIVACY_VERSION', '1.11.0' );
-
-if ( \file_exists( \WP_PLUGIN_DIR . '/embed-privacy/' ) ) {
-	\define( 'EPI_EMBED_PRIVACY_BASE', \WP_PLUGIN_DIR . '/embed-privacy/' );
-}
-else if ( \file_exists( \WPMU_PLUGIN_DIR . '/embed-privacy/' ) ) {
-	\define( 'EPI_EMBED_PRIVACY_BASE', \WPMU_PLUGIN_DIR . '/embed-privacy/' );
-}
-else {
-	\define( 'EPI_EMBED_PRIVACY_BASE', \plugin_dir_path( __FILE__ ) );
-}
-
-\define( 'EPI_EMBED_PRIVACY_FILE', __FILE__ );
-\define( 'EPI_EMBED_PRIVACY_URL', \plugin_dir_url( \EPI_EMBED_PRIVACY_BASE . 'embed-privacy.php' ) );
 
 if ( ! \class_exists( 'DOMDocument' ) ) {
 	/**
