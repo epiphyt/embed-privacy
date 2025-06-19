@@ -28,6 +28,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 	 * @param	{HTMLElement}	target Target element
 	 */
 	function checkboxActivation( target ) {
+		const container = target.closest( '.embed-privacy-container' );
 		var embedProvider = target.getAttribute( 'data-embed-provider' );
 		var cookie = ( get_cookie( 'embed-privacy' ) ? JSON.parse( get_cookie( 'embed-privacy' ) ) : '' );
 		
@@ -43,8 +44,11 @@ document.addEventListener( 'DOMContentLoaded', function() {
 			}
 			
 			enableAlwaysActiveProviders( document.querySelectorAll( '.embed-privacy-overlay' ) );
-			// focus first element in container
-			target.closest( '.embed-privacy-container' ).querySelector( '.embed-privacy-content > :first-child' ).focus();
+			
+			// focus first element in container, but not for opt-out shortcode
+			if ( container ) {
+				container.querySelector( '.embed-privacy-content > :first-child' ).focus();
+			}
 		}
 		else if ( cookie !== null ) {
 			delete cookie[ embedProvider ];
