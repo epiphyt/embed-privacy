@@ -474,6 +474,7 @@ final class Replacement {
 					'<html><meta charset="utf-8">',
 					'</html>',
 					'%20data-epi-spacing%20',
+					'"data-epi-spacing%20',
 					'%_epi_20data-epi-spacing%_epi_20', // % has been replaced with %_epi_ after replacing spaces
 				],
 				\array_values( $character_replacements )
@@ -483,6 +484,7 @@ final class Replacement {
 					'',
 					'',
 					' ',
+					'" ',
 					' ',
 				],
 				\array_keys( $character_replacements )
