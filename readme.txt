@@ -2,7 +2,7 @@
 Contributors: epiphyt, kittmedia, krafit
 Tags: oembed, privacy, gutenberg, iframes, performance
 Requires at least: 5.9
-Stable tag: 1.11.0
+Stable tag: 1.11.1
 Tested up to: 6.8
 Requires PHP: 5.6
 License: GPL2
@@ -159,6 +159,14 @@ We are [Epiphyt](https://epiph.yt/en/), your friendly neighborhood WordPress plu
 You can report security bugs through the Patchstack Vulnerability Disclosure Program. The Patchstack team help validate, triage and handle any security vulnerabilities. [Report a security vulnerability.](https://patchstack.com/database/vdp/embed-privacy)
 
 == Changelog ==
+
+= 1.11.1 =
+* Improved: Class autoloading performance
+* Improved: Allow overriding `EPI_EMBED_PRIVACY_BASE` constant
+* Improved: Replaced `url_to_postid` with a shortcode usage check in the content
+* Fixed: JavaScript error on clicking an opt-out checkbox
+* Fixed: Don't use deprecated parameter of Style class 
+* Fixed: Erroneous overlay replacements in certain circumstances
 
 = 1.11.0 =
 * Added: Support for embed provider Bluesky
