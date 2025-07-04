@@ -194,132 +194,37 @@ class Migration {
 		$this->register_default_embed_providers();
 		
 		switch ( $version ) {
-			case $this->version:
-				// most recent version, do nothing
-				break;
+			case '1.2.0':
+				$this->migrate_1_2_1();
+			case '1.2.1':
+				$this->migrate_1_2_2();
+			case '1.2.2':
+				$this->migrate_1_3_0();
+			case '1.3.0':
+				$this->migrate_1_4_0();
+			case '1.4.0':
+				$this->migrate_1_4_7();
+			case '1.4.7':
+				$this->migrate_1_5_0();
+			case '1.5.0':
+				$this->migrate_1_6_0();
+			case '1.6.0':
+				$this->migrate_1_7_0();
+			case '1.7.0':
+				$this->migrate_1_7_3();
+			case '1.7.3':
+				$this->migrate_1_8_0();
+			case '1.8.0':
+				$this->migrate_1_10_5();
+			case '1.10.5':
+				$this->migrate_1_10_6();
+			case '1.10.6':
+			case '1.10.7':
+				$this->migrate_1_10_7();
 			case '1.10.9':
 				$this->migrate_1_11_0();
-				break;
-			case '1.10.7':
-			case '1.10.6':
-				$this->migrate_1_11_0();
-				$this->migrate_1_10_7();
-				break;
-			case '1.10.5':
-				$this->migrate_1_11_0();
-				$this->migrate_1_10_7();
-				$this->migrate_1_10_6();
-				break;
-			case '1.8.0':
-				$this->migrate_1_11_0();
-				$this->migrate_1_10_7();
-				$this->migrate_1_10_6();
-				$this->migrate_1_10_5();
-				break;
-			case '1.7.3':
-				$this->migrate_1_11_0();
-				$this->migrate_1_10_7();
-				$this->migrate_1_10_6();
-				$this->migrate_1_10_5();
-				$this->migrate_1_8_0();
-				break;
-			case '1.7.0':
-				$this->migrate_1_11_0();
-				$this->migrate_1_10_7();
-				$this->migrate_1_10_6();
-				$this->migrate_1_10_5();
-				$this->migrate_1_8_0();
-				$this->migrate_1_7_3();
-				break;
-			case '1.6.0':
-				$this->migrate_1_11_0();
-				$this->migrate_1_10_7();
-				$this->migrate_1_10_6();
-				$this->migrate_1_10_5();
-				$this->migrate_1_8_0();
-				$this->migrate_1_7_3();
-				$this->migrate_1_7_0();
-				break;
-			case '1.5.0':
-				$this->migrate_1_11_0();
-				$this->migrate_1_10_7();
-				$this->migrate_1_10_6();
-				$this->migrate_1_10_5();
-				$this->migrate_1_8_0();
-				$this->migrate_1_7_3();
-				$this->migrate_1_7_0();
-				$this->migrate_1_6_0();
-				break;
-			case '1.4.7':
-				$this->migrate_1_11_0();
-				$this->migrate_1_10_7();
-				$this->migrate_1_10_6();
-				$this->migrate_1_10_5();
-				$this->migrate_1_8_0();
-				$this->migrate_1_7_0();
-				$this->migrate_1_6_0();
-				$this->migrate_1_5_0();
-				break;
-			case '1.4.0':
-				$this->migrate_1_11_0();
-				$this->migrate_1_10_7();
-				$this->migrate_1_10_6();
-				$this->migrate_1_10_5();
-				$this->migrate_1_8_0();
-				$this->migrate_1_7_0();
-				$this->migrate_1_6_0();
-				$this->migrate_1_5_0();
-				$this->migrate_1_4_7();
-				break;
-			case '1.3.0':
-				$this->migrate_1_11_0();
-				$this->migrate_1_10_7();
-				$this->migrate_1_10_6();
-				$this->migrate_1_10_5();
-				$this->migrate_1_8_0();
-				$this->migrate_1_7_0();
-				$this->migrate_1_6_0();
-				$this->migrate_1_5_0();
-				$this->migrate_1_4_0();
-				break;
-			case '1.2.2':
-				$this->migrate_1_11_0();
-				$this->migrate_1_10_7();
-				$this->migrate_1_10_6();
-				$this->migrate_1_10_5();
-				$this->migrate_1_8_0();
-				$this->migrate_1_7_0();
-				$this->migrate_1_6_0();
-				$this->migrate_1_5_0();
-				$this->migrate_1_4_0();
-				$this->migrate_1_3_0();
-				break;
-			case '1.2.1':
-				$this->migrate_1_11_0();
-				$this->migrate_1_10_7();
-				$this->migrate_1_10_6();
-				$this->migrate_1_10_5();
-				$this->migrate_1_8_0();
-				$this->migrate_1_7_0();
-				$this->migrate_1_6_0();
-				$this->migrate_1_5_0();
-				$this->migrate_1_4_0();
-				$this->migrate_1_3_0();
-				$this->migrate_1_2_2();
-				break;
-			case '1.2.0':
-				$this->migrate_1_11_0();
-				$this->migrate_1_10_7();
-				$this->migrate_1_10_6();
-				$this->migrate_1_10_5();
-				$this->migrate_1_8_0();
-				$this->migrate_1_7_0();
-				$this->migrate_1_6_0();
-				$this->migrate_1_5_0();
-				$this->migrate_1_4_0();
-				$this->migrate_1_3_0();
-				$this->migrate_1_2_2();
-				$this->migrate_1_2_1();
+			case $this->version:
+				// most recent version, do nothing
 				break;
 			default:
 				// run all migrations
