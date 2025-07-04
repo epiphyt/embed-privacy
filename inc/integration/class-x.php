@@ -13,7 +13,7 @@ use DOMXPath;
  * @package	epiphyt\Embed_Privacy
  * @since	1.10.5
  */
-final class X {
+class X {
 	/**
 	 * Initialize functionality.
 	 */
