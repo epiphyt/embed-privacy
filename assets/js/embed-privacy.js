@@ -307,6 +307,15 @@ document.addEventListener( 'DOMContentLoaded', function() {
 				videoShortcode.mediaelementplayer();
 			}
 		}
+		
+		if ( embedContainer.getAttribute( 'data-embed-provider' ) === 'instagram' ) {
+			const interval = setInterval( () => {
+				if ( window.instgrm ) {
+					window.instgrm.Embeds.process();
+					clearInterval( interval );
+				}
+			}, 100 );
+		}
 	}
 	
 	/**
