@@ -22,6 +22,7 @@ final class Post {
 		\add_filter( 'acf_the_content', [ Replacer::class, 'replace_embeds' ] );
 		\add_filter( 'do_shortcode_tag', [ Replacer::class, 'replace_embeds' ], 10, 2 );
 		\add_filter( 'embed_oembed_html', [ Replacer::class, 'replace_oembed' ], 10, 3 );
+		\add_filter( 'render_block', [ Replacer::class, 'replace_embeds' ] );
 		\add_filter( 'the_content', [ Replacer::class, 'replace_embeds' ] );
 		\add_filter( 'wp_video_shortcode', [ Replacer::class, 'replace_video_shortcode' ], 10, 2 );
 		\register_activation_hook( \EPI_EMBED_PRIVACY_FILE, [ self::class, 'clear_embed_cache' ] );
