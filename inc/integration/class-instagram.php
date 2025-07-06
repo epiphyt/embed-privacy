@@ -46,9 +46,8 @@ final class Instagram {
 			'elements' => [
 				'blockquote',
 			],
-			'regex' => '/<blockquote class="instagram-media"([^>]+)>([\S\s]*)instagram\.com\/embed\.js"><\/script>/',
+			'regex' => '/<blockquote class="instagram-media"([^>]+)>([\S\s]*?)<\/blockquote>\s?<script async src="\/\/www\.instagram\.com\/embed\.js"><\/script>/', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 		];
-		
 		$overlay = new Replacement( $content );
 		$new_content = $overlay->get( $attributes );
 		
