@@ -131,7 +131,10 @@ final class Style {
 			
 			// if width is in percentage, we need to use the content width
 			// since we cannot determine the actual width
-			if ( \str_contains( $attributes['width'], '%' ) ) {
+			if (
+				\str_contains( $attributes['width'], '%' )
+				|| \str_contains( $attributes['width'], '@@epi_percentage' )
+			) {
 				global $content_width;
 				
 				if ( $content_width === null ) {
