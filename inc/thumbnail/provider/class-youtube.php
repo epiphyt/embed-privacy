@@ -45,8 +45,9 @@ final class YouTube extends Thumbnail_Provider implements Thumbnail_Provider_Int
 	public static function get_id( $content ) {
 		$id = \str_replace(
 			[
-				'https://www.youtube.com/watch?v=',
 				'https://www.youtube.com/embed/',
+				'https://www.youtube.com/shorts/',
+				'https://www.youtube.com/watch?v=',
 				'https://youtu.be/',
 			],
 			'',
