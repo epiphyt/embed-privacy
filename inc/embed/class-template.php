@@ -149,7 +149,7 @@ final class Template {
 			}
 			else {
 				/* translators: embed provider */
-				\printf( \esc_html__( 'Click here to display content from %s', 'embed-privacy' ), \esc_html( $provider->get_title() ) );
+				\printf( \esc_html__( 'Click here to display content from %s.', 'embed-privacy' ), \esc_html( $provider->get_title() ) );
 			}
 		}
 		else {
