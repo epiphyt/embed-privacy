@@ -194,7 +194,7 @@ final class Replacement {
 		 * @param	string	$provider_name Embed provider name
 		 * @param	array	$attributes Additional attributes
 		 */
-		$ignore_embed = (bool) \apply_filters( 'embed_privacy_ignore_embed', false, $content, $this->provider->get_title(), $this->provider->get_name(), $attributes );
+		$ignore_embed = (bool) \apply_filters( 'embed_privacy_ignore_embed', $this->provider->is_disabled(), $content, $this->provider->get_title(), $this->provider->get_name(), $attributes );
 		
 		if ( $ignore_embed ) {
 			return $content;
