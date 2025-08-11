@@ -79,10 +79,8 @@ document.addEventListener( 'DOMContentLoaded', function() {
 				iframe.src = url.replace( /&$/, '' );
 				iframe.allowFullscreen = 1;
 				iframe.class = 'elementor-video';
-				iframe.style.maxHeight = '332px';
-				iframe.style.maxWidth = '100%';
-				iframe.style.height = 360;
-				iframe.style.width = 640;
+				iframe.style.height = '100%';
+				iframe.style.width = '100%';
 				
 				// replace the video element with the iframe
 				embedVideo.parentNode.replaceChild( iframe, embedVideo );
