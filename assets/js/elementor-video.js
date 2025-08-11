@@ -44,7 +44,15 @@ document.addEventListener( 'DOMContentLoaded', function() {
 				}
 				
 				const iframe = document.createElement( 'iframe' );
-				let url = settings.youtube_url.replace( 'watch?v=', 'embed/' ) + '?';
+				const divider = settings.youtube_url.indexOf( '?' ) !== -1 ? '&' : '?';
+				let url = settings.youtube_url.replace( 'watch?v=', 'embed/' ) + divider;
+				
+				if ( settings.youtube_url.indexOf( 'youtu.be' ) !== -1 ) {
+					const urlObject = new URL( settings.youtube_url );
+					
+					url = 'https://www.youtube-nocookie.com/embed' + urlObject.pathname + '?';
+				}
+				
 				const properties = {
 					autoplay: settings.autoplay ? 1 : 0,
 					cc_load_policy: settings.cc_load_policy ? 1 : 0,
