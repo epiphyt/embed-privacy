@@ -205,29 +205,7 @@ final class Template {
 			$footer_content = '<div class="embed-privacy-footer">';
 			
 			if ( ! \get_option( 'embed_privacy_disable_link' ) ) {
-				if ( ! empty( $attributes['embed_title'] ) ) {
-					$footer_link_title = \sprintf(
-					/* translators: content name  */
-						\esc_html__( 'Open "%s" directly', 'embed-privacy' ),
-						$attributes['embed_title']
-					);
-				}
-				else if ( ! empty( $provider->get_content_name() ) ) {
-					$footer_link_title = \sprintf(
-					/* translators: content name  */
-						\esc_html__( 'Open %s directly', 'embed-privacy' ),
-						$provider->get_content_name()
-					);
-				}
-				else {
-					$footer_link_title = \esc_html__( 'Open content directly', 'embed-privacy' );
-				}
-				
-				$footer_content .= \sprintf(
-					'<span class="embed-privacy-url"><a href="%1$s">%2$s</a></span>',
-					\esc_url( $attributes['embed_url'] ),
-					$footer_link_title
-				);
+				$footer_content .= self::get_embed_link_markup( $attributes, $provider );
 			}
 			
 			$footer_content .= '</div>' . \PHP_EOL;
@@ -295,11 +273,13 @@ final class Template {
 		 * Filter the complete markup of the embed.
 		 * 
 		 * @since	1.10.0
+		 * @since	1.11.2 Added $attributes parameter
 		 * 
 		 * @param	string									$markup The markup
 		 * @param	\epiphyt\Embed_Privacy\embed\Provider	$provider The embed provider of this embed
+		 * @param	mixed[]									$attributes Embed attributes
 		 */
-		$markup = \apply_filters( 'embed_privacy_template_markup', $markup, $provider );
+		$markup = \apply_filters( 'embed_privacy_template_markup', $markup, $provider, $attributes );
 		
 		Embed_Privacy::get_instance()->has_embed = true;
 		
@@ -308,5 +288,38 @@ final class Template {
 		}
 		
 		return $markup;
+	}
+	
+	/**
+	 * Get the embed link markup.
+	 * 
+	 * @param	mixed[]									$attributes Embed attributes
+	 * @param	\epiphyt\Embed_Privacy\embed\Provider	$provider The embed provider of this embed
+	 * @return	string Embed link markup
+	 */
+	private static function get_embed_link_markup( $attributes, $provider ) {
+		if ( ! empty( $attributes['embed_title'] ) ) {
+			$footer_link_title = \sprintf(
+			/* translators: content name  */
+				\esc_html__( 'Open "%s" directly', 'embed-privacy' ),
+				$attributes['embed_title']
+			);
+		}
+		else if ( ! empty( $provider->get_content_name() ) ) {
+			$footer_link_title = \sprintf(
+			/* translators: content name  */
+				\esc_html__( 'Open %s directly', 'embed-privacy' ),
+				$provider->get_content_name()
+			);
+		}
+		else {
+			$footer_link_title = \esc_html__( 'Open content directly', 'embed-privacy' );
+		}
+		
+		return \sprintf(
+			'<span class="embed-privacy-url"><a href="%1$s">%2$s</a></span>',
+			\esc_url( $attributes['embed_url'] ),
+			$footer_link_title
+		);
 	}
 }

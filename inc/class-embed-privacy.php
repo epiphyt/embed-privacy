@@ -8,6 +8,7 @@ use epiphyt\Embed_Privacy\data\Providers;
 use epiphyt\Embed_Privacy\data\Replacer;
 use epiphyt\Embed_Privacy\embed\Replacement;
 use epiphyt\Embed_Privacy\embed\Template;
+use epiphyt\Embed_Privacy\handler\Feed;
 use epiphyt\Embed_Privacy\handler\Post;
 use epiphyt\Embed_Privacy\handler\Shortcode;
 use epiphyt\Embed_Privacy\handler\Theme;
@@ -221,6 +222,7 @@ class Embed_Privacy {
 			\add_filter( 'oembed_ttl', '__return_zero' );
 		}
 		
+		Feed::init();
 		Migration::get_instance()->init();
 		Post::init();
 		Providers::get_instance()->init();
