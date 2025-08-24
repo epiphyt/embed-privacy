@@ -2,7 +2,7 @@
 Contributors: epiphyt, kittmedia, krafit
 Tags: oembed, privacy, gutenberg, iframes, performance
 Requires at least: 5.9
-Stable tag: 1.11.1
+Stable tag: 1.11.2
 Tested up to: 6.8
 Requires PHP: 5.6
 License: GPL2
@@ -159,6 +159,11 @@ We are [Epiphyt](https://epiph.yt/en/), your friendly neighborhood WordPress plu
 You can report security bugs through the Patchstack Vulnerability Disclosure Program. The Patchstack team help validate, triage and handle any security vulnerabilities. [Report a security vulnerability.](https://patchstack.com/database/vdp/embed-privacy)
 
 == Changelog ==
+
+= 1.11.2 =
+* Improved: YouTube support in Elementor (settings are now supported as well as youtu.be domain, styling has been improved)
+* Fixed: Replacing embeds on blog page
+* Fixed: Embed in feeds now display only a link to the content instead of a non-working overlay
 
 = 1.11.1 =
 * Improved: Class autoloading performance

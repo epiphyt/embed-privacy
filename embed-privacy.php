@@ -44,7 +44,7 @@ if ( ! \defined( 'EPI_EMBED_PRIVACY_BASE' ) ) {
 
 \define( 'EPI_EMBED_PRIVACY_FILE', \EPI_EMBED_PRIVACY_BASE . \basename( __FILE__ ) );
 \define( 'EPI_EMBED_PRIVACY_URL', \plugin_dir_url( \EPI_EMBED_PRIVACY_FILE ) );
-\define( 'EMBED_PRIVACY_VERSION', '1.11.1' );
+\define( 'EMBED_PRIVACY_VERSION', '1.11.2' );
 
 if ( ! \class_exists( 'DOMDocument' ) ) {
 	/**
