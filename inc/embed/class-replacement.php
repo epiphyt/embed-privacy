@@ -161,10 +161,9 @@ final class Replacement {
 		if ( $new_content !== $content ) {
 			Embed_Privacy::get_instance()->has_embed = true;
 			Embed_Privacy::get_instance()->frontend->print_assets();
-			$content = $new_content;
 		}
 		
-		return $content;
+		return $new_content;
 	}
 	
 	/**
