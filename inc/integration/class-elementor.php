@@ -164,7 +164,8 @@ final class Elementor {
 			return $content;
 		}
 		
-		if ( \str_contains( $content, 'youtube.com\/watch' ) ) {
+		// video elements
+		if ( \str_contains( $content, 'youtube.com\/watch' ) || \str_contains( $content, 'youtu.be\/' ) ) {
 			$content = self::get_youtube_overlay( $content );
 			Embed_Privacy::get_instance()->frontend->print_assets();
 		}
