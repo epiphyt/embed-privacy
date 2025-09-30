@@ -161,6 +161,10 @@ final class Style {
 				$attributes['width'] = $content_width;
 			}
 			
+			// explicit units are not welcome here
+			$attributes['height'] = \preg_replace( '/[^0-9]/', '', $attributes['height'] );
+			$attributes['width'] = \preg_replace( '/[^0-9]/', '', $attributes['width'] );
+			
 			$this->register( 'container', 'aspect-ratio', $attributes['width'] . '/' . $attributes['height'] );
 		}
 	}
