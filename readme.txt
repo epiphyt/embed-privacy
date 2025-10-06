@@ -2,7 +2,7 @@
 Contributors: epiphyt, kittmedia, krafit
 Tags: oembed, privacy, gutenberg, iframes, performance
 Requires at least: 5.9
-Stable tag: 1.11.2
+Stable tag: 1.11.3
 Tested up to: 6.8
 Requires PHP: 5.6
 License: GPL2
@@ -159,6 +159,10 @@ We are [Epiphyt](https://epiph.yt/en/), your friendly neighborhood WordPress plu
 You can report security bugs through the Patchstack Vulnerability Disclosure Program. The Patchstack team help validate, triage and handle any security vulnerabilities. [Report a security vulnerability.](https://patchstack.com/database/vdp/embed-privacy)
 
 == Changelog ==
+
+= 1.11.3 =
+* Fixed: Handling youtu.be links in Elementor
+* Fixed: Remove units from `height` and `width` attributes to correctly calculate the aspect ratio
 
 = 1.11.2 =
 * Improved: YouTube support in Elementor (settings are now supported as well as youtu.be domain, styling has been improved)
