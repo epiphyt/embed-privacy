@@ -5,14 +5,14 @@ namespace epiphyt\Embed_Privacy;
 Plugin Name:		Embed Privacy
 Plugin URL:			https://epiph.yt/en/embed-privacy/
 Description:		Embed Privacy prevents from loading external embeds directly and lets the user control which one should be loaded.
-Version:			1.11.3
+Version:			1.11.4
 Author:				Epiphyt
 Author URI:			https://epiph.yt/en/
 License:			GPL2
 License URI:		https://www.gnu.org/licenses/gpl-2.0.html
 Requires at least:	5.9
 Requires PHP:		5.6
-Tested up to:		6.8
+Tested up to:		6.9
 Text Domain:		embed-privacy
 
 Embed Privacy is free software: you can redistribute it and/or modify
@@ -44,7 +44,7 @@ if ( ! \defined( 'EPI_EMBED_PRIVACY_BASE' ) ) {
 
 \define( 'EPI_EMBED_PRIVACY_FILE', \EPI_EMBED_PRIVACY_BASE . \basename( __FILE__ ) );
 \define( 'EPI_EMBED_PRIVACY_URL', \plugin_dir_url( \EPI_EMBED_PRIVACY_FILE ) );
-\define( 'EMBED_PRIVACY_VERSION', '1.11.3' );
+\define( 'EMBED_PRIVACY_VERSION', '1.11.4' );
 
 if ( ! \class_exists( 'DOMDocument' ) ) {
 	/**
