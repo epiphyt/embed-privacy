@@ -152,7 +152,7 @@ final class Support_Data {
 		/* translators: count */
 		$output .= \sprintf( \__( 'Embed Privacy migration count: %s', 'embed-privacy' ), \get_option( 'embed_privacy_migration_count' ) ?: 0 ) . \PHP_EOL;
 		/* translators: version */
-		$output .= \sprintf( \__( 'WordPress version: %s', 'embed-privacy' ), \wp_get_wp_version() ) . \PHP_EOL;
+		$output .= \sprintf( \__( 'WordPress version: %s', 'embed-privacy' ), self::get_version() ) . \PHP_EOL;
 		/* translators: site URL */
 		$output .= \sprintf( \__( 'Site URL: %s', 'embed-privacy' ), \site_url() ) . \PHP_EOL;
 		/* translators: home URL */
@@ -169,5 +169,25 @@ final class Support_Data {
 		$output .= \sprintf( \__( 'Database: %s', 'embed-privacy' ), self::get_database_data() ) . \PHP_EOL;
 		
 		return $output . \PHP_EOL;
+	}
+	
+	/**
+	 * Get WordPress version.
+	 * Copy of wp_get_wp_version() from WordPress 6.7.
+	 * 
+	 * @return	string Current WordPress version
+	 */
+	private static function get_version() {
+		if ( \function_exists( 'wp_get_wp_version' ) ) {
+			return \wp_get_wp_version();
+		}
+		
+		static $wp_version;
+		
+		if ( ! isset( $wp_version ) ) {
+			require \ABSPATH . \WPINC . '/version.php';
+		}
+		
+		return $wp_version;
 	}
 }
