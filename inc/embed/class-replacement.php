@@ -505,10 +505,7 @@ final class Replacement {
 		
 		foreach ( $providers as $provider ) {
 			if (
-				! $provider->is_matching(
-					$content,
-					Replacer::extend_pattern( $provider->get_pattern(), $provider )
-				)
+				! $provider->is_matching( $content, $provider->get_pattern( 'extended' ) )
 				&& ( empty( $url ) || ! $provider->is_matching( $url ) )
 			) {
 				continue;

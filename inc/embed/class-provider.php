@@ -2,6 +2,7 @@
 namespace epiphyt\Embed_Privacy\embed;
 
 use epiphyt\Embed_Privacy\data\Providers;
+use epiphyt\Embed_Privacy\data\Replacer;
 use WP_Post;
 
 /**
@@ -49,6 +50,11 @@ final class Provider {
 	private $pattern = '';
 	
 	/**
+	 * @var	string Regular expression pattern
+	 */
+	private $pattern_extended = '';
+	
+	/**
 	 * @var	string Privacy policy URL
 	 */
 	private $privacy_policy_url = '';
@@ -92,6 +98,7 @@ final class Provider {
 			$this->set_background_image_id( \get_post_meta( $provider_object->ID, 'background_image', true ) );
 			$this->set_thumbnail_id( \get_post_thumbnail_id( $provider_object ) );
 			$this->set_content_name( \get_post_meta( $provider_object->ID, 'content_item_name', true ) );
+			$this->extend_pattern();
 		}
 		else {
 			$this->set_is_unknown( true );
@@ -107,6 +114,13 @@ final class Provider {
 	 */
 	public function __toString() {
 		return $this->get_name();
+	}
+	
+	/**
+	 * Extend the pattern.
+	 */
+	private function extend_pattern() {
+		$this->pattern_extended = Replacer::extend_pattern( $this->pattern, $this );
 	}
 	
 	/**
@@ -148,9 +162,14 @@ final class Provider {
 	/**
 	 * Get the pattern.
 	 * 
+	 * @param	string $type Type of the pattern, 'default' or 'extended'
 	 * @return	string Regular expression pattern
 	 */
-	public function get_pattern() {
+	public function get_pattern( $type = 'default' ) {
+		if ( $type === 'extended' ) {
+			return $this->pattern_extended;
+		}
+		
 		return $this->pattern;
 	}
 	
