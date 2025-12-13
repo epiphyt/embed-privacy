@@ -24,6 +24,7 @@ use epiphyt\Embed_Privacy\integration\Instagram_Feed;
 use epiphyt\Embed_Privacy\integration\Jetpack;
 use epiphyt\Embed_Privacy\integration\Kadence_Blocks;
 use epiphyt\Embed_Privacy\integration\Maps_Marker;
+use epiphyt\Embed_Privacy\integration\OOTB_OpenStreetMap;
 use epiphyt\Embed_Privacy\integration\Polylang;
 use epiphyt\Embed_Privacy\integration\Shortcodes_Ultimate;
 use epiphyt\Embed_Privacy\integration\Wpforo_Embeds;
@@ -97,6 +98,7 @@ class Embed_Privacy {
 		Jetpack::class,
 		Kadence_Blocks::class,
 		Maps_Marker::class,
+		OOTB_OpenStreetMap::class,
 		Polylang::class,
 		Shortcodes_Ultimate::class,
 		Wpforo_Embeds::class,
