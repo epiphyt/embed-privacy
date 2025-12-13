@@ -14,6 +14,35 @@ use epiphyt\Embed_Privacy\Embed_Privacy;
  */
 final class Template {
 	/**
+	 * Ensure content is localized, even if stored differently.
+	 * 
+	 * @since	1.12.0
+	 * 
+	 * @param	string									$content Content to localize
+	 * @param	\epiphyt\Embed_Privacy\embed\Provider	$provider Provider object
+	 * @param	string									$type Content type
+	 * @return	string Localized content, if possible
+	 */
+	private static function ensure_localized_content( $content, $provider, $type = 'description' ) {
+		if ( \get_locale() === 'en_US' ) {
+			return $content;
+		}
+		
+		if (
+			$type === 'description'
+			&& $content === \sprintf(
+				\esc_html( 'Click here to display content from %s.' ),
+				\esc_html( $provider->get_title() )
+			)
+		) {
+			/* translators: embed provider */
+			$content = \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), $provider->get_title() );
+		}
+		
+		return $content;
+	}
+	
+	/**
 	 * Get an overlay template.
 	 * 
 	 * @param	\epiphyt\Embed_Privacy\embed\Provider|string	$provider The embed provider
@@ -131,13 +160,15 @@ final class Template {
 				];
 				
 				if ( $embed_post ) {
-					echo $embed_post->post_content . \PHP_EOL; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					$description = $embed_post->post_content;
 					$privacy_policy = \get_post_meta( $embed_post->ID, 'privacy_policy_url', true );
 				}
 				else {
-					echo $provider->get_description() . \PHP_EOL; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					$description = $provider->get_description();
 					$privacy_policy = $provider->get_privacy_policy_url();
 				}
+				
+				echo \wp_kses_post( self::ensure_localized_content( $description, $provider ) ) . \PHP_EOL;
 				
 				if ( $privacy_policy ) {
 					?>
