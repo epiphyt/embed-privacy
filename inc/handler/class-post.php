@@ -22,7 +22,7 @@ final class Post {
 		\add_filter( 'acf_the_content', [ Replacer::class, 'replace_embeds' ] );
 		\add_filter( 'do_shortcode_tag', [ Replacer::class, 'replace_embeds' ], 10, 2 );
 		\add_filter( 'embed_oembed_html', [ Replacer::class, 'replace_oembed' ], 10, 3 );
-		\add_filter( 'render_block', [ Replacer::class, 'replace_embeds' ] );
+		\add_filter( 'render_block', [ Replacer::class, 'replace_embeds' ], 10, 2 );
 		\add_filter( 'the_content', [ Replacer::class, 'replace_embeds' ] );
 		\add_filter( 'wp_video_shortcode', [ Replacer::class, 'replace_video_shortcode' ], 10, 2 );
 		\register_activation_hook( \EPI_EMBED_PRIVACY_FILE, [ self::class, 'clear_embed_cache' ] );
@@ -69,18 +69,40 @@ final class Post {
 	}
 	
 	/**
+	 * List of ignored blocks that won't be replaced at all.
+	 * 
+	 * @return	string[] List of ignored blocks
+	 */
+	public static function get_ignored_blocks() {
+		$blocks = [];
+		
+		foreach ( \array_keys( \WP_Block_Type_Registry::get_instance()->get_all_registered() ) as $block_name ) {
+			if ( \strpos( $block_name, 'core/' ) === 0 && $block_name !== 'core/html' ) {
+				$blocks[] = $block_name;
+			}
+		}
+		
+		/**
+		 * List of ignored blocks, where no embed is possible.
+		 * 
+		 * @since	1.12.0
+		 * 
+		 * @param	string[]	$blocks List of ignored blocks
+		 */
+		$blocks = (array) \apply_filters( 'embed_privacy_ignored_blocks', $blocks );
+		
+		return $blocks;
+	}
+	
+	/**
 	 * Check if a post contains an embed.
 	 * 
 	 * @param	\WP_Post|int|null	$post A post object, post ID or null
 	 * @return	bool True if a post contains an embed, false otherwise
 	 */
 	public static function has_embed( $post = null ) {
-		if ( $post === null ) {
-			global $post;
-		}
-		
-		if ( \is_numeric( $post ) ) {
-			$post = \get_post( $post ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		if ( $post === null && \get_queried_object_id() ) {
+			$post = \get_post( \get_queried_object_id() );
 		}
 		
 		/**

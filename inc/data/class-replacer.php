@@ -4,6 +4,7 @@ namespace epiphyt\Embed_Privacy\data;
 use epiphyt\Embed_Privacy\embed\Replacement;
 use epiphyt\Embed_Privacy\Embed_Privacy;
 use epiphyt\Embed_Privacy\handler\Oembed;
+use epiphyt\Embed_Privacy\handler\Post;
 
 /**
  * Replacer functionality.
@@ -82,11 +83,22 @@ final class Replacer {
 	/**
 	 * Replace embeds with a container and hide the embed with an HTML comment.
 	 * 
-	 * @param	string	$content The original content
-	 * @param	string	$tag The shortcode tag if called via do_shortcode
+	 * @param	string			$content The original content
+	 * @param	string|array	$data The shortcode tag if called via do_shortcode, the block data otherwise
 	 * @return	string The updated content
 	 */
-	public static function replace_embeds( $content, $tag = '' ) {
+	public static function replace_embeds( $content, $data = '' ) {
+		if (
+			\is_array( $data )
+			&& isset( $data['blockName'] )
+			&& (
+				empty( $data['blockName'] )
+				|| \in_array( $data['blockName'], Post::get_ignored_blocks(), true )
+			)
+		) {
+			return $content;
+		}
+		
 		$embed_privacy = Embed_Privacy::get_instance();
 		
 		// do nothing in admin
@@ -114,11 +126,11 @@ final class Replacer {
 		 * 
 		 * @since	1.11.0
 		 * 
-		 * @param	string	$custom_replacement Current custom replacement
-		 * @param	string	$content The original content
-		 * @param	string	$tag The shortcode tag if called via do_shortcode
+		 * @param	string			$custom_replacement Current custom replacement
+		 * @param	string			$content The original content
+		 * @param	string|array	$data The shortcode tag if called via do_shortcode, the block data otherwise
 		 */
-		$custom_replacement = \apply_filters( 'embed_privacy_custom_embed_replacement', '', $content, $tag );
+		$custom_replacement = \apply_filters( 'embed_privacy_custom_embed_replacement', '', $content, $data );
 		
 		if ( ! empty( $custom_replacement ) && \is_string( $custom_replacement ) ) {
 			return $custom_replacement;
