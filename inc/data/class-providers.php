@@ -25,10 +25,30 @@ final class Providers {
 	private $list = [];
 	
 	/**
+	 * @var		array<string, string|string[]> List of matched provider names for a content
+	 */
+	private $matches = [];
+	
+	/**
 	 * Initialize functionality.
 	 */
 	public static function init() {
 		\add_filter( 'embed_privacy_provider_name', [ self::class, 'sanitize_name' ] );
+	}
+	
+	/**
+	 * Add a matched provider name to a content.
+	 * 
+	 * @param	string									$content Matched content
+	 * @param	\epiphyt\Embed_privacy\embed\Provider	$provider_name Provider name
+	 */
+	public function add_match( $content, $provider_name ) {
+		if ( empty( $provider_name ) ) {
+			$this->matches[ $content ] = 'none';
+		}
+		else {
+			$this->matches[ $content ][] = $provider_name;
+		}
 	}
 	
 	/**
@@ -77,6 +97,20 @@ final class Providers {
 	 */
 	public static function get_by_posts( $posts ) {
 		return \array_map( [ self::class, 'get_by_post' ], $posts );
+	}
+	
+	/**
+	 * Get all matches of a content.
+	 * 
+	 * @param	string	$content Content to get matches from
+	 * @return	string|string[]|false Matched providers, 'none' of none matched or false if there is no data
+	 */
+	public function get_content_matches( $content ) {
+		if ( isset( $this->matches[ $content ] ) ) {
+			return $this->matches[ $content ];
+		}
+		
+		return false;
 	}
 	
 	/**

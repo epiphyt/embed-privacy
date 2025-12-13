@@ -500,29 +500,62 @@ final class Replacement {
 	 * @param	string	$url URL to the embedded content
 	 */
 	private function set_provider( $content, $url = '' ) {
+		$cached_matches = Providers::get_instance()->get_content_matches( $content );
 		$current_provider = null;
 		$providers = Providers::get_instance()->get_list();
 		
-		foreach ( $providers as $provider ) {
-			if (
-				! $provider->is_matching( $content, $provider->get_pattern( 'extended' ) )
-				&& ( empty( $url ) || ! $provider->is_matching( $url ) )
-			) {
-				continue;
+		if ( $cached_matches !== false && $cached_matches !== 'none' ) {
+			foreach ( $cached_matches as $matched_provider ) {
+				foreach ( $providers as $provider ) {
+					if ( $provider->get_name() !== $matched_provider ) {
+						continue;
+					}
+					
+					$current_provider = $provider;
+					
+					/**
+					 * Filter the overlay provider.
+					 * 
+					 * @since	1.10.0
+					 * 
+					 * @param	\epiphyt\Embed_Privacy\embed\Provider	$provider Current provider
+					 * @param	string									$content Content to get the provider from
+					 * @param	string									$url URL to the embedded content
+					 */
+					$this->providers[] = \apply_filters( 'embed_privacy_overlay_provider', $provider, $content, $url );
+					
+					continue 2;
+				}
+			}
+		}
+		else if ( $cached_matches !== 'none' ) {
+			foreach ( $providers as $provider ) {
+				if (
+					! $provider->is_matching( $content, $provider->get_pattern( 'extended' ) )
+					&& ( empty( $url ) || ! $provider->is_matching( $url ) )
+				) {
+					continue;
+				}
+				
+				$current_provider = $provider;
+				
+				Providers::get_instance()->add_match( $content, $provider->get_name() );
+				
+				/**
+				 * Filter the overlay provider.
+				 * 
+				 * @since	1.10.0
+				 * 
+				 * @param	\epiphyt\Embed_Privacy\embed\Provider	$provider Current provider
+				 * @param	string									$content Content to get the provider from
+				 * @param	string									$url URL to the embedded content
+				 */
+				$this->providers[] = \apply_filters( 'embed_privacy_overlay_provider', $provider, $content, $url );
 			}
 			
-			$current_provider = $provider;
-			
-			/**
-			 * Filter the overlay provider.
-			 * 
-			 * @since	1.10.0
-			 * 
-			 * @param	\epiphyt\Embed_Privacy\embed\Provider	$provider Current provider
-			 * @param	string									$content Content to get the provider from
-			 * @param	string									$url URL to the embedded content
-			 */
-			$this->providers[] = \apply_filters( 'embed_privacy_overlay_provider', $current_provider, $content, $url );
+			if ( $current_provider === null ) {
+				Providers::get_instance()->add_match( $content, '' );
+			}
 		}
 		
 		// support unknown oEmbed provider
