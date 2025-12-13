@@ -148,11 +148,14 @@ final class Assets {
 				$output = '<script src="' . \esc_url( $asset['src'] ) . ( ! empty( $asset['version'] ) ? '?ver=' . \esc_attr( \rawurlencode( $asset['version'] ) ) : '' ) . '" id="' . \esc_attr( $asset['handle'] ) . '"></script>' . \PHP_EOL . $output; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 			}
 			else if ( $asset['type'] === 'inline' ) {
-				if ( empty( $asset['data'] ) || empty( $asset['object_name'] ) ) {
+				if ( ( empty( $asset['data'] ) || empty( $asset['object_name'] ) ) && empty( $asset['is_raw'] ) ) {
 					continue;
 				}
 				
-				if ( \is_string( $asset['data'] ) ) {
+				if ( $asset['is_raw'] && ! empty( $asset['data'] ) ) {
+					$output = '<script>' . $asset['data'] . '</script>';
+				}
+				else if ( \is_string( $asset['data'] ) ) {
 					$data = \html_entity_decode( $asset['data'], \ENT_QUOTES, 'UTF-8' );
 				}
 				else {
