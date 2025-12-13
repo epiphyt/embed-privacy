@@ -71,6 +71,8 @@ final class Post {
 	/**
 	 * List of ignored blocks that won't be replaced at all.
 	 * 
+	 * @since	1.12.0
+	 * 
 	 * @return	string[] List of ignored blocks
 	 */
 	public static function get_ignored_blocks() {

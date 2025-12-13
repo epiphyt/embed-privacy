@@ -39,6 +39,8 @@ final class Providers {
 	/**
 	 * Add a matched provider name to a content.
 	 * 
+	 * @since	1.12.0
+	 * 
 	 * @param	string									$content Matched content
 	 * @param	\epiphyt\Embed_privacy\embed\Provider	$provider_name Provider name
 	 */
@@ -101,6 +103,8 @@ final class Providers {
 	
 	/**
 	 * Get all matches of a content.
+	 * 
+	 * @since	1.12.0
 	 * 
 	 * @param	string	$content Content to get matches from
 	 * @return	string|string[]|false Matched providers, 'none' of none matched or false if there is no data

@@ -25,17 +25,17 @@ final class Provider {
 	private $content_name = '';
 	
 	/**
-	 * @var	string The description
+	 * @var		string The description
 	 */
 	private $description = '';
 	
 	/**
-	 * @var	bool Whether the provider is disabled
+	 * @var		bool Whether the provider is disabled
 	 */
 	private $disabled = false;
 	
 	/**
-	 * @var	string Provider name
+	 * @var		string Provider name
 	 */
 	private $name = '';
 	
@@ -45,17 +45,18 @@ final class Provider {
 	private $post_object = null;
 	
 	/**
-	 * @var	string Regular expression pattern
+	 * @var		string Regular expression pattern
 	 */
 	private $pattern = '';
 	
 	/**
-	 * @var	string Regular expression pattern
+	 * @since	1.12.0
+	 * @var		string Regular expression pattern
 	 */
 	private $pattern_extended = '';
 	
 	/**
-	 * @var	string Privacy policy URL
+	 * @var		string Privacy policy URL
 	 */
 	private $privacy_policy_url = '';
 	
@@ -65,12 +66,12 @@ final class Provider {
 	private $system = false;
 	
 	/**
-	 * @var	int|null Thumbnail ID
+	 * @var		int|null Thumbnail ID
 	 */
 	private $thumbnail_id = null;
 	
 	/**
-	 * @var	string Title
+	 * @var		string Title
 	 */
 	private $title = '';
 	
@@ -118,6 +119,8 @@ final class Provider {
 	
 	/**
 	 * Extend the pattern.
+	 * 
+	 * @since	1.12.0
 	 */
 	private function extend_pattern() {
 		$this->pattern_extended = Replacer::extend_pattern( $this->pattern, $this );
