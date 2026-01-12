@@ -24,7 +24,7 @@ final class Fields {
 		\add_action( 'add_meta_boxes', [ $this, 'add_meta_boxes' ] );
 		\add_action( 'do_meta_boxes', [ self::class, 'remove_default' ] );
 		\add_action( 'init', [ $this, 'register_default' ] );
-		\add_action( 'save_post', [ $this, 'save' ], 10, 2 );
+		\add_action( 'save_post_epi_embed', [ $this, 'save' ] );
 		\add_filter( 'map_meta_cap', [ self::class, 'disallow_deleting_system_embeds' ], 10, 4 );
 	}
 	
@@ -242,13 +242,18 @@ final class Fields {
 	/**
 	 * Save the fields as post meta.
 	 * 
-	 * @param	int			$post_id The ID of the post
-	 * @param	\WP_Post	$post The post object
+	 * @since	1.12.0 Deprecated second parameter
+	 * 
+	 * @param	int				$post_id The ID of the post
+	 * @param	\WP_Post|false	$deprecated Deprecated. The post object
 	 */
-	public function save( $post_id, $post ) {
-		// ignore other post types
-		if ( $post->post_type !== 'epi_embed' ) {
-			return;
+	public function save( $post_id, $deprecated ) {
+		if ( $deprecated !== false ) {
+			\_doing_it_wrong(
+				__METHOD__,
+				\esc_html__( 'The second parameter is deprecated. Please remove it from your method call.', 'embed-privacy' ),
+				'1.12.0'
+			);
 		}
 		
 		if (

@@ -1384,6 +1384,8 @@ class Migration {
 			return;
 		}
 		
+		\remove_action( 'save_post_epi_embed', [ Embed_Privacy::get_instance()->fields, 'save' ], 10 );
+		
 		foreach ( Providers::get_instance()->get_list() as $provider ) {
 			if ( ! $provider->get_post_object() ) {
 				continue;
@@ -1424,6 +1426,8 @@ class Migration {
 			
 			\update_post_meta( $provider->get_post_object()->ID, 'content_item_name', $content_item_name, true );
 		}
+		
+		\add_action( 'save_post_epi_embed', [ Embed_Privacy::get_instance()->fields, 'save' ], 10, 2 );
 	}
 	
 	/**
@@ -1440,6 +1444,8 @@ class Migration {
 			return;
 		}
 		
+		\remove_action( 'save_post_epi_embed', [ Embed_Privacy::get_instance()->fields, 'save' ] );
+		
 		foreach ( Providers::get_instance()->get_list() as $provider ) {
 			if ( ! $provider->get_post_object() ) {
 				continue;
@@ -1453,6 +1459,8 @@ class Migration {
 				] );
 			}
 		}
+		
+		\add_action( 'save_post_epi_embed', [ Embed_Privacy::get_instance()->fields, 'save' ] );
 	}
 	
 	/**
