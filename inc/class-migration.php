@@ -30,7 +30,7 @@ class Migration {
 	 * @var		string Current migration version
 	 * @since	1.2.2
 	 */
-	private $version = '1.11.0';
+	private $version = '1.12.0';
 	
 	/**
 	 * Migration constructor.
@@ -223,6 +223,8 @@ class Migration {
 				$this->migrate_1_10_7();
 			case '1.10.9':
 				$this->migrate_1_11_0();
+			case '1.11.0':
+				$this->migrate_1_12_0();
 			case $this->version:
 				// most recent version, do nothing
 				break;
@@ -735,7 +737,7 @@ class Migration {
 	}
 	
 	/**
-	 * Migrations for version 1.11.0
+	 * Migrations for version 1.11.0.
 	 * 
 	 * @since	1.11.0
 	 * 
@@ -745,46 +747,7 @@ class Migration {
 	 * - Make https: optional for YouTube regular expression
 	 */
 	private function migrate_1_11_0() {
-		foreach ( Providers::get_instance()->get_list() as $provider ) {
-			if ( ! $provider->get_post_object() ) {
-				continue;
-			}
-			
-			switch ( $provider->get_title() ) {
-				case \_x( 'Instagram', 'embed provider', 'embed-privacy' ):
-				case \_x( 'TikTok', 'embed provider', 'embed-privacy' ):
-					$content_item_name = \_x( 'post', 'content item name', 'embed-privacy' );
-					break;
-				case \_x( 'Flickr', 'embed provider', 'embed-privacy' ):
-				case \_x( 'Imgur', 'embed provider', 'embed-privacy' ):
-					$content_item_name = \_x( 'image', 'content item name', 'embed-privacy' );
-					break;
-				case \_x( 'Maps Marker Pro', 'embed provider', 'embed-privacy' ):
-					$content_item_name = \_x( 'map', 'content item name', 'embed-privacy' );
-					break;
-				case \_x( 'Meetup', 'embed provider', 'embed-privacy' ):
-					$content_item_name = \_x( 'event', 'content item name', 'embed-privacy' );
-					break;
-				case \_x( 'Photobucket', 'embed provider', 'embed-privacy' ):
-					$content_item_name = \_x( 'photo', 'content item name', 'embed-privacy' );
-					break;
-				case \_x( 'X', 'embed provider', 'embed-privacy' ):
-					$content_item_name = \_x( 'tweet', 'content item name', 'embed-privacy' );
-					break;
-				case \_x( 'DailyMotion', 'embed provider', 'embed-privacy' ):
-				case \_x( 'VideoPress', 'embed provider', 'embed-privacy' ):
-				case \_x( 'Vimeo', 'embed provider', 'embed-privacy' ):
-				case \_x( 'WordPress.tv', 'embed provider', 'embed-privacy' ):
-				case \_x( 'YouTube', 'embed provider', 'embed-privacy' ):
-					$content_item_name = \_x( 'video', 'content item name', 'embed-privacy' );
-					break;
-				default:
-					$content_item_name = \_x( 'content', 'content item name', 'embed-privacy' );
-					break;
-			}
-			
-			\add_post_meta( $provider->get_post_object()->ID, 'content_item_name', $content_item_name, true );
-		}
+		$this->set_translated_content_item_names();
 		
 		$youtube_provider = \get_posts( [
 			'meta_key' => 'is_system',
@@ -826,6 +789,19 @@ class Migration {
 			'post_title' => \_x( 'Canva', 'embed provider', 'embed-privacy' ),
 			'post_type' => 'epi_embed',
 		] );
+	}
+	
+	/**
+	 * Migrations for version 1.12.0.
+	 * 
+	 * @since	1.12.0
+	 * 
+	 * - Update content item names translation, if needed
+	 * - Updated description translation, if needed
+	 */
+	private function migrate_1_12_0() {
+		$this->set_translated_content_item_names();
+		$this->set_translated_descriptions();
 	}
 	
 	/**
@@ -1393,6 +1369,90 @@ class Migration {
 			</p>
 		</div>
 		<?php
+	}
+	
+	/**
+	 * Set translated content item names for all providers if it is the default.
+	 * Installing the plugin via e.g. WP-CLI prevents translations from being
+	 * active and thus we store untranslated strings in the database.
+	 * 
+	 * @since	1.12.0
+	 */
+	private function set_translated_content_item_names() {
+		// if there is no translation, don't set anything
+		if ( \_x( 'content', 'content item name', 'embed-privacy' ) === 'content' ) {
+			return;
+		}
+		
+		foreach ( Providers::get_instance()->get_list() as $provider ) {
+			if ( ! $provider->get_post_object() ) {
+				continue;
+			}
+			
+			switch ( $provider->get_title() ) {
+				case \_x( 'Instagram', 'embed provider', 'embed-privacy' ):
+				case \_x( 'TikTok', 'embed provider', 'embed-privacy' ):
+					$content_item_name = \_x( 'post', 'content item name', 'embed-privacy' );
+					break;
+				case \_x( 'Flickr', 'embed provider', 'embed-privacy' ):
+				case \_x( 'Imgur', 'embed provider', 'embed-privacy' ):
+					$content_item_name = \_x( 'image', 'content item name', 'embed-privacy' );
+					break;
+				case \_x( 'Maps Marker Pro', 'embed provider', 'embed-privacy' ):
+					$content_item_name = \_x( 'map', 'content item name', 'embed-privacy' );
+					break;
+				case \_x( 'Meetup', 'embed provider', 'embed-privacy' ):
+					$content_item_name = \_x( 'event', 'content item name', 'embed-privacy' );
+					break;
+				case \_x( 'Photobucket', 'embed provider', 'embed-privacy' ):
+					$content_item_name = \_x( 'photo', 'content item name', 'embed-privacy' );
+					break;
+				case \_x( 'X', 'embed provider', 'embed-privacy' ):
+					$content_item_name = \_x( 'tweet', 'content item name', 'embed-privacy' );
+					break;
+				case \_x( 'DailyMotion', 'embed provider', 'embed-privacy' ):
+				case \_x( 'VideoPress', 'embed provider', 'embed-privacy' ):
+				case \_x( 'Vimeo', 'embed provider', 'embed-privacy' ):
+				case \_x( 'WordPress.tv', 'embed provider', 'embed-privacy' ):
+				case \_x( 'YouTube', 'embed provider', 'embed-privacy' ):
+					$content_item_name = \_x( 'video', 'content item name', 'embed-privacy' );
+					break;
+				default:
+					$content_item_name = \_x( 'content', 'content item name', 'embed-privacy' );
+					break;
+			}
+			
+			\update_post_meta( $provider->get_post_object()->ID, 'content_item_name', $content_item_name, true );
+		}
+	}
+	
+	/**
+	 * Set translated descriptions for all providers if it is the default.
+	 * Installing the plugin via e.g. WP-CLI prevents translations from being
+	 * active and thus we store untranslated strings in the database.
+	 * 
+	 * @since	1.12.0
+	 */
+	private function set_translated_descriptions() {
+		// if there is no translation, don't set anything
+		/* translators: embed provider */
+		if ( \__( 'Click here to display content from %s.', 'embed-privacy' ) === 'Click here to display content from %s.' ) {
+			return;
+		}
+		
+		foreach ( Providers::get_instance()->get_list() as $provider ) {
+			if ( ! $provider->get_post_object() ) {
+				continue;
+			}
+			
+			if ( $provider->get_description() === \sprintf( 'Click here to display content from %s.', $provider->get_title() ) ) {
+				\wp_update_post( [
+					'ID' => $provider->get_post_object()->ID,
+					/* translators: embed provider */
+					'post_content' => \sprintf( \__( 'Click here to display content from %s.', 'embed-privacy' ), $provider->get_title() ),
+				] );
+			}
+		}
 	}
 	
 	/**
