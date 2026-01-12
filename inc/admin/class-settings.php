@@ -35,7 +35,7 @@ final class Settings {
 		<div class="wrap">
 			<h1><?php \esc_html_e( 'Embed Privacy', 'embed-privacy' ); ?> <a href="<?php echo \esc_url( \admin_url( 'edit.php?post_type=epi_embed' ) ); ?>" class="page-title-action"><?php \esc_html_e( 'Manage embeds', 'embed-privacy' ); ?></a></h1>
 			
-			<form action="options.php" method="post">
+			<form action="options.php" method="post" class="embed-privacy__settings-form">
 				<?php
 				\settings_fields( 'embed_privacy' );
 				\do_settings_sections( 'embed_privacy' );
