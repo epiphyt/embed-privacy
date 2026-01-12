@@ -12,6 +12,7 @@ if ( ! \defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 $GLOBALS['options'] = [
 	'embed_privacy_disable_link',
 	'embed_privacy_download_thumbnails',
+	'embed_privacy_force_script_loading',
 	'embed_privacy_is_migrating',
 	'embed_privacy_javascript_detection',
 	'embed_privacy_local_tweets',

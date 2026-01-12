@@ -12,7 +12,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 	var overlayLinks = document.querySelectorAll( '.embed-privacy-overlay a' );
 	
 	initOverlays( overlays, overlayLinks, checkboxes, labels );
-	initBuddyPressActivityStream();
+	initMutationObserver();
 	optOut();
 	setMinHeight();
 	
@@ -172,29 +172,26 @@ document.addEventListener( 'DOMContentLoaded', function() {
 	}
 	
 	/**
-	 * Initialize support for BuddyPress activity stream.
+	 * Initialize a MutationObserver to allow working embeds in dynamic content.
+	 * 
+	 * @since	1.12.0
 	 */
-	function initBuddyPressActivityStream() {
-		const activityStream = document.getElementById( 'activity-stream' );
-		
-		if ( ! activityStream ) {
-			return;
-		}
-		
-		const activityObserver = new MutationObserver( ( mutations ) => {
+	function initMutationObserver() {
+		const observer = new MutationObserver( ( mutations ) => {
 			for ( const mutation of mutations ) {
-				const checkboxes = mutation.target.querySelectorAll( '.embed-privacy-inner .embed-privacy-input' );
-				const labels = mutation.target.querySelectorAll( '.embed-privacy-inner .embed-privacy-label' );
 				const overlays = mutation.target.querySelectorAll( '.embed-privacy-overlay' );
-				const overlayLinks = mutation.target.querySelectorAll( '.embed-privacy-overlay a' );
 				
 				if ( overlays.length ) {
+					const checkboxes = mutation.target.querySelectorAll( '.embed-privacy-inner .embed-privacy-input' );
+					const labels = mutation.target.querySelectorAll( '.embed-privacy-inner .embed-privacy-label' );
+					const overlayLinks = mutation.target.querySelectorAll( '.embed-privacy-overlay a' );
+					
 					initOverlays( overlays, overlayLinks, checkboxes, labels );
 				}
 			}
 		} );
 		
-		activityObserver.observe( activityStream, {
+		observer.observe( document.body, {
 			childList: true,
 		} );
 	}

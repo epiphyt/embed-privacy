@@ -125,6 +125,21 @@ final class Settings {
 		);
 		\register_setting( 'embed_privacy', 'embed_privacy_download_thumbnails' );
 		\add_settings_field(
+			'embed_privacy_force_script_loading',
+			\__return_empty_string(),
+			[ Field::class, 'get' ],
+			'embed_privacy',
+			'embed_privacy_general',
+			[
+				'description' => \__( 'This loads the embed scripts on every page. Only use this option if your website loads content dynamically via JavaScript, that can include embedded content.', 'embed-privacy' ),
+				'name' => 'embed_privacy_force_script_loading',
+				'option_type' => 'option',
+				'title' => \__( 'Force script loading', 'embed-privacy' ),
+				'type' => 'checkbox',
+			]
+		);
+		\register_setting( 'embed_privacy', 'embed_privacy_force_script_loading' );
+		\add_settings_field(
 			'embed_privacy_preserve_data_on_uninstall',
 			\__( 'Data handling', 'embed-privacy' ),
 			[ Field::class, 'get' ],

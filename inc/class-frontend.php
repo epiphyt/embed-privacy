@@ -79,5 +79,9 @@ final class Frontend {
 		 * @param	string	$suffix A filename suffix
 		 */
 		\do_action( 'embed_privacy_register_assets', $is_debug, $suffix );
+		
+		if ( \get_option( 'embed_privacy_force_script_loading' ) === 'yes' ) {
+			$this->print_assets();
+		}
 	}
 }
