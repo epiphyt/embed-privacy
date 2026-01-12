@@ -46,7 +46,7 @@ final class Instagram {
 			'elements' => [
 				'blockquote',
 			],
-			'regex' => '/<blockquote class="instagram-media"([^>]+)>([\S\s]*?)<\/blockquote>\s?<script async src="\/\/www\.instagram\.com\/embed\.js"><\/script>/', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+			'regex' => '/<blockquote class="instagram-media([\w\s]*)"([^>]+)>([\S\s]*?)<\/blockquote>(\s*)?<script async src="\/\/www\.instagram\.com\/embed\.js"><\/script>/', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 		];
 		$overlay = new Replacement( $content );
 		$new_content = $overlay->get( $attributes );
@@ -55,6 +55,8 @@ final class Instagram {
 			Embed_Privacy::get_instance()->has_embed = true;
 			$content = $new_content;
 		}
+		
+		\add_filter( 'embed_privacy_overlay_replaced_content', [ self::class, 'replace_posts' ] );
 		
 		return $content;
 	}

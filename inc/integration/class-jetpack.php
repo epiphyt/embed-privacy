@@ -97,6 +97,8 @@ final class Jetpack {
 			$content = $new_content;
 		}
 		
+		\add_filter( 'embed_privacy_overlay_replaced_content', [ self::class, 'replace_facebook_posts' ] );
+		
 		return $content;
 	}
 }
