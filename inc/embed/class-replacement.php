@@ -5,7 +5,6 @@ use DOMDocument;
 use DOMElement;
 use DOMNode;
 use epiphyt\Embed_Privacy\data\Providers;
-use epiphyt\Embed_Privacy\data\Replacer;
 use epiphyt\Embed_Privacy\Embed_Privacy;
 
 /**
@@ -74,6 +73,11 @@ final class Replacement {
 		 * @param	string	$content The original content
 		 */
 		$ignore_unknown_providers = (bool) \apply_filters( 'embed_privacy_ignore_unknown_providers', false, $content );
+		
+		// we don't need to process an empty content as it never contains an embed
+		if ( empty( \trim( $content ) ) ) {
+			return $content;
+		}
 		
 		// get default external content
 		// special case for youtube-nocookie.com as it is part of YouTube provider
@@ -206,7 +210,7 @@ final class Replacement {
 			'height' => 0,
 			'ignore_aspect_ratio' => false,
 			'is_oembed' => false,
-			'regex' => Replacer::extend_pattern( $this->provider->get_pattern(), $this->provider ),
+			'regex' => $this->provider->get_pattern( 'extended' ),
 			'strip_newlines' => ! \has_blocks( $content ),
 			'width' => 0,
 		] );
