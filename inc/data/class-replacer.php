@@ -136,6 +136,11 @@ final class Replacer {
 			return $custom_replacement;
 		}
 		
+		// we don't need to process an empty content as it never contains an embed
+		if ( empty( \trim( $content ) ) ) {
+			return $content;
+		}
+		
 		$new_content = $content;
 		$replacement = new Replacement( $new_content );
 		$new_content = $replacement->get();
