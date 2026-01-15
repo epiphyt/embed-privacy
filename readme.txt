@@ -2,7 +2,7 @@
 Contributors: epiphyt, kittmedia, krafit
 Tags: oembed, privacy, gutenberg, iframes, performance
 Requires at least: 5.9
-Stable tag: 1.12.0
+Stable tag: 1.12.1
 Tested up to: 6.9
 Requires PHP: 5.6
 License: GPL2
@@ -159,6 +159,9 @@ We are [Epiphyt](https://epiph.yt/en/), your friendly neighborhood WordPress plu
 You can report security bugs through the Patchstack Vulnerability Disclosure Program. The Patchstack team help validate, triage and handle any security vulnerabilities. [Report a security vulnerability.](https://patchstack.com/database/vdp/embed-privacy)
 
 == Changelog ==
+
+= 1.12.1 =
+* Fixed: Fatal error during activation and saving embed providers
 
 = 1.12.0 =
 * Added: Allow handling dynamic content (in combination with the setting "Force script loading")

@@ -247,7 +247,7 @@ final class Fields {
 	 * @param	int				$post_id The ID of the post
 	 * @param	\WP_Post|false	$deprecated Deprecated. The post object
 	 */
-	public function save( $post_id, $deprecated ) {
+	public function save( $post_id, $deprecated = false ) {
 		if ( $deprecated !== false ) {
 			\_doing_it_wrong(
 				__METHOD__,

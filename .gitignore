@@ -1,8 +1,10 @@
 .DS_Store
+.phpunit.cache
 .vscode
-*.map
 *.css
+*.map
 *.min.js
 build
 node_modules
+phpunit.xml
 vendor

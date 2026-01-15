@@ -13,3 +13,5 @@ webpack.config.js
 composer.json
 composer.lock
 phpstan.neon.dist
+.phpunit.cache
+phpunit.xml
