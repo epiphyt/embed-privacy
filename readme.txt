@@ -160,6 +160,10 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 == Changelog ==
 
+= 1.12.2 =
+* Improved: Dynamic content is now handled more performant
+* Fixed: The current focussed element is no more changed to the first active embed after page load
+
 = 1.12.1 =
 * Fixed: Fatal error during activation and saving embed providers
 
