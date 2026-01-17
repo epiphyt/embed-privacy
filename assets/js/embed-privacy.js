@@ -122,7 +122,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		for ( var i = 0; i < embedOverlays.length; i++ ) {
 			embedOverlays[ i ].addEventListener( 'click', function( event ) {
 				if ( event.currentTarget.tagName !== 'INPUT' ) {
-					overlayClick( event.currentTarget );
+					overlayClick( event.currentTarget, true );
 				}
 			} );
 			
@@ -250,10 +250,12 @@ document.addEventListener( 'DOMContentLoaded', function() {
 	 * Clicking on an overlay.
 	 * 
 	 * @since	1.2.0
+	 * @since	1.12.2 Added parameter isSynthetic
 	 * 
 	 * @param	{element}	target Target element
+	 * @param	{boolean}	isSynthetic Whether the click event is synthetic
 	 */
-	function overlayClick( target ) {
+	function overlayClick( target, isSynthetic = false ) {
 		var embedContainer = target.parentNode;
 		var embedContent = target.nextElementSibling;
 		
@@ -295,7 +297,9 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		}
 		
 		// focus first element in container
-		embedContainer.querySelector( '.embed-privacy-content > :first-child' ).focus();
+		if ( ! isSynthetic ) {
+			embedContainer.querySelector( '.embed-privacy-content > :first-child' ).focus();
+		}
 		
 		if ( typeof jQuery !== 'undefined' ) {
 			const videoShortcode = jQuery( '.wp-video-shortcode' );
