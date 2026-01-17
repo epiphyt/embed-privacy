@@ -176,7 +176,7 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 * Fixed: Handling multiple Instagram/Facebook posts within the same content
 * Fixed: Fatal error in combination with Sugar Calendar Lite and Elementor
 
-For the full changelog, please visit https://docs.epiph.yt/embed-privacy/changelog.html.
+For the full changelog, please visit [https://docs.epiph.yt/embed-privacy/changelog.html](https://docs.epiph.yt/embed-privacy/changelog.html).
 
 == Upgrade Notice ==
 
