@@ -46,7 +46,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 			enableAlwaysActiveProviders( document.querySelectorAll( '.embed-privacy-overlay' ) );
 			
 			// focus first element in container, but not for opt-out shortcode
-			if ( container ) {
+			if ( container && document.activeElement !== container ) {
 				container.querySelector( '.embed-privacy-content > :first-child' ).focus();
 			}
 		}
@@ -70,6 +70,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 	 * @param {HTMLElement[]} currentOverlays List of current overlays
 	 */
 	function enableAlwaysActiveProviders( currentOverlays ) {
+		const activeElement = document.activeElement;
 		var cookie = ( get_cookie( 'embed-privacy' ) ? JSON.parse( get_cookie( 'embed-privacy' ) ) : '' );
 		
 		if ( ! currentOverlays ) {
@@ -89,6 +90,9 @@ document.addEventListener( 'DOMContentLoaded', function() {
 				currentOverlays[ i ].click();
 			}
 		}
+		
+		// focus previously active element
+		setTimeout( () => activeElement.focus(), 50 );
 	}
 	
 	/**
@@ -179,14 +183,16 @@ document.addEventListener( 'DOMContentLoaded', function() {
 	function initMutationObserver() {
 		const observer = new MutationObserver( ( mutations ) => {
 			for ( const mutation of mutations ) {
-				const overlays = mutation.target.querySelectorAll( '.embed-privacy-overlay' );
-				
-				if ( overlays.length ) {
-					const checkboxes = mutation.target.querySelectorAll( '.embed-privacy-inner .embed-privacy-input' );
-					const labels = mutation.target.querySelectorAll( '.embed-privacy-inner .embed-privacy-label' );
-					const overlayLinks = mutation.target.querySelectorAll( '.embed-privacy-overlay a' );
+				for ( const newNodes of mutation.addedNodes ) {
+					const overlays = newNodes.querySelectorAll( '.embed-privacy-overlay' );
 					
-					initOverlays( overlays, overlayLinks, checkboxes, labels );
+					if ( overlays.length ) {
+						const checkboxes = newNodes.querySelectorAll( '.embed-privacy-inner .embed-privacy-input' );
+						const labels = newNodes.querySelectorAll( '.embed-privacy-inner .embed-privacy-label' );
+						const overlayLinks = newNodes.querySelectorAll( '.embed-privacy-overlay a' );
+						
+						initOverlays( overlays, overlayLinks, checkboxes, labels );
+					}
 				}
 			}
 		} );
