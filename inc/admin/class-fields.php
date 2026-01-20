@@ -273,7 +273,7 @@ final class Fields {
 					)
 				)
 			)
-			&& \current_action() !== 'save_post'
+			&& \current_action() !== 'save_post_epi_embed'
 		) {
 			return;
 		}
