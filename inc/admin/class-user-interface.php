@@ -36,7 +36,7 @@ final class User_Interface {
 		return \array_merge(
 			$input,
 			[
-				'<a href="https://epiph.yt/en/embed-privacy/documentation/?version=' . \rawurlencode( \EMBED_PRIVACY_VERSION ) . '" target="_blank" rel="noopener noreferrer">' . \esc_html__( 'Documentation', 'embed-privacy' ) . '</a>',
+				'<a href="https://docs.epiph.yt/embed-privacy/?version=' . \rawurlencode( \EMBED_PRIVACY_VERSION ) . '" target="_blank" rel="noopener noreferrer">' . \esc_html__( 'Documentation', 'embed-privacy' ) . '</a>',
 			]
 		);
 	}
