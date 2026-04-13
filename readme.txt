@@ -27,7 +27,7 @@ Feel free to contribute. The code is available at [GitHub](https://github.com/ep
 
 ### Documentation
 
-You can find the documentation for Impressum at [docs.epiph.yt](https://docs.epiph.yt/embed-privacy/).
+You can find the documentation for Embed Privacy at [docs.epiph.yt](https://docs.epiph.yt/embed-privacy/).
 
 == Installation ==
 
