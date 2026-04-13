@@ -224,7 +224,7 @@ class Fields {
 	 * @param	int			$post_id The ID of the post
 	 * @param	\WP_Post	$post The post object
 	 */
-	public function save_fields( $post_id, $post ) {
+	public function save_fields( $post_id, $post ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		\_doing_it_wrong(
 			__METHOD__,
 			\sprintf(
@@ -234,7 +234,7 @@ class Fields {
 			),
 			'1.10.0'
 		);
-		Embed_Privacy::get_instance()->fields->save( $post_id, $post );
+		Embed_Privacy::get_instance()->fields->save( $post_id );
 	}
 	
 	/**
