@@ -21,6 +21,14 @@ By clicking on the placeholder the respective content will then be loaded.
 
 **Note: This plugins requires the PHP extension ["Document Object Model" (php-dom)](https://www.php.net/manual/en/book.dom.php).**
 
+### Contribution
+
+Feel free to contribute. The code is available at [GitHub](https://github.com/epiphyt/embed-privacy).
+
+### Documentation
+
+You can find the documentation for Impressum at [docs.epiph.yt](https://docs.epiph.yt/embed-privacy/).
+
 == Installation ==
 
 1. Upload the plugin files to the `/wp-content/plugins/embed-privacy` directory, or install the plugin through the WordPress plugins screen directly.
