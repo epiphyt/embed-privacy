@@ -185,6 +185,8 @@ final class Thumbnail {
 	 */
 	private static function delete( $filename ) {
 		$directory = self::get_directory();
+		// make sure to remove all sub-paths from the filename
+		$filename = \basename( $filename );
 		
 		if ( ! \file_exists( $directory['base_dir'] . '/' . $filename ) ) {
 			return;
