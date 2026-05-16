@@ -271,7 +271,7 @@ final class Replacement {
 					// and they are local by definition, so do nothing
 					// see https://github.com/epiphyt/embed-privacy/issues/27
 					if ( empty( $embedded_host ) ) {
-						return $content;
+						return self::transform_replaced_characters( $content, $character_replacements );
 					}
 					
 					$this->provider->set_title( $embedded_host );
@@ -435,7 +435,7 @@ final class Replacement {
 					$this->provider->is_system()
 					&& \str_contains( $matched_content, 'class="wp-block-embed__wrapper' )
 				) {
-					return $content;
+					return self::transform_replaced_characters( $content, $character_replacements );
 				}
 				
 				/**
@@ -472,29 +472,7 @@ final class Replacement {
 			$content = \rawurldecode( $content );
 		}
 		
-		return \str_replace(
-			\array_merge(
-				[
-					'<html><meta charset="utf-8">',
-					'</html>',
-					'%20data-epi-spacing%20',
-					'"data-epi-spacing%20',
-					'%_epi_20data-epi-spacing%_epi_20', // % has been replaced with %_epi_ after replacing spaces
-				],
-				\array_values( $character_replacements )
-			),
-			\array_merge(
-				[
-					'',
-					'',
-					' ',
-					'" ',
-					' ',
-				],
-				\array_keys( $character_replacements )
-			),
-			$content
-		);
+		return self::transform_replaced_characters( $content, $character_replacements );
 	}
 	
 	/**
@@ -582,5 +560,38 @@ final class Replacement {
 		 * This filter is documented in inc/embed/class-replacement.php.
 		 */
 		$this->providers[] = \apply_filters( 'embed_privacy_overlay_provider', $current_provider, $content, $url );
+	}
+	
+	/**
+	 * Transform all replaced characters to their original version.
+	 * 
+	 * @param	string					$content Content to transform
+	 * @param	array<string, string>	$replacements List of replacements
+	 * @return	string Transformed content
+	 */
+	private static function transform_replaced_characters( $content, array $replacements ) {
+		return \str_replace(
+			\array_merge(
+				[
+					'<html><meta charset="utf-8">',
+					'</html>',
+					'%20data-epi-spacing%20',
+					'"data-epi-spacing%20',
+					'%_epi_20data-epi-spacing%_epi_20', // % has been replaced with %_epi_ after replacing spaces
+				],
+				\array_values( $replacements )
+			),
+			\array_merge(
+				[
+					'',
+					'',
+					' ',
+					'" ',
+					' ',
+				],
+				\array_keys( $replacements )
+			),
+			$content
+		);
 	}
 }
