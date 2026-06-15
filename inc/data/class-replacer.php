@@ -111,7 +111,11 @@ final class Replacer {
 		}
 		
 		// do nothing for ignored shortcodes
-		if ( ! empty( $tag ) && \in_array( $tag, $embed_privacy->shortcode->get_ignored(), true ) ) {
+		if (
+			! empty( $data )
+			&& \is_string( $data )
+			&& \in_array( $data, $embed_privacy->shortcode->get_ignored(), true )
+		) {
 			return $content;
 		}
 		
