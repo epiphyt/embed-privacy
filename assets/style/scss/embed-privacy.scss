@@ -165,3 +165,12 @@
 .embed-privacy-local-tweet {
 	font-style: normal;
 }
+
+.wp-block-cover {
+	.wp-block-cover__embed-background {
+		// reset cover background pointer events
+		&:has(.embed-privacy-container) {
+			pointer-events: all;
+		}
+	}
+}

@@ -17,6 +17,7 @@ use epiphyt\Embed_Privacy\integration\Activitypub;
 use epiphyt\Embed_Privacy\integration\Amp;
 use epiphyt\Embed_Privacy\integration\Astra;
 use epiphyt\Embed_Privacy\integration\Buddypress;
+use epiphyt\Embed_Privacy\integration\Cover_Block;
 use epiphyt\Embed_Privacy\integration\Divi;
 use epiphyt\Embed_Privacy\integration\Elementor;
 use epiphyt\Embed_Privacy\integration\Enfold;
@@ -91,6 +92,7 @@ class Embed_Privacy {
 		Amp::class,
 		Astra::class,
 		Buddypress::class,
+		Cover_Block::class,
 		Divi::class,
 		Elementor::class,
 		Enfold::class,
