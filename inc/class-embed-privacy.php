@@ -19,6 +19,7 @@ use epiphyt\Embed_Privacy\integration\Astra;
 use epiphyt\Embed_Privacy\integration\Buddypress;
 use epiphyt\Embed_Privacy\integration\Divi;
 use epiphyt\Embed_Privacy\integration\Elementor;
+use epiphyt\Embed_Privacy\integration\Enfold;
 use epiphyt\Embed_Privacy\integration\Instagram;
 use epiphyt\Embed_Privacy\integration\Instagram_Feed;
 use epiphyt\Embed_Privacy\integration\Jetpack;
@@ -92,6 +93,7 @@ class Embed_Privacy {
 		Buddypress::class,
 		Divi::class,
 		Elementor::class,
+		Enfold::class,
 		Instagram::class,
 		Instagram_Feed::class,
 		Jetpack::class,

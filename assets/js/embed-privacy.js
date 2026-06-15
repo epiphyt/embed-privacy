@@ -323,6 +323,12 @@ document.addEventListener( 'DOMContentLoaded', function() {
 				}
 			}, 100 );
 		}
+		
+		const aviaClickToPlayOverlay = embedContainer.querySelector( '.av-click-to-play-overlay' );
+		
+		if ( aviaClickToPlayOverlay ) {
+			aviaClickToPlayOverlay.click();
+		}
 	}
 	
 	/**
