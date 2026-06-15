@@ -35,6 +35,15 @@
 	height: 100%;
 	width: 100%;
 	
+	> embed,
+	> iframe,
+	> object {
+		// limit the iframe size to the content size of the surrounding container
+		// since aspect-ratio is set via inline CSS, there is no distortion here
+		max-height: 100%;
+		max-width: 100%;
+	}
+	
 	// make sure centered elements are centered if body doesn't contain
 	// the class .wp-embed-responsive
 	// see https://github.com/epiphyt/embed-privacy/issues/66
