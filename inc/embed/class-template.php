@@ -51,6 +51,8 @@ final class Template {
 	 * @return	string The overlay template
 	 */
 	public static function get( $provider, $output, $attributes = [] ) {
+		$embed_post = null;
+		
 		if ( ! $provider instanceof Provider ) {
 			\_doing_it_wrong(
 				__METHOD__,
