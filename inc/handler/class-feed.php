@@ -30,6 +30,10 @@ final class Feed {
 			return $markup;
 		}
 		
+		if ( empty( $attributes['embed_url'] ) ) {
+			return self::get_non_link_markup( $provider );
+		}
+		
 		return self::get_link_markup( $attributes, $provider );
 	}
 	
@@ -49,6 +53,20 @@ final class Feed {
 				\esc_html__( 'Open embedded content from %s', 'embed-privacy' ),
 				\esc_html( $provider->get_title() )
 			)
+		);
+	}
+	
+	/**
+	 * Get non-link markup for the embedded content.
+	 * 
+	 * @param	\epiphyt\Embed_Privacy\embed\Provider	$provider Embed provider
+	 * @return	string Link markup
+	 */
+	public static function get_non_link_markup( $provider ) {
+		return \sprintf(
+			/* translators: embed provider title */
+			\esc_html__( 'Embedded content from %s', 'embed-privacy' ),
+			\esc_html( $provider->get_title() )
 		);
 	}
 }
