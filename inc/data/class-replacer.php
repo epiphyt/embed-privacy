@@ -72,9 +72,9 @@ final class Replacer {
 		 */
 		$allowed_tags = (array) \apply_filters( 'embed_privacy_replacer_matcher_elements', $allowed_tags, $provider );
 		
-		$tags_regex = '(' . \implode( '|', \array_filter( $allowed_tags, static function( $tag ) {
+		$tags_regex = '(' . \implode( '|', \array_map( static function( $tag ) {
 			return \preg_quote( $tag, '/' );
-		} ) ) . ')';
+		}, $allowed_tags ) ) . ')';
 		$pattern = '/<' . $tags_regex . '([^"]*)"([^<]*)(?<original_pattern>' . \trim( $pattern, '/' ) . ')([^"]*)"([^>]*)(>(.*?)<\/' . $tags_regex . ')?>/';
 		
 		return $pattern;
