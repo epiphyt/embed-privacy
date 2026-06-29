@@ -47,7 +47,11 @@ document.addEventListener( 'DOMContentLoaded', function() {
 			
 			// focus first element in container, but not for opt-out shortcode
 			if ( container && document.activeElement !== container ) {
-				container.querySelector( '.embed-privacy-content > :first-child' ).focus();
+				const firstChild = container.querySelector( '.embed-privacy-content > :first-child' );
+
+				if ( firstChild ) {
+					firstChild.focus();
+				}
 			}
 		}
 		else if ( cookie !== null ) {
@@ -311,7 +315,11 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		
 		// focus first element in container
 		if ( ! isSynthetic ) {
-			embedContainer.querySelector( '.embed-privacy-content > :first-child' ).focus();
+			const firstChild = embedContainer.querySelector( '.embed-privacy-content > :first-child' );
+
+			if ( firstChild ) {
+				firstChild.focus();
+			}
 		}
 		
 		if ( typeof jQuery !== 'undefined' ) {
