@@ -169,7 +169,7 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 == Changelog ==
 
 = 1.12.4 =
-* Fixed: Prevent deletion of non-thumbnails
+* Fixed: Prevent deletion of non-thumbnails ([CVE-2026-57346](https://www.cve.org/CVERecord?id=CVE-2026-57346))
 
 = 1.12.3 =
 * Fixed: Saving embed fields for embed providers was not successful
