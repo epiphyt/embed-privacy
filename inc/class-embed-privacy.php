@@ -332,7 +332,8 @@ class Embed_Privacy {
 			return $this->cookie;
 		}
 		
-		$this->cookie = \json_decode( \sanitize_text_field( \wp_unslash( $_COOKIE['embed-privacy'] ) ) );
+		$cookie = \json_decode( \sanitize_text_field( \wp_unslash( $_COOKIE['embed-privacy'] ) ) );
+		$this->cookie = \is_object( $cookie ) ? $cookie : '';
 		
 		return $this->cookie;
 	}
