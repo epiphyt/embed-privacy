@@ -44,6 +44,8 @@ final class WordPress_TV extends Thumbnail_Provider implements Thumbnail_Provide
 	 * {@inheritDoc}
 	 */
 	public static function get_id( $content ) {
+		$id = '';
+		
 		if ( \str_contains( $content, '/video.wordpress.com/embed/' ) ) {
 			$extracted = \preg_replace( '/.*video\.wordpress\.com\/embed\//', '', $content ); // phpcs:ignore WordPress.WP.CapitalPDangit.MisspelledInText
 			$parts = \explode( '?', $extracted );
@@ -106,10 +108,15 @@ final class WordPress_TV extends Thumbnail_Provider implements Thumbnail_Provide
 			);
 			$xpath = new DOMXPath( $dom );
 			// get thumbnail URL from og:image meta
-			$thumbnail_url = $xpath->evaluate( '//meta[@property="og:image"]/@content' )->item( 0 )->value;
-			$file = \download_url( $thumbnail_url );
+			$og_image = $xpath->evaluate( '//meta[@property="og:image"]/@content' )->item( 0 );
 			
 			\libxml_use_internal_errors( $use_errors );
+			
+			if ( $og_image === null ) {
+				return;
+			}
+			
+			$file = \download_url( $og_image->value );
 			
 			if ( \is_wp_error( $file ) ) {
 				return;
