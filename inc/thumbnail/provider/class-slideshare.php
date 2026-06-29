@@ -44,6 +44,8 @@ final class SlideShare extends Thumbnail_Provider implements Thumbnail_Provider_
 	 * {@inheritDoc}
 	 */
 	public static function get_id( $content ) {
+		$id = '';
+		
 		if ( \str_contains( $content, '/embed_code/key/' ) ) {
 			$extracted = \preg_replace( '/.*\/embed_code\/key\//', '', $content );
 			$parts = \explode( '"', $extracted );
