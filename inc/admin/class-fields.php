@@ -403,7 +403,7 @@ final class Fields {
 		/**
 		 * Set the option names to look for files.
 		 * 
-		 * @param	array	The default name list
+		 * @param	array	$valid_files The default name list
 		 */
 		$valid_files = \apply_filters( 'embed_privacy_valid_files', [ 'background_image' ] );
 		$validated = [];

@@ -23,8 +23,8 @@ final class User_Interface {
 	/**
 	 * Add plugin meta links.
 	 * 
-	 * @param	array	$input Registered links.
-	 * @param	string	$file  Current plugin file.
+	 * @param	array	$input Registered links
+	 * @param	string	$file Current plugin file
 	 * @return	array Merged links
 	 */
 	public static function add_meta_link( $input, $file ) {

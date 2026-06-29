@@ -207,8 +207,8 @@ final class Template {
 		 * 
 		 * @deprecated	1.10.0 Use embed_privacy_template_content instead
 		 * 
-		 * @param	string		$content The content
-		 * @param	string		$provider The embed provider of this embed
+		 * @param	string	$content The content
+		 * @param	string	$provider The embed provider of this embed
 		 */
 		$content = \apply_filters_deprecated(
 			'embed_privacy_content',
@@ -225,8 +225,8 @@ final class Template {
 		 * 
 		 * @since	1.10.0
 		 * 
-		 * @param	string		$content The content
-		 * @param	string		$provider The embed provider of this embed
+		 * @param	string	$content The content
+		 * @param	string	$provider The embed provider of this embed
 		 */
 		$content = \apply_filters( 'embed_privacy_template_content', $content, $provider );
 		

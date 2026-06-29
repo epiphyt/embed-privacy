@@ -165,7 +165,7 @@ final class Provider {
 	/**
 	 * Get the pattern.
 	 * 
-	 * @param	string $type Type of the pattern, 'default' or 'extended'
+	 * @param	string	$type Type of the pattern, 'default' or 'extended'
 	 * @return	string Regular expression pattern
 	 */
 	public function get_pattern( $type = 'default' ) {

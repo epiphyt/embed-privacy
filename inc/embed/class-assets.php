@@ -58,8 +58,8 @@ final class Assets {
 	 * @since	1.11.0 First parameter must be a provider object
 	 * 
 	 * @param	string|\epiphyt\Embed_Privacy\embed\Provider	$provider Provider object
-	 * @param	null											$deprecated Deprecated parameter
-	 * @param	array											$attributes Additional embed attributes
+	 * @param	null	$deprecated Deprecated parameter
+	 * @param	array	$attributes Additional embed attributes
 	 */
 	public function __construct( $provider, $deprecated = null, $attributes = [] ) {
 		if ( \is_string( $provider ) ) {

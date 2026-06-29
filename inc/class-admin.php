@@ -54,8 +54,8 @@ class Admin {
 	 * @deprecated	1.10.0 Use epiphyt\Embed_Privacy\admin\User_Interface::add_meta_link() instead
 	 * @since		1.6.0
 	 * 
-	 * @param	array	$input Registered links.
-	 * @param	string	$file  Current plugin file.
+	 * @param	array	$input Registered links
+	 * @param	string	$file Current plugin file
 	 * @return	array Merged links
 	 */
 	public function add_meta_link( $input, $file ) {

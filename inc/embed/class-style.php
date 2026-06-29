@@ -30,8 +30,8 @@ final class Style {
 	 * @since	1.11.0 First parameter must be a provider object
 	 * 
 	 * @param	string|\epiphyt\Embed_Privacy\embed\Provider	$provider Provider object
-	 * @param	null											$deprecated Deprecated parameter
-	 * @param	array											$attributes Additional embed attributes
+	 * @param	null	$deprecated Deprecated parameter
+	 * @param	array	$attributes Additional embed attributes
 	 */
 	public function __construct( $provider, $deprecated = null, $attributes = [] ) {
 		if ( \is_string( $provider ) ) {
@@ -107,7 +107,7 @@ final class Style {
 				$background['version']
 			);
 		}
-
+		
 		if ( ! empty( $logo['path'] ) ) {
 			$this->styling['logo']['background-image'] = \sprintf( 'url(%1$s?ver=%2$s)', \esc_url( $logo['url'] ), $logo['version'] );
 		}

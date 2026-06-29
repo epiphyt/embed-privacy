@@ -11,7 +11,7 @@ interface Thumbnail_Provider_Interface {
 	 * @param	object	$data A data object result from an oEmbed provider
 	 * @param	string	$url The URL of the content to be embedded
 	 */
-	public static function get( $data, $url );
+	public static function get( $data, $url ); // phpcs:ignore SlevomatCodingStandard.TypeHints.ReturnTypeHint.MissingAnyTypeHint
 	
 	/**
 	 * Get the thumbnail ID from an embed content.
@@ -59,5 +59,5 @@ interface Thumbnail_Provider_Interface {
 	 * @param	string	$url Embed URL
 	 * @param	string	$thumbnail_url Optional thumbnail URL if already available
 	 */
-	public static function save( $id, $url, $thumbnail_url = '' );
+	public static function save( $id, $url, $thumbnail_url = '' ); // phpcs:ignore SlevomatCodingStandard.TypeHints.ReturnTypeHint.MissingAnyTypeHint
 }

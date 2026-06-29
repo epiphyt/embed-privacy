@@ -107,7 +107,7 @@ final class Widget {
 			 * @param	string	$sidebar_id The current sidebar ID
 			 */
 			$widget_output = \apply_filters( 'embed_privacy_widget_output', $widget_output, $widget_id, $sidebar_id );
-
+			
 			echo \is_string( $widget_output ) ? $widget_output : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		}
 	}
