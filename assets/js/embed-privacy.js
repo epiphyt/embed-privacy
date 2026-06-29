@@ -128,6 +128,12 @@ document.addEventListener( 'DOMContentLoaded', function() {
 	 */
 	function initOverlays( embedOverlays, overlayLinks, checkboxes, labels ) {
 		for ( var i = 0; i < embedOverlays.length; i++ ) {
+			// don't bind listeners twice (e.g. when re-initialized via the MutationObserver)
+			if ( embedOverlays[ i ].hasAttribute( 'data-ep-initialized' ) ) {
+				continue;
+			}
+			
+			embedOverlays[ i ].setAttribute( 'data-ep-initialized', '' );
 			embedOverlays[ i ].addEventListener( 'click', function( event ) {
 				if ( event.currentTarget.tagName !== 'INPUT' ) {
 					overlayClick( event.currentTarget, true );
@@ -154,6 +160,11 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		}
 		
 		for ( var i = 0; i < overlayLinks.length; i++ ) {
+			if ( overlayLinks[ i ].hasAttribute( 'data-ep-initialized' ) ) {
+				continue;
+			}
+			
+			overlayLinks[ i ].setAttribute( 'data-ep-initialized', '' );
 			overlayLinks[ i ].addEventListener( 'click', function( event ) {
 				// don't trigger the overlays click
 				event.stopPropagation();
@@ -161,6 +172,12 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		}
 		
 		for ( var i = 0; i < checkboxes.length; i++ ) {
+			if ( checkboxes[ i ].hasAttribute( 'data-ep-initialized' ) ) {
+				continue;
+			}
+			
+			checkboxes[ i ].setAttribute( 'data-ep-initialized', '' );
+			
 			checkboxes[ i ].addEventListener( 'click', function( event ) {
 				// don't trigger the overlays click
 				event.stopPropagation();
@@ -170,6 +187,11 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		}
 		
 		for ( var i = 0; i < labels.length; i++ ) {
+			if ( labels[ i ].hasAttribute( 'data-ep-initialized' ) ) {
+				continue;
+			}
+			
+			labels[ i ].setAttribute( 'data-ep-initialized', '' );
 			labels[ i ].addEventListener( 'click', function( event ) {
 				// don't trigger the overlays click
 				event.stopPropagation();
