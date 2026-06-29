@@ -30,7 +30,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 	function checkboxActivation( target ) {
 		const container = target.closest( '.embed-privacy-container' );
 		var embedProvider = target.getAttribute( 'data-embed-provider' );
-		var cookie = ( get_cookie( 'embed-privacy' ) ? JSON.parse( get_cookie( 'embed-privacy' ) ) : '' );
+		var cookie = getCookieJson( 'embed-privacy' );
 		
 		if ( target.checked ) {
 			// add|update the cookie's value
@@ -71,7 +71,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 	 */
 	function enableAlwaysActiveProviders( currentOverlays ) {
 		const activeElement = document.activeElement;
-		var cookie = ( get_cookie( 'embed-privacy' ) ? JSON.parse( get_cookie( 'embed-privacy' ) ) : '' );
+		var cookie = getCookieJson( 'embed-privacy' );
 		
 		if ( ! currentOverlays ) {
 			currentOverlays = overlays;
@@ -103,7 +103,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 	 * @return	{string[]} List of always active providers
 	 */
 	function getAlwaysActiveProviders() {
-		const cookie = ( get_cookie( 'embed-privacy' ) ? JSON.parse( get_cookie( 'embed-privacy' ) ) : '' );
+		const cookie = getCookieJson( 'embed-privacy' );
 		
 		if ( ! cookie ) {
 			return [];
@@ -270,8 +270,15 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		// hide the embed overlay
 		target.style.display = 'none';
 		// get stored content from JavaScript
-		var embedObject = JSON.parse( window[ '_' + target.parentNode.getAttribute( 'data-embed-id' ) ] );
-		
+		var embedObject;
+
+		try {
+			embedObject = JSON.parse( window[ '_' + target.parentNode.getAttribute( 'data-embed-id' ) ] );
+		}
+		catch ( exception ) {
+			return;
+		}
+
 		embedContent.innerHTML = htmlentities_decode( embedObject.embed );
 		
 		// reset wrapper inline CSS set in setMinHeight()
@@ -367,6 +374,27 @@ function get_cookie( name ) {
 		if ( c.indexOf( nameEQ ) == 0 ) return c.substring( nameEQ.length, c.length );
 	}
 	return null;
+}
+
+/**
+ * Get a cookie and decode it as JSON.
+ *
+ * @param	{string}	name The name of the cookie
+ * @return	{Object|string} The decoded cookie or an empty string
+ */
+function getCookieJson( name ) {
+	var value = get_cookie( name );
+
+	if ( ! value ) {
+		return '';
+	}
+
+	try {
+		return JSON.parse( value );
+	}
+	catch ( exception ) {
+		return '';
+	}
 }
 
 /**

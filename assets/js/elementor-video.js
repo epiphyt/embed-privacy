@@ -37,8 +37,15 @@ document.addEventListener( 'DOMContentLoaded', function() {
 				}
 				
 				// get the video settings
-				const settings = JSON.parse( embeds[ i ].getAttribute( 'data-settings' ) );
-				
+				let settings;
+
+				try {
+					settings = JSON.parse( embeds[ i ].getAttribute( 'data-settings' ) );
+				}
+				catch ( exception ) {
+					continue;
+				}
+
 				if ( ! settings ) {
 					continue;
 				}
