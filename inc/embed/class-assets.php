@@ -152,6 +152,8 @@ final class Assets {
 					continue;
 				}
 				
+				$data = '';
+				
 				if ( \is_string( $asset['data'] ) ) {
 					$data = \html_entity_decode( $asset['data'], \ENT_QUOTES, 'UTF-8' );
 				}
@@ -164,6 +166,7 @@ final class Assets {
 						$data[ $key ] = \html_entity_decode( (string) $value, \ENT_QUOTES, 'UTF-8' );
 					}
 				}
+				
 				$output = '<script>var ' . \esc_js( $asset['object_name'] ) . ' = ' . \wp_json_encode( $data ) . ';</script>' . \PHP_EOL . $output;
 			}
 		}
