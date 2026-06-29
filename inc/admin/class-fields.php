@@ -112,7 +112,7 @@ final class Fields {
 				 */
 				$fields = \apply_filters( 'embed_privacy_editor_fields', $post->ID );
 				
-				if ( $fields !== $post->ID ) {
+				if ( $fields !== $post->ID && \is_string( $fields ) ) {
 					echo $fields; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				}
 				?>
