@@ -54,7 +54,7 @@ final class User_Interface {
 			return;
 		}
 		
-		if ( ( $hook === 'post.php' && $hook === 'post-new.php' ) || $screen->id === 'epi_embed' ) {
+		if ( ( $hook === 'post.php' || $hook === 'post-new.php' ) || $screen->id === 'epi_embed' ) {
 			$script_path = \EPI_EMBED_PRIVACY_BASE . 'assets/js/admin/image-upload' . $suffix . '.js';
 			$script_url = \EPI_EMBED_PRIVACY_URL . 'assets/js/admin/image-upload' . $suffix . '.js';
 			
