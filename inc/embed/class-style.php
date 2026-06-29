@@ -103,13 +103,13 @@ final class Style {
 		if ( ! empty( $background['path'] ) ) {
 			$this->styling['container']['background-image'] = \sprintf(
 				'url(%1$s?ver=%2$s)',
-				$background['url'],
+				\esc_url( $background['url'] ),
 				$background['version']
 			);
 		}
-		
+
 		if ( ! empty( $logo['path'] ) ) {
-			$this->styling['logo']['background-image'] = \sprintf( 'url(%1$s?ver=%2$s)', $logo['url'], $logo['version'] );
+			$this->styling['logo']['background-image'] = \sprintf( 'url(%1$s?ver=%2$s)', \esc_url( $logo['url'] ), $logo['version'] );
 		}
 	}
 	
