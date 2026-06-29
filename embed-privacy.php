@@ -93,5 +93,4 @@ if ( ! \class_exists( 'DOMDocument' ) ) {
 	}
 } );
 
-Embed_Privacy::get_instance()->set_plugin_file( __FILE__ );
 Embed_Privacy::get_instance()->init();

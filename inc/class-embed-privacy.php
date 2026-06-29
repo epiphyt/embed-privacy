@@ -122,7 +122,7 @@ class Embed_Privacy {
 	 * @deprecated	1.10.0 Use \EPI_EMBED_PRIVACY_FILE instead
 	 * @var		string The full path to the main plugin file
 	 */
-	public $plugin_file = '';
+	public $plugin_file = \EPI_EMBED_PRIVACY_FILE;
 	
 	/**
 	 * @since	1.10.0
@@ -668,7 +668,7 @@ class Embed_Privacy {
 		 * @deprecated	1.10.0
 		 * @since		1.9.0
 		 * 
-		 * @param	array $style_properties Style properties array
+		 * @param	array	$style_properties Style properties array
 		 */
 		$this->style = (array) \apply_filters_deprecated( 'embed_privacy_dynamic_style_properties', $this->style, '1.10.0' );
 		
