@@ -33,7 +33,8 @@ final class Vimeo extends Thumbnail_Provider implements Thumbnail_Provider_Inter
 		
 		// the thumbnail URL has usually something like _295x166 in the end
 		// remove this to get the maximum resolution
-		$thumbnail_url = \substr( $data->thumbnail_url, 0, \strrpos( $data->thumbnail_url, '_' ) );
+		$underscore_position = \strrpos( $data->thumbnail_url, '_' );
+		$thumbnail_url = $underscore_position !== false ? \substr( $data->thumbnail_url, 0, $underscore_position ) : $data->thumbnail_url;
 		$id = self::get_id( $url );
 		
 		if ( $id ) {
