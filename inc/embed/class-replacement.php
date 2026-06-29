@@ -468,7 +468,7 @@ final class Replacement {
 		// decode to make sure there is nothing left encoded if replacements have been made
 		// otherwise, content is untouched by DOMDocument, and we don't need a decoding
 		// only required for WPBakery Page Builder
-		if ( ! empty( $this->replacements ) && \str_contains( 'vc_row', $content ) ) {
+		if ( ! empty( $this->replacements ) && \str_contains( $content, 'vc_row' ) ) {
 			$content = \rawurldecode( $content );
 		}
 		
