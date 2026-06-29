@@ -335,7 +335,7 @@ final class Template {
 			$footer_link_title = \sprintf(
 			/* translators: content name  */
 				\esc_html__( 'Open "%s" directly', 'embed-privacy' ),
-				$attributes['embed_title']
+				\esc_html( $attributes['embed_title'] )
 			);
 		}
 		else if ( ! empty( $provider->get_content_name() ) ) {
