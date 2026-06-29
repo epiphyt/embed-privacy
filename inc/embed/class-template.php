@@ -263,13 +263,17 @@ final class Template {
 				/* translators: 1: embed title, 2: embed provider */
 				$button_text = \sprintf( \__( 'Display "%1$s" from %2$s', 'embed-privacy' ), $attributes['embed_title'], \esc_html( $provider->get_title() ) );
 			}
+			
+			/* translators: embed provider */
+			$loaded_message = \sprintf( \__( 'Content from %s has been loaded.', 'embed-privacy' ), $provider->get_title() );
 			?>
 			<button type="button" class="embed-privacy-enable screen-reader-text"><?php echo \esc_html( $button_text ); ?></button>
+			<div class="embed-privacy-sr-message screen-reader-text" aria-live="polite" data-message="<?php echo \esc_attr( $loaded_message ); ?>"></div>
 			
 			<div class="embed-privacy-overlay">
 				<div class="embed-privacy-inner">
 					<?php
-					echo ! empty( $logo_style ) ? '<div class="embed-privacy-logo" style="' . \esc_attr( $logo_style ) . '"></div>' . \PHP_EOL : '';
+					echo ! empty( $logo_style ) ? '<div class="embed-privacy-logo" style="' . \esc_attr( $logo_style ) . '" aria-hidden="true"></div>' . \PHP_EOL : '';
 					echo $content . \PHP_EOL; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 					?>
 				</div>

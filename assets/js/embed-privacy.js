@@ -306,6 +306,13 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		}
 
 		embedContent.innerHTML = htmlentities_decode( embedObject.embed );
+
+		// announce to screen readers that the embed has been loaded
+		var srMessage = embedContainer.querySelector( '.embed-privacy-sr-message' );
+		
+		if ( srMessage ) {
+			srMessage.textContent = srMessage.getAttribute( 'data-message' ) || '';
+		}
 		
 		// reset wrapper inline CSS set in setMinHeight()
 		var wrapper = embedContainer.parentNode;
