@@ -219,7 +219,7 @@ final class Replacement {
 			return Template::get( $this->provider, $content, $attributes );
 		}
 		
-		\libxml_use_internal_errors( true );
+		$use_errors = \libxml_use_internal_errors( true );
 		$dom = new DOMDocument();
 		$character_replacements = self::get_character_replacements();
 		$dom->loadHTML(
@@ -271,6 +271,8 @@ final class Replacement {
 					// and they are local by definition, so do nothing
 					// see https://github.com/epiphyt/embed-privacy/issues/27
 					if ( empty( $embedded_host ) ) {
+						\libxml_use_internal_errors( $use_errors );
+						
 						return self::transform_replaced_characters( $content, $character_replacements );
 					}
 					
@@ -375,7 +377,7 @@ final class Replacement {
 			}
 		}
 		
-		\libxml_use_internal_errors( false );
+		\libxml_use_internal_errors( $use_errors );
 		
 		$i = -1;
 		
