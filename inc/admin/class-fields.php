@@ -412,14 +412,29 @@ final class Fields {
 			return $validated;
 		}
 		
+		/**
+		 * Filter the allowed mime types for uploaded files.
+		 * 
+		 * @since	1.13.0
+		 * 
+		 * @param	string[]	$allowed_mime_types List of allowed mime types
+		 */
+		$allowed_mime_types = (array) \apply_filters( 'embed_privacy_allowed_file_mime_types', [ 'image/gif', 'image/jpeg', 'image/png', 'image/webp' ] );
+		
 		foreach ( $_FILES as $key => $files ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			if ( ! \in_array( $key, $valid_files, true ) ) { // check valid files
 				continue;
 			}
 			
+			$filetype = \wp_check_filetype( $files['name'] );
+			
+			if ( empty( $filetype['type'] ) || ! \in_array( $filetype['type'], $allowed_mime_types, true ) ) {
+				continue;
+			}
+			
 			$validated[ $key ] = [
 				'content' => $wp_filesystem->get_contents( $files['tmp_name'] ),
-				'name' => $files['name'],
+				'name' => \sanitize_file_name( $files['name'] ),
 				'tmp_name' => $files['tmp_name'],
 			];
 		}
