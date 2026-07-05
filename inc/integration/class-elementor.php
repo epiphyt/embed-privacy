@@ -129,7 +129,7 @@ final class Elementor {
 	 * @return	bool Whether Elementor has been used
 	 */
 	public static function is_used() {
-		$id = \get_the_ID();
+		$id = \get_queried_object_id();
 		
 		return System::is_plugin_active( 'elementor/elementor.php' )
 			&& $id
@@ -168,8 +168,23 @@ final class Elementor {
 		}
 		
 		// video elements
-		if ( \str_contains( $content, 'youtube.com\/watch' ) || \str_contains( $content, 'youtu.be\/' ) ) {
+		if (
+			\str_contains( $content, 'youtube.com\/watch' )
+			|| \str_contains( $content, 'youtube.com/watch' )
+			|| \str_contains( $content, 'youtu.be\/' )
+			|| \str_contains( $content, 'youtu.be/' )
+		) {
 			$content = self::get_youtube_overlay( $content );
+			
+			// make sure to register the assets, as they may not be registered
+			if ( self::is_used() ) {
+				$is_debug = \defined( 'WP_DEBUG' ) && \WP_DEBUG;
+				$suffix = ( $is_debug ? '' : '.min' );
+				
+				self::register_assets( $is_debug, $suffix );
+				self::enqueue_assets();
+			}
+			
 			Embed_Privacy::get_instance()->frontend->print_assets();
 		}
 		
