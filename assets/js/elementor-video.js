@@ -51,8 +51,9 @@ document.addEventListener( 'DOMContentLoaded', function() {
 				}
 				
 				const iframe = document.createElement( 'iframe' );
-				const divider = settings.youtube_url.indexOf( '?' ) !== -1 ? '&' : '?';
-				let url = settings.youtube_url.replace( 'watch?v=', 'embed/' ) + divider;
+				let url = settings.youtube_url.replace( 'watch?v=', 'embed/' );
+				const divider = url.indexOf( '?' ) !== -1 ? '&' : '?';
+				url += divider;
 				
 				if ( settings.youtube_url.indexOf( 'youtu.be' ) !== -1 ) {
 					const urlObject = new URL( settings.youtube_url );
