@@ -17,3 +17,10 @@
 .elementor-widget-video .embed-privacy-container {
 	height: 100%;
 }
+
+.e-atomic-element {
+	> .embed-privacy-container {
+		height: 100%;
+		width: 100%;
+	}
+}

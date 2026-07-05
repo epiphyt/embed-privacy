@@ -59,15 +59,23 @@ final class Elementor {
 		
 		/** @var	\DOMElement $element */
 		foreach ( $dom->getElementsByTagName( 'div' ) as $element ) {
-			if ( ! \str_contains( $element->getAttribute( 'data-settings' ), 'youtube_url' ) ) {
+			$data_settings = $element->getAttribute( 'data-settings' );
+			
+			if (
+				! \str_contains( $data_settings, 'youtube_url' )
+				&& $element->getAttribute( 'data-e-type' ) !== 'e-youtube'
+			) {
 				continue;
 			}
 			
-			$settings = \json_decode( $element->getAttribute( 'data-settings' ) );
+			$settings = \json_decode( $data_settings );
 			$args = [];
 			
 			if ( ! empty( $settings->youtube_url ) ) {
 				$args['embed_url'] = $settings->youtube_url;
+			}
+			else if ( ! empty( $settings->source ) ) {
+				$args['embed_url'] = $settings->source;
 			}
 			
 			// get overlay template as DOM element
@@ -173,6 +181,7 @@ final class Elementor {
 			|| \str_contains( $content, 'youtube.com/watch' )
 			|| \str_contains( $content, 'youtu.be\/' )
 			|| \str_contains( $content, 'youtu.be/' )
+			|| \str_contains( $content, 'e-youtube' )
 		) {
 			$content = self::get_youtube_overlay( $content );
 			
