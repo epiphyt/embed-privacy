@@ -21,6 +21,12 @@
 		}
 	}
 	
+	// WordPress.org embeds have a different aspect ratio than its embed says
+	// Don't use it
+	&.embed-wordpress-org {
+		aspect-ratio: auto !important;
+	}
+	
 	&.is-enabled {
 		background-image: none !important;
 	}
