@@ -118,6 +118,6 @@ final class Enfold {
 			return $output;
 		}
 		
-		return Template::get( $current_provider, $output );
+		return Template::get( $current_provider, $output, $atts );
 	}
 }
