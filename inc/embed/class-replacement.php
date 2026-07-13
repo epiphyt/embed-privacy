@@ -580,6 +580,7 @@ final class Replacement {
 					'%20data-epi-spacing%20',
 					'"data-epi-spacing%20',
 					'%_epi_20data-epi-spacing%_epi_20', // % has been replaced with %_epi_ after replacing spaces
+					' data-epi-spacing',
 				],
 				\array_values( $replacements )
 			),
@@ -589,6 +590,7 @@ final class Replacement {
 					'',
 					' ',
 					'" ',
+					' ',
 					' ',
 				],
 				\array_keys( $replacements )
