@@ -136,7 +136,6 @@ document.addEventListener( 'DOMContentLoaded', function() {
 	 */
 	function replaceAtomicEmbeds() {
 		const embeds = document.querySelectorAll( '.embed-privacy-container.embed-youtube .embed-privacy-content div[data-e-type="e-youtube"]' );
-		console.log(embeds)
 
 		for ( let i = 0; i < embeds.length; i++ ) {
 			// skip already replaced embeds
@@ -149,7 +148,6 @@ document.addEventListener( 'DOMContentLoaded', function() {
 
 			try {
 				settings = JSON.parse( embeds[ i ].getAttribute( 'data-settings' ) );
-				console.log(settings)
 			}
 			catch ( exception ) {
 				continue;
@@ -160,7 +158,6 @@ document.addEventListener( 'DOMContentLoaded', function() {
 			}
 
 			const videoId = getYouTubeVideoId( settings.source );
-			console.log(videoId)
 
 			if ( ! videoId ) {
 				continue;
@@ -183,7 +180,6 @@ document.addEventListener( 'DOMContentLoaded', function() {
 			}
 
 			const iframe = getYouTubeIframe( host + '/embed/' + videoId, properties );
-			console.log(iframe)
 
 			// the container is rendered empty, so append the iframe
 			embeds[ i ].appendChild( iframe );
