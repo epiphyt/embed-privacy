@@ -128,7 +128,7 @@ final class Assets {
 			 * @param	array	$assets List of embed assets
 			 * @param	string	$provider The current embed provider in lowercase
 			 */
-			$args['assets'] = \apply_filters( "embed_privacy_assets_{$provider}", $assets, $provider );
+			$assets = (array) \apply_filters( "embed_privacy_assets_{$provider}", $assets, $provider );
 		}
 		
 		if ( empty( $assets ) ) {
