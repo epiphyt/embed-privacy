@@ -48,7 +48,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		const iframe = document.createElement( 'iframe' );
 		iframe.src = url.replace( /&$/, '' );
 		iframe.allowFullscreen = 1;
-		iframe.class = 'elementor-video';
+		iframe.classList.add( 'elementor-video' );
 		iframe.style.height = '100%';
 		iframe.style.width = '100%';
 
