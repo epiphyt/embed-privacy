@@ -76,6 +76,12 @@ final class Post {
 	 * @return	string[] List of ignored blocks
 	 */
 	public static function get_ignored_blocks() {
+		static $blocks = null;
+		
+		if ( $blocks !== null ) {
+			return $blocks;
+		}
+		
 		$blocks = [];
 		
 		foreach ( \array_keys( \WP_Block_Type_Registry::get_instance()->get_all_registered() ) as $block_name ) {
