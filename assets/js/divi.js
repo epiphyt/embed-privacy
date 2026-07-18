@@ -6,6 +6,12 @@
  * @package	epiphyt\Embed_Privacy
  */
 document.addEventListener( 'DOMContentLoaded', () => {
+	if ( typeof jQuery === 'undefined' ) {
+		return;
+	}
+
+	const $ = jQuery;
+
 	// Generate responsive video wrapper for Embed Privacy container
 	if ( $.fn.fitVids ) {
 		$( '#main-content' ).fitVids( {
