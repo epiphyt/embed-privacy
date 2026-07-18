@@ -105,6 +105,13 @@ final class Replacement {
 	 * @return	array List of character replacements
 	 */
 	private static function get_character_replacements() {
+		static $replacements = null;
+		
+		// the replacements are a constant configuration per request
+		if ( $replacements !== null ) {
+			return $replacements;
+		}
+		
 		$replacements = [
 			'%' => '@@epi_percentage',
 			' ' => ' data-epi-spacing ',
@@ -124,6 +131,41 @@ final class Replacement {
 		$replacements = (array) \apply_filters( 'embed_privacy_overlay_character_replacements', $replacements );
 		
 		return $replacements;
+	}
+	
+	/**
+	 * Get the (base) host of the current site.
+	 * If WordPress is installed on a sub domain, the base domain is returned.
+	 * 
+	 * @since	1.13.0
+	 * 
+	 * @return	string The current site host
+	 */
+	private static function get_host() {
+		static $hosts = [];
+		$blog_id = \get_current_blog_id();
+		
+		if ( isset( $hosts[ $blog_id ] ) ) {
+			return $hosts[ $blog_id ];
+		}
+		
+		$host = \wp_parse_url( \home_url(), \PHP_URL_HOST );
+		
+		if ( ! \filter_var( $host, \FILTER_VALIDATE_IP ) ) {
+			$host_array = \explode( '.', \str_replace( 'www.', '', $host ) );
+			$tld_count = \count( $host_array );
+			
+			if ( $tld_count >= 3 && \strlen( $host_array[ $tld_count - 2 ] ) === 2 ) {
+				$host = \implode( '.', \array_splice( $host_array, $tld_count - 3, 3 ) );
+			}
+			else if ( $tld_count >= 2 ) {
+				$host = \implode( '.', \array_splice( $host_array, $tld_count - 2, $tld_count ) );
+			}
+		}
+		
+		$hosts[ $blog_id ] = $host;
+		
+		return $host;
 	}
 	
 	/**
@@ -232,19 +274,7 @@ final class Replacement {
 		);
 		$template_dom = new DOMDocument();
 		// detect domain if WordPress is installed on a sub domain
-		$host = \wp_parse_url( \home_url(), \PHP_URL_HOST );
-		
-		if ( ! \filter_var( $host, \FILTER_VALIDATE_IP ) ) {
-			$host_array = \explode( '.', \str_replace( 'www.', '', $host ) );
-			$tld_count = \count( $host_array );
-			
-			if ( $tld_count >= 3 && \strlen( $host_array[ $tld_count - 2 ] ) === 2 ) {
-				$host = \implode( '.', \array_splice( $host_array, $tld_count - 3, 3 ) );
-			}
-			else if ( $tld_count >= 2 ) {
-				$host = \implode( '.', \array_splice( $host_array, $tld_count - 2, $tld_count ) );
-			}
-		}
+		$host = self::get_host();
 		
 		foreach ( $attributes['elements'] as $tag ) {
 			$replacements = [];

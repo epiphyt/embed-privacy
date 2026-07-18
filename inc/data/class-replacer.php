@@ -145,17 +145,9 @@ final class Replacer {
 			return $content;
 		}
 		
-		$new_content = $content;
-		$replacement = new Replacement( $new_content );
-		$new_content = $replacement->get();
+		$replacement = new Replacement( $content );
 		
-		while ( $new_content !== $content ) {
-			$content = $new_content;
-			$replacement = new Replacement( $new_content );
-			$new_content = $replacement->get();
-		}
-		
-		return $new_content;
+		return $replacement->get();
 	}
 	
 	/**
