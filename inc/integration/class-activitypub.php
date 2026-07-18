@@ -86,11 +86,11 @@ final class Activitypub {
 		// phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		return \sprintf(
 			self::$toot_template,
-			$data->content,
-			self::get_username_from_attributed_to( $data->attributedTo ),
-			$data->attributedTo,
+			\wp_kses_post( $data->content ),
+			\esc_html( self::get_username_from_attributed_to( $data->attributedTo ) ),
+			\esc_url( $data->attributedTo ),
 			$date->format( \get_option( 'date_format' ) . ' ' . \get_option( 'time_format' ) ),
-			$data->url
+			\esc_url( $data->url )
 		);
 		// phpcs:enable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 	}
