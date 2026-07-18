@@ -210,6 +210,11 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		const observer = new MutationObserver( ( mutations ) => {
 			for ( const mutation of mutations ) {
 				for ( const newNodes of mutation.addedNodes ) {
+					// added nodes can be text/comment nodes, which have no querySelectorAll
+					if ( newNodes.nodeType !== Node.ELEMENT_NODE ) {
+						continue;
+					}
+
 					const overlays = newNodes.querySelectorAll( '.embed-privacy-overlay' );
 					
 					if ( overlays.length ) {
