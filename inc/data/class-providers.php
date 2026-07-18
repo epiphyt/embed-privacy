@@ -33,7 +33,55 @@ final class Providers {
 	 * Initialize functionality.
 	 */
 	public static function init() {
+		\add_action( 'added_post_meta', [ self::class, 'clear_cache_on_meta' ], 10, 2 );
+		\add_action( 'deleted_post', [ self::class, 'clear_cache_on_post' ], 10, 2 );
+		\add_action( 'deleted_post_meta', [ self::class, 'clear_cache_on_meta' ], 10, 2 );
+		\add_action( 'save_post_epi_embed', [ self::class, 'clear_cache' ] );
+		\add_action( 'trashed_post', [ self::class, 'clear_cache_on_post' ] );
+		\add_action( 'untrashed_post', [ self::class, 'clear_cache_on_post' ] );
+		\add_action( 'updated_post_meta', [ self::class, 'clear_cache_on_meta' ], 10, 2 );
 		\add_filter( 'embed_privacy_provider_name', [ self::class, 'sanitize_name' ] );
+	}
+	
+	/**
+	 * Clear the cached provider lists.
+	 * 
+	 * @since	1.13.0
+	 */
+	public static function clear_cache() {
+		foreach ( [ 'all', 'custom', 'custom_google', 'oembed' ] as $type ) {
+			\delete_transient( 'embed_privacy_providers_' . $type );
+		}
+	}
+	
+	/**
+	 * Clear the cached provider lists if a provider's meta changed.
+	 * 
+	 * @since	1.13.0
+	 * 
+	 * @param	int|string	$meta_id The meta ID (unused)
+	 * @param	int			$post_id The post ID the meta belongs to
+	 */
+	public static function clear_cache_on_meta( $meta_id, $post_id ) {
+		self::clear_cache_on_post( $post_id );
+	}
+	
+	/**
+	 * Clear the cached provider lists if the affected post is a provider.
+	 * 
+	 * @since	1.13.0
+	 * 
+	 * @param	int				$post_id The post ID
+	 * @param	\WP_Post|null	$post Optional post object
+	 */
+	public static function clear_cache_on_post( $post_id, $post = null ) {
+		if ( ! $post instanceof WP_Post ) {
+			$post = \get_post( $post_id );
+		}
+		
+		if ( $post instanceof WP_Post && $post->post_type === 'epi_embed' ) {
+			self::clear_cache();
+		}
 	}
 	
 	/**
@@ -159,7 +207,7 @@ final class Providers {
 		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 		switch ( $type ) {
 			case 'custom':
-				$custom_providers = \get_posts( \array_merge( [
+				$custom_providers = $this->query_providers( 'embed_privacy_providers_custom', [
 					'meta_query' => [ // phpcs:ignore SlevomatCodingStandard.Arrays.DisallowPartiallyKeyed.DisallowedPartiallyKeyed
 						'relation' => 'OR',
 						[ // phpcs:ignore Universal.Arrays.MixedKeyedUnkeyedArray.Found, Universal.Arrays.MixedArrayKeyTypes.ImplicitNumericKey
@@ -179,15 +227,15 @@ final class Providers {
 					'orderby' => 'post_title',
 					'post_type' => 'epi_embed',
 					'update_post_term_cache' => false,
-				], $args ) );
-				$google_provider = \get_posts( \array_merge( [
+				], $args );
+				$google_provider = $this->query_providers( 'embed_privacy_providers_custom_google', [
 					'meta_key' => 'is_system',
 					'meta_value' => 'yes',
 					'name' => 'google-maps',
 					'no_found_rows' => true,
 					'post_type' => 'epi_embed',
 					'update_post_term_cache' => false,
-				], $args ) );
+				], $args );
 				
 				if ( ! empty( $hash ) ) {
 					$this->list[ $hash ] = self::get_by_posts( \array_merge( $custom_providers, $google_provider ) );
@@ -197,7 +245,7 @@ final class Providers {
 				}
 				break;
 			case 'oembed':
-				$embed_providers = \get_posts( \array_merge( [
+				$embed_providers = $this->query_providers( 'embed_privacy_providers_oembed', [
 					'meta_key' => 'is_system',
 					'meta_value' => 'yes',
 					'no_found_rows' => true,
@@ -206,7 +254,7 @@ final class Providers {
 					'orderby' => 'post_title',
 					'post_type' => 'epi_embed',
 					'update_post_term_cache' => false,
-				], $args ) );
+				], $args );
 				
 				if ( ! empty( $hash ) ) {
 					$this->list[ $hash ] = self::get_by_posts( $embed_providers );
@@ -217,14 +265,14 @@ final class Providers {
 				break;
 			case 'all':
 			default:
-				$embed_providers = \get_posts( \array_merge( [
+				$embed_providers = $this->query_providers( 'embed_privacy_providers_all', [
 					'no_found_rows' => true,
 					'numberposts' => -1,
 					'order' => 'ASC',
 					'orderby' => 'post_title',
 					'post_type' => 'epi_embed',
 					'update_post_term_cache' => false,
-				], $args ) );
+				], $args );
 				
 				if ( ! empty( $hash ) ) {
 					$this->list[ $hash ] = self::get_by_posts( $embed_providers );
@@ -250,6 +298,46 @@ final class Providers {
 		$this->list[ $identifier ] = (array) \apply_filters( 'embed_privacy_provider_list', $this->list[ $identifier ], $identifier, $this->list );
 		
 		return $this->list[ $identifier ];
+	}
+	
+	/**
+	 * Get provider posts of a query, cached in a transient.
+	 * Queries with additional custom arguments are not cached.
+	 * 
+	 * @since	1.13.0
+	 * 
+	 * @param	string	$cache_key The transient cache key
+	 * @param	array	$query_args The default query arguments
+	 * @param	array	$args Additional custom query arguments
+	 * @return	\WP_Post[] List of provider post objects
+	 */
+	private function query_providers( $cache_key, $query_args, $args ) {
+		// don't cache queries with custom arguments
+		if ( ! empty( $args ) ) {
+			return \get_posts( \array_merge( $query_args, $args ) );
+		}
+		
+		$posts = \get_transient( $cache_key );
+		
+		if ( \is_array( $posts ) ) {
+			// prime the meta cache for all providers in a single query so
+			// hydrating the Provider objects doesn't cause a query per provider
+			$ids = \array_filter( \array_map( static function( $post ) {
+				return $post instanceof WP_Post ? $post->ID : 0;
+			}, $posts ) );
+			
+			if ( ! empty( $ids ) ) {
+				\update_meta_cache( 'post', $ids );
+			}
+			
+			return $posts;
+		}
+		
+		$posts = \get_posts( $query_args );
+		
+		\set_transient( $cache_key, $posts, \DAY_IN_SECONDS );
+		
+		return $posts;
 	}
 	
 	/**
