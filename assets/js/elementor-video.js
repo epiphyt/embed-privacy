@@ -66,16 +66,26 @@ document.addEventListener( 'DOMContentLoaded', function() {
 			return;
 		}
 
-		// check for changed YouTube embeds
+		let isScheduled = false;
 		const observeEmbeds = new MutationObserver( function() {
-			replaceClassicEmbeds();
-			replaceAtomicEmbeds();
+			if ( isScheduled ) {
+				return;
+			}
+
+			isScheduled = true;
+			window.requestAnimationFrame( function() {
+				isScheduled = false;
+				replaceClassicEmbeds();
+				replaceAtomicEmbeds();
+			} );
 		} );
 
-		observeEmbeds.observe( document, {
-			childList: true,
-			subtree: true,
-		} );
+		for ( let i = 0; i < youTubeEmbeds.length; i++ ) {
+			observeEmbeds.observe( youTubeEmbeds[ i ], {
+				childList: true,
+				subtree: true,
+			} );
+		}
 	}
 
 	/**
