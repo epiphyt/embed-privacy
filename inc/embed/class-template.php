@@ -268,7 +268,7 @@ final class Template {
 			$loaded_message = \sprintf( \__( 'Content from %s has been loaded.', 'embed-privacy' ), $provider->get_title() );
 			?>
 			<button type="button" class="embed-privacy-enable screen-reader-text"><?php echo \esc_html( $button_text ); ?></button>
-			<div class="embed-privacy-sr-message screen-reader-text" aria-live="polite" data-message="<?php echo \esc_attr( $loaded_message ); ?>"></div>
+			<div class="embed-privacy-sr-message screen-reader-text" role="status" data-message="<?php echo \esc_attr( $loaded_message ); ?>"></div>
 			
 			<div class="embed-privacy-overlay">
 				<div class="embed-privacy-inner">

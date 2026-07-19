@@ -48,7 +48,7 @@ final class Settings {
 			
 			<div class="embed-privacy__copy-to-clipboard--container">
 				<button type="button" class="button embed-privacy__support-data--copy-to-clipboard embed-privacy__copy-to-clipboard" data-copy="embed-privacy__support-data--code" data-status="embed-privacy__copy-to-clipboard--status--support-data"><?php \esc_html_e( 'Copy support data to clipboard', 'embed-privacy' ); ?></button>
-				<p class="embed-privacy__copy-to-clipboard--status embed-privacy__copy-to-clipboard--status--support-data" role="status" aria-live="polite" aria-atomic="true"></p>
+				<p class="embed-privacy__copy-to-clipboard--status embed-privacy__copy-to-clipboard--status--support-data" role="status"></p>
 			</div>
 			<pre class="embed-privacy__support-data--code-container"><code class="embed-privacy__support-data--code"><?php echo \esc_html( Support_Data::get() ); ?></code></pre>
 		</div>
