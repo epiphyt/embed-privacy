@@ -151,44 +151,48 @@ final class Template {
 		\ob_start();
 		?>
 		<p>
-		<?php
-		if ( ! empty( $provider->get_name() ) ) {
-			if ( $embed_post || ! empty( $provider->get_description() ) ) {
-				$allowed_tags = [
-					'a' => [
-						'href',
-						'target',
-					],
-				];
-				
-				if ( $embed_post ) {
-					$description = $embed_post->post_content;
-					$privacy_policy = \get_post_meta( $embed_post->ID, 'privacy_policy_url', true );
+			<?php
+			if ( ! empty( $provider->get_name() ) ) {
+				if ( $embed_post || ! empty( $provider->get_description() ) ) {
+					$allowed_tags = [
+						'a' => [
+							'href',
+							'target',
+						],
+					];
+					
+					if ( $embed_post ) {
+						$description = $embed_post->post_content;
+						$privacy_policy = \get_post_meta( $embed_post->ID, 'privacy_policy_url', true );
+					}
+					else {
+						$description = $provider->get_description();
+						$privacy_policy = $provider->get_privacy_policy_url();
+					}
+					
+					echo \wp_kses_post( self::ensure_localized_content( $description, $provider ) ) . \PHP_EOL;
+					
+					if ( $privacy_policy ) {
+						?>
+						<br>
+						<?php
+						/* translators: 1: embed provider, 2: opening <a> tag to the privacy policy, 3: closing </a> */
+						\printf( \wp_kses( \__( 'Learn more in %2$s%1$s’s privacy policy%3$s.', 'embed-privacy' ), $allowed_tags ), \esc_html( $provider->get_title() ), '<a href="' . \esc_url( $privacy_policy ) . '" target="_blank">', '</a>' );
+					}
 				}
 				else {
-					$description = $provider->get_description();
-					$privacy_policy = $provider->get_privacy_policy_url();
-				}
-				
-				echo \wp_kses_post( self::ensure_localized_content( $description, $provider ) ) . \PHP_EOL;
-				
-				if ( $privacy_policy ) {
-					?>
-					<br>
-					<?php
-					/* translators: 1: embed provider, 2: opening <a> tag to the privacy policy, 3: closing </a> */
-					\printf( \wp_kses( \__( 'Learn more in %2$s%1$s’s privacy policy%3$s.', 'embed-privacy' ), $allowed_tags ), \esc_html( $provider->get_title() ), '<a href="' . \esc_url( $privacy_policy ) . '" target="_blank">', '</a>' );
+					/* translators: embed provider */
+					\printf( \esc_html__( 'Click here to display content from %s.', 'embed-privacy' ), \esc_html( $provider->get_title() ) );
 				}
 			}
 			else {
-				/* translators: embed provider */
-				\printf( \esc_html__( 'Click here to display content from %s.', 'embed-privacy' ), \esc_html( $provider->get_title() ) );
+				\esc_html_e( 'Click here to display content from an external service.', 'embed-privacy' );
 			}
-		}
-		else {
-			\esc_html_e( 'Click here to display content from an external service.', 'embed-privacy' );
-		}
-		?>
+			?>
+			<noscript>
+				<br>
+				<?= \esc_html__( 'Please enable JavaScript in your browser to load this content.', 'embed-privacy' ); ?>
+			</noscript>
 		</p>
 		<p class="embed-privacy-input-wrapper">
 			<input id="<?php echo \esc_attr( $checkbox_id ); ?>" type="checkbox" value="1" class="embed-privacy-input" data-embed-provider="<?php echo \esc_attr( $provider->get_name() ); ?>">
