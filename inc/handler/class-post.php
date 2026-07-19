@@ -39,22 +39,31 @@ final class Post {
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 		if ( \is_plugin_active_for_network( 'embed-privacy/embed-privacy.php' ) ) {
 			// on networks we need to iterate through every site
-			$sites = \get_sites( [
-				'fields' => 'ids',
-				'number' => 99999,
-			] );
+			$batch_size = 50;
+			$offset = 0;
 			
-			foreach ( $sites as $blog_id ) {
-				$wpdb->query(
-					$wpdb->prepare(
-						// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-						"DELETE FROM	$wpdb->get_blog_prefix( $blog_id )postmeta
-						WHERE			meta_key LIKE %s",
-						// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-						[ '%_oembed_%' ]
-					)
-				);
-			}
+			do {
+				$sites = \get_sites( [
+					'fields' => 'ids',
+					'number' => $batch_size,
+					'offset' => $offset,
+				] );
+				
+				foreach ( $sites as $blog_id ) {
+					$prefix = $wpdb->get_blog_prefix( $blog_id );
+					$wpdb->query(
+						$wpdb->prepare(
+							// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+							"DELETE FROM	{$prefix}postmeta
+							WHERE			meta_key LIKE %s",
+							// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+							[ '%_oembed_%' ]
+						)
+					);
+				}
+				
+				$offset += $batch_size;
+			} while ( \count( $sites ) === $batch_size );
 		}
 		else {
 			$wpdb->query(

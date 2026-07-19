@@ -22,22 +22,29 @@ $GLOBALS['options'] = [
 ];
 
 if ( \is_multisite() ) {
-	$sites = \get_sites( [
-		'fields' => 'ids',
-		'number' => 99999,
-	] );
+	$batch_size = 50;
+	$offset = 0;
 	
-	foreach ( $sites as $site_blog_id ) {
-		\switch_to_blog( $site_blog_id );
+	do {
+		$sites = \get_sites( [
+			'fields' => 'ids',
+			'number' => $batch_size,
+			'offset' => $offset,
+		] );
 		
-		// do nothing if option says so
-		if ( \get_option( 'embed_privacy_preserve_data_on_uninstall' ) ) {
-			continue;
+		foreach ( $sites as $site_blog_id ) {
+			\switch_to_blog( $site_blog_id );
+			
+			// only delete data if the option does not say otherwise
+			if ( ! \get_option( 'embed_privacy_preserve_data_on_uninstall' ) ) {
+				delete_data();
+			}
+			
+			\restore_current_blog();
 		}
 		
-		delete_data();
-		\restore_current_blog();
-	}
+		$offset += $batch_size;
+	} while ( \count( $sites ) === $batch_size );
 	
 	// delete site options
 	foreach ( $GLOBALS['options'] as $option ) {
