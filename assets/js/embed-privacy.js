@@ -428,14 +428,14 @@ function getCookieJson( name ) {
 	var value = get_cookie( name );
 
 	if ( ! value ) {
-		return '';
+		return null;
 	}
 
 	try {
 		return JSON.parse( value );
 	}
 	catch ( exception ) {
-		return '';
+		return null;
 	}
 }
 
@@ -461,7 +461,7 @@ function htmlentities_decode( content ) {
  * @param	{string}	name The name of the cookie
  */
 function remove_cookie( name ) {
-	document.cookie = name + '=; expires=0; path=/';
+	document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax';
 }
 
 /**
@@ -480,5 +480,6 @@ function set_cookie( name, value, days ) {
 		date.setTime( date.getTime() + ( days * 24 * 60 * 60 * 1000 ) );
 		expires = '; expires=' + date.toUTCString();
 	}
-	document.cookie = name + '=' + ( value || '' ) + expires + '; path=/';
+	var secure = window.location.protocol === 'https:' ? '; Secure' : '';
+	document.cookie = name + '=' + ( value || '' ) + expires + '; path=/; SameSite=Lax' + secure;
 }
