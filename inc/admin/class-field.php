@@ -130,12 +130,22 @@ final class Field {
 				<input type="hidden" name="<?php echo \esc_attr( $attributes['name'] ); ?>" value="<?php echo \esc_attr( $attributes['value'] ); ?>" class="embed-privacy-image-input">
 				
 				<div class="embed-privacy-image-input-container<?php echo ! empty( $attributes['value'] ) ? ' embed-privacy-hidden' : ''; ?>">
-					<button type="button" class="button button-secondary embed-privacy-image-upload"><?php \esc_html_e( 'Upload or choose file', 'embed-privacy' ); ?></button>
+					<button type="button" class="button button-secondary embed-privacy-image-upload"><span class="screen-reader-text"><?= \esc_html( $attributes['title'] ); ?></span> <?php \esc_html_e( 'Upload or choose file', 'embed-privacy' ); ?></button>
 				</div>
 				
 				<div class="embed-privacy-image-container<?php echo empty( $attributes['value'] ) ? ' embed-privacy-hidden' : ''; ?>">
 					<?php echo $image; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-					<span class="dashicons dashicons-no embed-privacy-icon embed-privacy-remove-image"></span>
+					<button type="button" class="dashicons dashicons-no embed-privacy-icon embed-privacy-remove-image">
+						<span class="screen-reader-text">
+							<?php
+							\printf(
+								/* translators: field title */
+								\esc_attr__( 'Remove image for %s', 'embed-privacy' ),
+								\esc_html( $attributes['title'] )
+							);
+							?>
+						</span>
+					</button>
 				</div>
 				
 				<?php if ( ! empty( $attributes['description'] ) ) : ?>

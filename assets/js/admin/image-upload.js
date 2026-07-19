@@ -20,6 +20,8 @@ jQuery( document ).ready( function( $ ) {
 		image_item.find( '.embed-privacy-upload-input' ).val( '' );
 		// reset type
 		image_item.find( '.embed-privacy-upload-input' ).attr( 'type', 'file' );
+		// set focus to upload button
+		image_item.find( '.embed-privacy-image-upload' ).focus();
 	} );
 	
 	// upload functionality single image
