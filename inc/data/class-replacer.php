@@ -141,7 +141,7 @@ final class Replacer {
 		}
 		
 		// we don't need to process an empty content as it never contains an embed
-		if ( empty( \trim( $content ) ) ) {
+		if ( \trim( $content ) === '' ) {
 			return $content;
 		}
 		

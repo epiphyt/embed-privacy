@@ -75,7 +75,7 @@ final class Replacement {
 		$ignore_unknown_providers = (bool) \apply_filters( 'embed_privacy_ignore_unknown_providers', false, $content );
 		
 		// we don't need to process an empty content as it never contains an embed
-		if ( empty( \trim( $content ) ) ) {
+		if ( \trim( $content ) === '' ) {
 			return $content;
 		}
 		
