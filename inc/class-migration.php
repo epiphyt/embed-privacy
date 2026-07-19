@@ -268,14 +268,6 @@ class Migration {
 	 * - Add missing meta data
 	 */
 	private function migrate_1_2_1() {
-		global $wp_filesystem;
-		
-		// initialize the WP filesystem if not exists
-		if ( empty( $wp_filesystem ) ) {
-			require_once \ABSPATH . 'wp-admin/includes/file.php';
-			\WP_Filesystem();
-		}
-		
 		$available_providers = \get_posts( [
 			'no_found_rows' => true,
 			'numberposts' => -1,

@@ -1,6 +1,7 @@
 <?php
 namespace epiphyt\Embed_Privacy\admin;
 
+use epiphyt\Embed_Privacy\Embed_Privacy;
 use WP_Post;
 
 /**
@@ -392,13 +393,7 @@ final class Fields {
 	 * @return	array The updated form fields
 	 */
 	private static function validate_files() {
-		global $wp_filesystem;
-		
-		// initialize the WP filesystem if not exists
-		if ( empty( $wp_filesystem ) ) {
-			require_once \ABSPATH . 'wp-admin/includes/file.php';
-			\WP_Filesystem();
-		}
+		$wp_filesystem = Embed_Privacy::get_wp_filesystem();
 		
 		/**
 		 * Set the option names to look for files.

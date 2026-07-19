@@ -1,6 +1,7 @@
 <?php
 namespace epiphyt\Embed_Privacy\thumbnail\provider;
 
+use epiphyt\Embed_Privacy\Embed_Privacy;
 use epiphyt\Embed_Privacy\thumbnail\Thumbnail;
 
 /**
@@ -90,15 +91,7 @@ final class Vimeo extends Thumbnail_Provider implements Thumbnail_Provider_Inter
 				return;
 			}
 			
-			/** @var	\WP_Filesystem_Direct $wp_filesystem */
-			global $wp_filesystem;
-			
-			// initialize the WP filesystem if not exists
-			if ( empty( $wp_filesystem ) ) {
-				\WP_Filesystem();
-			}
-			
-			$wp_filesystem->move( $file, $thumbnail_path );
+			Embed_Privacy::get_wp_filesystem()->move( $file, $thumbnail_path );
 		}
 		
 		\update_post_meta(
