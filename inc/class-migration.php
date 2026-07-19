@@ -330,7 +330,16 @@ class Migration {
 	 * - Update regex for Google Maps
 	 */
 	private function migrate_1_3_0() {
-		$providers = Embed_Privacy::get_instance()->get_embeds( 'oembed' );
+		$providers = \get_posts( [
+			'meta_key' => 'is_system',
+			'meta_value' => 'yes',
+			'no_found_rows' => true,
+			'numberposts' => -1,
+			'order' => 'ASC',
+			'orderby' => 'post_title',
+			'post_type' => 'epi_embed',
+			'update_post_term_cache' => false,
+		] );
 		$google_provider = \get_posts( [
 			'meta_key' => 'is_system',
 			'meta_value' => 'yes',
@@ -372,7 +381,14 @@ class Migration {
 	 * - Add missing default embed providers (this also adds new Wolfram Cloud)
 	 */
 	private function migrate_1_4_0() {
-		$providers = Embed_Privacy::get_instance()->get_embeds();
+		$providers = \get_posts( [
+			'no_found_rows' => true,
+			'numberposts' => -1,
+			'order' => 'ASC',
+			'orderby' => 'post_title',
+			'post_type' => 'epi_embed',
+			'update_post_term_cache' => false,
+		] );
 		$missing_providers = $this->providers;
 		$processed_providers = [];
 		
