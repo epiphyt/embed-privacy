@@ -158,6 +158,8 @@ final class Assets {
 					$data = \html_entity_decode( $asset['data'], \ENT_QUOTES, 'UTF-8' );
 				}
 				else {
+					$data = [];
+					
 					foreach ( (array) $asset['data'] as $key => $value ) {
 						if ( ! \is_scalar( $value ) ) {
 							continue;
