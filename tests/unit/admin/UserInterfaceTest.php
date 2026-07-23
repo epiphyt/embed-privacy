@@ -20,10 +20,69 @@ use function Brain\Monkey\tearDown;
 #[CoversClass(User_Interface::class)]
 final class UserInterfaceTest extends MockeryTestCase
 {
+    /**
+     * @var string[] Asset files created by a test to satisfy the file_exists() guard
+     */
+    private $createdAssets = [];
+
+    /**
+     * @var string[] Asset files moved aside by a test to force their absence
+     */
+    private $movedAssets = [];
+
     protected function setUp(): void
     {
         parent::setUp();
         setUp();
+    }
+
+    /**
+     * The admin asset files the source guards with file_exists() (minified variant).
+     *
+     * @return string[] Absolute asset paths
+     */
+    private function assetTargets(): array
+    {
+        return [
+            \EPI_EMBED_PRIVACY_BASE . 'assets/js/admin/image-upload.min.js',
+            \EPI_EMBED_PRIVACY_BASE . 'assets/style/embed-privacy-admin.min.css',
+            \EPI_EMBED_PRIVACY_BASE . 'assets/js/admin/clipboard.min.js',
+            \EPI_EMBED_PRIVACY_BASE . 'assets/style/settings.min.css',
+        ];
+    }
+
+    /**
+     * Ensure the guarded asset files exist on disk (creating only missing ones).
+     */
+    private function makeAssetsAvailable(): void
+    {
+        foreach ($this->assetTargets() as $path) {
+            if (\file_exists($path)) {
+                continue;
+            }
+
+            if (!\is_dir(\dirname($path))) {
+                \mkdir(\dirname($path), 0755, true);
+            }
+
+            \file_put_contents($path, '');
+            $this->createdAssets[] = $path;
+        }
+    }
+
+    /**
+     * Ensure the guarded asset files are absent (moving any existing ones aside).
+     */
+    private function makeAssetsUnavailable(): void
+    {
+        foreach ($this->assetTargets() as $path) {
+            if (!\file_exists($path)) {
+                continue;
+            }
+
+            \rename($path, $path . '.epbak');
+            $this->movedAssets[] = $path;
+        }
     }
 
     public function testInitRegistersHooks(): void
@@ -88,6 +147,8 @@ final class UserInterfaceTest extends MockeryTestCase
         stubs([
             'get_current_screen' => $screen,
         ]);
+        // assets exist on disk, so they are enqueued (version is their filemtime)
+        $this->makeAssetsAvailable();
 
         expect('wp_enqueue_script')
             ->once()
@@ -105,6 +166,23 @@ final class UserInterfaceTest extends MockeryTestCase
         User_Interface::enqueue_assets('post.php');
     }
 
+    public function testEnqueueAssetsSkipsMissingAssetsOnPostEditScreen(): void
+    {
+        $screen = Mockery::mock('WP_Screen');
+        $screen->id = 'post';
+
+        stubs([
+            'get_current_screen' => $screen,
+        ]);
+        // assets are not available on disk, so the guard skips enqueue (and filemtime)
+        $this->makeAssetsUnavailable();
+
+        expect('wp_enqueue_script')->never();
+        expect('wp_enqueue_style')->never();
+
+        User_Interface::enqueue_assets('post.php');
+    }
+
     public function testEnqueueAssetsForEmbedScreen(): void
     {
         $screen = Mockery::mock('WP_Screen');
@@ -113,6 +191,7 @@ final class UserInterfaceTest extends MockeryTestCase
         stubs([
             'get_current_screen' => $screen,
         ]);
+        $this->makeAssetsAvailable();
 
         // the embed post type screen also triggers the image upload assets
         expect('wp_enqueue_script')->once()->with(
@@ -136,6 +215,7 @@ final class UserInterfaceTest extends MockeryTestCase
         stubs([
             'get_current_screen' => $screen,
         ]);
+        $this->makeAssetsAvailable();
 
         expect('wp_enqueue_script')->once()->with(
             'embed-privacy-admin-clipboard',
@@ -155,8 +235,41 @@ final class UserInterfaceTest extends MockeryTestCase
         User_Interface::enqueue_assets('settings_page_embed_privacy');
     }
 
+    public function testEnqueueAssetsSkipsMissingAssetsOnSettingsScreen(): void
+    {
+        $screen = Mockery::mock('WP_Screen');
+        $screen->id = 'settings_page_embed_privacy';
+
+        stubs([
+            'get_current_screen' => $screen,
+        ]);
+        // no built assets => no script/style/localize and no filemtime warning
+        $this->makeAssetsUnavailable();
+
+        expect('wp_enqueue_script')->never();
+        expect('wp_localize_script')->never();
+        expect('wp_enqueue_style')->never();
+
+        User_Interface::enqueue_assets('settings_page_embed_privacy');
+    }
+
     protected function tearDown(): void
     {
+        foreach ($this->createdAssets as $path) {
+            if (\file_exists($path)) {
+                \unlink($path);
+            }
+        }
+
+        foreach ($this->movedAssets as $path) {
+            if (\file_exists($path . '.epbak')) {
+                \rename($path . '.epbak', $path);
+            }
+        }
+
+        $this->createdAssets = [];
+        $this->movedAssets = [];
+
         tearDown();
         parent::tearDown();
     }

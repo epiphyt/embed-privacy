@@ -58,32 +58,40 @@ final class User_Interface {
 			$script_path = \EPI_EMBED_PRIVACY_BASE . 'assets/js/admin/image-upload' . $suffix . '.js';
 			$script_url = \EPI_EMBED_PRIVACY_URL . 'assets/js/admin/image-upload' . $suffix . '.js';
 			
-			\wp_enqueue_script( 'embed-privacy-admin-image-upload', $script_url, [ 'jquery' ], (string) \filemtime( $script_path ), true );
+			if ( \file_exists( $script_path ) ) {
+				\wp_enqueue_script( 'embed-privacy-admin-image-upload', $script_url, [ 'jquery' ], (string) \filemtime( $script_path ), true );
+			}
 			
 			$style_path = \EPI_EMBED_PRIVACY_BASE . 'assets/style/embed-privacy-admin' . $suffix . '.css';
 			$style_url = \EPI_EMBED_PRIVACY_URL . 'assets/style/embed-privacy-admin' . $suffix . '.css';
 			
-			\wp_enqueue_style( 'embed-privacy-admin-style', $style_url, [], (string) \filemtime( $style_path ) );
+			if ( \file_exists( $style_path ) ) {
+				\wp_enqueue_style( 'embed-privacy-admin-style', $style_url, [], (string) \filemtime( $style_path ) );
+			}
 		}
 		
 		if ( $screen->id === 'settings_page_embed_privacy' ) {
 			$script_path = \EPI_EMBED_PRIVACY_BASE . 'assets/js/admin/clipboard' . $suffix . '.js';
 			$script_url = \EPI_EMBED_PRIVACY_URL . 'assets/js/admin/clipboard' . $suffix . '.js';
 			
-			\wp_enqueue_script( 'embed-privacy-admin-clipboard', $script_url, [], (string) \filemtime( $script_path ), true );
-			\wp_localize_script(
-				'embed-privacy-admin-clipboard',
-				'embedPrivacyAdminSettings',
-				[
-					'supportDataCopiedToClipboardFailure' => \__( 'Support data could not be copied to clipboard!', 'embed-privacy' ),
-					'supportDataCopiedToClipboardSuccess' => \__( 'Support data copied to clipboard!', 'embed-privacy' ),
-				]
-			);
+			if ( \file_exists( $script_path ) ) {
+				\wp_enqueue_script( 'embed-privacy-admin-clipboard', $script_url, [], (string) \filemtime( $script_path ), true );
+				\wp_localize_script(
+					'embed-privacy-admin-clipboard',
+					'embedPrivacyAdminSettings',
+					[
+						'supportDataCopiedToClipboardFailure' => \__( 'Support data could not be copied to clipboard!', 'embed-privacy' ),
+						'supportDataCopiedToClipboardSuccess' => \__( 'Support data copied to clipboard!', 'embed-privacy' ),
+					]
+				);
+			}
 			
 			$style_path = \EPI_EMBED_PRIVACY_BASE . 'assets/style/settings' . $suffix . '.css';
 			$style_url = \EPI_EMBED_PRIVACY_URL . 'assets/style/settings' . $suffix . '.css';
 			
-			\wp_enqueue_style( 'embed-privacy-admin-settings', $style_url, [], (string) \filemtime( $style_path ) );
+			if ( \file_exists( $style_path ) ) {
+				\wp_enqueue_style( 'embed-privacy-admin-settings', $style_url, [], (string) \filemtime( $style_path ) );
+			}
 		}
 	}
 }
