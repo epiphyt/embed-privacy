@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<ruleset name="PSR12ForTests">
+	<description>PSR-12 standard for test files.</description>
+	
+	<rule ref="PSR12"/>
+</ruleset>

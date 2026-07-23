@@ -1,0 +1,16 @@
+{
+    "require-dev": {
+        "phpunit/phpunit": "^12.5",
+        "brain/monkey": "2.*",
+        "brain/faker": "dev-master"
+    },
+    "autoload": {
+        "classmap": ["inc"]
+    },
+    "scripts": {
+        "phpunit": "phpunit",
+        "test": [
+            "@phpunit"
+        ]
+    }
+}
