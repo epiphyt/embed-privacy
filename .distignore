@@ -3,7 +3,12 @@
 .github
 .wordpress-org
 node_modules/
+tests/
 src/
+DOCKER_ENV
+docker_tag
+Dockerfile-php-build
+output.log
 package.json
 package-lock.json
 ruleset.xml
