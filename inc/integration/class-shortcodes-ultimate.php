@@ -36,9 +36,11 @@ final class Shortcodes_Ultimate {
 	 * @param	string	$suffix A filename suffix
 	 */
 	public static function register_assets( $is_debug, $suffix ) {
-		$css_file_url = \EPI_EMBED_PRIVACY_URL . 'assets/style/shortcodes-ultimate' . $suffix . '.css';
-		$file_version = $is_debug ? \filemtime( \EPI_EMBED_PRIVACY_BASE . 'assets/style/shortcodes-ultimate' . $suffix . '.css' ) : \EMBED_PRIVACY_VERSION;
-		
-		\wp_register_style( 'embed-privacy-shortcodes-ultimate', $css_file_url, [], $file_version );
+		if ( \file_exists( \EPI_EMBED_PRIVACY_BASE . 'assets/style/shortcodes-ultimate' . $suffix . '.css' ) ) {
+			$css_file_url = \EPI_EMBED_PRIVACY_URL . 'assets/style/shortcodes-ultimate' . $suffix . '.css';
+			$file_version = $is_debug ? \filemtime( \EPI_EMBED_PRIVACY_BASE . 'assets/style/shortcodes-ultimate' . $suffix . '.css' ) : \EMBED_PRIVACY_VERSION;
+			
+			\wp_register_style( 'embed-privacy-shortcodes-ultimate', $css_file_url, [], $file_version );
+		}
 	}
 }

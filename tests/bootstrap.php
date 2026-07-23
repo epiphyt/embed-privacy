@@ -2,6 +2,7 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/helper/ProvidersHelper.php';
+require_once __DIR__ . '/helper/ManagesAssetFiles.php';
 
 // WordPress output/query format constants
 if (!defined('ARRAY_A')) {

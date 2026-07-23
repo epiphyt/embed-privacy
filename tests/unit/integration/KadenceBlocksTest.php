@@ -7,6 +7,7 @@ namespace Tests\Unit\integration;
 use epiphyt\Embed_Privacy\integration\Kadence_Blocks;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
+use Tests\Unit\helper\ManagesAssetFiles;
 
 use function Brain\Monkey\Actions\has as hasAction;
 use function Brain\Monkey\Functions\expect;
@@ -20,6 +21,8 @@ use function Brain\Monkey\tearDown;
 #[CoversClass(Kadence_Blocks::class)]
 final class KadenceBlocksTest extends MockeryTestCase
 {
+    use ManagesAssetFiles;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -56,6 +59,9 @@ final class KadenceBlocksTest extends MockeryTestCase
 
     public function testRegisterAssetsUsesVersionConstantWhenNotDebug(): void
     {
+        // asset exists on disk, so it is registered with the version constant
+        $this->makeAssetsAvailable([\EPI_EMBED_PRIVACY_BASE . 'assets/style/kadence-blocks.min.css']);
+
         expect('wp_register_style')->once()->with(
             'embed-privacy-kadence-blocks',
             \EPI_EMBED_PRIVACY_URL . 'assets/style/kadence-blocks.min.css',
@@ -66,9 +72,20 @@ final class KadenceBlocksTest extends MockeryTestCase
         Kadence_Blocks::register_assets(false, '.min');
     }
 
+    public function testRegisterAssetsSkipsMissingAsset(): void
+    {
+        // asset is not available on disk, so nothing is registered (and no filemtime warning)
+        $this->makeAssetsUnavailable([\EPI_EMBED_PRIVACY_BASE . 'assets/style/kadence-blocks.min.css']);
+
+        expect('wp_register_style')->never();
+
+        Kadence_Blocks::register_assets(false, '.min');
+    }
+
     public function testRegisterAssetsUsesFilemtimeWhenDebug(): void
     {
-        // an empty suffix maps to an existing CSS file, so filemtime() does not warn
+        // build the non-minified file so file_exists() passes and filemtime() does not warn
+        $this->makeAssetsAvailable([\EPI_EMBED_PRIVACY_BASE . 'assets/style/kadence-blocks.css']);
         $expected = \filemtime(\EPI_EMBED_PRIVACY_BASE . 'assets/style/kadence-blocks.css');
         expect('wp_register_style')->once()->with(
             'embed-privacy-kadence-blocks',
@@ -82,6 +99,8 @@ final class KadenceBlocksTest extends MockeryTestCase
 
     protected function tearDown(): void
     {
+        $this->restoreAssetFiles();
+
         tearDown();
         parent::tearDown();
     }

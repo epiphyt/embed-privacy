@@ -9,6 +9,7 @@ use epiphyt\Embed_Privacy\integration\Wpforo_Embeds;
 use Mockery;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
+use Tests\Unit\helper\ManagesAssetFiles;
 
 use function Brain\Monkey\Actions\has as hasAction;
 use function Brain\Monkey\Filters\has as hasFilter;
@@ -20,6 +21,8 @@ use function Brain\Monkey\tearDown;
 #[CoversClass(Wpforo_Embeds::class)]
 final class WpforoEmbedsTest extends MockeryTestCase
 {
+    use ManagesAssetFiles;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -60,6 +63,9 @@ final class WpforoEmbedsTest extends MockeryTestCase
 
     public function testRegisterAssetsUsesVersionConstantWhenNotDebug(): void
     {
+        // asset exists on disk, so it is registered with the version constant
+        $this->makeAssetsAvailable([\EPI_EMBED_PRIVACY_BASE . 'assets/style/wpforo-embeds.min.css']);
+
         expect('wp_register_style')->once()->with(
             'embed-privacy-wpforo-embeds',
             \EPI_EMBED_PRIVACY_URL . 'assets/style/wpforo-embeds.min.css',
@@ -70,10 +76,21 @@ final class WpforoEmbedsTest extends MockeryTestCase
         Wpforo_Embeds::register_assets(false, '.min');
     }
 
+    public function testRegisterAssetsSkipsMissingAsset(): void
+    {
+        // asset is not available on disk, so nothing is registered (and no filemtime warning)
+        $this->makeAssetsUnavailable([\EPI_EMBED_PRIVACY_BASE . 'assets/style/wpforo-embeds.min.css']);
+
+        expect('wp_register_style')->never();
+
+        Wpforo_Embeds::register_assets(false, '.min');
+    }
+
     public function testRegisterAssetsUsesFilemtimeWhenDebug(): void
     {
-        // an empty suffix maps to an existing CSS file, so filemtime() does not warn;
+        // build the non-minified file so file_exists() passes and filemtime() does not warn;
         // the source casts the result to string
+        $this->makeAssetsAvailable([\EPI_EMBED_PRIVACY_BASE . 'assets/style/wpforo-embeds.css']);
         $expected = (string) \filemtime(\EPI_EMBED_PRIVACY_BASE . 'assets/style/wpforo-embeds.css');
         expect('wp_register_style')->once()->with(
             'embed-privacy-wpforo-embeds',
@@ -99,6 +116,8 @@ final class WpforoEmbedsTest extends MockeryTestCase
 
     protected function tearDown(): void
     {
+        $this->restoreAssetFiles();
+
         tearDown();
         Embed_Privacy::$instance = null;
         parent::tearDown();

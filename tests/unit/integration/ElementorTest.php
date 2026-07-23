@@ -7,6 +7,7 @@ namespace Tests\Unit\integration;
 use epiphyt\Embed_Privacy\integration\Elementor;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
+use Tests\Unit\helper\ManagesAssetFiles;
 
 use function Brain\Monkey\Actions\has as hasAction;
 use function Brain\Monkey\Filters\has as hasFilter;
@@ -25,10 +26,25 @@ use function Brain\Monkey\tearDown;
 #[CoversClass(Elementor::class)]
 final class ElementorTest extends MockeryTestCase
 {
+    use ManagesAssetFiles;
+
     protected function setUp(): void
     {
         parent::setUp();
         setUp();
+    }
+
+    /**
+     * Minified asset files guarded by register_assets().
+     *
+     * @return string[] Absolute asset paths
+     */
+    private function minAssets(): array
+    {
+        return [
+            \EPI_EMBED_PRIVACY_BASE . 'assets/js/elementor-video.min.js',
+            \EPI_EMBED_PRIVACY_BASE . 'assets/style/elementor.min.css',
+        ];
     }
 
     public function testInitRegistersHooks(): void
@@ -65,6 +81,9 @@ final class ElementorTest extends MockeryTestCase
 
     public function testRegisterAssetsUsesVersionConstantWhenNotDebug(): void
     {
+        // assets exist on disk, so they are registered with the version constant
+        $this->makeAssetsAvailable($this->minAssets());
+
         expect('wp_register_script')->once()->with(
             'embed-privacy-elementor-video',
             \EPI_EMBED_PRIVACY_URL . 'assets/js/elementor-video.min.js',
@@ -82,9 +101,24 @@ final class ElementorTest extends MockeryTestCase
         Elementor::register_assets(false, '.min');
     }
 
+    public function testRegisterAssetsSkipsMissingAssets(): void
+    {
+        // assets are not available on disk, so nothing is registered (and no filemtime warning)
+        $this->makeAssetsUnavailable($this->minAssets());
+
+        expect('wp_register_script')->never();
+        expect('wp_register_style')->never();
+
+        Elementor::register_assets(false, '.min');
+    }
+
     public function testRegisterAssetsUsesFilemtimeWhenDebug(): void
     {
-        // an empty suffix maps to existing asset files, so filemtime() does not warn
+        // build the non-minified files so file_exists() passes and filemtime() does not warn
+        $this->makeAssetsAvailable([
+            \EPI_EMBED_PRIVACY_BASE . 'assets/js/elementor-video.js',
+            \EPI_EMBED_PRIVACY_BASE . 'assets/style/elementor.css',
+        ]);
         $expectedJs = \filemtime(\EPI_EMBED_PRIVACY_BASE . 'assets/js/elementor-video.js');
         $expectedCss = \filemtime(\EPI_EMBED_PRIVACY_BASE . 'assets/style/elementor.css');
         expect('wp_register_script')->once()->with(
@@ -116,6 +150,8 @@ final class ElementorTest extends MockeryTestCase
 
     protected function tearDown(): void
     {
+        $this->restoreAssetFiles();
+
         tearDown();
         parent::tearDown();
     }

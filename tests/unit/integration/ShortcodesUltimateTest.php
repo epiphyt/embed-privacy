@@ -7,6 +7,7 @@ namespace Tests\Unit\integration;
 use epiphyt\Embed_Privacy\integration\Shortcodes_Ultimate;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
+use Tests\Unit\helper\ManagesAssetFiles;
 
 use function Brain\Monkey\Actions\has as hasAction;
 use function Brain\Monkey\Functions\expect;
@@ -17,6 +18,8 @@ use function Brain\Monkey\tearDown;
 #[CoversClass(Shortcodes_Ultimate::class)]
 final class ShortcodesUltimateTest extends MockeryTestCase
 {
+    use ManagesAssetFiles;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -53,6 +56,9 @@ final class ShortcodesUltimateTest extends MockeryTestCase
 
     public function testRegisterAssetsUsesVersionConstantWhenNotDebug(): void
     {
+        // asset exists on disk, so it is registered with the version constant
+        $this->makeAssetsAvailable([\EPI_EMBED_PRIVACY_BASE . 'assets/style/shortcodes-ultimate.min.css']);
+
         expect('wp_register_style')->once()->with(
             'embed-privacy-shortcodes-ultimate',
             \EPI_EMBED_PRIVACY_URL . 'assets/style/shortcodes-ultimate.min.css',
@@ -63,9 +69,20 @@ final class ShortcodesUltimateTest extends MockeryTestCase
         Shortcodes_Ultimate::register_assets(false, '.min');
     }
 
+    public function testRegisterAssetsSkipsMissingAsset(): void
+    {
+        // asset is not available on disk, so nothing is registered (and no filemtime warning)
+        $this->makeAssetsUnavailable([\EPI_EMBED_PRIVACY_BASE . 'assets/style/shortcodes-ultimate.min.css']);
+
+        expect('wp_register_style')->never();
+
+        Shortcodes_Ultimate::register_assets(false, '.min');
+    }
+
     public function testRegisterAssetsUsesFilemtimeWhenDebug(): void
     {
-        // an empty suffix maps to an existing CSS file, so filemtime() does not warn
+        // build the non-minified file so file_exists() passes and filemtime() does not warn
+        $this->makeAssetsAvailable([\EPI_EMBED_PRIVACY_BASE . 'assets/style/shortcodes-ultimate.css']);
         $expected = \filemtime(\EPI_EMBED_PRIVACY_BASE . 'assets/style/shortcodes-ultimate.css');
         expect('wp_register_style')->once()->with(
             'embed-privacy-shortcodes-ultimate',
@@ -79,6 +96,8 @@ final class ShortcodesUltimateTest extends MockeryTestCase
 
     protected function tearDown(): void
     {
+        $this->restoreAssetFiles();
+
         tearDown();
         parent::tearDown();
     }
