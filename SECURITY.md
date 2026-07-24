@@ -6,8 +6,8 @@ We usually only support the latest major version.
 
 | Version  | Supported          |
 | -------- | ------------------ |
-| 1.12.x   | :white_check_mark: |
-| < 1.12   | :x:                |
+| 1.13.x   | :white_check_mark: |
+| < 1.13   | :x:                |
 
 ## How can I report security bugs?
 
