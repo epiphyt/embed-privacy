@@ -53,13 +53,29 @@ final class CoverBlockTest extends MockeryTestCase
         $this->assertSame($content, Cover_Block::replace_background_dim($content));
     }
 
+    public function testReturnsContentUnchangedWithoutEmbedBackground(): void
+    {
+        // cover with an overlay container but no wp-block-cover__embed-background,
+        // so the guard bails out and the content is returned untouched
+        $content = '<div class="wp-block-cover">'
+            . '<span class="wp-block-cover__background"></span>'
+            . '<div class="embed-privacy-container">'
+            . '<div class="embed-privacy-overlay"></div>'
+            . '</div>'
+            . '</div>';
+
+        $this->assertSame($content, Cover_Block::replace_background_dim($content));
+    }
+
     public function testMovesBackgroundDimBeforeOverlay(): void
     {
         // both markers present so the guard passes and the DOM is processed
         $content = '<div class="wp-block-cover">'
             . '<span class="wp-block-cover__background" id="dim"></span>'
+            . '<div class="wp-block-cover__embed-background">'
             . '<div class="embed-privacy-container">'
             . '<div class="embed-privacy-overlay" id="overlay"></div>'
+            . '</div>'
             . '</div>'
             . '</div>';
 
@@ -85,8 +101,10 @@ final class CoverBlockTest extends MockeryTestCase
         // container present (guard passes) but without an embed-privacy-overlay child
         $content = '<div class="wp-block-cover">'
             . '<span class="wp-block-cover__background" id="dim"></span>'
+            . '<div class="wp-block-cover__embed-background">'
             . '<div class="embed-privacy-container" id="container">'
             . '<p>no overlay here</p>'
+            . '</div>'
             . '</div>'
             . '</div>';
 
@@ -117,6 +135,34 @@ final class CoverBlockTest extends MockeryTestCase
         $this->assertStringContainsString('embed-privacy-container', $output);
         $this->assertStringContainsString('embed-privacy-overlay', $output);
         $this->assertStringNotContainsString('wp-block-cover__background', $output);
+    }
+
+    public function testSkipsCoverWhenEmbedBackgroundIsNotDirectChild(): void
+    {
+        // all markers present (guard passes) but the embed background is nested
+        // inside another wrapper rather than being a direct child of the cover
+        $content = '<div class="wp-block-cover">'
+            . '<span class="wp-block-cover__background" id="dim"></span>'
+            . '<div class="inner-wrapper">'
+            . '<div class="wp-block-cover__embed-background">'
+            . '<div class="embed-privacy-container">'
+            . '<div class="embed-privacy-overlay" id="overlay"></div>'
+            . '</div>'
+            . '</div>'
+            . '</div>'
+            . '</div>';
+
+        $output = Cover_Block::replace_background_dim($content);
+
+        // the cover was not processed, so the dim stays put as the cover's first
+        // child, still before the embed background wrapper (it was not moved into
+        // the container). Had it been processed, the dim would sit after it.
+        $dimPos = \strpos($output, 'id="dim"');
+        $embedBackgroundPos = \strpos($output, 'wp-block-cover__embed-background');
+
+        $this->assertNotFalse($dimPos);
+        $this->assertNotFalse($embedBackgroundPos);
+        $this->assertLessThan($embedBackgroundPos, $dimPos);
     }
 
     protected function tearDown(): void

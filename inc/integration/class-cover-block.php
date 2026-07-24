@@ -27,7 +27,11 @@ final class Cover_Block {
 	 * @return	string Updated content
 	 */
 	public static function replace_background_dim( $content ) {
-		if ( ! \str_contains( $content, 'embed-privacy-container' ) || ! \str_contains( $content, 'wp-block-cover' ) ) {
+		if (
+			! \str_contains( $content, 'embed-privacy-container' )
+			|| ! \str_contains( $content, 'wp-block-cover' )
+			|| ! \str_contains( $content, 'wp-block-cover__embed-background' )
+		) {
 			return $content;
 		}
 		
@@ -42,7 +46,8 @@ final class Cover_Block {
 			return "contains(concat(' ', normalize-space(@class), ' '), ' {$name} ')";
 		};
 		
-		$covers = $xpath->query( "//*[{$class('wp-block-cover')}][.//*[{$class('embed-privacy-container')}]]" );
+		// only process covers with the embed background as a direct child
+		$covers = $xpath->query( "//*[{$class('wp-block-cover')}][*[{$class('wp-block-cover__embed-background')}]]" );
 		
 		foreach ( $covers as $cover ) {
 			$overlay = $xpath->query( ".//*[{$class('wp-block-cover__background')}]", $cover )->item( 0 );
