@@ -2,15 +2,23 @@
     "require-dev": {
         "phpunit/phpunit": "^12.5",
         "brain/monkey": "2.*",
-        "brain/faker": "dev-master"
+        "brain/faker": "dev-master",
+        "epiphyt/coding-standard": "^1.0"
     },
     "autoload": {
         "classmap": ["inc"]
     },
     "scripts": {
+        "phpcs": "phpcs -s .",
         "phpunit": "phpunit",
         "test": [
+            "@phpcs",
             "@phpunit"
         ]
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
     }
 }

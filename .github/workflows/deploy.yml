@@ -9,6 +9,19 @@ on:
     branches:
       - '**'
 jobs:
+  phpcs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Install Composer dependencies
+        uses: php-actions/composer@v6
+        with:
+          php_version: 8.3
+          version: 2.2
+      - name: Run PHP Code Sniffer
+        run: vendor/bin/phpcs -s --standard=.phpcs.xml .
   phpunit:
     runs-on: ubuntu-latest
     steps:
@@ -26,7 +39,7 @@ jobs:
         configuration: phpunit.xml
         php_version: 8.3
   deploy-production:
-    needs: [phpunit]
+    needs: [phpcs, phpunit]
     if: ${{ startsWith(github.ref, 'refs/tags/v') }}
     name: deploy production
     runs-on: ubuntu-latest
