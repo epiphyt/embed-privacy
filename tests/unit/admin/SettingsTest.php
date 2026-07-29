@@ -66,11 +66,41 @@ final class SettingsTest extends MockeryTestCase
             'wp_sprintf' => '',
         ]);
 
-        expect('add_settings_section')->once();
-        expect('add_settings_field')->times(6);
+        // both groups are real sections, so they render as headings
+        expect('add_settings_section')->once()->with(
+            'embed_privacy_general',
+            'Embeds',
+            '__return_null',
+            'embed_privacy'
+        );
+        expect('add_settings_section')->once()->with(
+            'embed_privacy_data_handling',
+            'Data handling',
+            '__return_null',
+            'embed_privacy'
+        );
+
+        $sections = [];
+        expect('add_settings_field')->times(6)->andReturnUsing(
+            static function (...$arguments) use (&$sections) {
+                $sections[] = $arguments[4];
+            }
+        );
         expect('register_setting')->times(6);
 
         Settings::register();
+
+        $this->assertSame(
+            [
+                'embed_privacy_general',
+                'embed_privacy_general',
+                'embed_privacy_general',
+                'embed_privacy_general',
+                'embed_privacy_general',
+                'embed_privacy_data_handling',
+            ],
+            $sections
+        );
     }
 
     public function testRegisterMenuAddsSubmenuPage(): void

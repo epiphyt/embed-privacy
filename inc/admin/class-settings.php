@@ -30,11 +30,14 @@ final class Settings {
 			return;
 		}
 		
-		\settings_errors( 'embed_privacy_messages' );
 		?>
 		<div class="wrap">
-			<h1><?php \esc_html_e( 'Embed Privacy', 'embed-privacy' ); ?> <a href="<?php echo \esc_url( \admin_url( 'edit.php?post_type=epi_embed' ) ); ?>" class="page-title-action"><?php \esc_html_e( 'Manage embeds', 'embed-privacy' ); ?></a></h1>
-			
+			<h1 class="wp-heading-inline"><?php \esc_html_e( 'Embed Privacy', 'embed-privacy' ); ?></h1>
+			<a href="<?php echo \esc_url( \admin_url( 'edit.php?post_type=epi_embed' ) ); ?>" class="page-title-action"><?php \esc_html_e( 'Manage embeds', 'embed-privacy' ); ?></a>
+			<hr class="wp-header-end">
+
+			<?php \settings_errors( 'embed_privacy_messages' ); ?>
+
 			<form action="options.php" method="post" class="embed-privacy__settings-form">
 				<?php
 				\settings_fields( 'embed_privacy' );
@@ -59,10 +62,11 @@ final class Settings {
 	 * Register settings.
 	 */
 	public static function register() {
-		\add_settings_section( 'embed_privacy_general', null, '__return_null', 'embed_privacy' );
+		\add_settings_section( 'embed_privacy_general', \__( 'Embeds', 'embed-privacy' ), '__return_null', 'embed_privacy' );
+		\add_settings_section( 'embed_privacy_data_handling', \__( 'Data handling', 'embed-privacy' ), '__return_null', 'embed_privacy' );
 		\add_settings_field(
 			'embed_privacy_local_activitypub_posts',
-			\__( 'Embeds', 'embed-privacy' ),
+			\__return_empty_string(),
 			[ Field::class, 'get' ],
 			'embed_privacy',
 			'embed_privacy_general',
@@ -141,10 +145,10 @@ final class Settings {
 		\register_setting( 'embed_privacy', 'embed_privacy_force_script_loading' );
 		\add_settings_field(
 			'embed_privacy_preserve_data_on_uninstall',
-			\__( 'Data handling', 'embed-privacy' ),
+			\__return_empty_string(),
 			[ Field::class, 'get' ],
 			'embed_privacy',
-			'embed_privacy_general',
+			'embed_privacy_data_handling',
 			[
 				'description' => \__( 'By enabling this option, all plugin data is preserved on uninstall.', 'embed-privacy' ),
 				'name' => 'embed_privacy_preserve_data_on_uninstall',
