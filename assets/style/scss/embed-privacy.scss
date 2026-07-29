@@ -105,7 +105,8 @@
 		text-align: right;
 	}
 	
-	&:hover {
+	&:hover,
+	.embed-privacy-container:focus-within & {
 		background-color: rgba(0, 0, 0, .8);
 		color: #fff;
 		
