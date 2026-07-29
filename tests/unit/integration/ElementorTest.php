@@ -13,6 +13,7 @@ use function Brain\Monkey\Actions\has as hasAction;
 use function Brain\Monkey\Filters\has as hasFilter;
 use function Brain\Monkey\Functions\expect;
 use function Brain\Monkey\Functions\stubs;
+use function Brain\Monkey\Functions\stubTranslationFunctions;
 use function Brain\Monkey\setUp;
 use function Brain\Monkey\tearDown;
 
@@ -32,6 +33,20 @@ final class ElementorTest extends MockeryTestCase
     {
         parent::setUp();
         setUp();
+
+        stubTranslationFunctions();
+    }
+
+    /**
+     * Expect the video title to be localized for the registered script.
+     */
+    private function expectLocalizedVideoTitle(): void
+    {
+        expect('wp_localize_script')->once()->with(
+            'embed-privacy-elementor-video',
+            'embedPrivacyElementor',
+            ['videoTitle' => 'YouTube video']
+        );
     }
 
     /**
@@ -97,6 +112,7 @@ final class ElementorTest extends MockeryTestCase
             [],
             \EMBED_PRIVACY_VERSION
         );
+        $this->expectLocalizedVideoTitle();
 
         Elementor::register_assets(false, '.min');
     }
@@ -108,6 +124,7 @@ final class ElementorTest extends MockeryTestCase
 
         expect('wp_register_script')->never();
         expect('wp_register_style')->never();
+        expect('wp_localize_script')->never();
 
         Elementor::register_assets(false, '.min');
     }
@@ -134,6 +151,7 @@ final class ElementorTest extends MockeryTestCase
             [],
             $expectedCss
         );
+        $this->expectLocalizedVideoTitle();
 
         Elementor::register_assets(true, '');
     }

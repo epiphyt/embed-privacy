@@ -51,6 +51,9 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		iframe.classList.add( 'elementor-video' );
 		iframe.style.height = '100%';
 		iframe.style.width = '100%';
+		// Elementor provides no video title, so a generic one is used to make
+		// sure the frame has an accessible name at all
+		iframe.title = embedPrivacyElementor.videoTitle;
 
 		return iframe;
 	}

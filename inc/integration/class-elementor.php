@@ -157,6 +157,9 @@ final class Elementor {
 			$file_version = $is_debug ? \filemtime( \EPI_EMBED_PRIVACY_BASE . 'assets/js/elementor-video' . $suffix . '.js' ) : \EMBED_PRIVACY_VERSION;
 			
 			\wp_register_script( 'embed-privacy-elementor-video', $js_file_url, [], $file_version, [ 'strategy' => 'defer' ] );
+			\wp_localize_script( 'embed-privacy-elementor-video', 'embedPrivacyElementor', [
+				'videoTitle' => \__( 'YouTube video', 'embed-privacy' ),
+			] );
 		}
 		
 		if ( \file_exists( \EPI_EMBED_PRIVACY_BASE . 'assets/style/elementor' . $suffix . '.css' ) ) {
