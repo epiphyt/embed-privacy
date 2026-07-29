@@ -170,6 +170,7 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 = 1.13.1 =
 * Improved: Overlay styles are now also applied while an element inside the overlay is focussed
+* Improved: Reduced motion and forced colors preferences are now respected
 * Fixed: Activating an overlay via keyboard loaded the embedded content twice and caused a JavaScript error
 * Fixed: Focus was lost after loading an embedded content
 * Fixed: A stale, invisible button remained after activating an overlay with the mouse

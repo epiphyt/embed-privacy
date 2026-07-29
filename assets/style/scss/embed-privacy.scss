@@ -84,7 +84,17 @@
 	@media (min-width: 768px) {
 		min-height: 300px;
 	}
-	
+
+	// the background color is replaced by the system color, which makes the
+	// overlay indistinguishable from the rest of the page without a border
+	@media (forced-colors: active) {
+		border: 1px solid;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		transition: none;
+	}
+
 	label,
 	p {
 		color: #eee;
@@ -92,8 +102,12 @@
 		font-weight: 400;
 		text-align: center;
 		transition: color .25s ease-in-out;
+
+		@media (prefers-reduced-motion: reduce) {
+			transition: none;
+		}
 	}
-	
+
 	label,
 	.embed-privacy-input-wrapper {
 		margin: 0;
@@ -134,6 +148,10 @@
 	margin-bottom: 30px;
 	opacity: .8;
 	transition: opacity .25s ease-in-out;
+
+	@media (prefers-reduced-motion: reduce) {
+		transition: none;
+	}
 }
 
 // make sure responsive Gutenberg blocks don't have too much space
