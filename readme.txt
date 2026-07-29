@@ -169,19 +169,19 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 == Changelog ==
 
 = 1.13.1 =
-* Added: Notice that the link to the privacy policy opens in a new tab
 * Added: New attribute `headline_level` for the opt-out shortcode
+* Added: Notice that the link to the privacy policy opens in a new tab
 * Added: Title for video iframes in Elementor
-* Improved: The list of embed providers of the opt-out shortcode is now labelled by its headline
-* Improved: The settings page now uses proper section headings
 * Improved: Field descriptions are now programmatically associated with their form controls
-* Improved: Support data can now be scrolled via keyboard
-* Fixed: Labelling and keyboard focus handling of the background image field in the admin
 * Improved: Overlay styles are now also applied while an element inside the overlay is focussed
 * Improved: Reduced motion and forced colors preferences are now respected
+* Improved: Support data can now be scrolled via keyboard
+* Improved: The list of embed providers of the opt-out shortcode is now labelled by its headline
+* Improved: The settings page now uses proper section headings
+* Fixed: A stale, invisible button remained after activating an overlay with the mouse
 * Fixed: Activating an overlay via keyboard loaded the embedded content twice and caused a JavaScript error
 * Fixed: Focus was lost after loading an embedded content
-* Fixed: A stale, invisible button remained after activating an overlay with the mouse
+* Fixed: Labelling and keyboard focus handling of the background image field in the admin
 
 = 1.13.0 =
 * Added: Support for cover block embed URLs
