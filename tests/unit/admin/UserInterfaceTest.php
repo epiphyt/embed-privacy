@@ -144,6 +144,7 @@ final class UserInterfaceTest extends MockeryTestCase
         $screen = Mockery::mock('WP_Screen');
         $screen->id = 'post';
 
+        stubTranslationFunctions();
         stubs([
             'get_current_screen' => $screen,
         ]);
@@ -159,6 +160,15 @@ final class UserInterfaceTest extends MockeryTestCase
                 Mockery::any(),
                 true
             );
+        // the status messages announced after selecting or removing an image
+        expect('wp_localize_script')->once()->with(
+            'embed-privacy-admin-image-upload',
+            'embedPrivacyAdminImageUpload',
+            [
+                'imageRemoved' => 'Image removed.',
+                'imageSelected' => 'Image selected.',
+            ]
+        );
         expect('wp_enqueue_style')
             ->once()
             ->with('embed-privacy-admin-style', Mockery::any(), [], Mockery::any());
@@ -178,6 +188,7 @@ final class UserInterfaceTest extends MockeryTestCase
         $this->makeAssetsUnavailable();
 
         expect('wp_enqueue_script')->never();
+        expect('wp_localize_script')->never();
         expect('wp_enqueue_style')->never();
 
         User_Interface::enqueue_assets('post.php');
@@ -188,6 +199,7 @@ final class UserInterfaceTest extends MockeryTestCase
         $screen = Mockery::mock('WP_Screen');
         $screen->id = 'epi_embed';
 
+        stubTranslationFunctions();
         stubs([
             'get_current_screen' => $screen,
         ]);
@@ -201,6 +213,7 @@ final class UserInterfaceTest extends MockeryTestCase
             Mockery::any(),
             true
         );
+        expect('wp_localize_script')->once();
         expect('wp_enqueue_style')->once();
 
         User_Interface::enqueue_assets('index.php');

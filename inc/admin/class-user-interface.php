@@ -60,6 +60,14 @@ final class User_Interface {
 			
 			if ( \file_exists( $script_path ) ) {
 				\wp_enqueue_script( 'embed-privacy-admin-image-upload', $script_url, [ 'jquery' ], (string) \filemtime( $script_path ), true );
+				\wp_localize_script(
+					'embed-privacy-admin-image-upload',
+					'embedPrivacyAdminImageUpload',
+					[
+						'imageRemoved' => \__( 'Image removed.', 'embed-privacy' ),
+						'imageSelected' => \__( 'Image selected.', 'embed-privacy' ),
+					]
+				);
 			}
 			
 			$style_path = \EPI_EMBED_PRIVACY_BASE . 'assets/style/embed-privacy-admin' . $suffix . '.css';

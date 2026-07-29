@@ -176,6 +176,7 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 * Improved: The settings page now uses proper section headings
 * Improved: Field descriptions are now programmatically associated with their form controls
 * Fixed: The settings page did not confirm that settings have been saved
+* Fixed: Labelling and keyboard focus handling of the background image field in the admin
 * Improved: Overlay styles are now also applied while an element inside the overlay is focussed
 * Improved: Reduced motion and forced colors preferences are now respected
 * Fixed: Activating an overlay via keyboard loaded the embedded content twice and caused a JavaScript error

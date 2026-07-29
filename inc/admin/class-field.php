@@ -166,34 +166,29 @@ final class Field {
 		
 		$attributes['value'] = (string) \get_post_meta( $post_id, $attributes['name'], $attributes['single'] );
 		$image = \wp_get_attachment_image( (int) $attributes['value'] );
+		$label_id = $attributes['name'] . '-label';
 		?>
 		<tr>
 			<th scope="row">
-				<label for="<?php echo \esc_attr( $attributes['name'] ); ?>"><?php echo \esc_html( $attributes['title'] ); ?></label>
+				<span id="<?php echo \esc_attr( $label_id ); ?>"><?php echo \esc_html( $attributes['title'] ); ?></span>
 			</th>
-			<td class="embed-privacy-image-item">
+			<td class="embed-privacy-image-item" role="group" aria-labelledby="<?php echo \esc_attr( $label_id ); ?>">
 				<input type="hidden" name="<?php echo \esc_attr( $attributes['name'] ); ?>" value="<?php echo \esc_attr( $attributes['value'] ); ?>" class="embed-privacy-image-input">
 				
 				<div class="embed-privacy-image-input-container<?php echo ! empty( $attributes['value'] ) ? ' embed-privacy-hidden' : ''; ?>">
-					<button type="button" class="button button-secondary embed-privacy-image-upload"<?php echo self::get_described_by( $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>><span class="screen-reader-text"><?= \esc_html( $attributes['title'] ); ?></span> <?php \esc_html_e( 'Upload or choose file', 'embed-privacy' ); ?></button>
+					<button type="button" class="button button-secondary embed-privacy-image-upload"<?php echo self::get_described_by( $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>><?php \esc_html_e( 'Upload or choose file', 'embed-privacy' ); ?></button>
 				</div>
 				
 				<div class="embed-privacy-image-container<?php echo empty( $attributes['value'] ) ? ' embed-privacy-hidden' : ''; ?>">
 					<?php echo $image; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 					<button type="button" class="dashicons dashicons-no embed-privacy-icon embed-privacy-remove-image">
-						<span class="screen-reader-text">
-							<?php
-							\printf(
-								/* translators: field title */
-								\esc_attr__( 'Remove image for %s', 'embed-privacy' ),
-								\esc_html( $attributes['title'] )
-							);
-							?>
-						</span>
+						<span class="screen-reader-text"><?= \esc_attr__( 'Remove image', 'embed-privacy' ); ?></span>
 					</button>
 				</div>
 				
 				<?php echo self::get_description( $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				
+				<p class="screen-reader-text embed-privacy-image-status" role="status"></p>
 			</td>
 		</tr>
 		<?php

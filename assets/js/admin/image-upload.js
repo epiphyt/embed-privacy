@@ -22,7 +22,18 @@ jQuery( document ).ready( function( $ ) {
 		image_item.find( '.embed-privacy-upload-input' ).attr( 'type', 'file' );
 		// set focus to upload button
 		image_item.find( '.embed-privacy-image-upload' ).focus();
+		announce( image_item, embedPrivacyAdminImageUpload.imageRemoved );
 	} );
+
+	/**
+	 * Announce a status message of an image field to screen readers.
+	 *
+	 * @param	{jQuery}	image_item The image field
+	 * @param	{string}	message The message to announce
+	 */
+	function announce( image_item, message ) {
+		image_item.find( '.embed-privacy-image-status' ).text( message );
+	}
 	
 	// upload functionality single image
 	$( document ).on( 'click', '.embed-privacy-image-upload', function( event ) {
@@ -44,9 +55,13 @@ jQuery( document ).ready( function( $ ) {
 			container.removeClass( 'embed-privacy-hidden' );
 			// store attachment ID
 			id_field.val( media_attachment.id );
-			
+
+			// move the focus away from the upload button before hiding it,
+			// as the media frame returns the focus to it on close
+			container.find( '.embed-privacy-remove-image' ).focus();
 			// hide upload field
 			upload_field.parent().addClass( 'embed-privacy-hidden' );
+			announce( upload_field.closest( '.embed-privacy-image-item' ), embedPrivacyAdminImageUpload.imageSelected );
 		} );
 		
 		meta_image_frame.open();

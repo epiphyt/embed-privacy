@@ -11,19 +11,23 @@
 
 .embed-privacy-icon {
 	background-color: rgba(0, 0, 0, .75);
+	border: 0;
 	border-radius: 50%;
 	color: #fff;
 	cursor: pointer;
+	height: 30px;
 	left: 5px;
 	padding: 5px;
 	position: absolute;
 	top: 5px;
-}
-
-.embed-privacy-icon {
-	border: 0;
-	height: 30px;
 	width: 30px;
+
+	// the button has no .button class, so it doesn't get the focus style of
+	// WordPress, and it's placed on top of an arbitrary image
+	&:focus-visible {
+		box-shadow: 0 0 0 2px #fff, 0 0 0 4px #2271b1;
+		outline: 2px solid transparent;
+	}
 }
 
 .embed-privacy-image-container {

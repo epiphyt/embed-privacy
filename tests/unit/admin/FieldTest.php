@@ -362,6 +362,12 @@ final class FieldTest extends MockeryTestCase
         // the description is programmatically associated with the upload button
         $this->assertStringContainsString('<p class="description" id="background_image-description">', $output);
         $this->assertStringContainsString('aria-describedby="background_image-description"', $output);
+        // the field is a group labelled by its title, as it has no labelable control
+        $this->assertStringContainsString('<span id="background_image-label">Background</span>', $output);
+        $this->assertStringContainsString('role="group" aria-labelledby="background_image-label"', $output);
+        $this->assertStringNotContainsString('<label for="background_image">', $output);
+        // status messages are announced through a live region
+        $this->assertStringContainsString('class="screen-reader-text embed-privacy-image-status" role="status"', $output);
         // with a value present, the upload button container is hidden
         $this->assertStringContainsString('embed-privacy-image-input-container embed-privacy-hidden', $output);
     }
