@@ -170,6 +170,8 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 = 1.13.1 =
 * Added: Notice that the link to the privacy policy opens in a new tab
+* Added: New attribute `headline_level` for the opt-out shortcode
+* Improved: The list of embed providers of the opt-out shortcode is now labelled by its headline
 * Improved: Overlay styles are now also applied while an element inside the overlay is focussed
 * Improved: Reduced motion and forced colors preferences are now respected
 * Fixed: Activating an overlay via keyboard loaded the embedded content twice and caused a JavaScript error

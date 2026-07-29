@@ -11,6 +11,7 @@ use epiphyt\Embed_Privacy\handler\Shortcode;
 use Mockery;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 use function Brain\Monkey\Filters\expectApplied;
 use function Brain\Monkey\Filters\has;
@@ -140,6 +141,11 @@ final class ShortcodeTest extends MockeryTestCase
                 return \array_merge($defaults, (array) $atts);
             },
             'checked' => '',
+            'wp_unique_id' => static function ($prefix = '') {
+                static $id = 0;
+
+                return $prefix . ++$id;
+            },
         ]);
         $this->installEmbedPrivacy();
         $this->installProviders([$this->provider('youtube', 'YouTube')]);
@@ -149,7 +155,7 @@ final class ShortcodeTest extends MockeryTestCase
         $this->assertStringContainsString('embed-privacy-opt-out', $output);
         $this->assertStringContainsString('data-show-all="0"', $output);
         // headline and subline are rendered
-        $this->assertStringContainsString('<h3>Embed providers</h3>', $output);
+        $this->assertMatchesRegularExpression('/<h3 id="embed-privacy-opt-out-headline-\d+">Embed providers<\/h3>/', $output);
         // with show_all off and no enabled providers, the entry is hidden
         $this->assertStringContainsString('is-hidden', $output);
         $this->assertStringContainsString('data-embed-provider="youtube"', $output);
@@ -163,6 +169,11 @@ final class ShortcodeTest extends MockeryTestCase
                 return \array_merge($defaults, (array) $atts);
             },
             'checked' => '',
+            'wp_unique_id' => static function ($prefix = '') {
+                static $id = 0;
+
+                return $prefix . ++$id;
+            },
         ]);
         $this->installEmbedPrivacy();
         $this->installProviders([$this->provider('vimeo', 'Vimeo')]);
@@ -173,6 +184,99 @@ final class ShortcodeTest extends MockeryTestCase
         // with show_all on, providers are not hidden
         $this->assertStringNotContainsString('is-hidden', $output);
         $this->assertStringContainsString('data-embed-provider="vimeo"', $output);
+    }
+
+    public function testOptOutLabelsProviderGroupByItsHeadline(): void
+    {
+        stubs([
+            'shortcode_atts' => static function ($defaults, $atts) {
+                return \array_merge($defaults, (array) $atts);
+            },
+            'checked' => '',
+            'wp_unique_id' => static function ($prefix = '') {
+                static $id = 0;
+
+                return $prefix . ++$id;
+            },
+        ]);
+        $this->installEmbedPrivacy();
+        $this->installProviders([$this->provider('youtube', 'YouTube')]);
+
+        $output = Shortcode::opt_out([]);
+
+        $this->assertSame(1, \preg_match('/<h3 id="([^"]+)">/', $output, $headline));
+        $this->assertStringContainsString('role="group"', $output);
+        $this->assertStringContainsString('aria-labelledby="' . $headline[1] . '"', $output);
+    }
+
+    public function testOptOutUsesUniqueIdsPerProvider(): void
+    {
+        stubs([
+            'shortcode_atts' => static function ($defaults, $atts) {
+                return \array_merge($defaults, (array) $atts);
+            },
+            'checked' => '',
+            'wp_unique_id' => static function ($prefix = '') {
+                static $id = 0;
+
+                return $prefix . ++$id;
+            },
+        ]);
+        $this->installEmbedPrivacy();
+        $this->installProviders([
+            $this->provider('youtube', 'YouTube'),
+            $this->provider('vimeo', 'Vimeo'),
+        ]);
+
+        $output = Shortcode::opt_out(['show_all' => 1]);
+
+        $this->assertSame(2, \preg_match_all('/<input type="checkbox" id="([^"]+)"/', $output, $matches));
+        $this->assertSame($matches[1], \array_unique($matches[1]));
+
+        // every checkbox is referenced by exactly one label
+        foreach ($matches[1] as $id) {
+            $this->assertStringContainsString('for="' . $id . '"', $output);
+        }
+    }
+
+    /**
+     * @param mixed $level
+     */
+    #[DataProvider('headlineLevelProvider')]
+    public function testOptOutRespectsHeadlineLevel($level, string $expected): void
+    {
+        stubs([
+            'shortcode_atts' => static function ($defaults, $atts) {
+                return \array_merge($defaults, (array) $atts);
+            },
+            'checked' => '',
+            'wp_unique_id' => static function ($prefix = '') {
+                static $id = 0;
+
+                return $prefix . ++$id;
+            },
+        ]);
+        $this->installEmbedPrivacy();
+        $this->installProviders([$this->provider('youtube', 'YouTube')]);
+
+        $output = Shortcode::opt_out(['headline_level' => $level]);
+
+        $this->assertStringContainsString('<' . $expected . ' id="', $output);
+        $this->assertStringContainsString('</' . $expected . '>', $output);
+    }
+
+    /**
+     * @return array<string, array{0: mixed, 1: string}>
+     */
+    public static function headlineLevelProvider(): array
+    {
+        return [
+            'level 2' => [2, 'h2'],
+            'level 6' => [6, 'h6'],
+            'string level' => ['4', 'h4'],
+            'below range is clamped' => [0, 'h1'],
+            'above range is clamped' => [9, 'h6'],
+        ];
     }
 
     public function testPrintAssetsForShortcodePrintsWhenShortcodePresent(): void

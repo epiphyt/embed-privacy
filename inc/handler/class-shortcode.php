@@ -56,6 +56,7 @@ final class Shortcode {
 	public static function opt_out( $attributes ) {
 		$attributes = \shortcode_atts( [
 			'headline' => \__( 'Embed providers', 'embed-privacy' ),
+			'headline_level' => 3,
 			'show_all' => 0,
 			'subline' => \__( 'Enable or disable embed providers globally. By enabling a provider, its embedded content will be displayed directly on every page without asking you anymore.', 'embed-privacy' ),
 		], $attributes );
@@ -67,15 +68,25 @@ final class Shortcode {
 			return '';
 		}
 		
-		$headline = '<h3>' . \esc_html( $attributes['headline'] ) . '</h3>' . \PHP_EOL;
+		$headline_id = \wp_unique_id( 'embed-privacy-opt-out-headline-' );
+		$headline_level = \min( 6, \max( 1, (int) $attributes['headline_level'] ) );
+		$headline = \sprintf(
+			'<h%1$d id="%2$s">%3$s</h%1$d>' . \PHP_EOL,
+			$headline_level,
+			\esc_attr( $headline_id ),
+			\esc_html( $attributes['headline'] )
+		);
 		
 		/**
 		 * Filter the opt-out headline.
 		 * 
+		 * @since	1.13.1	Added the $headline_id parameter
+		 * 
 		 * @param	string	$headline Current headline HTML
 		 * @param	array	$attributes Shortcode attributes
+		 * @param	string	$headline_id The ID the group of embed providers is labelled by
 		 */
-		$headline = \apply_filters( 'embed_privacy_opt_out_headline', $headline, $attributes );
+		$headline = \apply_filters( 'embed_privacy_opt_out_headline', $headline, $attributes, $headline_id );
 		
 		/**
 		 * Filter the opt-out subline.
@@ -85,7 +96,7 @@ final class Shortcode {
 		 */
 		$subline = \apply_filters( 'embed_privacy_opt_out_subline', '<p>' . \esc_html( $attributes['subline'] ) . '</p>' . \PHP_EOL, $attributes );
 		
-		$output = '<div class="embed-privacy-opt-out" data-show-all="' . ( $attributes['show_all'] ? 1 : 0 ) . '">' . \PHP_EOL . $headline . $subline;
+		$output = '<div class="embed-privacy-opt-out" data-show-all="' . ( $attributes['show_all'] ? 1 : 0 ) . '" role="group" aria-labelledby="' . \esc_attr( $headline_id ) . '">' . \PHP_EOL . $headline . $subline;
 		
 		foreach ( $embed_providers as $provider ) {
 			$is_checked = false;
@@ -95,10 +106,10 @@ final class Shortcode {
 			}
 			
 			$is_hidden = ! $attributes['show_all'] && ! \in_array( $provider->get_name(), $enabled_providers, true );
-			$microtime = \str_replace( '.', '', \microtime( true ) );
+			$input_id = \wp_unique_id( 'embed-privacy-provider-' . $provider->get_name() . '-' );
 			$output .= '<span class="embed-privacy-provider' . ( $is_hidden ? ' is-hidden' : '' ) . '">' . \PHP_EOL;
-			$output .= '<label class="embed-privacy-opt-out-label" for="embed-privacy-provider-' . \esc_attr( $provider->get_name() ) . '-' . $microtime . '" data-embed-provider="' . \esc_attr( $provider->get_name() ) . '">';
-			$output .= '<input type="checkbox" id="embed-privacy-provider-' . \esc_attr( $provider->get_name() ) . '-' . $microtime . '" ' . \checked( $is_checked, true, false ) . ' class="embed-privacy-opt-out-input" data-embed-provider="' . \esc_attr( $provider->get_name() ) . '"> ';
+			$output .= '<label class="embed-privacy-opt-out-label" for="' . \esc_attr( $input_id ) . '" data-embed-provider="' . \esc_attr( $provider->get_name() ) . '">';
+			$output .= '<input type="checkbox" id="' . \esc_attr( $input_id ) . '" ' . \checked( $is_checked, true, false ) . ' class="embed-privacy-opt-out-input" data-embed-provider="' . \esc_attr( $provider->get_name() ) . '"> ';
 			$output .= \sprintf(
 				/* translators: embed provider title */
 				\esc_html__( 'Load all embeds from %s', 'embed-privacy' ),
