@@ -37,9 +37,19 @@
 	}
 }
 
-.embed-privacy__support-data--code {
-	display: block;
+// the scrollable element is focusable, so it can be scrolled via keyboard
+.embed-privacy__support-data--code-container {
+	background: rgba(0, 0, 0, .07); // mirror code design from commons.css
 	max-height: 500px;
 	max-width: 570px;
-	overflow: scroll;
+	overflow: auto;
+	
+	> code {
+		background-color: transparent;
+	}
+
+	&:focus-visible {
+		box-shadow: 0 0 0 2px #2271b1;
+		outline: 2px solid transparent;
+	}
 }
