@@ -132,6 +132,12 @@ The shortcode `[embed_privacy_opt_out]` can be used to let users opt-out of embe
 [embed_privacy_opt_out headline="My custom headline"]
 `
 
+<code>headline_level</code> – Set the heading level of the headline, from 1 to 6 (default: 3)
+
+`
+[embed_privacy_opt_out headline_level="2"]
+`
+
 <code>subline</code> – Add a custom subline (default: Enable or disable embed providers globally. By enabling a provider, its embedded content will be displayed directly on every page without asking you anymore.)
 
 `
