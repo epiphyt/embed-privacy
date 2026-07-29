@@ -157,7 +157,11 @@ final class Template {
 					$allowed_tags = [
 						'a' => [
 							'href',
+							'rel',
 							'target',
+						],
+						'span' => [
+							'class',
 						],
 					];
 					
@@ -176,8 +180,12 @@ final class Template {
 						?>
 						<br>
 						<?php
-						/* translators: 1: embed provider, 2: opening <a> tag to the privacy policy, 3: closing </a> */
-						\printf( \wp_kses( \__( 'Learn more in %2$s%1$s’s privacy policy%3$s.', 'embed-privacy' ), $allowed_tags ), \esc_html( $provider->get_title() ), '<a href="' . \esc_url( $privacy_policy ) . '" target="_blank">', '</a>' );
+						\printf(
+							/* translators: 1: embed provider, 2: opening <a> tag to the privacy policy, 3: closing </a> */
+							\wp_kses( \__( 'Learn more in %2$s%1$s’s privacy policy%3$s.', 'embed-privacy' ), $allowed_tags ),
+							\esc_html( $provider->get_title() ),
+							'<a href="' . \esc_url( $privacy_policy ) . '" target="_blank" rel="noopener noreferrer">', '<span class="embed-privacy__new-tab-notice"> ' . \esc_html__( '(opens in a new tab)', 'embed-privacy' ) . '</span></a>'
+						);
 					}
 				}
 				else {
