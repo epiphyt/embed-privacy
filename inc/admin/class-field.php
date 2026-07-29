@@ -51,6 +51,68 @@ final class Field {
 	}
 	
 	/**
+	 * Get the markup of a field description.
+	 * 
+	 * @since	1.13.1
+	 * 
+	 * @param	array	$attributes Field attributes
+	 * @return	string The description markup or an empty string
+	 */
+	private static function get_description( array $attributes ) {
+		if ( empty( $attributes['description'] ) ) {
+			return '';
+		}
+		
+		$validation = ! empty( $attributes['validation'] ) ? $attributes['validation'] : '';
+		
+		if ( empty( $validation ) ) {
+			$description = \esc_html( $attributes['description'] );
+		}
+		else if ( $validation === 'allow-links' ) {
+			$description = \wp_kses( $attributes['description'], [
+				'a' => [
+					'href' => true,
+					'rel' => true,
+					'target' => true,
+				],
+			] );
+		}
+		else {
+			return '';
+		}
+		
+		return '<p class="description" id="' . \esc_attr( self::get_description_id( $attributes ) ) . '">' . $description . '</p>';
+	}
+	
+	/**
+	 * Get the ID a field description is referenced by.
+	 * 
+	 * @since	1.13.1
+	 * 
+	 * @param	array	$attributes Field attributes
+	 * @return	string The description ID
+	 */
+	private static function get_description_id( array $attributes ) {
+		return $attributes['name'] . '-description';
+	}
+	
+	/**
+	 * Get the aria-describedby attribute of a field, if it has a description.
+	 * 
+	 * @since	1.13.1
+	 * 
+	 * @param	array	$attributes Field attributes
+	 * @return	string The attribute or an empty string
+	 */
+	private static function get_described_by( array $attributes ) {
+		if ( empty( self::get_description( $attributes ) ) ) {
+			return '';
+		}
+		
+		return ' aria-describedby="' . \esc_attr( self::get_description_id( $attributes ) ) . '"';
+	}
+	
+	/**
 	 * Get a choice field (checkbox or radio button).
 	 * 
 	 * @param	array	$attributes Field attributes
@@ -63,26 +125,9 @@ final class Field {
 		
 		\ob_start();
 		?>
-		<label for="<?php echo \esc_attr( $attributes['name'] ); ?>"><input type="<?php echo \esc_attr( $attributes['type'] ); ?>" name="<?php echo \esc_attr( $attributes['name'] ); ?>" id="<?php echo \esc_attr( $attributes['name'] ); ?>" value="<?php echo \esc_attr( $attributes['value'] ); ?>" class="<?php echo \esc_attr( $attributes['classes'] ); ?>"<?php \checked( $current_value, $attributes['value'] ); ?>> <?php echo \esc_html( $attributes['title'] ); ?></label>
-		<?php if ( ! empty( $attributes['description'] ) ) : ?>
-		<p>
-			<?php
-			if ( empty( $attributes['validation'] ) ) {
-				echo \esc_html( $attributes['description'] );
-			}
-			else if ( $attributes['validation'] === 'allow-links' ) {
-				echo \wp_kses( $attributes['description'], [
-					'a' => [
-						'href' => true,
-						'rel' => true,
-						'target' => true,
-					],
-				] );
-			}
-			?>
-		</p>
+		<label for="<?php echo \esc_attr( $attributes['name'] ); ?>"><input type="<?php echo \esc_attr( $attributes['type'] ); ?>" name="<?php echo \esc_attr( $attributes['name'] ); ?>" id="<?php echo \esc_attr( $attributes['name'] ); ?>" value="<?php echo \esc_attr( $attributes['value'] ); ?>" class="<?php echo \esc_attr( $attributes['classes'] ); ?>"<?php \checked( $current_value, $attributes['value'] ); ?><?php echo self::get_described_by( $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>> <?php echo \esc_html( $attributes['title'] ); ?></label>
 		<?php
-		endif;
+		echo self::get_description( $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		$input = \ob_get_clean();
 		
 		if ( $attributes['option_type'] === 'option' ) {
@@ -130,7 +175,7 @@ final class Field {
 				<input type="hidden" name="<?php echo \esc_attr( $attributes['name'] ); ?>" value="<?php echo \esc_attr( $attributes['value'] ); ?>" class="embed-privacy-image-input">
 				
 				<div class="embed-privacy-image-input-container<?php echo ! empty( $attributes['value'] ) ? ' embed-privacy-hidden' : ''; ?>">
-					<button type="button" class="button button-secondary embed-privacy-image-upload"><span class="screen-reader-text"><?= \esc_html( $attributes['title'] ); ?></span> <?php \esc_html_e( 'Upload or choose file', 'embed-privacy' ); ?></button>
+					<button type="button" class="button button-secondary embed-privacy-image-upload"<?php echo self::get_described_by( $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>><span class="screen-reader-text"><?= \esc_html( $attributes['title'] ); ?></span> <?php \esc_html_e( 'Upload or choose file', 'embed-privacy' ); ?></button>
 				</div>
 				
 				<div class="embed-privacy-image-container<?php echo empty( $attributes['value'] ) ? ' embed-privacy-hidden' : ''; ?>">
@@ -148,9 +193,7 @@ final class Field {
 					</button>
 				</div>
 				
-				<?php if ( ! empty( $attributes['description'] ) ) : ?>
-				<p><?php echo \esc_html( $attributes['description'] ); ?></p>
-				<?php endif; ?>
+				<?php echo self::get_description( $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			</td>
 		</tr>
 		<?php
@@ -165,29 +208,19 @@ final class Field {
 	public static function get_text( array $attributes, $current_value ) {
 		\ob_start();
 		?>
-		<input type="<?php echo \esc_attr( $attributes['type'] ); ?>" name="<?php echo \esc_attr( $attributes['name'] ); ?>" id="<?php echo \esc_attr( $attributes['name'] ); ?>" value="<?php echo \esc_attr( $current_value ); ?>" class="<?php echo \esc_attr( $attributes['classes'] ); ?>">
-		<?php if ( ! empty( $attributes['description'] ) ) : ?>
-		<p>
-			<?php
-			if ( empty( $attributes['validation'] ) ) {
-				echo \esc_html( $attributes['description'] );
-			}
-			else if ( $attributes['validation'] === 'allow-links' ) {
-				echo \wp_kses( $attributes['description'], [
-					'a' => [
-						'href' => true,
-						'rel' => true,
-						'target' => true,
-					],
-				] );
-			}
-			?>
-		</p>
+		<input type="<?php echo \esc_attr( $attributes['type'] ); ?>" name="<?php echo \esc_attr( $attributes['name'] ); ?>" id="<?php echo \esc_attr( $attributes['name'] ); ?>" value="<?php echo \esc_attr( $current_value ); ?>" class="<?php echo \esc_attr( $attributes['classes'] ); ?>"<?php echo self::get_described_by( $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 		<?php
-		endif;
+		echo self::get_description( $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		$input = \ob_get_clean();
 		
 		if ( $attributes['option_type'] === 'option' ) {
+			// unlike a choice field, a text field has no label wrapping it, and
+			// the settings section provides none either
+			\printf(
+				'<label for="%1$s">%2$s</label> ',
+				\esc_attr( $attributes['name'] ),
+				\esc_html( $attributes['title'] )
+			);
 			echo $input; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			
 			return;

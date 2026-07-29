@@ -174,6 +174,7 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 * Added: Title for video iframes in Elementor
 * Improved: The list of embed providers of the opt-out shortcode is now labelled by its headline
 * Improved: The settings page now uses proper section headings
+* Improved: Field descriptions are now programmatically associated with their form controls
 * Fixed: The settings page did not confirm that settings have been saved
 * Improved: Overlay styles are now also applied while an element inside the overlay is focussed
 * Improved: Reduced motion and forced colors preferences are now respected

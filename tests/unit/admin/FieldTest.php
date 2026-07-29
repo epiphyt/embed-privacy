@@ -192,6 +192,28 @@ final class FieldTest extends MockeryTestCase
         });
 
         $this->assertStringContainsString('Just some text', $output);
+        // the description is programmatically associated with the checkbox
+        $this->assertStringContainsString('<p class="description" id="toggle-description">', $output);
+        $this->assertStringContainsString('aria-describedby="toggle-description"', $output);
+    }
+
+    public function testGetChoiceWithoutDescriptionHasNoDescribedBy(): void
+    {
+        $output = $this->render(static function () {
+            Field::get_choice([
+                'classes' => '',
+                'description' => '',
+                'name' => 'toggle',
+                'option_type' => 'meta',
+                'title' => 'Toggle',
+                'type' => 'checkbox',
+                'validation' => '',
+                'value' => 'yes',
+            ], '');
+        });
+
+        $this->assertStringNotContainsString('aria-describedby', $output);
+        $this->assertStringNotContainsString('class="description"', $output);
     }
 
     public function testGetChoiceAllowsLinksInDescription(): void
@@ -249,6 +271,9 @@ final class FieldTest extends MockeryTestCase
         $this->assertStringContainsString('value="current"', $output);
         $this->assertStringContainsString('Helpful hint', $output);
         $this->assertStringContainsString('<tr>', $output);
+        // the description is programmatically associated with the input
+        $this->assertStringContainsString('<p class="description" id="title_field-description">', $output);
+        $this->assertStringContainsString('aria-describedby="title_field-description"', $output);
     }
 
     public function testGetTextAllowsLinksInDescription(): void
@@ -285,6 +310,8 @@ final class FieldTest extends MockeryTestCase
 
         $this->assertStringNotContainsString('<tr>', $output);
         $this->assertStringContainsString('value="x"', $output);
+        // without the table row there is no <th> label, so the field brings its own
+        $this->assertStringContainsString('<label for="title_field">Title</label>', $output);
     }
 
     public function testGetImageReturnsEarlyWithoutName(): void
@@ -332,6 +359,9 @@ final class FieldTest extends MockeryTestCase
         $this->assertStringContainsString('name="background_image"', $output);
         $this->assertStringContainsString('value="42"', $output);
         $this->assertStringContainsString('Choose a background', $output);
+        // the description is programmatically associated with the upload button
+        $this->assertStringContainsString('<p class="description" id="background_image-description">', $output);
+        $this->assertStringContainsString('aria-describedby="background_image-description"', $output);
         // with a value present, the upload button container is hidden
         $this->assertStringContainsString('embed-privacy-image-input-container embed-privacy-hidden', $output);
     }
