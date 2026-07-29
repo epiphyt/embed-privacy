@@ -45,12 +45,13 @@ document.addEventListener( 'DOMContentLoaded', function() {
 			
 			enableAlwaysActiveProviders( document.querySelectorAll( '.embed-privacy-overlay' ) );
 			
-			// focus first element in container, but not for opt-out shortcode
+			// focus the embedded content, but not for opt-out shortcode
 			if ( container && document.activeElement !== container ) {
-				const firstChild = container.querySelector( '.embed-privacy-content > :first-child' );
+				const embedContent = container.querySelector( '.embed-privacy-content' );
 
-				if ( firstChild ) {
-					firstChild.focus();
+				if ( embedContent ) {
+					embedContent.setAttribute( 'tabindex', '-1' );
+					embedContent.focus();
 				}
 			}
 		}
@@ -95,8 +96,12 @@ document.addEventListener( 'DOMContentLoaded', function() {
 			}
 		}
 		
-		// focus previously active element
-		setTimeout( () => activeElement.focus(), 50 );
+		// focus previously active element, but only if it's still part of the document
+		setTimeout( () => {
+			if ( activeElement && activeElement.isConnected ) {
+				activeElement.focus();
+			}
+		}, 50 );
 	}
 	
 	/**
@@ -148,14 +153,6 @@ document.addEventListener( 'DOMContentLoaded', function() {
 			
 			button.addEventListener( 'click', function( event ) {
 				overlayClick( event.currentTarget.parentNode.querySelector( '.embed-privacy-overlay' ) );
-				event.currentTarget.parentNode.removeChild( event.currentTarget ); // IE11 doesn't support .remove()
-			} );
-			button.addEventListener( 'keypress', function( event ) {
-				if ( event.code === 'Enter' || event.code === 'Space' ) {
-					event.preventDefault(); // prevent space from scrolling the page
-					overlayClick( event.currentTarget.parentNode.querySelector( '.embed-privacy-overlay' ) );
-					event.currentTarget.parentNode.removeChild( event.currentTarget ); // IE11 doesn't support .remove()
-				}
 			} );
 		}
 		
@@ -313,8 +310,9 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		embedContent.innerHTML = htmlentities_decode( embedObject.embed );
 
 		// announce to screen readers that the embed has been loaded
-		var srMessage = embedContainer.querySelector( '.embed-privacy-sr-message' );
-		
+		// synthetic clicks happen on page load, where there is nothing to announce
+		var srMessage = ! isSynthetic ? embedContainer.querySelector( '.embed-privacy-sr-message' ) : null;
+
 		if ( srMessage ) {
 			srMessage.textContent = srMessage.getAttribute( 'data-message' ) || '';
 		}
@@ -347,15 +345,21 @@ document.addEventListener( 'DOMContentLoaded', function() {
 			embedContent.appendChild( element );
 		}
 		
-		// focus first element in container
+		// focus the embedded content itself, since its first child is not
+		// necessarily focusable (e.g. a blockquote for X posts)
 		if ( ! isSynthetic ) {
-			const firstChild = embedContainer.querySelector( '.embed-privacy-content > :first-child' );
-
-			if ( firstChild ) {
-				firstChild.focus();
-			}
+			embedContent.setAttribute( 'tabindex', '-1' );
+			embedContent.focus();
 		}
-		
+
+		// remove the enable button after the focus has been moved away from it,
+		// no matter whether the overlay has been enabled by it or not
+		const enableButton = embedContainer.querySelector( '.embed-privacy-enable' );
+
+		if ( enableButton ) {
+			enableButton.remove();
+		}
+
 		if ( typeof jQuery !== 'undefined' ) {
 			const videoShortcode = jQuery( '.wp-video-shortcode' );
 			
