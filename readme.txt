@@ -2,8 +2,8 @@
 Contributors: epiphyt, kittmedia, krafit
 Tags: oembed, privacy, gutenberg, iframes, performance
 Requires at least: 5.9
-Stable tag: 1.13.0
-Tested up to: 7.0
+Stable tag: 1.14.0
+Tested up to: 7.1
 Requires PHP: 5.6
 License: GPL2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -164,6 +164,12 @@ If you’re using a caching plugin, make sure you enable the "JavaScript detecti
 
 Check out our documentation: [https://epiph.yt/en/embed-privacy/documentation/](https://epiph.yt/en/embed-privacy/documentation/)
 
+= Is Embed Privacy accessible? =
+
+Yes. During development, I test each feature against the Web Content Accessibility Guidelines (WCAG). You can find the [Accessibility Conformance Report](https://docs.epiph.yt/embed-privacy/acr.html) in the documentation.
+
+If you find an issue, please don't hesitate to contact me via the support forums or via my [contact page](https://epiph.yt/en/contact/).
+
 = Who are you, folks? =
 
 We are [Epiphyt](https://epiph.yt/en/), your friendly neighborhood WordPress plugin shop from southern Germany.
@@ -174,7 +180,7 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 == Changelog ==
 
-= 1.13.1 =
+= 1.14.0 =
 * Added: New attribute `headline_level` for the opt-out shortcode
 * Added: Notice that the link to the privacy policy opens in a new tab
 * Added: Title for video iframes in Elementor
