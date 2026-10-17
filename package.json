@@ -3,11 +3,17 @@
 	"description": "Embed Privacy prevents from loading external embeds directly and lets the user control which one should be loaded.",
 	"scripts": {
 		"start": "wp-scripts start",
-		"build": "wp-scripts build"
+		"build": "wp-scripts build",
+		"start:wp-env": "wp-env start",
+		"reset:wp-env": "wp-env reset all",
+		"stop:wp-env": "wp-env stop",
+		"destroy:wp-env": "wp-env destroy",
+		"shell:wp-env": "wp-env run cli /bin/bash"
 	},
 	"author": "Epiphyt",
 	"license": "GPL-2.0",
 	"devDependencies": {
+		"@wordpress/env": "^11.17.0",
 		"@wordpress/scripts": "^22.0",
 		"extract-loader": "^5.1.0",
 		"file-loader": "^6.2.0",
