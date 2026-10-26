@@ -2,11 +2,9 @@
   "core": null,
   "phpVersion": "8.3",
   "plugins": [
+    ".",
     "https://downloads.wordpress.org/plugin/plugin-check.zip"
   ],
-  "mappings": {
-    "wp-content/plugins/embed-privacy" : "."
-  },
   "port": 8888,
   "testsEnvironment": false,
   "config": {
@@ -16,8 +14,5 @@
     "SCRIPT_DEBUG": true,
     "WP_ENVIRONMENT_TYPE": "local",
     "DISALLOW_FILE_EDIT": false
-  },
-  "lifecycleScripts":{
-    "afterStart": "wp-env run cli wp plugin activate embed-privacy"
   }
 }

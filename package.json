@@ -4,11 +4,13 @@
 	"scripts": {
 		"start": "wp-scripts start",
 		"build": "wp-scripts build",
-		"start:wp-env": "wp-env start",
+		"start:wp-env": "wp-env start --runtime=playground",
+		"start:wp-env:docker": "wp-env start",
 		"reset:wp-env": "wp-env reset all",
 		"stop:wp-env": "wp-env stop",
 		"destroy:wp-env": "wp-env destroy",
-		"shell:wp-env": "wp-env run cli /bin/bash"
+		"shell:wp-env": "wp-env run cli /bin/bash",
+		"plugin-check:wp-env": "wp-env run cli wp plugin check embed-privacy"
 	},
 	"author": "Epiphyt",
 	"license": "GPL-2.0",
