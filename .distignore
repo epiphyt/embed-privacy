@@ -8,6 +8,7 @@
 .phpunit.cache
 .prettierignore
 .prettierrc.js
+.wp-env.json
 .wordpress-org
 *scss/
 composer.json
