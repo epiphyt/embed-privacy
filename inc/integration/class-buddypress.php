@@ -20,6 +20,7 @@ final class Buddypress {
 		\add_action( 'bp_enqueue_community_scripts', [ self::class, 'register_scripts' ], 2 );
 		\add_action( 'bp_enqueue_community_scripts', [ self::class, 'enqueue_assets' ] );
 		\add_filter( 'bp_get_activity_content_body', [ self::class, 'replace_activity_content' ] );
+		\add_filter( 'bp_embed_oembed_html', [ self::class, 'replace_activity_comment_oembed' ], 10, 3 );
 	}
 	
 	/**
@@ -44,5 +45,23 @@ final class Buddypress {
 	 */
 	public static function replace_activity_content( $content ) {
 		return Replacer::replace_embeds( $content );
+	}
+	
+	/**
+	 * Replace oEmbeds in BuddyPress activity comments.
+	 * 
+	 * BuddyPress does not use the WordPress `embed_oembed_html` filter for embeds
+	 * in activity comments, but its own `bp_embed_oembed_html` filter. Forward it
+	 * to the WordPress filter so the regular oEmbed replacement applies there too.
+	 * 
+	 * @since	1.14.1
+	 * 
+	 * @param	string	$html Current embed HTML
+	 * @param	string	$url URL of the embedded content
+	 * @param	array	$attributes Embed attributes
+	 * @return	string Updated embed HTML
+	 */
+	public static function replace_activity_comment_oembed( $html, $url, array $attributes ) {
+		return \apply_filters( 'embed_oembed_html', $html, $url, $attributes );
 	}
 }

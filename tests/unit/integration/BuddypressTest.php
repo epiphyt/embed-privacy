@@ -10,6 +10,7 @@ use Mockery;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 
+use function Brain\Monkey\Functions\expect;
 use function Brain\Monkey\Functions\stubEscapeFunctions;
 use function Brain\Monkey\Functions\stubs;
 use function Brain\Monkey\Functions\stubTranslationFunctions;
@@ -52,6 +53,9 @@ final class BuddypressTest extends MockeryTestCase
         $this->assertNotFalse(
             \Brain\Monkey\Filters\has('bp_get_activity_content_body', [Buddypress::class, 'replace_activity_content'])
         );
+        $this->assertNotFalse(
+            \Brain\Monkey\Filters\has('bp_embed_oembed_html', [Buddypress::class, 'replace_activity_comment_oembed'])
+        );
     }
 
     public function testEnqueueAssetsDelegatesToFrontend(): void
@@ -68,6 +72,25 @@ final class BuddypressTest extends MockeryTestCase
         $frontend->shouldReceive('register_assets')->once();
 
         Buddypress::register_scripts();
+    }
+
+    /**
+     * BuddyPress uses its own filter for oEmbeds in activity comments. It must be
+     * forwarded to the WordPress filter so the standard oEmbed replacement runs.
+     */
+    public function testReplaceActivityCommentOembedForwardsToWordPressFilter(): void
+    {
+        $html = '<iframe src="https://www.youtube.com/embed/abc"></iframe>';
+        $url = 'https://www.youtube.com/watch?v=abc';
+        $attributes = [ 'width' => 640 ];
+        $replaced = '<div data-embed-provider="youtube">consent overlay</div>';
+
+        expect('apply_filters')
+            ->once()
+            ->with('embed_oembed_html', $html, $url, $attributes)
+            ->andReturn($replaced);
+
+        $this->assertSame($replaced, Buddypress::replace_activity_comment_oembed($html, $url, $attributes));
     }
 
     public function testReplaceActivityContentReturnsUnchangedWithoutEmbeds(): void
